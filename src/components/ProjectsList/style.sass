@@ -1,0 +1,72 @@
+@import '../../styles/variables.sass'
+
+.project-list-component
+  .header-component
+    background-image: url("../../../static/images/dots.png")
+    padding: 20px
+    background-color: #f3faff
+    text-align: center
+    margin-bottom: 40px
+    color: $primary
+    .icon
+     color: $primary
+     font-size: 40px
+  .projects-search
+    text-align: center
+    margin-bottom: 3rem
+  .title
+    @media #{$xs-and-less}
+      text-align: center
+      font-size: 30px
+    padding: 25px 0px 25px 0px
+    font-weight: 500
+  .view-all-btn-container
+    text-align: right
+    margin-bottom: 10px
+    .btn-projects
+      font-size: 16px
+      padding: 0px 5px
+      font-weight: 600
+      color: $primary
+  .project-list-item-component:hover
+    opacity: 0.7
+    border: 1px solid $grey
+  .project-list-item-component
+    @media #{$sm}
+      flex-direction: column
+      text-align: center
+    @media #{$tiny-and-less}
+      flex-direction: column
+      text-align: center
+    min-height: 150px
+    background-color: #fff
+    cursor: pointer
+    display: flex
+    align-items: flex-start
+    margin: 1px
+    margin-bottom: 25px
+    padding: 10px
+    padding-right: 15px
+    border: 1px solid $light-grey
+    border-radius: 5px
+    -webkit-box-shadow: 0px 0px 42px -2px rgba(0,0,0,0.05)
+    -moz-box-shadow: 0px 0px 42px -2px rgba(0,0,0,0.05)
+    box-shadow: 0px 0px 42px -2px rgba(0,0,0,0.05)
+    .image
+      @media #{$sm}
+        margin: auto
+      @media #{$tiny-and-less}
+        margin: auto
+      margin-right: 10px
+      width: 90px
+    .item-title
+      color: $secondary
+      font-weight: 600
+      margin-bottom: 2px !important
+      text-align: left
+    .item-descriptiom
+      font-size: 11px
+      text-align: justify
+      margin-bottom: 0px !important
+  
+      
