@@ -1,7 +1,0 @@
-{
-  "private": true,
-  "workspaces": ["inventory-theme", "site"],
-  "scripts": {
-    "develop": "yarn workspace site develop"
-  }
-}
