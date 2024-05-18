@@ -1,7 +1,0 @@
-{
-  "private": true,
-  "workspaces": ["hotel-management-theme", "site"],
-  "scripts": {
-    "develop": "yarn workspace site develop"
-  }
-}
