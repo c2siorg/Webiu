@@ -1,0 +1,38 @@
+.publications__card {
+  display: flex;
+  padding: 16px 28px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  border-radius: 8px;
+  border: 2px solid var(--primary-white, #fff);
+  background: var(--primary-white, #fff);
+  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.1);
+  width: 500px;
+
+  a {
+    color: var(--primary-dark, var(--primary-dark, #0a0a15));
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 150%;
+    text-decoration-line: underline;
+    max-width: 460px;
+  }
+
+  .publications__card__issued__by {
+    color: var(--primary-dark, var(--primary-dark, #0a0a15));
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    max-width: 460px;
+  }
+
+  .publications__card__desc {
+    color: var(--font-light, #898989);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    max-width: 460px;
+  }
+}

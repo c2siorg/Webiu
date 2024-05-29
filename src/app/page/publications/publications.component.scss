@@ -1,0 +1,37 @@
+.publications {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .publications-hero {
+    max-width: 1000px;
+    margin: 50px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .publications-hero-content {
+      h1 {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 48px;
+        font-weight: 500;
+        line-height: 150%;
+      }
+
+      p {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 16px;
+        font-weight: light;
+        line-height: 150%;
+      }
+    }
+  }
+
+  .publications-cards-container {
+    display: grid;
+    gap: 25px;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 20px;
+  }
+}
