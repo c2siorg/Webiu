@@ -12,7 +12,7 @@
     <img src="../../../assets/publications-img.png" alt="publications" />
   </div>
   <div class="publications-cards-container">
-    <div *ngFor="let publication of publications">
+    <div *ngFor="let publication of publicationsData">
       <app-publications-card
         [heading]="publication.heading"
         [link]="publication.link"

@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { PublicationsCardComponent } from '../../components/publications-card/publications-card.component';
-import publicationsData from './publications-data.json';
+import { publicationsData } from './publications-data';
 
 interface Publication {
   heading: string;
@@ -19,11 +19,8 @@ interface Publication {
   styleUrls: ['./publications.component.scss'],
 })
 export class PublicationsComponent implements OnInit {
-  publications: Publication[] = publicationsData;
-
+  publicationsData = publicationsData;
   constructor() {}
 
-  ngOnInit(): void {
-    console.log('Fetched Publications:', this.publications);
-  }
+  ngOnInit(): void {}
 }
