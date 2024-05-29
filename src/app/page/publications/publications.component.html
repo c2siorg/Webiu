@@ -1,2 +1,24 @@
 <app-navbar></app-navbar>
-<p>publications works!</p>
+
+<div class="publications">
+  <div class="publications-hero">
+    <div class="publications-hero-content">
+      <h1>Our Publications</h1>
+      <p>
+        Discover a Spectrum of Publications by the researchers at Ceylon
+        Computer Science Institute
+      </p>
+    </div>
+    <img src="../../../assets/publications-img.png" alt="publications" />
+  </div>
+  <div class="publications-cards-container">
+    <div *ngFor="let publication of publications">
+      <app-publications-card
+        [heading]="publication.heading"
+        [link]="publication.link"
+        [issued_by]="publication.issued_by"
+        [description]="publication.description"
+      ></app-publications-card>
+    </div>
+  </div>
+</div>
