@@ -1,0 +1,53 @@
+.homepage {
+    align-items: center;
+    display: flex;
+    margin-top: 150px;
+    margin-left: 200px;
+    margin-right: 300px;
+}
+
+.details {
+    gap: 10px;
+    opacity: 0px;
+    display: flex;
+    align-items: center;
+}
+
+.title {
+    font-weight: 400;
+    font-size: 48px;
+    line-height: 72px;
+    margin-top: 30%;
+    gap: 0px;
+    opacity: 0px;
+    margin-top: 100px;
+    display: flex;
+    flex: 0;
+}
+
+.image {
+    align-items: center;
+    margin-left: 10%;
+}
+
+img {
+    width: 350px;
+    height: 350px;
+    max-width: 15;
+    max-height: 15;
+    display: flex;
+    flex: 0;
+}
+
+.description {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 24px;
+    margin-left: 70 px;
+    margin-top: 10px;
+    gap: 0px;
+    opacity: 0px;
+    display: flex;
+    flex: 1;
+    text-align: justify;
+}

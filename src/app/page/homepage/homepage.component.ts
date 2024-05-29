@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component , OnInit} from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { HomepageDetails } from '../../common/data/homepage';
 
 @Component({
   selector: 'app-homepage',
@@ -8,4 +9,10 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.scss',
 })
-export class HomepageComponent {}
+export class HomepageComponent {
+  homepageData = HomepageDetails;
+
+  ngOnInit(): void {
+
+  }
+}
