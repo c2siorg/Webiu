@@ -1,7 +1,7 @@
 <div class="navbar">
   <img src="../../../assets/c2silogo-dark.png" alt="C2SI Logo" class="logo" />
 
-  <div class="navbar__menu">
+  <div [ngClass]="{ navbar__menu: true, open: isMenuOpen }" id="navbarMenu">
     <div class="navbar__menu__items" routerLink="/">
       <img src="../../../assets/home.svg" alt="Home Icon" />
       <p>Home</p>
@@ -25,6 +25,17 @@
     <div class="navbar__menu__items" routerLink="/gsoc">
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC</p>
+    </div>
+  </div>
+
+  <div class="navigation__buttons" (click)="toggleMenu()">
+    <div class="nav-btn">
+      <img
+        *ngIf="!isMenuOpen"
+        src="../../../assets/ham-menu.svg"
+        alt="ham menu"
+      />
+      <img *ngIf="isMenuOpen" src="../../../assets/cross.svg" alt="cross" />
     </div>
   </div>
 </div>
