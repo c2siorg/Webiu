@@ -36,3 +36,15 @@
     max-width: 460px;
   }
 }
+
+@media screen and (max-width: 600px) {
+  .publications__card {
+    width: 400px;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .publications__card {
+    width: 300px;
+  }
+}
