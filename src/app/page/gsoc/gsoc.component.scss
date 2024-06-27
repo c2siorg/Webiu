@@ -1,0 +1,144 @@
+.gsoc__page {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .gsoc-hero {
+    max-width: 1000px;
+    margin: 50px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .gsoc-hero-content {
+      h1 {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 48px;
+        font-weight: 500;
+        line-height: 150%;
+      }
+
+      p {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 16px;
+        font-weight: light;
+        line-height: 150%;
+        max-width: 450px;
+      }
+    }
+  }
+
+  .gsoc__details {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  .gsoc__idea__details {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 20px;
+
+    h3 {
+      font-size: 20px;
+      font-weight: 500;
+      line-height: 150%;
+    }
+
+    p {
+      font-size: 16px;
+      font-style: italic;
+      font-weight: 400;
+      line-height: 150%;
+    }
+
+    ol {
+      li {
+        font-family: Poppins;
+        font-size: 16px;
+        font-style: italic;
+        font-weight: 400;
+        line-height: 150%;
+      }
+    }
+  }
+
+  .gsoc__projects__list {
+    display: flex;
+    padding: 20px;
+    flex-direction: column;
+    gap: 20px;
+    border-radius: 10px;
+    background: var(--Gray-6, #f2f2f2);
+    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.05) inset;
+    margin: 30px 16px;
+
+    .gsoc__project {
+      display: flex;
+      padding: 16px;
+      align-items: center;
+      border-radius: 8px;
+      border: 2px solid var(--primary-white, #fff);
+      background: var(--primary-white, #fff);
+      box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.1);
+
+      p {
+        font-size: 16px;
+        max-width: 800px;
+        font-weight: 500;
+        line-height: 150%;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 1100px) {
+  .gsoc__page {
+    .gsoc-hero {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+
+      .gsoc-hero-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        p {
+          max-width: 600px;
+          text-align: center;
+        }
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .gsoc__page {
+    .gsoc-hero {
+      img {
+        width: 400px;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .gsoc__page {
+    .gsoc-hero {
+      .gsoc-hero-content {
+        h1 {
+          font-size: 32px;
+        }
+      }
+      img {
+        width: 300px;
+      }
+    }
+  }
+}
