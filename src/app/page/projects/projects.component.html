@@ -1,2 +1,28 @@
 <app-navbar></app-navbar>
-<p>projects works!</p>
+
+<div class="projects">
+  <div class="projects-hero">
+    <div class="projects-hero-content">
+      <h1>Our Projects</h1>
+      <p>
+        Discover a Spectrum of Innovative Projects done by the researchers at
+        C2SI
+      </p>
+    </div>
+    <img src="../../../assets/projects-img.png" alt="projects" />
+  </div>
+  <div class="projects-cards-container">
+    <div *ngFor="let project of projectsData">
+      <app-projects-card
+        [name]="project.name"
+        [description]="project.description || ''"
+        [issue]="project.open_issues_count"
+        [link]="project.html_url"
+        [language]="project.language || ''"
+        [topics]="project.topics"
+        [createdAt]="project.created_at"
+        [updatedAt]="project.updated_at"
+      ></app-projects-card>
+    </div>
+  </div>
+</div>
