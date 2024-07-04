@@ -1,0 +1,88 @@
+.community-main{
+    margin-top: 5%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.community-details{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+.intro{
+    font-size: xxx-large;
+    font-weight: bold;
+    display: flex;
+    justify-self: center
+}
+.media.icons{
+    margin: 2%;
+}
+.social-media{
+    width: 60%;
+    vertical-align: middle;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;   
+    align-items: center;
+}
+.icon-link {
+    margin: 0 12px;
+}
+.icon{
+    cursor: pointer;
+    width: 13%;
+}
+.community-img{
+    max-height: 60%;
+    max-width: 60%;
+    display: block;
+    justify-content: center;
+}
+.community-image{
+    width: 100%;
+}
+.team-details{
+    margin-top: 2%;
+    width: 80%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.team-caption{
+    text-align: center;
+    font-size: xxx-large;
+    font-weight: bold;
+}
+.team-description{
+    text-align: center;
+}
+.team{
+    width: 80%;
+    display: flex;
+}
+.team-align{
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap:10px;
+    margin: 2%;
+    justify-content: center;
+}
+.card{
+    // border: solid 1px;
+    width: fit-content;
+    border-radius: 25px;
+    background-color: rgb(216, 213, 213);
+}
+.card-data{
+    padding: 8px 22px;
+}
+.user-name{
+    text-align: center;
+    font-size: larger;
+}
+.user-designation{
+    text-align: center;
+    font-size: medium;
+}

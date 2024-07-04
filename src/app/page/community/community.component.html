@@ -1,2 +1,39 @@
+<div class = "community-main">
+    <div class = "community-details">
+        <div class = "social-media">
+            <p class="intro">Join our community</p>
+            <div class="media-icons">
+                @for (icon of icons; track $index) {
+                    <a class = "icon-link" href={{icon.link}}><img class="icon" src = {{icon.media_icon}} ></a>
 
-<p>community works!</p>
+                    <!-- <img src="../../../assets/community/discord.png"> -->
+                }
+            </div>
+        </div>
+        <div class="community-img">
+            <img class= "community-image" src="../../../assets/community/community-image.png">
+        </div>
+    </div>
+    <div class = "team-details">
+        <p class ="team-caption">
+            Meet the team
+        </p>
+        <p class = "team-description">Dedicated individuals who are pushing the boundaries of technology</p>
+        <div class = "team">
+            <div class="team-align">
+            @for(user of users; track $index){
+                <div class = "card">
+                    <div class = "card-data">
+                        <p class = "user-name">
+                           {{user.contributor_name}}
+                        </p>
+                        <p class = "user-designation">
+                            C2SI Contributor
+                        </p>
+                    </div>
+                </div>
+            }
+        </div>
+        </div>
+    </div>
+</div>
