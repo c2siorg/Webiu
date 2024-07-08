@@ -1,0 +1,112 @@
+.project__idea {
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 0 20px;
+
+  header {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+
+    img {
+      width: 100px;
+      height: 100px;
+    }
+
+    h1 {
+      color: var(--primary-dark, var(--primary-dark, #0a0a15));
+      font-size: 48px;
+      font-weight: 500;
+      line-height: 150%;
+    }
+  }
+
+  .project_idea_title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      color: var(--primary-dark, var(--primary-dark, #0a0a15));
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 150%;
+    }
+
+    .git-btn {
+      display: flex;
+      padding: 5px 8px;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      border-radius: 4px;
+      background: var(--Green-1, #219653);
+
+      p {
+        color: var(--primary-white, #fff);
+        font-size: 14px;
+        font-weight: 400;
+        line-height: 150%;
+        text-decoration: none;
+      }
+    }
+  }
+
+  .project_idea_details {
+    margin: 30px 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: space-between;
+    align-items: center;
+
+    .project_idea_details_box {
+      display: flex;
+      padding: 10px 14px;
+      justify-content: center;
+      align-items: center;
+      gap: 15px;
+      max-width: 280px;
+      border-radius: 5px;
+      background: #fff;
+      box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.1);
+
+      h3 {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 16px;
+        font-weight: 500;
+        line-height: 150%;
+      }
+
+      p {
+        font-size: 16px;
+        font-weight: 400;
+        line-height: 150%;
+      }
+    }
+  }
+
+  .project_idea_main {
+    display: flex;
+    padding: 10px 14px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+    border-radius: 5px;
+    background: #fff;
+    box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+
+    h4 {
+      font-weight: 500;
+    }
+    p {
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 150%;
+    }
+    li {
+      margin-left: 30px;
+    }
+  }
+}
