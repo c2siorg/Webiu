@@ -5,6 +5,7 @@ import { PublicationsComponent } from './page/publications/publications.componen
 import { ContributorsComponent } from './page/contributors/contributors.component';
 import { CommunityComponent } from './page/community/community.component';
 import { GsocComponent } from './page/gsoc/gsoc.component';
+import { GsocProjectIdeaComponent } from './page/gsoc-project-idea/gsoc-project-idea.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
@@ -25,4 +26,5 @@ export const routes: Routes = [
     component: CommunityComponent,
   },
   { path: 'gsoc', component: GsocComponent },
+  { path: 'gsocIdea', component: GsocProjectIdeaComponent },
 ];
