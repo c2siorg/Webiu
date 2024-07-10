@@ -14,6 +14,8 @@
     width: 50%;
     cursor: pointer;
     padding: 1% 2%;
+    font-weight: bold;
+
 }
 
 .search-button {
@@ -26,14 +28,15 @@
     border-radius: 5px;
     padding: 1% 2%;
     margin-left: 2%;
+    font-weight: bold;
 }
+   
 
 
 .repo-filter {
-    margin-top: 2%;
     display: flex;
     align-items: center;
-    
+    margin: 3%;
 }
 
 
@@ -47,10 +50,11 @@
 
 
 .repo-selection {
-    border-radius: 5px;
+    border-radius: 10px;
     padding: 10px 20px;
-    margin-left: 5%;
+    margin: 2% 5%;
     align-items: center;
+
 }
 
 .search-button {

@@ -1,11 +1,12 @@
 .profile-box {
     display: flex;
     border: solid 1px #e0e0e0;
-    box-shadow: 0px 4px 24px 0px #0000001a;
+    box-shadow: 10px 10px 30px 10px #0505051a;
+    border-radius: 10px;
     width: 100%;
     max-width: 350px;
     max-height: 650px;
-    min-height: 350px;
+    min-height: 300px;
     align-items: center;
     justify-content: center;
     flex-direction: column;
@@ -13,13 +14,10 @@
 }
 
 .profile-img {
-    width: 30%;
-    height: 30%;
+    width: 40%;
+    height: 40%;
     border-radius: 50%;
     border: solid 0.2px;
-}
-.profile-username{
-    font-weight: bold;
 }
 
 .profile-info {
@@ -40,9 +38,6 @@
     justify-content: center;
     margin-top: 5%;
 }
-.profile-contributions{
-    font-weight: bold;
-}
 
 .github-icon {
     display: flex;
@@ -53,6 +48,7 @@
 .github-username {
     display: flex;
     align-items: center;
+    color: black;
 }
 
 /* Media Queries */

@@ -3,11 +3,11 @@
    <input type="text" class ="search-bar" placeholder="Search.." [formControl] = "searchText"  />
     <div class="search-button" (click)="filterProfiles()">
       <p class="search-font">Search</p>
-      <img src="../../../assets/search.svg" alt="Search Icon" />
+      <!-- <img src="../../../assets/search.svg" alt="Search Icon" /> -->
     </div>
   </div>
   <div class = "repo-filter">
-    <span>Filter by Repository</span> 
+    <h3>Filter by Repository</h3> 
     <div class="repo-dropdown">
       
       <select class ="repo-selection" (change)="onRepoChange($event)">
