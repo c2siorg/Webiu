@@ -1,88 +1,144 @@
-.community-main{
-    margin-top: 5%;
+.community {
+  margin-top: 5%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .community-hero {
+    max-width: 1000px;
+    margin: 50px auto;
     display: flex;
-    flex-direction: column;
     align-items: center;
-}
-.community-details{
-    width: 100%;
-    display: flex;
     justify-content: center;
-}
-.intro{
-    font-size: xxx-large;
-    font-weight: bold;
-    display: flex;
-    justify-self: center
-}
-.media.icons{
-    margin: 2%;
-}
-.social-media{
-    width: 60%;
-    vertical-align: middle;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;   
-    align-items: center;
-}
-.icon-link {
-    margin: 0 12px;
-}
-.icon{
-    cursor: pointer;
-    width: 13%;
-}
-.community-img{
-    max-height: 60%;
-    max-width: 60%;
-    display: block;
-    justify-content: center;
-}
-.community-image{
-    width: 100%;
-}
-.team-details{
+
+    .community-hero-content {
+      h1 {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 40px;
+        margin-bottom: 10px;
+        font-weight: 500;
+        line-height: 150%;
+      }
+
+      p {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 16px;
+        font-weight: light;
+        line-height: 150%;
+      }
+
+      .media-icons {
+        img {
+          height: 50px;
+          margin-right: 20px;
+        }
+      }
+    }
+  }
+
+  .team-details {
     margin-top: 2%;
     width: 80%;
     display: flex;
     flex-direction: column;
     align-items: center;
+
+    .team-caption {
+      font-size: 48px;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .team-description {
+      text-align: center;
+    }
+
+    .team {
+      width: 80%;
+      display: flex;
+
+      .team-align {
+        display: flex;
+        flex-wrap: wrap;
+        flex-direction: row;
+        gap: 10px;
+        margin: 2%;
+        justify-content: center;
+
+        .card {
+          width: fit-content;
+          display: flex;
+          padding: 10px 20px;
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 5px;
+          border-radius: 10px;
+          border: 1px solid var(--Gray-5, #e0e0e0);
+          background: var(--primary-white, #fff);
+          box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+
+          .card-data {
+            padding: 8px 22px;
+
+            .user-name {
+              text-align: center;
+              font-size: larger;
+            }
+
+            .user-designation {
+              text-align: center;
+              font-size: medium;
+            }
+          }
+        }
+      }
+    }
+  }
 }
-.team-caption{
-    text-align: center;
-    font-size: xxx-large;
-    font-weight: bold;
+
+@media screen and (max-width: 1100px) {
+  .community {
+    .community-hero {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+
+      .community-hero-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        p {
+          max-width: 600px;
+          text-align: center;
+        }
+      }
+    }
+  }
 }
-.team-description{
-    text-align: center;
+
+@media screen and (max-width: 600px) {
+  .community {
+    .community-hero {
+      img {
+        width: 400px;
+      }
+    }
+  }
 }
-.team{
-    width: 80%;
-    display: flex;
-}
-.team-align{
-    display: flex;
-    flex-wrap: wrap;
-    flex-direction: row;
-    gap:10px;
-    margin: 2%;
-    justify-content: center;
-}
-.card{
-    // border: solid 1px;
-    width: fit-content;
-    border-radius: 25px;
-    background-color: rgb(216, 213, 213);
-}
-.card-data{
-    padding: 8px 22px;
-}
-.user-name{
-    text-align: center;
-    font-size: larger;
-}
-.user-designation{
-    text-align: center;
-    font-size: medium;
+
+@media screen and (max-width: 450px) {
+  .community {
+    .community-hero {
+      .community-hero-content {
+        h1 {
+          font-size: 32px;
+        }
+      }
+      img {
+        width: 300px;
+      }
+    }
+  }
 }

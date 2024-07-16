@@ -10,13 +10,13 @@
     <img src="../../../assets/publications-img.png" alt="publications" />
   </div>
   <div class="publications-cards-container">
-    <div *ngFor="let publication of publicationsData">
-      <app-publications-card
-        [heading]="publication.heading"
-        [link]="publication.link"
-        [issued_by]="publication.issued_by"
-        [description]="publication.description"
-      ></app-publications-card>
-    </div>
+    @for (publication of publicationsData; track $index) {
+    <app-publications-card
+      [heading]="publication.heading"
+      [link]="publication.link"
+      [issued_by]="publication.issued_by"
+      [description]="publication.description"
+    ></app-publications-card
+    >}
   </div>
 </div>
