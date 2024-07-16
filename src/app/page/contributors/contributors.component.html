@@ -1,37 +1,32 @@
 <div class="main">
   <div class="search-components">
-    <input
-      type="text"
-      class="search-bar"
-      placeholder="Search.."
-      [formControl]="searchText"
-    />
+   <input type="text" class ="search-bar" placeholder="Search.." [formControl] = "searchText"  />
     <div class="search-button" (click)="filterProfiles()">
       <p class="search-font">Search</p>
-      <img src="../../../assets/search.svg" alt="Search Icon" />
+      <!-- <img src="../../../assets/search.svg" alt="Search Icon" /> -->
     </div>
   </div>
-  <div class="repo-filter">
-    <span>Filter by Repository</span>
+  <div class = "repo-filter">
+    <h3>Filter by Repository</h3> 
     <div class="repo-dropdown">
-      <select class="repo-selection" (change)="onRepoChange($event)">
+      
+      <select class ="repo-selection" (change)="onRepoChange($event)">
         <option value="">All repos</option>
-        @for (repo of allRepos;track $index) {
-        <option>{{ repo }}</option>
-        };
-      </select>
+          @for (repo of allRepos;track $index) {<option>{{repo}}</option>};
+        </select>
+      
     </div>
   </div>
-  <div class="contributers-context">
+  <div class = "contributers-context">
     @for (profile of profiles; track $index) {
-    <app-profile-card
-      [contributor_name]="profile.contributor_name"
-      [contributions]="profile.contributions"
-      [avatar_url]="profile.avatar_url"
-      [followers]="profile.followers"
-      [followings]="profile.followings"
-      [github_username]="profile.github_username"
-    ></app-profile-card>
-    }
+      <app-profile-card
+        [contributor_name]="profile.contributor_name"
+        [contributions]="profile.contributions"
+        [avatar_url]="profile.avatar_url"
+        [followers]="profile.followers" 
+        [followings]="profile.followings" 
+        [github_username]="profile.github_username"
+      ></app-profile-card>
+      }
   </div>
 </div>
