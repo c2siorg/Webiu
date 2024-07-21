@@ -1,13 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
-import { projectsData } from './projects-data';
 
 interface Project {
   name: string;
   description: string | null;
   issue: number;
+  pull_requests: number;
   link: string;
   open_issues_count: number;
   html_url: string;
@@ -20,14 +21,46 @@ interface Project {
 @Component({
   selector: 'app-projects',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, ProjectsCardComponent],
+  imports: [
+    CommonModule,
+    HttpClientModule,
+    NavbarComponent,
+    ProjectsCardComponent,
+  ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
 })
 export class ProjectsComponent implements OnInit {
-  projectsData = projectsData;
+  projectsData: Project[] = [];
+  isLoading = true;
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.fetchProjects();
+  }
+
+  fetchProjects(): void {
+    this.http
+      .get<{ repositories: Project[] }>(
+        'http://localhost:5000/api/v1/project/projects/'
+      )
+      .subscribe({
+        next: (response) => {
+          this.projectsData = response.repositories;
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.error('Error fetching projects:', error);
+          this.isLoading = false;
+        },
+        complete: () => {
+          console.log('Fetch projects request completed.');
+        },
+      });
+  }
+
+  trackByProjectName(index: number, project: Project): string {
+    return project.name;
+  }
 }

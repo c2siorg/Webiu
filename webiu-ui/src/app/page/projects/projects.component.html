@@ -9,8 +9,20 @@
     </div>
     <img src="../../../assets/projects-img.png" alt="projects" />
   </div>
+
   <div class="projects-cards-container">
-    @for (project of projectsData; track $index) {
+    <ng-container *ngIf="isLoading; then loading; else content"></ng-container>
+  </div>
+</div>
+
+<ng-template #loading>
+  <div class="loader"></div>
+</ng-template>
+
+<ng-template #content>
+  <ng-container
+    *ngFor="let project of projectsData; trackBy: trackByProjectName"
+  >
     <app-projects-card
       [name]="project.name"
       [description]="project.description || ''"
@@ -20,7 +32,7 @@
       [topics]="project.topics"
       [createdAt]="project.created_at"
       [updatedAt]="project.updated_at"
+      [pullRequests]="project.pull_requests"
     ></app-projects-card>
-    }
-  </div>
-</div>
+  </ng-container>
+</ng-template>
