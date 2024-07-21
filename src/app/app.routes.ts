@@ -26,5 +26,5 @@ export const routes: Routes = [
     component: CommunityComponent,
   },
   { path: 'gsoc', component: GsocComponent },
-  { path: 'gsocIdea', component: GsocProjectIdeaComponent },
+  { path: 'idea', component: GsocProjectIdeaComponent },
 ];

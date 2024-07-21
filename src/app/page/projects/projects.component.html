@@ -1,4 +1,3 @@
-
 <div class="projects">
   <div class="projects-hero">
     <div class="projects-hero-content">
@@ -11,17 +10,17 @@
     <img src="../../../assets/projects-img.png" alt="projects" />
   </div>
   <div class="projects-cards-container">
-    <div *ngFor="let project of projectsData">
-      <app-projects-card
-        [name]="project.name"
-        [description]="project.description || ''"
-        [issue]="project.open_issues_count"
-        [link]="project.html_url"
-        [language]="project.language || ''"
-        [topics]="project.topics"
-        [createdAt]="project.created_at"
-        [updatedAt]="project.updated_at"
-      ></app-projects-card>
-    </div>
+    @for (project of projectsData; track $index) {
+    <app-projects-card
+      [name]="project.name"
+      [description]="project.description || ''"
+      [issue]="project.open_issues_count"
+      [link]="project.html_url"
+      [language]="project.language || ''"
+      [topics]="project.topics"
+      [createdAt]="project.created_at"
+      [updatedAt]="project.updated_at"
+    ></app-projects-card>
+    }
   </div>
 </div>
