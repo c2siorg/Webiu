@@ -30,6 +30,7 @@
       .media-icons {
         img {
           height: 50px;
+          width: 50px;
           margin-right: 20px;
         }
       }
@@ -134,6 +135,12 @@
       .community-hero-content {
         h1 {
           font-size: 32px;
+        }
+        .media-icons {
+          img {
+            height: 30px;
+            width: 30px;
+          }
         }
       }
       img {
