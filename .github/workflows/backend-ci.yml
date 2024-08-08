@@ -1,0 +1,36 @@
+name: CI for Webiu Backend
+
+on:
+  push:
+    branches: [feature/webiu-2024]
+  pull_request:
+    branches: [feature/webiu-2024]
+
+jobs:
+  build-webiu-server:
+    name: Build and Test Node.js (webiu-server)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install dependencies
+        run: |
+          cd webiu-server
+          npm install
+
+      - name: Run Server Tests
+        run: |
+          cd webiu-server
+          npm test
+
+      - name: Start Server
+        run: |
+          cd webiu-server
+          npm start &

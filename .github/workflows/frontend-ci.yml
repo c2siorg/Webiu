@@ -1,0 +1,39 @@
+name: CI for Webiu Frontend
+
+on:
+  push:
+    branches: [feature/webiu-2024]
+  pull_request:
+    branches: [feature/webiu-2024]
+
+jobs:
+  build-webiu-ui:
+    name: Build and Test Angular (webiu-ui)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Install Angular CLI
+        run: npm install -g @angular/cli
+
+      - name: Install dependencies
+        run: |
+          cd webiu-ui
+          npm install
+
+      - name: Build Angular App
+        run: |
+          cd webiu-ui
+          npm run build
+
+      - name: Run Angular Tests
+        run: |
+          cd webiu-ui
+          npm test
