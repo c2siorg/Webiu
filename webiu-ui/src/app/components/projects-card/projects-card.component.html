@@ -6,7 +6,11 @@
     </div>
     <div class="projects__card__details">
       <span>
-        <div class="circle-box" [style.background-color]="randomColor()"></div>
+        <div
+          class="circle-box"
+          [style.background-color]="getLanguageColor()"
+        ></div>
+
         <h4>{{ language }}</h4>
       </span>
       <div class="projects__card__details__info">
@@ -52,7 +56,7 @@
             />
           </svg>
           <p>Pull Requests</p>
-          <span>43</span>
+          <span>{{ pullRequests }}</span>
         </a>
         <a [href]="link" target="_blank" class="git-btn">
           <svg

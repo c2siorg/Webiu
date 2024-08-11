@@ -6,12 +6,13 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [CommonModule],
   templateUrl: './projects-card.component.html',
-  styleUrl: './projects-card.component.scss',
+  styleUrls: ['./projects-card.component.scss'],
 })
 export class ProjectsCardComponent {
   @Input() name!: string;
   @Input() description!: any;
   @Input() issue!: number;
+  @Input() pullRequests!: number;
   @Input() link!: string;
   @Input() language!: string;
   @Input() topics!: string[];
@@ -30,19 +31,18 @@ export class ProjectsCardComponent {
       : this.description;
   }
 
-  randomColor(): string {
-    const colors = [
-      '#F1E05A;',
-      '#99582A',
-      '#007EA7',
-      '#CBFF4D',
-      '#607466',
-      '#F06543',
-      '#F7AF9D',
-      '#293241',
-      '#9A48D0',
-    ];
-    const randomIndex = Math.floor(Math.random() * colors.length);
-    return colors[randomIndex];
+  getLanguageColor(): string {
+    const languageColors: { [key: string]: string } = {
+      Python: '#3572A5',
+      JavaScript: '#F1E05A',
+      TypeScript: '#2B7489',
+      Java: '#B07219',
+      HTML: '#E34C26',
+      'C++': '#F34B7D',
+      HCL: '#0298C3',
+      Default: '#607466',
+    };
+
+    return languageColors[this.language] || languageColors['Default'];
   }
 }
