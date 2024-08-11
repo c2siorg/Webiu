@@ -10,12 +10,12 @@ import { CommonModule } from '@angular/common';
 })
 export class ProjectsCardComponent {
   @Input() name!: string;
-  @Input() description!: any;
+  @Input() description: string | null = '';
   @Input() issue!: number;
   @Input() pullRequests!: number;
   @Input() link!: string;
   @Input() language!: string;
-  @Input() topics!: string[];
+  @Input() topics: string[] = [];
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
 
@@ -25,7 +25,10 @@ export class ProjectsCardComponent {
     this.detailsVisible = !this.detailsVisible;
   }
 
-  get truncatedDescription() {
+  get truncatedDescription(): string {
+    if (!this.description) {
+      return '';
+    }
     return this.description.length > 100
       ? `${this.description.slice(0, 100)}...`
       : this.description;
