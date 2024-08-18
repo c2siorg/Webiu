@@ -9,12 +9,11 @@ import { Component , Input } from "@angular/core";
     styleUrl:'./profile-card.component.scss',
 })
 export class ProfileCardComponent{
-  @Input()  contributor_name!: string;
-  @Input() github_username!: string;
+  @Input()  login!: string;
   @Input()  repos!: string[];
   @Input() avatar_url!:string;
-  @Input() contributions!: string;
-  @Input() followers!: string;
-  @Input() followings!: string;
+  @Input() contributions!: number;
+  @Input() followers!: number;
+  @Input() following!: number;
 
 }
