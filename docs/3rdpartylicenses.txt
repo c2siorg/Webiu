@@ -56,7 +56,7 @@ License: "Apache-2.0"
     the Work and Derivative Works thereof.
 
     "Contribution" shall mean any work of authorship, including
-    the original version of the Work and any modifications or additions
+    the original version of Work and any modifications or additions
     to that Work or Derivative Works thereof, that is intentionally
     submitted to Licensor for inclusion in the Work by the copyright owner
     or by an individual or Legal Entity authorized to submit on behalf of
