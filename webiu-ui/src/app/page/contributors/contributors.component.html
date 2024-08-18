@@ -18,14 +18,13 @@
     </div>
   </div>
   <div class = "contributers-context">
-    @for (profile of profiles; track $index) {
+    @for (profile of displayProfiles; track $index) {
       <app-profile-card
-        [contributor_name]="profile.contributor_name"
+        [login]="profile.login"
         [contributions]="profile.contributions"
         [avatar_url]="profile.avatar_url"
         [followers]="profile.followers" 
-        [followings]="profile.followings" 
-        [github_username]="profile.github_username"
+        [following]="profile.following" 
       ></app-profile-card>
       }
   </div>
