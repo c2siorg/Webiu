@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  webiu-server:
+    build:
+      context: ./webiu-server
+    container_name: webiu-server
+    ports:
+      - 5000:5000
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./webiu-server:/usr/src/app
+    command: ["npm", "start"]
+
+  webiu-ui:
+    build:
+      context: ./webiu-ui
+    container_name: webiu-ui
+    ports:
+      - 4200:4200
+    expose:
+      - 4200
+    depends_on:
+      - webiu-server
