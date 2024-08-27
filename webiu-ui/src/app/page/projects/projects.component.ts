@@ -3,20 +3,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
-
-interface Project {
-  name: string;
-  description: string | null;
-  issue: number;
-  pull_requests: number;
-  link: string;
-  open_issues_count: number;
-  html_url: string;
-  language: string | null;
-  topics: string[];
-  created_at: string;
-  updated_at: string;
-}
+import { projectsData } from './projects-data';
+import { Project, ProjectResponse } from './project.model';
 
 @Component({
   selector: 'app-projects',
@@ -42,16 +30,14 @@ export class ProjectsComponent implements OnInit {
 
   fetchProjects(): void {
     this.http
-      .get<{ repositories: Project[] }>(
-        'http://localhost:5000/api/v1/project/projects/'
-      )
+      .get<ProjectResponse>('http://localhost:5000/api/v1/project/projects/')
       .subscribe({
         next: (response) => {
           this.projectsData = response.repositories;
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error fetching projects:', error);
+          this.projectsData = projectsData.repositories;
           this.isLoading = false;
         },
         complete: () => {
