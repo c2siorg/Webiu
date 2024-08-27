@@ -34,11 +34,9 @@ export class ProjectsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.projectsData = response.repositories;
-          console.log(response.repositories);
           this.isLoading = false;
         },
         error: (error) => {
-          console.error('Error fetching projects:', error);
           this.projectsData = projectsData.repositories;
           this.isLoading = false;
         },
