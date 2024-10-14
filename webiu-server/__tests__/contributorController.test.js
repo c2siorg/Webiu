@@ -1,14 +1,11 @@
-//__tests__/contributorController.test.js
-
-
 const request = require('supertest');
 const express = require('express');
-const axios = require('axios'); // Import axios
-const contributorController = require('../controllers/contributorController'); // Correct import
+const axios = require('axios'); 
+const contributorController = require('../controllers/contributorController'); 
 
 const app = express();
 app.use(express.json());
-app.get('/contributors', contributorController.getAllContributors); // Set up your route
+app.get('/contributors', contributorController.getAllContributors); 
 
 describe('GET /contributors', () => {
     it('should return a list of contributors', async () => {
@@ -19,15 +16,15 @@ describe('GET /contributors', () => {
     });
 
     it('should handle errors', async () => {
-        // Mock the axios request to simulate an error
+        
         jest.spyOn(axios, 'get').mockImplementationOnce(() => {
-            throw new Error('Failed to fetch repositories'); // Simulate an error with the message
+            throw new Error('Failed to fetch repositories'); 
         });
 
         const response = await request(app).get('/contributors');
 
         expect(response.status).toBe(500);
-        // Adjust the expected error message to match the actual controller response
-        expect(response.body).toHaveProperty('error', 'Failed to fetch repositories'); // Ensure this matches your controller's response
+        
+        expect(response.body).toHaveProperty('error', 'Failed to fetch repositories'); 
     });
 });

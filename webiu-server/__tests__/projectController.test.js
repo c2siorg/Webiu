@@ -1,5 +1,3 @@
-//__tests__/projectController.test.js
-
 const axios = require('axios');
 const request = require('supertest');
 const express = require('express');
@@ -19,7 +17,7 @@ describe('GET /projects', () => {
     });
 
     it('should handle errors', async () => {
-        // Mock the axios request here to simulate an error
+        
         jest.spyOn(axios, 'get').mockImplementationOnce(() => {
             throw new Error('Failed to fetch repositories');
         });
@@ -27,6 +25,6 @@ describe('GET /projects', () => {
         const response = await request(app).get('/projects');
 
         expect(response.status).toBe(500);
-        expect(response.body).toHaveProperty('error', 'Internal server error'); // Ensure this matches your controller's response
+        expect(response.body).toHaveProperty('error', 'Internal server error'); 
     });
 });
