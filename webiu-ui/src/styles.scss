@@ -1,13 +1,154 @@
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* Set default body styles */
 body {
   font-family: "Poppins", sans-serif;
+  font-size: 16px; 
+  line-height: 1.6;
+  background-color: #f9f9f9; /* Light background */
+  color: #333; 
+  width: 100%;
+  overflow-x: hidden;
 }
 
-body,html{
+/* Define CSS variables */
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2ecc71;
+  --font-color-dark: #333;
+  --font-color-light: #fff;
+  --background-light: #f9f9f9;
+  --background-dark: #333;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-sm: 14px;
+  --line-height-base: 1.6;
+  --line-height-lg: 1.8;
+  --spacing: 16px;
+}
+
+/* Dark Mode Support */
+[data-theme='dark'] {
+  --primary-color: #2980b9;
+  --secondary-color: #27ae60;
+  --font-color-dark: #f9f9f9;
+  --background-dark: #1a1a1a;
+  background-color: var(--background-dark);
+  color: var(--font-color-dark);
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  margin-bottom: 1.5rem;
+  font-weight: 700;
+  color: var(--font-color-dark);
+}
+
+p {
+  margin-bottom: 1rem;
+  color: var(--font-color-dark);
+}
+
+/* Links */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+a:hover {
+  filter: brightness(0.9); /* Darkens the color by 10% */
+}
+
+
+/* Utility Classes */
+.mt-1 { margin-top: 8px; }
+.mt-2 { margin-top: 16px; }
+.mt-3 { margin-top: 24px; }
+.mb-1 { margin-bottom: 8px; }
+.mb-2 { margin-bottom: 16px; }
+.mb-3 { margin-bottom: 24px; }
+.p-1 { padding: 8px; }
+.p-2 { padding: 16px; }
+.p-3 { padding: 24px; }
+.text-center { text-align: center; }
+.text-right { text-align: right; }
+.text-left { text-align: left; }
+.flex { display: flex; }
+.flex-column { display: flex; flex-direction: column; }
+.justify-center { justify-content: center; }
+.align-center { align-items: center; }
+.w-100 { width: 100%; }
+.h-100 { height: 100%; }
+
+/* Grid System */
+.grid {
+  display: grid;
+  gap: var(--spacing);
+}
+
+.grid-cols-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-cols-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+.grid-cols-auto {
+  grid-template-columns: auto;
+}
+
+/* Form Styling */
+input, textarea, select {
+  font-family: "Poppins", sans-serif;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 5px;
   width: 100%;
+  margin-bottom: 1rem;
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: var(--primary-color);
+  outline: none;
+}
+
+/* Button Styling */
+button, .btn {
+  background-color: var(--primary-color);
+  color: var(--font-color-light);
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+button:hover, .btn:hover {
+  background-color: #2980b9;
+}
+
+/* Media Queries for responsiveness */
+@media (max-width: 768px) {
+  body {
+    font-size: var(--font-size-sm);
+  }
+  
+  h1 {
+    font-size: 1.75rem;
+  }
+  
+  p {
+    font-size: 0.9rem;
+  }
 }
