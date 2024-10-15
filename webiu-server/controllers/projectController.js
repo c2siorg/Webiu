@@ -3,7 +3,7 @@ const accessToken = process.env.GITHUB_ACCESS_TOKEN;
 
 const getAllProjects = async (req, res, next) => {
   try {
-    // Fetch repositories
+    
     const repositoriesResponse = await axios.get(
       `https://api.github.com/orgs/c2siorg/repos`,
       {

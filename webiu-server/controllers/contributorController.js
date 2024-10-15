@@ -1,7 +1,6 @@
+require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
-require('dotenv').config();
-
 const router = express.Router();
 const port = process.env.PORT || 3000;
 const baseUrl = 'https://api.github.com';
