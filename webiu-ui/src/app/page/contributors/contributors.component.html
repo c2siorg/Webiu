@@ -1,31 +1,50 @@
-<div class="main">
-  <div class="search-components">
-   <input type="text" class ="search-bar" placeholder="Search.." [formControl] = "searchText"  />
-    <div class="search-button" (click)="filterProfiles()">
-      <p class="search-font">Search</p>
-      <!-- <img src="../../../assets/search.svg" alt="Search Icon" /> -->
+<div class="contributors-page">
+  <section class="search-section">
+    <div class="search-container">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="search contributors"
+          [formControl]="searchText"
+        />
+        <button class="search-button" (click)="filterProfiles()">
+          <span>search</span>
+          <img src="../../../assets/search.svg" alt="Search Icon" />
+        </button>
+      </div>
     </div>
-  </div>
-  <div class = "repo-filter">
-    <h3>Filter by Repository</h3> 
-    <div class="repo-dropdown">
-      
-      <select class ="repo-selection" (change)="onRepoChange($event)">
-        <option value="">All repos</option>
-          @for (repo of allRepos;track $index) {<option>{{repo}}</option>};
-        </select>
-      
+    <div class="filter-section">
+      <span>filter by repository</span>
+      <select class="repository-select" (change)="onRepoChange($event)">
+        <option value="">Codelabz</option>
+        @for (repo of allRepos; track $index) {
+        <option [value]="repo">{{ repo }}</option>
+        }
+      </select>
     </div>
-  </div>
-  <div class = "contributers-context">
-    @for (profile of displayProfiles; track $index) {
-      <app-profile-card
-        [login]="profile.login"
-        [contributions]="profile.contributions"
-        [avatar_url]="profile.avatar_url"
-        [followers]="profile.followers" 
-        [following]="profile.following" 
-      ></app-profile-card>
-      }
-  </div>
+    <div class="contributors-card-container">
+      <ng-container
+        *ngIf="isLoading; then loading; else content"
+      ></ng-container>
+    </div>
+  </section>
 </div>
+
+<ng-template #loading>
+  <div class="loader"></div>
+</ng-template>
+
+<ng-template #content>
+  <div class="contributors-grid">
+    @for (profile of displayProfiles; track $index) {
+    <app-profile-card
+      [login]="profile.login"
+      [contributions]="profile.contributions"
+      [avatar_url]="profile.avatar_url"
+      [followers]="profile.followers"
+      [following]="profile.following"
+    ></app-profile-card>
+    }
+  </div>
+</ng-template>
