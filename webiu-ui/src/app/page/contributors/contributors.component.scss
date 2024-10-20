@@ -102,6 +102,39 @@
     }
   }
 
+  .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 20px;
+
+    button {
+      padding: 10px 20px;
+      background-color: #2f80ed;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:disabled {
+        background-color: var(--gray-200);
+        cursor: not-allowed;
+      }
+
+      &:hover:not(:disabled) {
+        background-color: #004cbf;
+      }
+    }
+
+    span {
+      font-size: 16px;
+      color: var(--gray-900);
+    }
+  }
+
   .contributors-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
