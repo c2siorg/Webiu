@@ -25,12 +25,16 @@ export class ContributorsComponent implements OnInit {
   searchText = new FormControl('');
   selectedRepo: string = '';
   allRepos: string[] = [];
+  isLoading = true;
+
+  currentPage = 1;
+  profilesPerPage = 9;
+  totalPages = 1;
+
   constructor(
     private http: HttpClient,
     private commonUtil: CommmonUtilService
   ) {}
-
-  isLoading = true;
 
   ngOnInit() {
     this.getProfiles();
@@ -44,23 +48,29 @@ export class ContributorsComponent implements OnInit {
           if (res) {
             this.profiles = res;
             this.commonUtil.commonProfiles = this.profiles;
-            this.displayProfiles = this.profiles;
-            this.commonUtil.commonDisplayProfiles = this.displayProfiles;
             this.allRepos = this.getUniqueRepos();
-            this.commonUtil.commonAllRepos = this.allRepos;
+            this.totalPages = Math.ceil(
+              (this.profiles?.length || 0) / this.profilesPerPage
+            );
+            this.filterProfiles();
             this.isLoading = false;
           } else {
             this.profiles = contributors.flatMap((profile: any) => profile);
-            this.displayProfiles = this.profiles;
             this.allRepos = this.getUniqueRepos();
+            this.totalPages = Math.ceil(
+              (this.profiles?.length || 0) / this.profilesPerPage
+            );
+            this.filterProfiles();
             this.isLoading = false;
           }
         },
         error: (error) => {
           this.profiles = contributors.map((profile) => profile);
-          console.log(error);
-          this.displayProfiles = this.profiles;
           this.allRepos = this.getUniqueRepos();
+          this.totalPages = Math.ceil(
+            (this.profiles?.length || 0) / this.profilesPerPage
+          );
+          this.filterProfiles();
           this.isLoading = false;
         },
       });
@@ -74,6 +84,7 @@ export class ContributorsComponent implements OnInit {
     }
     return array;
   }
+
   onRepoChange(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     this.selectedRepo = selectElement.value;
@@ -83,7 +94,7 @@ export class ContributorsComponent implements OnInit {
   filterProfiles() {
     let searchTextValue: string =
       this.searchText.value?.toLocaleLowerCase().trim() || '';
-    this.displayProfiles = this.profiles?.filter((doc) => {
+    let filteredProfiles = this.profiles?.filter((doc) => {
       return (
         (searchTextValue?.length
           ? [doc.login].some((str) =>
@@ -95,5 +106,27 @@ export class ContributorsComponent implements OnInit {
           : true)
       );
     });
+
+    this.totalPages = Math.ceil(
+      (filteredProfiles?.length || 0) / this.profilesPerPage
+    );
+    this.displayProfiles = filteredProfiles?.slice(
+      (this.currentPage - 1) * this.profilesPerPage,
+      this.currentPage * this.profilesPerPage
+    );
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.filterProfiles();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.filterProfiles();
+    }
   }
 }
