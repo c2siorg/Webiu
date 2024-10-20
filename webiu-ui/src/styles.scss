@@ -184,11 +184,12 @@ nav ul li a {
   align-items: center;
   gap: 8px; 
   padding: 0.5rem 1rem;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 nav ul li a:hover {
   background-color: #2980b9; 
+  color: #fff;
   border-radius: 5px;
 }
 
