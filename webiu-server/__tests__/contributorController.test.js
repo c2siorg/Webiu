@@ -47,6 +47,8 @@ describe('GET /contributors', () => {
       followers: 100,
       following: 50,
       avatar_url: 'https://example.com/avatar1.jpg',
+      issues: [],
+      pullRequests: []
     });
   });
 

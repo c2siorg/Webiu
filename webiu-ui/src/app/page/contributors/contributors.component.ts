@@ -35,18 +35,12 @@ export class ContributorsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-<<<<<<< HEAD
-    private commonUtil : CommmonUtilService,
+    private commonUtil: CommmonUtilService,
     private router: Router
-  ) {
-    
-=======
-    private commonUtil: CommmonUtilService
   ) {}
 
   ngOnInit() {
     this.getProfiles();
->>>>>>> 65611a2c2c8429b24c554344d531f1781155244a
   }
 
   getProfiles() {
