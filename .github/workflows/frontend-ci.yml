@@ -40,6 +40,11 @@ jobs:
           cd webiu-ui
           npm install
 
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
       - name: Build Angular App
         run: |
           cd webiu-ui
@@ -48,4 +53,4 @@ jobs:
       - name: Run Angular Tests
         run: |
           cd webiu-ui
-          npm test
+          npm test -- --browsers=ChromeHeadless
