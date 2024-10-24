@@ -5,6 +5,7 @@
     <div class="profile-info">
        <p >{{followers}} followers</p>
         <p>{{following}} followings</p>
+        <p (click)="onContributionsClick()" class="contributions">Contributions: {{ contributions }}</p>
     </div>
     <div class="profile-github">
         <div class="github-icon">

@@ -17,15 +17,18 @@
       
     </div>
   </div>
-  <div class = "contributers-context">
-    @for (profile of displayProfiles; track $index) {
+  <div class="contributors-context">
+    <ng-container *ngFor="let profile of displayProfiles"> 
       <app-profile-card
         [login]="profile.login"
         [contributions]="profile.contributions"
         [avatar_url]="profile.avatar_url"
-        [followers]="profile.followers" 
-        [following]="profile.following" 
+        [followers]="profile.followers"
+        [following]="profile.following"
+        (contributionsClick)="viewContributorDetails(profile.login)"
       ></app-profile-card>
-      }
+    </ng-container>
   </div>
+  
+  
 </div>

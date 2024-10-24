@@ -6,6 +6,8 @@ import { ContributorsComponent } from './page/contributors/contributors.componen
 import { CommunityComponent } from './page/community/community.component';
 import { GsocComponent } from './page/gsoc/gsoc.component';
 import { GsocProjectIdeaComponent } from './page/gsoc-project-idea/gsoc-project-idea.component';
+import { ContributorDetailsComponent } from './page/contributor-details/contributor-details.component';
+
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
@@ -27,4 +29,5 @@ export const routes: Routes = [
   },
   { path: 'gsoc', component: GsocComponent },
   { path: 'idea', component: GsocProjectIdeaComponent },
+  { path: 'contributors/:contributorLogin/details', component: ContributorDetailsComponent },
 ];

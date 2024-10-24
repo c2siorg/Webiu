@@ -6,6 +6,8 @@ import { CommonModule } from '@angular/common';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
+import { Router } from '@angular/router';
+
 @Component({
   selector: 'app-contributors',
   standalone: true,
@@ -22,6 +24,7 @@ export class ContributorsComponent implements OnInit {
   constructor(
     private http: HttpClient,
     private commonUtil : CommmonUtilService,
+    private router: Router
   ) {
     
   }
@@ -58,6 +61,12 @@ export class ContributorsComponent implements OnInit {
     
   }
 
+  viewContributorDetails(login: string) {
+      this.router.navigate([`/contributors/${login}/details`]);
+    }
+    
+  
+
   getUniqueRepos(): string[] {
     let array: string[] = []
     if( this.profiles?.length){
@@ -83,4 +92,3 @@ export class ContributorsComponent implements OnInit {
   }
 
 }
-
