@@ -31,12 +31,19 @@ jobs:
           git checkout pr
 
       - name: Install Angular CLI
-        run: npm install -g @angular/cli
+        run: |
+          cd webiu-ui
+          npm install -g @angular/cli
 
       - name: Install dependencies
         run: |
           cd webiu-ui
           npm install
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
 
       - name: Build Angular App
         run: |
@@ -46,4 +53,4 @@ jobs:
       - name: Run Angular Tests
         run: |
           cd webiu-ui
-          npm test
+          npm test -- --browsers=ChromeHeadless --watch=false
