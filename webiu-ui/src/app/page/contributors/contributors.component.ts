@@ -1,4 +1,4 @@
-import { Component , OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor, contributors } from '../../common/data/contributor';
@@ -11,7 +11,13 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-contributors',
   standalone: true,
-  imports: [NavbarComponent, HttpClientModule , ReactiveFormsModule,CommonModule,ProfileCardComponent],
+  imports: [
+    NavbarComponent,
+    HttpClientModule,
+    ReactiveFormsModule,
+    CommonModule,
+    ProfileCardComponent,
+  ],
   templateUrl: './contributors.component.html',
   styleUrl: './contributors.component.scss',
 })
@@ -19,46 +25,64 @@ export class ContributorsComponent implements OnInit {
   profiles?: Contributor[];
   displayProfiles?: Contributor[];
   searchText = new FormControl('');
-  selectedRepo:string = '';
-  allRepos:string[] =[];
+  selectedRepo: string = '';
+  allRepos: string[] = [];
+  isLoading = true;
+
+  currentPage = 1;
+  profilesPerPage = 9;
+  totalPages = 1;
+
   constructor(
     private http: HttpClient,
+<<<<<<< HEAD
     private commonUtil : CommmonUtilService,
     private router: Router
   ) {
     
+=======
+    private commonUtil: CommmonUtilService
+  ) {}
+
+  ngOnInit() {
+    this.getProfiles();
+>>>>>>> 65611a2c2c8429b24c554344d531f1781155244a
   }
 
-  ngOnInit(){
-    this.getProfiles()
-  }
-
-  
-  getProfiles(){
-    this.http.get<any>('http://localhost:5000/api/contributor/contributors').subscribe({
-      next: (res)=>{
-       if(res){
-        this.profiles = res;
-        this.commonUtil.commonProfiles = this.profiles;
-        this.displayProfiles = this.profiles;
-        this.commonUtil.commonDisplayProfiles = this.displayProfiles;
-        this.allRepos = this.getUniqueRepos();
-        this.commonUtil.commonAllRepos = this.allRepos
-      }
-      else{
-        this.profiles = contributors.flatMap((profile: any)=>profile);
-        this.displayProfiles = this.profiles;
-        this.allRepos = this.getUniqueRepos()
-      }
-      },
-      error: (error)=>{
-        this.profiles = contributors.map((profile)=>profile);
-        console.log(error);
-        this.displayProfiles = this.profiles;
-        this.allRepos = this.getUniqueRepos()
-        }
-      })
-    
+  getProfiles() {
+    this.http
+      .get<any>('http://localhost:5000/api/contributor/contributors')
+      .subscribe({
+        next: (res) => {
+          if (res) {
+            this.profiles = res;
+            this.commonUtil.commonProfiles = this.profiles;
+            this.allRepos = this.getUniqueRepos();
+            this.totalPages = Math.ceil(
+              (this.profiles?.length || 0) / this.profilesPerPage
+            );
+            this.filterProfiles();
+            this.isLoading = false;
+          } else {
+            this.profiles = contributors.flatMap((profile: any) => profile);
+            this.allRepos = this.getUniqueRepos();
+            this.totalPages = Math.ceil(
+              (this.profiles?.length || 0) / this.profilesPerPage
+            );
+            this.filterProfiles();
+            this.isLoading = false;
+          }
+        },
+        error: (error) => {
+          this.profiles = contributors.map((profile) => profile);
+          this.allRepos = this.getUniqueRepos();
+          this.totalPages = Math.ceil(
+            (this.profiles?.length || 0) / this.profilesPerPage
+          );
+          this.filterProfiles();
+          this.isLoading = false;
+        },
+      });
   }
 
   viewContributorDetails(login: string) {
@@ -68,27 +92,56 @@ export class ContributorsComponent implements OnInit {
   
 
   getUniqueRepos(): string[] {
-    let array: string[] = []
-    if( this.profiles?.length){
-      const repos = this.profiles.flatMap(profile => profile.repos);
-      array =  Array.from(new Set(repos));
+    let array: string[] = [];
+    if (this.profiles?.length) {
+      const repos = this.profiles.flatMap((profile) => profile.repos);
+      array = Array.from(new Set(repos));
     }
-    return array
+    return array;
   }
-  onRepoChange(event:Event){
+
+  onRepoChange(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     this.selectedRepo = selectElement.value;
     this.filterProfiles();
   }
 
-
   filterProfiles() {
-    let searchTextValue:string= this.searchText.value?.toLocaleLowerCase().trim()||'';
-    this.displayProfiles = this.profiles?.filter( doc =>{
-      return (searchTextValue?.length ? [doc.login].some(str => str.toLocaleLowerCase().includes(searchTextValue)): true)
-      && (this.selectedRepo?.length ? doc.repos.includes(this.selectedRepo):true)
-    })
+    let searchTextValue: string =
+      this.searchText.value?.toLocaleLowerCase().trim() || '';
+    let filteredProfiles = this.profiles?.filter((doc) => {
+      return (
+        (searchTextValue?.length
+          ? [doc.login].some((str) =>
+              str.toLocaleLowerCase().includes(searchTextValue)
+            )
+          : true) &&
+        (this.selectedRepo?.length
+          ? doc.repos.includes(this.selectedRepo)
+          : true)
+      );
+    });
 
-  }
+    this.totalPages = Math.ceil(
+      (filteredProfiles?.length || 0) / this.profilesPerPage
+    );
+    this.displayProfiles = filteredProfiles?.slice(
+      (this.currentPage - 1) * this.profilesPerPage,
+      this.currentPage * this.profilesPerPage
+    );
+  }
 
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.filterProfiles();
+    }
+  }
+
+  prevPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.filterProfiles();
+    }
+  }
 }
