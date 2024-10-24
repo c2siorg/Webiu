@@ -1,0 +1,13 @@
+<div>
+  <h2>Contributor Issues</h2>
+  <ul>
+    <li *ngFor="let issue of issues">{{ issue.title }}</li>
+    <li *ngIf="issues.length === 0">No issues found.</li>
+  </ul>
+
+  <h2>Contributor Pull Requests</h2>
+  <ul>
+    <li *ngFor="let pr of pullRequests">{{ pr.title }}</li>
+    <li *ngIf="pullRequests.length === 0">No pull requests found.</li>
+  </ul>
+</div>
