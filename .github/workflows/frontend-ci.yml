@@ -20,6 +20,16 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/webiu-2024
+
+      - name: Fetch pull request changes
+        run: |
+          git fetch origin +refs/pull/${{ github.event.pull_request.number }}/merge:pr
+          git checkout pr
+
       - name: Install Angular CLI
         run: npm install -g @angular/cli
 
@@ -42,4 +52,4 @@ jobs:
         if: github.ref == 'refs/heads/feature/webiu-2024'
         run: |
           cd webiu-ui
-          npx angular-cli-ghpages --dir=../docs
+          ngh --dir=../docs
