@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
+import { environment } from '../../../environments/environment'; 
 @Component({
   selector: 'app-contributors',
   standalone: true,
@@ -42,7 +43,7 @@ export class ContributorsComponent implements OnInit {
 
   getProfiles() {
     this.http
-      .get<any>('http://localhost:5000/api/contributor/contributors')
+      .get<any>(`${environment.serverUrl}/api/contributor/contributors`)
       .subscribe({
         next: (res) => {
           if (res) {
