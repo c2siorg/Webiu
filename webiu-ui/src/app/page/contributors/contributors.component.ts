@@ -39,6 +39,10 @@ export class ContributorsComponent implements OnInit {
 
   ngOnInit() {
     this.getProfiles();
+    
+    this.searchText.valueChanges.subscribe(() => {   // Listen for changes in the search input field
+    this.filterProfiles();
+  });
   }
 
   getProfiles() {
