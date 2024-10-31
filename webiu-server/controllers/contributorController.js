@@ -111,6 +111,6 @@ async function fetchUserDetails(username) {
   }
 }
 
-module.exports = module.exports = {
+module.exports = {
   getAllContributors,
 };;
