@@ -5,22 +5,23 @@
   box-sizing: border-box;
 }
 
-/* Set default body styles */
+
 body {
   font-family: "Poppins", sans-serif;
   font-size: 16px; 
   line-height: 1.6;
-  background-color: #f9f9f9; /* Light background */
+  background-color: #f9f9f9; 
   color: #333; 
   width: 100%;
   overflow-x: hidden;
 }
 
-/* Define CSS variables */
+
 :root {
   --primary-color: #3498db;
   --secondary-color: #2ecc71;
   --font-color-dark: #333;
+  --hover-color: #0892ed;
   --font-color-light: #fff;
   --background-light: #f9f9f9;
   --background-dark: #333;
@@ -32,7 +33,7 @@ body {
   --spacing: 16px;
 }
 
-/* Dark Mode Support */
+
 [data-theme='dark'] {
   --primary-color: #2980b9;
   --secondary-color: #27ae60;
@@ -42,7 +43,7 @@ body {
   color: var(--font-color-dark);
 }
 
-/* Typography */
+
 h1, h2, h3, h4, h5, h6 {
   margin-bottom: 1.5rem;
   font-weight: 700;
@@ -62,11 +63,11 @@ a {
 }
 
 a:hover {
-  filter: brightness(0.9); /* Darkens the color by 10% */
+  filter: brightness(0.9);
 }
 
 
-/* Utility Classes */
+
 .mt-1 { margin-top: 8px; }
 .mt-2 { margin-top: 16px; }
 .mt-3 { margin-top: 24px; }
@@ -86,7 +87,7 @@ a:hover {
 .w-100 { width: 100%; }
 .h-100 { height: 100%; }
 
-/* Grid System */
+
 .grid {
   display: grid;
   gap: var(--spacing);
@@ -108,7 +109,7 @@ a:hover {
   grid-template-columns: auto;
 }
 
-/* Form Styling */
+
 input, textarea, select {
   font-family: "Poppins", sans-serif;
   padding: 0.75rem;
@@ -123,7 +124,7 @@ input:focus, textarea:focus, select:focus {
   outline: none;
 }
 
-/* Button Styling */
+
 button, .btn {
   display: flex;
   justify-content: center; 
@@ -135,11 +136,10 @@ button, .btn {
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s ease;
-  gap: 8px; 
 }
 
 button:hover, .btn:hover {
-  background-color: #2980b9;
+  background-color: var(--hover-color);
 }
 
 button i, .btn i {
@@ -153,7 +153,7 @@ button .icon, .btn .icon {
   margin-right: 8px; 
 }
 
-/* Navigation Styling */
+
 nav {
   display: flex;
   justify-content: center; 
@@ -163,38 +163,31 @@ nav {
 }
 
 nav ul {
-  list-style: none;
   display: flex;
-  gap: 1.5rem; 
+  list-style: none;
+  gap: 1.5rem;
   margin: 0;
-  padding: 0;
 }
 
-nav ul li {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
 
 nav ul li a {
   color: var(--font-color-light);
   text-decoration: none;
   font-size: var(--font-size-base);
+  padding: 0.5rem 1rem;
+  border-radius: 5px;
+  transition: background-color 0.3s ease, color 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 8px; 
-  padding: 0.5rem 1rem;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  justify-content: center;
 }
 
 nav ul li a:hover {
-  background-color: #2980b9; 
-  color: #fff;
-  border-radius: 5px;
+  background-color: var(--hover-color);
+  color: var(--font-color-light);
 }
 
 
-/* Media Queries for responsiveness */
 @media (max-width: 768px) {
   body {
     font-size: var(--font-size-sm);

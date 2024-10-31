@@ -5,9 +5,9 @@
     box-sizing: border-box;
 }
 
-/* Body and Root Styles */
+
 html {
-    font-size: 16px; /* Default font size */
+    font-size: 16px; 
     scroll-behavior: smooth;
 }
 
@@ -20,13 +20,13 @@ body {
     padding: 0;
 }
 
-/* Main container width adjustment */
+
 .main {
     width: 80%;
     margin: 0 auto;
 }
 
-/* Typography */
+
 h1, h2, h3, h4, h5, h6 {
     font-weight: 700;
     color: #222;
@@ -70,7 +70,7 @@ small {
     color: #666;
 }
 
-/* Links */
+
 a {
     color: #3498db;
     text-decoration: none;
@@ -82,7 +82,7 @@ a:hover {
     text-decoration: underline;
 }
 
-/* Buttons */
+
 button, .btn {
     padding: 0.75rem 1.5rem;
     background-color: #3498db;
@@ -109,7 +109,7 @@ button:hover, .btn:hover {
     color: #fff;
 }
 
-/* Form Elements */
+
 input, select, textarea {
     width: 100%;
     padding: 0.75rem;
@@ -125,7 +125,7 @@ input:focus, select:focus, textarea:focus {
     box-shadow: 0 0 5px rgba(52, 152, 219, 0.5);
 }
 
-/* Table Styles */
+
 table {
     width: 100%;
     border-collapse: collapse;
@@ -147,7 +147,7 @@ table tr:nth-child(even) {
     background-color: #f9f9f9;
 }
 
-/* Grid System */
+
 .container {
     max-width: 1200px;
     margin: 0 auto;
@@ -172,7 +172,7 @@ table tr:nth-child(even) {
 .col-6 { flex: 0 0 50%; }
 .col-12 { flex: 0 0 100%; }
 
-/* Flex Utilities */
+
 .flex {
     display: flex;
     justify-content: space-between;
@@ -190,7 +190,7 @@ table tr:nth-child(even) {
     flex-direction: column;
 }
 
-/* Utility classes for padding and margin */
+
 .mt-1 { margin-top: 1rem; }
 .mt-2 { margin-top: 2rem; }
 .mb-1 { margin-bottom: 1rem; }
@@ -198,7 +198,7 @@ table tr:nth-child(even) {
 .p-1 { padding: 1rem; }
 .p-2 { padding: 2rem; }
 
-/* Custom Cards */
+
 .card {
     background-color: #fff;
     padding: 1.5rem;
@@ -212,7 +212,7 @@ table tr:nth-child(even) {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
 }
 
-/* Animations */
+
 .fade-in {
     animation: fadeIn 1s ease-in forwards;
 }
@@ -226,7 +226,7 @@ table tr:nth-child(even) {
     }
 }
 
-/* Media Queries */
+
 @media (max-width: 768px) {
     .main {
         width: 95%;
@@ -249,7 +249,7 @@ table tr:nth-child(even) {
     }
 }
 
-/* Dark Theme */
+
 body.dark-mode {
     background-color: #222;
     color: #f4f4f4;
@@ -268,7 +268,7 @@ body.dark-mode table th, body.dark-mode table td {
     border-color: #444;
 }
 
-/* Spinners */
+
 .spinner {
     border: 4px solid #f3f3f3;
     border-radius: 50%;
