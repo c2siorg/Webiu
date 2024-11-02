@@ -1,11 +1,17 @@
 <div class="profile-box">
-  <img class="profile-img" src="{{ avatar_url }}" />
-  <p class="profile-username">{{ login }}</p>
-  <p class="profile-contributions">{{ contributions }} contributions</p>
+  <img
+    class="profile-img"
+    [src]="avatar_url || 'path/to/default-avatar.jpg'"
+    alt="{{ login }}'s profile picture"
+  />
+  <p class="profile-username">{{ login || 'Unknown User' }}</p>
+  <p class="profile-contributions">{{ contributions || 0 }} contributions</p>
+  
   <div class="profile-info">
-    <p>{{ followers }} followers</p>
-    <p>{{ following }} followings</p>
+    <p>{{ followers || 0 }} followers</p>
+    <p>{{ following || 0 }} followings</p>
   </div>
+  
   <div class="profile-github">
     <div class="github-icon">
       <svg
@@ -37,9 +43,8 @@
       <a
         target="_blank"
         class="github-username"
-        href="https://github.com/{{ login }}"
-      >
-        {{ login }}</a
+        [href]="'https://github.com/' + login"
+        >{{ login }}</a
       >
     </div>
   </div>
