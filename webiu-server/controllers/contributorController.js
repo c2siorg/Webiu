@@ -18,36 +18,39 @@ const getAllContributors = async (req, res) => {
 
     await Promise.all(
       repositories.map(async (repo) => {
-        const contributors = await fetchContributors(orgName, repo.name);
-
-        if (!contributors) {
-          return;
+        try {
+          const contributors = await fetchContributors(orgName, repo.name);
+          if (!contributors) return;
+    
+          await Promise.all(
+            contributors.map(async (contributor) => {
+              try {
+                const userDetails = await fetchUserDetails(contributor.login);
+                if (!userDetails) return;
+    
+                if (finalResponse[userDetails.login]) {
+                  finalResponse[userDetails.login].repos.push(repo.name);
+                } else {
+                  finalResponse[userDetails.login] = {
+                    login: userDetails.login,
+                    contributions: contributor.contributions,
+                    repos: [repo.name],
+                    followers: userDetails.followers,
+                    following: userDetails.following,
+                    avatar_url: userDetails.avatar_url,
+                  };
+                }
+              } catch (err) {
+                console.error('Error in fetching user details:', err);
+              }
+            })
+          );
+        } catch (err) {
+          console.error('Error in fetching contributors:', err);
         }
-
-        await Promise.all(
-          contributors.map(async (contributor) => {
-            const userDetails = await fetchUserDetails(contributor.login);
-
-            if (!userDetails) {
-              return;
-            }
-
-            if (finalResponse[userDetails.login]) {
-              finalResponse[userDetails.login].repos.push(repo.name);
-            } else {
-              finalResponse[userDetails.login] = {
-                login: userDetails.login,
-                contributions: contributor.contributions,
-                repos: [repo.name],
-                followers: userDetails.followers,
-                following: userDetails.following,
-                avatar_url: userDetails.avatar_url
-              };
-            }
-          })
-        );
       })
     );
+    
     let allContributors = []
     for (const contributor  in finalResponse){
       allContributors.push(finalResponse[contributor]);
@@ -108,6 +111,6 @@ async function fetchUserDetails(username) {
   }
 }
 
-module.exports = module.exports = {
+module.exports = {
   getAllContributors,
 };;
