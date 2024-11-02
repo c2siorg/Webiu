@@ -7,6 +7,8 @@ import { ProfileCardComponent } from '../../components/profile-card/profile-card
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment'; 
+import { distinctUntilChanged } from 'rxjs/operators';
+
 @Component({
   selector: 'app-contributors',
   standalone: true,
@@ -18,11 +20,11 @@ import { environment } from '../../../environments/environment';
     ProfileCardComponent,
   ],
   templateUrl: './contributors.component.html',
-  styleUrl: './contributors.component.scss',
+  styleUrls: ['./contributors.component.scss'],
 })
 export class ContributorsComponent implements OnInit {
-  profiles?: Contributor[];
-  displayProfiles?: Contributor[];
+  profiles: Contributor[] = [];
+  displayProfiles: Contributor[] = [];
   searchText = new FormControl('');
   selectedRepo: string = '';
   allRepos: string[] = [];
@@ -39,55 +41,32 @@ export class ContributorsComponent implements OnInit {
 
   ngOnInit() {
     this.getProfiles();
-    
-    this.searchText.valueChanges.subscribe(() => {
-    this.filterProfiles();
-  });
+
+    this.searchText.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
+      this.filterProfiles();
+    });
   }
 
   getProfiles() {
     this.http
-      .get<any>(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
       .subscribe({
-        next: (res) => {
-          if (res) {
-            this.profiles = res;
-            this.commonUtil.commonProfiles = this.profiles;
-            this.allRepos = this.getUniqueRepos();
-            this.totalPages = Math.ceil(
-              (this.profiles?.length || 0) / this.profilesPerPage
-            );
-            this.filterProfiles();
-            this.isLoading = false;
-          } else {
-            this.profiles = contributors.flatMap((profile: any) => profile);
-            this.allRepos = this.getUniqueRepos();
-            this.totalPages = Math.ceil(
-              (this.profiles?.length || 0) / this.profilesPerPage
-            );
-            this.filterProfiles();
-            this.isLoading = false;
-          }
-        },
-        error: (error) => {
-          this.profiles = contributors.map((profile) => profile);
-          this.allRepos = this.getUniqueRepos();
-          this.totalPages = Math.ceil(
-            (this.profiles?.length || 0) / this.profilesPerPage
-          );
-          this.filterProfiles();
-          this.isLoading = false;
-        },
+        next: (res) => this.handleProfileResponse(res || contributors),
+        error: () => this.handleProfileResponse(contributors),
       });
   }
 
+  handleProfileResponse(profiles: Contributor[]) {
+    this.profiles = profiles;
+    this.commonUtil.commonProfiles = this.profiles;
+    this.allRepos = this.getUniqueRepos();
+    this.totalPages = Math.ceil((this.profiles.length || 0) / this.profilesPerPage);
+    this.filterProfiles();
+    this.isLoading = false;
+  }
+
   getUniqueRepos(): string[] {
-    let array: string[] = [];
-    if (this.profiles?.length) {
-      const repos = this.profiles.flatMap((profile) => profile.repos);
-      array = Array.from(new Set(repos));
-    }
-    return array;
+    return Array.from(new Set(this.profiles.flatMap((profile) => profile.repos)));
   }
 
   onRepoChange(event: Event) {
@@ -97,28 +76,24 @@ export class ContributorsComponent implements OnInit {
   }
 
   filterProfiles() {
-    let searchTextValue: string =
-      this.searchText.value?.toLocaleLowerCase().trim() || '';
-    let filteredProfiles = this.profiles?.filter((doc) => {
-      return (
-        (searchTextValue?.length
-          ? [doc.login].some((str) =>
-              str.toLocaleLowerCase().includes(searchTextValue)
-            )
-          : true) &&
-        (this.selectedRepo?.length
-          ? doc.repos.includes(this.selectedRepo)
-          : true)
-      );
-    });
-
-    this.totalPages = Math.ceil(
-      (filteredProfiles?.length || 0) / this.profilesPerPage
+    const searchTextValue = this.searchText.value?.toLocaleLowerCase().trim() || '';
+    const filteredProfiles = this.profiles.filter((doc) =>
+      this.matchesSearchText(doc, searchTextValue) && this.matchesSelectedRepo(doc)
     );
-    this.displayProfiles = filteredProfiles?.slice(
+
+    this.totalPages = Math.ceil(filteredProfiles.length / this.profilesPerPage);
+    this.displayProfiles = filteredProfiles.slice(
       (this.currentPage - 1) * this.profilesPerPage,
       this.currentPage * this.profilesPerPage
     );
+  }
+
+  matchesSearchText(doc: Contributor, searchText: string): boolean {
+    return !searchText.length || doc.login.toLocaleLowerCase().includes(searchText);
+  }
+
+  matchesSelectedRepo(doc: Contributor): boolean {
+    return !this.selectedRepo.length || doc.repos.includes(this.selectedRepo);
   }
 
   nextPage() {
