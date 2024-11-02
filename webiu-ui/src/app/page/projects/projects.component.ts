@@ -5,7 +5,7 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { projectsData } from './projects-data';
 import { Project, ProjectResponse } from './project.model';
-
+import { environment } from '../../../environments/environment'; 
 @Component({
   selector: 'app-projects',
   standalone: true,
@@ -30,7 +30,7 @@ export class ProjectsComponent implements OnInit {
 
   fetchProjects(): void {
     this.http
-      .get<ProjectResponse>('http://localhost:5000/api/v1/project/projects/')
+      .get<ProjectResponse>(`${environment.serverUrl}api/v1/project/projects/`)
       .subscribe({
         next: (response) => {
           this.projectsData = response.repositories;
