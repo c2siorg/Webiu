@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor, contributors } from '../../common/data/contributor';
@@ -7,28 +8,28 @@ import { CommmonUtilService } from '../../common/service/commmon-util.service';
 @Component({
   selector: 'app-community',
   standalone: true,
-  imports: [NavbarComponent],
+  imports: [CommonModule, NavbarComponent], 
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],
 })
 export class CommunityComponent {
-  constructor(private commonUtil : CommmonUtilService){
-
-  }
   icons: Media[] = socialMedia;
   users: Contributor[] = this.shuffleArray(contributors);
+
+  constructor(private commonUtil: CommmonUtilService) {}
+
   private shuffleArray(array: any[]): any[] {
     let currentIndex = array.length,
       randomIndex;
     while (currentIndex !== 0) {
       randomIndex = Math.floor(Math.random() * currentIndex);
       currentIndex--;
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex],
-        array[currentIndex],
-      ];
+      [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
     }
-
     return array;
+  }
+
+  trackByFn(index: number, item: any): number {
+    return index;
   }
 }
