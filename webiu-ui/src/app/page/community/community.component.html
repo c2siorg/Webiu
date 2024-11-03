@@ -1,35 +1,44 @@
 <div class="community">
   <div class="community-hero">
     <div class="community-hero-content">
-      <h1>Join our community</h1>
+      <h1>Join Our Community</h1>
+      <p class="hero-subtitle">
+        Connect with like-minded individuals and grow with us.
+      </p>
       <div class="media-icons">
-        @for (icon of icons; track $index) {
-        <a class="icon-link" href="{{ icon.link }}"
-          ><img class="icon" src="{{ icon.media_icon }}"
-        /></a>
-        }
+        <ng-container *ngFor="let icon of icons; trackBy: trackByFn">
+          <a class="icon-link" [href]="icon.link" target="_blank" rel="noopener noreferrer">
+            <img class="icon" [src]="icon.media_icon" alt="icon" />
+          </a>
+        </ng-container>
       </div>
     </div>
-    <img src="../../../assets/projects-img.png" alt="community" />
+    <img class="community-image" src="../../../assets/projects-img.png" alt="Community banner" />
   </div>
 
   <div class="team-details">
-    <p class="team-caption">Meet the team</p>
+    <p class="team-caption">Meet the Team</p>
     <p class="team-description">
-      Dedicated individuals who are pushing the boundaries of technology
+      A passionate team pushing the boundaries of technology.
     </p>
     <div class="team">
       <div class="team-align">
-        @for(user of users; track $index){
-        <div class="card">
-          <div class="card-data">
-            <p class="user-name">
-              {{ user.login }}
-            </p>
-            <p class="user-designation">C2SI Contributor</p>
+        <ng-container *ngFor="let user of users; trackBy: trackByFn">
+          <div class="card">
+            <img class="avatar" [src]="user.avatar_url" [alt]="user.login + ' avatar'" />
+            <div class="card-data">
+              <p class="user-name">{{ user.login }}</p>
+              <p class="user-designation">C2SI Contributor</p>
+              <p class="user-contributions">Contributions: {{ user.contributions }}</p>
+              <p class="user-followers">Followers: {{ user.followers }} | Following: {{ user.following }}</p>
+              <p class="user-repos">Repos: {{ user.repos.join(', ') }}</p>
+              <p class="user-github">
+                GitHub:
+                <a [href]="'https://github.com/' + user.login" target="_blank">{{ user.login }}</a>
+              </p>
+            </div>
           </div>
-        </div>
-        }
+        </ng-container>
       </div>
     </div>
   </div>
