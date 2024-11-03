@@ -13,27 +13,36 @@
 
     .community-hero-content {
       h1 {
-        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        color: var(--primary-dark, #0a0a15);
         font-size: 40px;
         margin-bottom: 10px;
         font-weight: 500;
         line-height: 150%;
       }
 
-      p {
-        color: var(--primary-dark, var(--primary-dark, #0a0a15));
-        font-size: 16px;
-        font-weight: light;
-        line-height: 150%;
-      }
-
       .media-icons {
+        display: flex;
+        gap: 20px;
+        margin-top: 20px;
+
+        a {
+          transition: transform 0.2s;
+
+          &:hover {
+            transform: scale(1.1);
+          }
+        }
+
         img {
           height: 50px;
           width: 50px;
-          margin-right: 20px;
         }
       }
+    }
+
+    img {
+      max-width: 100%;
+      height: auto;
     }
   }
 
@@ -52,43 +61,105 @@
 
     .team-description {
       text-align: center;
+      margin-bottom: 30px;
+      color: var(--text-secondary, #707070);
     }
 
     .team {
-      width: 80%;
+      width: 100%;
       display: flex;
+      justify-content: center;
 
       .team-align {
         display: flex;
         flex-wrap: wrap;
-        flex-direction: row;
-        gap: 10px;
-        margin: 2%;
+        gap: 20px;
         justify-content: center;
 
         .card {
-          width: fit-content;
+          width: 280px;
+          padding: 20px;
           display: flex;
-          padding: 10px 20px;
           flex-direction: column;
-          align-items: flex-start;
-          gap: 5px;
+          align-items: center;
           border-radius: 10px;
-          border: 1px solid var(--Gray-5, #e0e0e0);
           background: var(--primary-white, #fff);
-          box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+          box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+          transition: transform 0.2s, box-shadow 0.2s;
+
+          &:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 6px 20px rgba(0, 0, 0, 0.15);
+          }
+
+          img {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            margin-bottom: 15px;
+          }
 
           .card-data {
-            padding: 8px 22px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
 
             .user-name {
-              text-align: center;
-              font-size: larger;
+              font-size: 18px;
+              font-weight: bold;
+              margin-bottom: 5px;
+              color: var(--primary-dark, #0a0a15);
             }
 
             .user-designation {
-              text-align: center;
-              font-size: medium;
+              font-size: 14px;
+              color: var(--text-secondary, #707070);
+              margin-bottom: 10px;
+            }
+          }
+
+          .github-icon {
+            width: 35px;
+            height: 35px;
+            background-color: #333;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s, transform 0.2s;
+
+            &:hover {
+              background-color: #0366d6;
+              transform: scale(1.1);
+            }
+
+            img {
+              width: 18px;
+              height: 18px;
+              filter: invert(100%);
+            }
+          }
+
+          .stats {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding-top: 10px;
+            border-top: 1px solid var(--Gray-5, #e0e0e0);
+
+            .stat {
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              font-size: 14px;
+              color: var(--text-secondary, #707070);
+
+              .stat-value {
+                font-weight: bold;
+                color: var(--primary-dark, #0a0a15);
+              }
             }
           }
         }
@@ -101,19 +172,12 @@
   .community {
     .community-hero {
       flex-direction: column;
-      justify-content: center;
       align-items: center;
       padding: 20px;
+      text-align: center;
 
       .community-hero-content {
-        display: flex;
-        flex-direction: column;
         align-items: center;
-
-        p {
-          max-width: 600px;
-          text-align: center;
-        }
       }
     }
   }
@@ -136,6 +200,7 @@
         h1 {
           font-size: 32px;
         }
+
         .media-icons {
           img {
             height: 30px;
@@ -143,6 +208,7 @@
           }
         }
       }
+
       img {
         width: 300px;
       }
