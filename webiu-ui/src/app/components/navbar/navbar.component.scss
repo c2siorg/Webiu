@@ -74,6 +74,9 @@
   .navbar__menu__items:hover {
     background: var(--blue, #2f80ed);
     color: #fff;
+    p {
+      color: #fff;
+    }
   }
 
   .navbar__menu__items:hover img {

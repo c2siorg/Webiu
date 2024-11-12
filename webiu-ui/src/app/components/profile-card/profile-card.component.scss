@@ -1,80 +1,80 @@
 .profile-box {
-    display: flex;
-    border: solid 1px #e0e0e0;
-    box-shadow: 10px 10px 30px 10px #0505051a;
-    border-radius: 10px;
-    width: 100%;
-    max-width: 350px;
-    max-height: 650px;
-    min-height: 300px;
-    align-items: center;
-    justify-content: center;
-    flex-direction: column;
-    text-align: center;
+  display: flex;
+  border: solid 1px #e0e0e0;
+  box-shadow: 10px 10px 30px 10px #0505051a;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 350px;
+  min-height: 300px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  text-align: center;
+  padding: 20px 0;
 }
 
 .profile-img {
-    width: 40%;
-    height: 40%;
-    border-radius: 50%;
-    border: solid 0.2px;
+  width: 40%;
+  height: 40%;
+  border-radius: 50%;
+  border: solid 0.2px;
 }
 
 .profile-info {
-    display: flex;
-    width: 100%;
-    gap: 10%;
-    justify-content: center;
-    margin-top: 10px;
+  display: flex;
+  width: 100%;
+  gap: 10%;
+  justify-content: center;
+  margin-top: 10px;
 }
 
 .profile-github {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    border-radius: 5px;
-    background: var(--Gray-6, #eeecec);
-    padding: 8px 12px;
-    justify-content: center;
-    margin-top: 5%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 5px;
+  background: var(--Gray-6, #eeecec);
+  padding: 8px 12px;
+  justify-content: center;
+  margin-top: 5%;
 }
 
 .github-icon {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .github-username {
-    display: flex;
-    align-items: center;
-    color: black;
+  display: flex;
+  align-items: center;
+  color: black;
 }
 
 /* Media Queries */
 @media (max-width: 1200px) {
-    .contributers-context {
-        grid-template-columns: repeat(3, 1fr);
-    }
-    .contributors-main {
-        margin-left: 15%;
-    }
-    .box {
-        width: 100%;
-        height: 100%;
-    }
+  .contributers-context {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .contributors-main {
+    margin-left: 15%;
+  }
+  .box {
+    width: 100%;
+    height: 100%;
+  }
 }
 
 @media (max-width: 992px) {
-    .box {
-        width: 80%;
-        height: 80%;
-    }
+  .box {
+    width: 80%;
+    height: 80%;
+  }
 }
 
 @media (max-width: 500px) {
-    .box {
-        width: 70%;
-        height: 70%;
-    }
+  .box {
+    width: 70%;
+    height: 70%;
+  }
 }
