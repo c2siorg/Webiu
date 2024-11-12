@@ -53,5 +53,4 @@ jobs:
       - name: Run Angular Tests
         run: |
           cd webiu-ui
-          npm test
-          npm test -- --browsers=ChromeHeadless --watch=false --no-sandbox
+          npm test -- --browsers=ChromeHeadless --watch=false
