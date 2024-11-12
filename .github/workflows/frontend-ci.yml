@@ -54,4 +54,4 @@ jobs:
         run: |
           cd webiu-ui
           npm test
-          npm test -- --browsers=ChromeHeadless --watch=false
+          npm test -- --browsers=ChromeHeadless --watch=false --no-sandbox
