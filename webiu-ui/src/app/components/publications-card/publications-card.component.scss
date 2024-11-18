@@ -6,9 +6,9 @@
   align-items: flex-start;
   gap: 20px;
   border-radius: 8px;
-  border: 2px solid var(--primary-white, #fff);
-  background: var(--primary-white, #fff);
-  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--publications-card-border);
+  background: var(--publications-card-bg);
+  box-shadow: 0px 4px 24px 0px var(--publications-card-box-shadow);
   width: 500px;
 
   a {

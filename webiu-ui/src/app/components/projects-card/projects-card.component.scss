@@ -6,8 +6,8 @@
   justify-content: space-between;
   gap: 20px;
   border-radius: 8px;
-  border: 2px solid var(--primary-white, #fff);
-  background: var(--primary-white, #fff);
+  border: 2px solid var(--border-color, #fff);
+  background: var(--card-container-2, #fff);
   box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.1);
 
   .projects__card__main {
@@ -72,9 +72,10 @@
           color: var(--primary-dark, var(--primary-dark, #0a0a15));
           border-radius: 4px;
           border: 1px solid var(--Gray-5, #e0e0e0);
-          background: var(--Gray-6, #f2f2f2);
+          background: var(--card-button-bg);
 
           p {
+            color: var(--card-color-p);
             width: 100px;
             font-size: 14px;
             font-weight: 500;
@@ -86,8 +87,11 @@
             font-size: 14px;
             font-weight: 400;
             border-radius: 20px;
-            background: var(--primary-white, #fff);
+            background: var(--card-span, #fff);
             padding: 6px;
+          }
+          svg path {
+            fill: var(--card-color-p); /* Apply dynamic fill color */
           }
         }
 
@@ -101,22 +105,27 @@
           color: var(--primary-dark, var(--primary-dark, #0a0a15));
 
           border: 1px solid var(--Gray-5, #e0e0e0);
-          background: var(--Gray-6, #f2f2f2);
+          background: var(--card-button-bg);
 
           span {
             color: var(--primary-dark, var(--primary-dark, #0a0a15));
             font-size: 14px;
             font-weight: 400;
             border-radius: 20px;
-            background: var(--primary-white, #fff);
+            background: var(--card-span, #fff);
             padding: 6px;
           }
 
           p {
+            color: var(--card-color-p);
             font-size: 14px;
             font-weight: 500;
             line-height: 150%;
           }
+          svg path {
+            fill: var(--card-color-p); /* Apply dynamic fill color */
+          }
+
         }
 
         .git-btn {

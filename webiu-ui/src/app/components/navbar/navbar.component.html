@@ -1,5 +1,5 @@
 <div class="navbar">
-  <img src="../../../assets/c2silogo-dark.png" alt="C2SI Logo" class="logo" />
+  <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="logo" />
 
   <div [ngClass]="{ navbar__menu: true, open: isMenuOpen }" id="navbarMenu">
     <div class="navbar__menu__items" routerLink="/">
@@ -26,6 +26,14 @@
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC</p>
     </div>
+      <button class="sun-moon-toggle" aria-label="Toggle color mode" title="Toggle color mode" (click)="toggleMode()">
+        <div class="sun" [class.visible]="isSunVisible"></div>
+  
+        <div class="moon" [class.visible]="!isSunVisible">
+          <div class="star"></div>
+          <div class="star small"></div>
+        </div>
+      </button>
   </div>
 
   <div class="navigation__buttons" (click)="toggleMenu()">
