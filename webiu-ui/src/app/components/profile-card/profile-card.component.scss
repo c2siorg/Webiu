@@ -1,7 +1,8 @@
 .profile-box {
   display: flex;
-  border: solid 1px #e0e0e0;
-  box-shadow: 10px 10px 30px 10px #0505051a;
+  border: solid 1px var(--profile-box-border);
+  background-color: var(--profile-box-bg);
+  box-shadow: 10px 10px 30px 10px var(--profile-github-box-shadow);
   border-radius: 10px;
   width: 100%;
   max-width: 350px;
@@ -33,7 +34,7 @@
   align-items: center;
   gap: 10px;
   border-radius: 5px;
-  background: var(--Gray-6, #eeecec);
+  background: var(--profile-github-bg);
   padding: 8px 12px;
   justify-content: center;
   margin-top: 5%;
@@ -43,12 +44,17 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  svg {
+    path {
+      fill: var(--profile-github-username);
+    }
+  }
 }
 
 .github-username {
   display: flex;
   align-items: center;
-  color: black;
+  color: var(--profile-github-username);
 }
 
 /* Media Queries */

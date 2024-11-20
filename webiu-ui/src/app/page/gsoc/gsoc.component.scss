@@ -62,7 +62,7 @@
         font-size: 16px;
         font-style: italic;
         font-weight: 400;
-        line-height: 150%;
+        line-height: 150%; 
       }
     }
   }
@@ -73,7 +73,7 @@
     flex-direction: column;
     gap: 20px;
     border-radius: 10px;
-    background: var(--Gray-6, #f2f2f2);
+    background: var(--gsoc-project-list-bg);
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.05) inset;
     margin: 30px 16px;
 
@@ -82,9 +82,9 @@
       padding: 16px;
       align-items: center;
       border-radius: 8px;
-      border: 2px solid var(--primary-white, #fff);
-      background: var(--primary-white, #fff);
-      box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.1);
+      border: 2px solid var(--primary-white, var(--gsoc-project-list-border));
+      background: var(--primary-white, var(--gsoc-project-list-bg-2));
+      box-shadow: 0px 4px 24px 0px var(--gsoc-project-list-box-shadow);
 
       p {
         font-size: 16px;
