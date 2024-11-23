@@ -1,11 +1,13 @@
+<!-- profile-card/profile-card.component.html-->
 <div class="profile-box">
   <img class="profile-img" src="{{ avatar_url }}" />
-  <p class="profile-username">{{ login }}</p>
-  <p class="profile-contributions">{{ contributions }} contributions</p>
-  <div class="profile-info">
-    <p>{{ followers }} followers</p>
-    <p>{{ following }} followings</p>
-  </div>
+  <span class="profile-username" (click)="onUsernameClick(login)">
+    {{ login }}
+  </span>
+  <p class="profile-contributions">Contributions: {{ contributions }}</p>
+  <p class="profile-followers">Followers: {{ followers }}</p>
+  <p class="profile-following">Following: {{ following }}</p>
+  
   <div class="profile-github">
     <div class="github-icon">
       <svg
@@ -39,8 +41,8 @@
         class="github-username"
         href="https://github.com/{{ login }}"
       >
-        {{ login }}</a
-      >
+        {{ login }}
+      </a>
     </div>
   </div>
 </div>

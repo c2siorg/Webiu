@@ -1,62 +1,64 @@
+<!-- page/contributors/contributors.component.html -->
 <div class="contributors-page">
-    <section class="search-section">
-      <div class="search-container">
-        <div class="search-wrapper">
-          <input
-            type="text"
-            class="search-input"
-            placeholder="search contributors"
-            [formControl]="searchText"
-          />
-          <button class="search-button" (click)="filterProfiles()">
-            <span>search</span>
-            <img src="../../../assets/search.svg" alt="Search Icon" />
-          </button>
-        </div>
-      </div>
-  
-      <div class="filter-section">
-        <span>filter by repository</span>
-        <select class="repository-select" (change)="onRepoChange($event)">
-          <option value="">Codelabz</option>
-          <ng-container *ngFor="let repo of allRepos; let i = index">
-            <option [value]="repo">{{ repo }}</option>
-          </ng-container>
-        </select>
-      </div>
-  
-      <div class="contributors-card-container">
-        <ng-container *ngIf="isLoading; then loading; else content"></ng-container>
-      </div>
-  
-      <div class="pagination">
-        <button (click)="prevPage()" [disabled]="currentPage === 1">
-          Previous
-        </button>
-        <span>Page {{ currentPage }} of {{ totalPages }}</span>
-        <button (click)="nextPage()" [disabled]="currentPage === totalPages">
-          Next
-        </button>
-      </div>
-    </section>
+  <section class="search-section">
+    <div class="search-container">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="search contributors"
+          [formControl]="searchText"
+        />
+        <button class="search-button" (click)="filterProfiles()">
+          <span>search</span>
+          <img src="../../../assets/search.svg" alt="Search Icon" />
+        </button>
+      </div>
+    </div>
+    <div class="filter-section">
+      <span>filter by repository</span>
+      <select class="repository-select" (change)="onRepoChange($event)">
+        <option value="">Codelabz</option>
+        @for (repo of allRepos; track $index) {
+        <option [value]="repo">{{ repo }}</option>
+        }
+      </select>
+    </div>
+    <div class="contributors-card-container">
+      <ng-container
+        *ngIf="isLoading; then loading; else content"
+      ></ng-container>
+    </div>
+    <div class="pagination">
+      <button (click)="prevPage()" [disabled]="currentPage === 1">
+        Previous
+      </button>
+      <span>Page {{ currentPage }} of {{ totalPages }}</span>
+      <button (click)="nextPage()" [disabled]="currentPage === totalPages">
+        Next
+      </button>
+    </div>
+  </section>
+</div>
+
+<ng-template #loading>
+  <div class="loader"></div>
+</ng-template>
+
+<ng-template #content>
+  <div class="contributors-grid">
+    @for (profile of displayProfiles; track $index) {
+      <app-profile-card
+      *ngFor="let profile of displayProfiles; trackBy: trackByFn"
+      [login]="profile.login"
+      [contributions]="profile.contributions"
+      [avatar_url]="profile.avatar_url"
+      [followers]="profile.followers"
+      [following]="profile.following"
+      (usernameClick)="onUsernameClick($event)" 
+    ></app-profile-card>
+    
+    
+    }
   </div>
-  
-  <ng-template #loading>
-    <div class="loader"></div>
-  </ng-template>
-  
-  <ng-template #content>
-    <div class="contributors-grid">
-      <ng-container *ngFor="let profile of displayProfiles; let i = index">
-        <app-profile-card
-          [login]="profile.login"
-          [contributions]="profile.contributions"
-          [avatar_url]="profile.avatar_url"
-          [followers]="profile.followers"
-          [following]="profile.following"
-          (contributionsClick)="viewContributorDetails(profile.login)"
-        ></app-profile-card>
-      </ng-container>
-    </div>
-  </ng-template>
-  
+</ng-template>

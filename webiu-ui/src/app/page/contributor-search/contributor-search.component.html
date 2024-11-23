@@ -1,0 +1,57 @@
+<div style="padding: 20px;">
+    <h2 class="title">Contributor Search</h2>
+  
+    <!-- Search Bar -->
+    <div class="search-bar">
+      <input
+        type="text"
+        [(ngModel)]="username"
+        placeholder="Enter GitHub Username"
+        class="search-input"
+      />
+      <button (click)="onSearch()" class="search-button">Search</button>
+    </div>
+  
+    <!-- Error Message -->
+    <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+  
+    <!-- Loading State -->
+    <p *ngIf="loading" class="loading-message">Loading...</p>
+  
+    <!-- Display Issues and Pull Requests Side by Side -->
+  <div class="data-section-container">
+    <!-- Display Issues -->
+    <div *ngIf="issues.length > 0" class="data-section">
+      <h3 class="section-title">Created Issues</h3>
+      <ul class="data-list">
+        <li *ngFor="let issue of issues" class="data-item">
+          <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer">
+            {{ issue.title }}
+          </a>
+        </li>
+      </ul>
+    </div>
+  
+    <!-- Display Pull Requests -->
+    <div *ngIf="pullRequests.length > 0" class="data-section">
+      <h3 class="section-title">Created Pull Requests</h3>
+      <ul class="data-list">
+        <li *ngFor="let pr of pullRequests" class="data-item">
+          <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer">
+            {{ pr.title }}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  
+  
+    <!-- No data message -->
+    <p
+      *ngIf="!loading && !errorMessage && issues.length === 0 && pullRequests.length === 0"
+      class="no-data-message"
+    >
+      No issues or pull requests found for this contributor.
+    </p>
+  </div>
+  

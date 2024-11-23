@@ -1,4 +1,6 @@
+//page/contributors/contributors.component.ts
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor, contributors } from '../../common/data/contributor';
@@ -6,6 +8,9 @@ import { CommonModule } from '@angular/common';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
+
+
+
 @Component({
   selector: 'app-contributors',
   standalone: true,
@@ -39,15 +44,11 @@ export class ContributorsComponent implements OnInit {
 
   ngOnInit() {
     this.getProfiles();
-    
-    this.searchText.valueChanges.subscribe(() => {
-    this.filterProfiles();
-  });
   }
 
   getProfiles() {
     this.http
-      .get<any>(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<any>('http://localhost:5000/api/contributor/contributors')
       .subscribe({
         next: (res) => {
           if (res) {
@@ -81,11 +82,6 @@ export class ContributorsComponent implements OnInit {
       });
   }
 
-  viewContributorDetails(login: string) {
-      this.router.navigate([`/contributors/${login}/details`]);
-    }
-    
-  
 
   getUniqueRepos(): string[] {
     let array: string[] = [];
@@ -140,4 +136,14 @@ export class ContributorsComponent implements OnInit {
       this.filterProfiles();
     }
   }
+  // Method to handle the username click and navigate to ContributorSearchComponent
+  onUsernameClick(username: string) {
+    this.router.navigate(['/search'], {
+      queryParams: { username: username },
+    });
+  }
+
+  trackByFn(_: number, profile: Contributor): string {
+    return profile.login; // Use underscore to indicate 'index' is unused
+  }  
 }
