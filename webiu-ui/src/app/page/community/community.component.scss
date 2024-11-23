@@ -74,8 +74,8 @@
           align-items: flex-start;
           gap: 5px;
           border-radius: 10px;
-          border: 1px solid var(--Gray-5, #e0e0e0);
-          background: var(--primary-white, #fff);
+          border: 1px solid var(--community-card-border);
+          background: var(--community-card-bg);
           box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
 
           .card-data {

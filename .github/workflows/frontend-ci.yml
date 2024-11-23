@@ -7,8 +7,8 @@ on:
     branches: [feature/webiu-2024]
 
 jobs:
-  build-and-deploy:
-    name: Build, Test, and Deploy Angular (webiu-ui)
+  build-webiu-ui:
+    name: Build and Test Angular (webiu-ui)
     runs-on: ubuntu-latest
 
     steps:
@@ -20,28 +20,37 @@ jobs:
         with:
           node-version: '20'
 
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/webiu-2024
+
+      - name: Fetch pull request changes
+        run: |
+          git fetch origin +refs/pull/${{ github.event.pull_request.number }}/merge:pr
+          git checkout pr
+
       - name: Install Angular CLI
-        run: npm install -g @angular/cli
+        run: |
+          cd webiu-ui
+          npm install -g @angular/cli
 
       - name: Install dependencies
         run: |
           cd webiu-ui
           npm install
 
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
       - name: Build Angular App
         run: |
           cd webiu-ui
-          ng build --output-path=../docs --base-href="/Webiu/"
+          npm run build
 
       - name: Run Angular Tests
-        env:
-          CHROME_BIN: google-chrome
         run: |
           cd webiu-ui
-          ng test --watch=false --browsers=ChromeHeadless --no-sandbox
-
-      - name: Deploy to GitHub Pages
-        if: github.ref == 'refs/heads/feature/webiu-2024'
-        run: |
-          cd webiu-ui
-          ngh --dir=../docs
+          npm test -- --browsers=ChromeHeadless --watch=false
