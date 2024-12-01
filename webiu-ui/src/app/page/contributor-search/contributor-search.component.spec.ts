@@ -19,7 +19,7 @@ describe('ContributorSearchComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [ContributorSearchComponent],
+      imports: [ContributorSearchComponent],
       providers: [
         { provide: ActivatedRoute, useValue: mockActivatedRoute } 
       ]
