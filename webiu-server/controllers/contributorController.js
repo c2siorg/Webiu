@@ -111,7 +111,7 @@ async function fetchUserDetails(username) {
   }
 }
 
-<<<<<<< HEAD
+
 const userCreatedIssues = async (req, res) => {
   try {
     const orgName = 'c2siorg';
@@ -167,9 +167,6 @@ const userCreatedPullRequests = async (req, res) => {
 };
 
 module.exports = {
-=======
-module.exports = {
->>>>>>> eecff6efa5c9e47c1ab8c43e9fc4e598f5368b11
   getAllContributors,
   userCreatedIssues,
   userCreatedPullRequests,
