@@ -1,13 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router'; // Import ActivatedRoute
-import { of } from 'rxjs'; // Import of to return observables
+import { ActivatedRoute } from '@angular/router'; 
+import { of } from 'rxjs'; 
 import { ContributorSearchComponent } from './contributor-search.component';
 
 describe('ContributorSearchComponent', () => {
   let component: ContributorSearchComponent;
   let fixture: ComponentFixture<ContributorSearchComponent>;
 
-  // Mock ActivatedRoute
+  
   const mockActivatedRoute = {
     queryParams: of({ username: 'someUsername' })
   };
