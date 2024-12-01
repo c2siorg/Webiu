@@ -11,7 +11,8 @@ describe('ContributorSearchComponent', () => {
   const mockActivatedRoute = {
     snapshot: {
       paramMap: {
-        get: jest.fn().mockReturnValue('someId') // Replace 'someId' with the expected value
+        
+        get: jasmine.createSpy().and.returnValue('someId') // Replace 'someId' with the expected value
       }
     }
   };
@@ -20,7 +21,7 @@ describe('ContributorSearchComponent', () => {
     await TestBed.configureTestingModule({
       declarations: [ContributorSearchComponent],
       providers: [
-        { provide: ActivatedRoute, useValue: mockActivatedRoute } // Provide the mock here
+        { provide: ActivatedRoute, useValue: mockActivatedRoute } 
       ]
     })
     .compileComponents();
