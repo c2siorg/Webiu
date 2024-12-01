@@ -1,5 +1,6 @@
+//profile-card/profile-card.component.ts
 import { CommonModule } from "@angular/common";
-import { Component , Input } from "@angular/core";
+import { Component , Input, Output, EventEmitter } from "@angular/core";
 
 @Component({
     selector: 'app-profile-card',
@@ -16,4 +17,9 @@ export class ProfileCardComponent{
   @Input() followers!: number;
   @Input() following!: number;
 
+  @Output() usernameClick = new EventEmitter<string>();
+
+onUsernameClick(username: string) {
+  this.usernameClick.emit(username); // Emit the login value to the parent
+}
 }

@@ -1,0 +1,169 @@
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.search-input {
+  padding: 10px;
+  font-size: 16px;
+  width: 300px;
+  margin-right: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-button {
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  font-size: 16px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #0056b3;
+}
+
+.error-message {
+  color: red;
+  font-weight: bold;
+  text-align: center;
+  margin-top: 10px;
+}
+
+.loading-message {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: #555;
+  margin-top: 10px;
+}
+
+.no-data-message {
+  text-align: center;
+  font-size: 18px;
+  color: #777;
+  margin-top: 20px;
+}
+
+.toggle-buttons {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.toggle-button {
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #f1f1f1;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-right: 10px;
+}
+
+.toggle-button.active {
+  background-color: #007bff;
+  color: white;
+}
+
+.toggle-button:hover {
+  background-color: #d1d1d1;
+}
+
+.data-section {
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px; /* Adjusted margin-top */
+}
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin-bottom: 10px;
+  text-align: center;
+}
+
+.data-list {
+  list-style-type: none;
+  padding-left: 0;
+  width: fit-content;
+}
+
+.data-item {
+  margin-bottom: 10px;
+  background-color: #e9ecef;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 4px;
+  transition: background-color 0.3s ease;
+  
+}
+
+.data-item a {
+  text-decoration: none;
+  color: #007bff;
+  font-size: 16px;
+  transition: color 0.3s ease;
+}
+
+.data-item a:hover {
+  color: #0056b3;
+}
+
+.data-item:hover {
+  background-color: #f0f0f0;
+}
+
+.icon-gap {
+  margin-right: 10px; 
+}
+
+.main-container {
+  display: flex;
+  justify-content: flex-start; 
+  align-items: flex-start; 
+  margin-top: 20px;
+  flex-direction: row; 
+  gap: 100px; 
+}
+
+.data-container {
+  flex: 2; 
+  margin-right: 0; 
+}
+
+.user-profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: fit-content;
+  height: fit-content; 
+  margin-left: 50px; 
+}
+
+.profile-picture {
+  width: 100px; 
+  height: 100px; 
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.username {
+  font-size: 1rem; 
+  font-weight: bold;
+  text-align: center;
+  margin: 0; 
+}

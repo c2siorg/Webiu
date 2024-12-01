@@ -57,6 +57,12 @@
   color: var(--profile-github-username);
 }
 
+.profile-username {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
 /* Media Queries */
 @media (max-width: 1200px) {
   .contributers-context {

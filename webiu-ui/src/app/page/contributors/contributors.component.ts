@@ -1,4 +1,6 @@
+//page/contributors/contributors.component.ts
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor, contributors } from '../../common/data/contributor';
@@ -7,8 +9,6 @@ import { ProfileCardComponent } from '../../components/profile-card/profile-card
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment'; 
-import { distinctUntilChanged } from 'rxjs/operators';
-
 @Component({
   selector: 'app-contributors',
   standalone: true,
@@ -36,20 +36,21 @@ export class ContributorsComponent implements OnInit {
 
   constructor(
     private http: HttpClient,
-    private commonUtil: CommmonUtilService
+    private commonUtil: CommmonUtilService,
+    private router: Router
   ) {}
 
   ngOnInit() {
     this.getProfiles();
-
-    this.searchText.valueChanges.pipe(distinctUntilChanged()).subscribe(() => {
-      this.filterProfiles();
-    });
+    
+    this.searchText.valueChanges.subscribe(() => {
+    this.filterProfiles();
+  });
   }
 
   getProfiles() {
     this.http
-      .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<any>(`${environment.serverUrl}/api/contributor/contributors`)
       .subscribe({
         next: (res) => this.handleProfileResponse(res || contributors),
         error: () => this.handleProfileResponse(contributors),
@@ -64,6 +65,7 @@ export class ContributorsComponent implements OnInit {
     this.filterProfiles();
     this.isLoading = false;
   }
+
 
   getUniqueRepos(): string[] {
     return Array.from(new Set(this.profiles.flatMap((profile) => profile.repos)));
@@ -109,4 +111,14 @@ export class ContributorsComponent implements OnInit {
       this.filterProfiles();
     }
   }
+  // Method to handle the username click and navigate to ContributorSearchComponent
+  onUsernameClick(username: string) {
+    this.router.navigate(['/search'], {
+      queryParams: { username: username },
+    });
+  }
+
+  trackByFn(_: number, profile: Contributor): string {
+    return profile.login; // Use underscore to indicate 'index' is unused
+  }  
 }

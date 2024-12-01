@@ -1,3 +1,4 @@
+<!-- page/contributors/contributors.component.html -->
 <div class="contributors-page">
   <section class="search-section">
     <div class="search-container">
@@ -47,13 +48,17 @@
 <ng-template #content>
   <div class="contributors-grid">
     @for (profile of displayProfiles; track $index) {
-    <app-profile-card
+      <app-profile-card
+      *ngFor="let profile of displayProfiles; trackBy: trackByFn"
       [login]="profile.login"
       [contributions]="profile.contributions"
       [avatar_url]="profile.avatar_url"
       [followers]="profile.followers"
       [following]="profile.following"
+      (usernameClick)="onUsernameClick($event)" 
     ></app-profile-card>
+    
+    
     }
   </div>
 </ng-template>

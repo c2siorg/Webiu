@@ -1,0 +1,78 @@
+<div style="padding: 20px;">
+  <h2 class="title">Contributor Search</h2>
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <input
+      type="text"
+      [(ngModel)]="username"
+      placeholder="Enter GitHub Username"
+      class="search-input"
+    />
+    <button (click)="onSearch()" class="search-button">Search</button>
+  </div>
+
+  <!-- Error Message -->
+  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
+
+  <!-- Loading State -->
+  <p *ngIf="loading" class="loading-message">Loading...</p>
+
+  
+
+  <!-- Toggle Buttons for Issues and Pull Requests -->
+  <div class="toggle-buttons">
+    <button
+      (click)="toggleView('issues')"
+      [class.active]="activeView === 'issues'"
+      class="toggle-button"
+    >
+      <i class="fas fa-circle-notch icon-gap"></i> Issues Created: {{ issues.length }}
+    </button>
+    <button
+      (click)="toggleView('pullRequests')"
+      [class.active]="activeView === 'pullRequests'"
+      class="toggle-button"
+    >
+      <i class="fas fa-code-branch icon-gap"></i> Pull Requests: {{ pullRequests.length }}
+    </button>
+  </div>
+
+  <!-- Display Issues or Pull Requests Based on Active View -->
+   <!-- User Profile Section -->
+    <div class="main-container">
+  <div *ngIf="userProfile" class="user-profile">
+    <img [src]="userProfile.avatar_url" alt="Profile Picture" class="profile-picture" />
+    <h3 class="username">{{ userProfile.login }}</h3>
+  </div>
+  <div *ngIf="activeView === 'issues'" class="data-section">
+    <h3 class="section-title">Created Issues</h3>
+    <ul class="data-list">
+      <li *ngFor="let issue of issues" class="data-item">
+        <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer">
+          {{ issue.title }}
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div *ngIf="activeView === 'pullRequests'" class="data-section">
+    <h3 class="section-title">Created Pull Requests</h3>
+    <ul class="data-list">
+      <li *ngFor="let pr of pullRequests" class="data-item">
+        <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer">
+          {{ pr.title }}
+        </a>
+      </li>
+    </ul>
+  </div>
+</div>
+
+  <!-- No data message -->
+  <p
+    *ngIf="!loading && !errorMessage && issues.length === 0 && pullRequests.length === 0"
+    class="no-data-message"
+  >
+    No issues or pull requests found for this contributor.
+  </p>
+</div>
