@@ -21,16 +21,24 @@ const getAllContributors = async (req, res) => {
         try {
           const contributors = await fetchContributors(orgName, repo.name);
           if (!contributors) return;
-    
+
           await Promise.all(
             contributors.map(async (contributor) => {
               try {
                 const userDetails = await fetchUserDetails(contributor.login);
                 if (!userDetails) return;
-    
+
+                // Fetch issues and pull requests for each contributor
+                const issues = await fetchUserCreatedIssues(userDetails.login);
+                const pullRequests = await fetchUserCreatedPullRequests(userDetails.login);
+
+                // If user is already in the response, update their data
                 if (finalResponse[userDetails.login]) {
                   finalResponse[userDetails.login].repos.push(repo.name);
+                  finalResponse[userDetails.login].issues = issues || [];
+                  finalResponse[userDetails.login].pullRequests = pullRequests || [];
                 } else {
+                  // If user is not yet in the response, create their entry
                   finalResponse[userDetails.login] = {
                     login: userDetails.login,
                     contributions: contributor.contributions,
@@ -38,6 +46,8 @@ const getAllContributors = async (req, res) => {
                     followers: userDetails.followers,
                     following: userDetails.following,
                     avatar_url: userDetails.avatar_url,
+                    issues: issues || [], // Ensure issues field is always present
+                    pullRequests: pullRequests || [] // Ensure pullRequests field is always present
                   };
                 }
               } catch (err) {
@@ -50,9 +60,9 @@ const getAllContributors = async (req, res) => {
         }
       })
     );
-    
-    let allContributors = []
-    for (const contributor  in finalResponse){
+
+    let allContributors = [];
+    for (const contributor in finalResponse) {
       allContributors.push(finalResponse[contributor]);
     }
 
@@ -61,7 +71,43 @@ const getAllContributors = async (req, res) => {
     console.error('Error fetching organization info:', error);
     return res.status(500).json({ error: 'Failed to fetch organization info' });
   }
+};
+
+// Helper functions to fetch issues and pull requests
+async function fetchUserCreatedIssues(username) {
+  try {
+    const issuesResponse = await axios.get(
+      `${baseUrl}/search/issues?q=author:${username}+org:c2siorg+type:issue`,
+      {
+        headers: {
+          Authorization: `token ${accessToken}`,
+        },
+      }
+    );
+    return issuesResponse.data.items || []; // Return empty array if no issues found
+  } catch (error) {
+    console.error('Error fetching user-created issues:', error);
+    return []; // Return empty array in case of error
+  }
 }
+
+async function fetchUserCreatedPullRequests(username) {
+  try {
+    const pullRequestsResponse = await axios.get(
+      `${baseUrl}/search/issues?q=author:${username}+org:c2siorg+type:pr`,
+      {
+        headers: {
+          Authorization: `token ${accessToken}`,
+        },
+      }
+    );
+    return pullRequestsResponse.data.items || []; // Return empty array if no PRs found
+  } catch (error) {
+    console.error('Error fetching user-created pull requests:', error);
+    return []; // Return empty array in case of error
+  }
+}
+
 
 async function fetchRepositories(orgName) {
   try {
