@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ActivatedRoute } from '@angular/router'; // Import ActivatedRoute
-import { of } from 'rxjs'; // Import of to return observables
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs'; // Import 'of' to return observables
 import { ContributorSearchComponent } from './contributor-search.component';
 
 describe('ContributorSearchComponent', () => {
@@ -9,12 +9,7 @@ describe('ContributorSearchComponent', () => {
 
   // Mock ActivatedRoute
   const mockActivatedRoute = {
-    snapshot: {
-      paramMap: {
-        
-        get: jasmine.createSpy().and.returnValue('someId') // Replace 'someId' with the expected value
-      }
-    }
+    queryParams: of({ username: 'someUsername' }) // Provide a mock observable for queryParams
   };
 
   beforeEach(async () => {
@@ -33,5 +28,10 @@ describe('ContributorSearchComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should automatically search when username is provided in queryParams', () => {
+    expect(component.username).toBe('someUsername');
+    expect(component.onSearch).toHaveBeenCalled();
   });
 });
