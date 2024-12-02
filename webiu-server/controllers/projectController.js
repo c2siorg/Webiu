@@ -1,6 +1,10 @@
 const axios = require('axios');
 const accessToken = process.env.GITHUB_ACCESS_TOKEN;
 
+if (!accessToken) {
+  throw new Error("GITHUB_ACCESS_TOKEN is not defined in the environment.");
+}
+
 const GITHUB_API_URL = 'https://api.github.com';
 const headers = {
   Authorization: `token ${accessToken}`,
@@ -8,10 +12,9 @@ const headers = {
 
 const getAllProjects = async (req, res) => {
   try {
-    const repositoriesResponse = await axios.get(
-      `${GITHUB_API_URL}/orgs/c2siorg/repos`,
-      { headers }
-    );
+    const repositoriesResponse = await axios.get(`${GITHUB_API_URL}/orgs/c2siorg/repos`, {
+      headers,
+    });
 
     const repositories = repositoriesResponse.data;
     const repositoriesWithPRs = await Promise.allSettled(
@@ -43,8 +46,15 @@ const getAllProjects = async (req, res) => {
     );
 
     const successfulProjects = repositoriesWithPRs
-      .filter(result => result.status === 'fulfilled')
-      .map(result => result.value);
+      .filter((result) => result.status === 'fulfilled')
+      .map((result) => result.value);
+    const failedProjects = repositoriesWithPRs
+      .filter((result) => result.status === 'rejected')
+      .map((result) => result.reason);
+
+    if (failedProjects.length) {
+      console.warn(`Some repositories could not be processed:`, failedProjects);
+    }
 
     res.status(200).json({ repositories: successfulProjects });
   } catch (error) {
