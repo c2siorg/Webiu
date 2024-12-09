@@ -3,7 +3,7 @@ const express = require('express');
 const axios = require('axios');
 const projectController = require('../controllers/projectController');
 
-jest.mock('axios');
+jest.mock('axios'); 
 
 const app = express();
 app.use(express.json());
@@ -12,10 +12,10 @@ app.get('/projects', projectController.getAllProjects);
 describe('GET /projects', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    console.error = jest.fn();
+    console.error = jest.fn(); 
   });
 
-  it('should return a list of projects with pull requests count', async () => {
+  it('should return a list of projects with pull request counts', async () => {
     const mockRepos = [
       { name: 'repo1', id: 1 },
       { name: 'repo2', id: 2 },
@@ -25,8 +25,8 @@ describe('GET /projects', () => {
 
     axios.get
       .mockResolvedValueOnce({ data: mockRepos })
-      .mockResolvedValueOnce({ data: mockPRs1 })
-      .mockResolvedValueOnce({ data: mockPRs2 });
+      .mockResolvedValueOnce({ data: mockPRs1 })  
+      .mockResolvedValueOnce({ data: mockPRs2 }); 
 
     const response = await request(app).get('/projects');
 
@@ -34,6 +34,7 @@ describe('GET /projects', () => {
     expect(response.body).toHaveProperty('repositories');
     expect(Array.isArray(response.body.repositories)).toBe(true);
     expect(response.body.repositories).toHaveLength(2);
+
     expect(response.body.repositories).toEqual([
       expect.objectContaining({
         name: 'repo1',
@@ -78,28 +79,76 @@ describe('GET /projects', () => {
     );
   });
 
-  it('should handle errors when fetching pull requests', async () => {
+  it('should handle errors when fetching pull requests for a repository', async () => {
     const mockRepos = [{ name: 'repo1', id: 1 }];
     axios.get
-      .mockResolvedValueOnce({ data: mockRepos })
-      .mockRejectedValueOnce(new Error('Failed to fetch pull requests'));
+      .mockResolvedValueOnce({ data: mockRepos }) 
+      .mockRejectedValueOnce(new Error('Failed to fetch pull requests')); 
 
     const response = await request(app).get('/projects');
 
-    expect(response.status).toBe(500);
-    expect(response.body).toHaveProperty('error', 'Internal server error');
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('repositories');
+    expect(response.body.repositories).toHaveLength(1);
+    expect(response.body.repositories[0]).toEqual(
+      expect.objectContaining({
+        name: 'repo1',
+        id: 1,
+        pull_requests: 'Error fetching PRs',
+      })
+    );
+
     expect(console.error).toHaveBeenCalledWith(
-      'Error fetching repositories or pull requests:',
-      expect.stringContaining('Failed to fetch pull requests')
+      expect.stringMatching(/Error fetching pull requests/),
+      expect.anything()
     );
   });
 
-  it('should handle empty repository list', async () => {
-    axios.get.mockResolvedValueOnce({ data: [] });
+  it('should handle an empty repository list', async () => {
+    axios.get.mockResolvedValueOnce({ data: [] }); 
 
     const response = await request(app).get('/projects');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual({ repositories: [] });
+  });
+
+  it('should handle partial failures while fetching pull requests', async () => {
+    const mockRepos = [
+      { name: 'repo1', id: 1 },
+      { name: 'repo2', id: 2 },
+    ];
+    const mockPRs1 = [{ id: 1 }, { id: 2 }];
+
+    axios.get
+      .mockResolvedValueOnce({ data: mockRepos }) 
+      .mockResolvedValueOnce({ data: mockPRs1 })  
+      .mockRejectedValueOnce(new Error('Failed to fetch pull requests for repo2')); 
+
+    const response = await request(app).get('/projects');
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('repositories');
+    expect(response.body.repositories).toHaveLength(2);
+
+    expect(response.body.repositories[0]).toEqual(
+      expect.objectContaining({
+        name: 'repo1',
+        id: 1,
+        pull_requests: 2,
+      })
+    );
+    expect(response.body.repositories[1]).toEqual(
+      expect.objectContaining({
+        name: 'repo2',
+        id: 2,
+        pull_requests: 'Error fetching PRs',
+      })
+    );
+
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringMatching(/Error fetching pull requests/),
+      expect.anything()
+    );
   });
 });
