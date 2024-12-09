@@ -1,10 +1,8 @@
 const axios = require('axios');
-
-const accessToken =
-  process.env.GITHUB_ACCESS_TOKEN || (process.env.NODE_ENV === 'test' && 'test-token');
+const accessToken = process.env.GITHUB_ACCESS_TOKEN || (process.env.NODE_ENV === 'test' ? 'test-token' : null);
 
 if (!accessToken) {
-  throw new Error("GITHUB_ACCESS_TOKEN is not defined in the environment.");
+  throw new Error('GITHUB_ACCESS_TOKEN is not defined in the environment.');
 }
 
 const GITHUB_API_URL = 'https://api.github.com';
@@ -14,19 +12,13 @@ const headers = {
 
 const getAllProjects = async (req, res) => {
   try {
-    const repositoriesResponse = await axios.get(`${GITHUB_API_URL}/orgs/c2siorg/repos`, {
-      headers,
-    });
-
+    const repositoriesResponse = await axios.get(`${GITHUB_API_URL}/orgs/c2siorg/repos`, { headers });
     const repositories = repositoriesResponse.data;
+
     const repositoriesWithPRs = await Promise.allSettled(
       repositories.map(async (repo) => {
         try {
-          const pullsResponse = await axios.get(
-            `${GITHUB_API_URL}/repos/c2siorg/${repo.name}/pulls`,
-            { headers }
-          );
-
+          const pullsResponse = await axios.get(`${GITHUB_API_URL}/repos/c2siorg/${repo.name}/pulls`, { headers });
           return {
             name: repo.name,
             description: repo.description || 'No description provided',
@@ -50,20 +42,10 @@ const getAllProjects = async (req, res) => {
     const successfulProjects = repositoriesWithPRs
       .filter((result) => result.status === 'fulfilled')
       .map((result) => result.value);
-    const failedProjects = repositoriesWithPRs
-      .filter((result) => result.status === 'rejected')
-      .map((result) => result.reason);
-
-    if (failedProjects.length) {
-      console.warn(`Some repositories could not be processed:`, failedProjects);
-    }
 
     res.status(200).json({ repositories: successfulProjects });
   } catch (error) {
-    console.error(
-      'Error fetching repositories or pull requests:',
-      error.response ? error.response.data : error.message
-    );
+    console.error('Error fetching repositories or pull requests:', error.response?.data || error.message);
     res.status(500).json({ error: 'Internal server error' });
   }
 };
