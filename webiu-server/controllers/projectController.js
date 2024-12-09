@@ -1,5 +1,7 @@
 const axios = require('axios');
-const accessToken = process.env.GITHUB_ACCESS_TOKEN;
+
+const accessToken =
+  process.env.GITHUB_ACCESS_TOKEN || (process.env.NODE_ENV === 'test' && 'test-token');
 
 if (!accessToken) {
   throw new Error("GITHUB_ACCESS_TOKEN is not defined in the environment.");
