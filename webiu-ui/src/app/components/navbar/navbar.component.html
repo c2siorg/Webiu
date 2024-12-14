@@ -26,6 +26,16 @@
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC</p>
     </div>
+    
+    <button class="navbar__menu__items" (click)="loginWithGoogle()">
+      <img src="https://static.vecteezy.com/system/resources/previews/010/353/285/non_2x/colourful-google-logo-on-white-background-free-vector.jpg" alt="Google Login" />
+      <p>Login with Google</p>
+    </button>
+    <button class="navbar__menu__items" (click)="loginWithGitHub()">
+      <img src="https://static.vecteezy.com/system/resources/previews/016/833/872/non_2x/github-logo-git-hub-icon-on-white-background-free-vector.jpg" alt="GitHub Login" />
+      <p>Login with GitHub</p>
+    </button>
+    
       <button class="sun-moon-toggle" aria-label="Toggle color mode" title="Toggle color mode" (click)="toggleMode()">
         <div class="sun" [class.visible]="isSunVisible"></div>
   

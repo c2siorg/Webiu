@@ -222,6 +222,69 @@
   transform: scale(0.45) rotate(35deg);
 }
 
+
+.navbar__menu__items {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  margin: 0 10px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+  
+  &:hover {
+    background-color: #f0f0f0;
+    transform: scale(1.05);
+  }
+
+  img {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    object-fit: contain;
+    border-radius: 50%;
+    background-color: white;
+    padding: 3px;
+  }
+
+  p {
+    font-size: 14px;
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+
+.navbar__menu__items img[src*="google-icon.svg"] {
+  background-color: #fff;
+  border: 1px solid #db4437; 
+  padding: 5px;
+}
+
+.navbar__menu__items p {
+  font-size: 14px;
+  color: #333;
+  font-weight: 500;
+}
+
+
+.navbar__menu__items img[src*="github-icon.svg"] {
+  background-color: #fff;
+  border: 1px solid #333; 
+  padding: 5px;
+}
+
+
+.navbar__menu__items:hover img {
+  opacity: 0.8;
+}
+
+.navbar__menu__items:hover p {
+  color: #db4437; 
+}
+
+
 @media (max-width: 1100px) {
   .navbar__menu {
     display: none !important;

@@ -26,4 +26,12 @@ export class NavbarComponent {
     this.isSunVisible = !this.isSunVisible;
     this.toggleTheme();
   }
+  loginWithGoogle() {
+    window.location.href = 'http://localhost:5000/auth/google'; 
+  }
+
+  
+  loginWithGitHub() {
+    window.location.href = 'http://localhost:5000/auth/github'; 
+  }
 }
