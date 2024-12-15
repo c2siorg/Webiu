@@ -1,0 +1,110 @@
+/* Main container styles */
+.min-h-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: var(--community-bg);
+    height: 80vh;
+  }
+  
+  .card-container {
+    width: 100%;
+    max-width: 400px;
+    background-color: var(--community-card-bg);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-top: 5rem;
+    color: var(--primary-dark, var(--primary-dark, #0a0a15)) !important;
+
+  }
+  
+  /* Text and titles */
+  .text-3xl {
+    font-size: 1.875rem;
+    font-weight: bold;
+  }
+  
+  .text{
+    color: var(--primary-dark, var(--primary-dark, #0a0a15)) !important;
+  }
+  
+  .text-center {
+    text-align: center;
+  }
+  
+  /* Input label */
+  .label {
+    font-size: 0.875rem;
+  }
+  
+  /* Input fields */
+  .input-field {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 0.375rem;
+    outline: none;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .input-field:focus {
+    border-color: #3b82f6;
+    ring: 2px solid rgba(59, 130, 246, 0.5);
+  }
+  
+  /* Error message */
+  .error-message {
+    color: #f87171;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+  }
+  
+  /* Button */
+  .submit-button {
+    width: 100%;
+    background-color: #3b82f6;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    margin-top: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .submit-button:hover {
+    background-color: #2563eb;
+  }
+  
+  .submit-button:disabled {
+    background-color: #93c5fd;
+    cursor: not-allowed;
+  }
+  
+  /* Divider */
+  .divider {
+    position: relative;
+    margin: 1rem 0;
+  }
+  
+  .divider-line {
+    width: 100%;
+    border-top: 1px solid #d1d5db;
+  }
+  
+  /* Social buttons */
+  .social-button {
+    width: 100%;
+    border: 2px solid #d1d5db;
+    padding: 0.75rem;
+    border-radius: 0.375rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.2s ease;
+  }
+  
+  .social-button:hover {
+    background-color: #f3f4f6;
+  }
+  

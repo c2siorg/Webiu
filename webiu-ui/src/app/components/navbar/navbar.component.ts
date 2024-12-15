@@ -12,18 +12,31 @@ import { ThemeService } from '../../services/theme.service';
 })
 export class NavbarComponent {
   isMenuOpen = false;
-  isSunVisible = true; 
+  isSunVisible = true;
+
   toggleMenu() {
     this.isMenuOpen = !this.isMenuOpen;
   }
+
   constructor(private themeService: ThemeService) {
     this.isSunVisible = !this.themeService.isDarkMode();
   }
+
   toggleTheme(): void {
     this.themeService.toggleDarkMode();
   }
+
   toggleMode() {
     this.isSunVisible = !this.isSunVisible;
     this.toggleTheme();
+  }
+
+  isLoggedIn(): boolean {
+    return !!localStorage.getItem('token');
+  }
+
+  logout() {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
   }
 }

@@ -7,11 +7,13 @@ import { CommunityComponent } from './page/community/community.component';
 import { GsocComponent } from './page/gsoc/gsoc.component';
 import { GsocProjectIdeaComponent } from './page/gsoc-project-idea/gsoc-project-idea.component';
 import { ContributorSearchComponent } from './page/contributor-search/contributor-search.component';
-
-
+import { LoginComponent } from './page/login/login.component';
+import { RegisterComponent } from './page/register/register.component';
 
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
+  { path: 'login', component: LoginComponent },
+  { path: 'register', component: RegisterComponent },
   {
     path: 'projects',
     component: ProjectsComponent,
@@ -31,6 +33,5 @@ export const routes: Routes = [
   { path: 'gsoc', component: GsocComponent },
   { path: 'idea', component: GsocProjectIdeaComponent },
   { path: 'search', component: ContributorSearchComponent },
-    
 ];
 export const AppRoutingModule = RouterModule.forRoot(routes);

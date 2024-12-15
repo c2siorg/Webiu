@@ -1,0 +1,57 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+  <div class="card-container">
+    <div class="text-center">
+      <h1 class="text-3xl font-bold">Welcome back</h1>
+      <p class="text-gray-500">Sign in to your account</p>
+    </div>
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="mt-6">
+      <div class="grid gap-4">
+        <div>
+          <label for="email" class="label">Email</label>
+          <input id="email" type="email" formControlName="email" placeholder="m@example.com" class="input-field" />
+          <p *ngIf="loginForm.get('email')?.invalid && loginForm.get('email')?.touched" class="error-message">
+            Please enter a valid email
+          </p>
+        </div>
+
+        <div>
+          <label for="password" class="label">Password</label>
+          <input id="password" type="password" formControlName="password" placeholder="password" class="input-field" />
+          <p *ngIf="loginForm.get('password')?.invalid && loginForm.get('password')?.touched" class="error-message">
+            Please enter a password
+          </p>
+        </div>
+
+        <button type="submit" [disabled]="isLoading" class="submit-button">
+          <span *ngIf="isLoading" class="mr-2 animate-spin">🔄</span>
+          {{ isLoading ? 'Signing in...' : 'Sign in with Email' }}
+        </button>
+      </div>
+    </form>
+
+    <div class="divider">
+      <div class="absolute inset-0 flex items-center">
+        <span class="divider-line"></span>
+      </div>
+      <div class="relative flex justify-center text-xs uppercase">
+        <span class="bg-white px-2 text-gray-500">Or continue with</span>
+      </div>
+    </div>
+
+    <div class="grid gap-4">
+      <button (click)="signInWithGoogle()" class="social-button">
+        <span class="mr-2">🌐</span> Google
+      </button>
+      <button (click)="signInWithGitHub()" class="social-button">
+        <span class="mr-2">🐙</span> GitHub
+      </button>
+    </div>
+
+    <div class="text-center mt-4">
+      <p class="text-gray-500">
+        Don't have an account? <a (click)="redirectToRegister()" class="text-blue-500 cursor-pointer">Register here</a>
+      </p>
+    </div>
+  </div>
+</div>

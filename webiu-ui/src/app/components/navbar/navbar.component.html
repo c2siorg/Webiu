@@ -26,14 +26,23 @@
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC</p>
     </div>
-      <button class="sun-moon-toggle" aria-label="Toggle color mode" title="Toggle color mode" (click)="toggleMode()">
-        <div class="sun" [class.visible]="isSunVisible"></div>
-  
-        <div class="moon" [class.visible]="!isSunVisible">
-          <div class="star"></div>
-          <div class="star small"></div>
-        </div>
-      </button>
+    
+    <div class="navbar__menu__items" *ngIf="!isLoggedIn()" routerLink="/login">
+      <img src="../../../assets/login.svg" alt="Login Icon" />
+      <p>Login</p>
+    </div>
+    <div class="navbar__menu__items" *ngIf="isLoggedIn()">
+      <p (click)="logout()">Logout</p>
+    </div>
+
+    <button class="sun-moon-toggle" aria-label="Toggle color mode" title="Toggle color mode" (click)="toggleMode()">
+      <div class="sun" [class.visible]="isSunVisible"></div>
+
+      <div class="moon" [class.visible]="!isSunVisible">
+        <div class="star"></div>
+        <div class="star small"></div>
+      </div>
+    </button>
   </div>
 
   <div class="navigation__buttons" (click)="toggleMenu()">

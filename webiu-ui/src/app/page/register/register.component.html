@@ -1,0 +1,61 @@
+<div class="min-h-screen flex items-center justify-center bg-gray-50">
+    <div class="card-container">
+      <div class="text-center">
+        <h1 class="text-3xl font-bold">Create an Account</h1>
+        <p class="text-gray-500">Fill in the details to register</p>
+      </div>
+  
+      <form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="mt-6">
+        <div class="grid gap-4">
+          <div>
+            <label for="name" class="label">Name</label>
+            <input id="name" type="text" formControlName="name" placeholder="Full Name" class="input-field" />
+            <p *ngIf="registerForm.get('name')?.invalid && registerForm.get('name')?.touched" class="error-message">
+              Please enter your name
+            </p>
+          </div>
+  
+          <div>
+            <label for="email" class="label">Email</label>
+            <input id="email" type="email" formControlName="email" placeholder="m@example.com" class="input-field" />
+            <p *ngIf="registerForm.get('email')?.invalid && registerForm.get('email')?.touched" class="error-message">
+              Please enter a valid email
+            </p>
+          </div>
+  
+          <div>
+            <label for="password" class="label">Password</label>
+            <input id="password" type="password" formControlName="password" placeholder="Password" class="input-field" />
+            <p *ngIf="registerForm.get('password')?.invalid && registerForm.get('password')?.touched" class="error-message">
+              Please enter a password
+            </p>
+          </div>
+  
+          <div>
+            <label for="confirmPassword" class="label">Confirm Password</label>
+            <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Confirm Password" class="input-field" />
+            <p *ngIf="registerForm.get('confirmPassword')?.invalid && registerForm.get('confirmPassword')?.touched" class="error-message">
+              Please confirm your password
+            </p>
+          </div>
+  
+          <div>
+            <label for="githubId" class="label">GitHub ID (optional)</label>
+            <input id="githubId" type="text" formControlName="githubId" placeholder="GitHub ID (Optional)" class="input-field" />
+          </div>
+  
+          <button type="submit" [disabled]="isLoading" class="submit-button">
+            <span *ngIf="isLoading" class="mr-2 animate-spin">🔄</span>
+            {{ isLoading ? 'Registering...' : 'Register' }}
+          </button>
+        </div>
+      </form>
+  
+      <div class="text-center mt-4">
+        <p class="text">
+          Already have an account? <a (click)="redirectToLogin()" class="text-blue-500 cursor-pointer">Login here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+  
