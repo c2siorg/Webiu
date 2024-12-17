@@ -109,6 +109,13 @@ const login = async (req, res) => {
       });
     }
 
+    if(!user.isVerified){
+      return res.status(401).json({
+        status: 'error',
+        message: 'Please verify your email to login',
+      });
+    }
+
     
     const token = signToken(user);
 
