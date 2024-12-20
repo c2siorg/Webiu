@@ -1,4 +1,4 @@
-//profile-card/profile-card.component.ts
+
 import { CommonModule } from "@angular/common";
 import { Component , Input, Output, EventEmitter } from "@angular/core";
 

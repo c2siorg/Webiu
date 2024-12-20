@@ -78,7 +78,9 @@ app.get("/auth/google/callback", async (req, res) => {
         const payload = ticket.getPayload(); 
         console.log("Verified User info:", payload);
 
-        res.json({ message: "Google login successful", user: userResponse.data });
+        const user = userResponse.data;
+        const redirectUrl = `http://localhost:4200?user=${encodeURIComponent(JSON.stringify(user))}`;
+        res.redirect(redirectUrl);
     } catch (error) {
         console.error("Error during Google OAuth:", error);
         res.status(500).json({ message: "Error authenticating with Google", error: error.response?.data || error.message });
@@ -137,7 +139,9 @@ app.get("/auth/github/callback", async (req, res) => {
             },
         });
 
-        res.json({ message: "GitHub login successful", user: userResponse.data });
+        const user = userResponse.data;
+        const redirectUrl = `http://localhost:4200?user=${encodeURIComponent(JSON.stringify(user))}`;
+        res.redirect(redirectUrl);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error authenticating with GitHub", error: error.response?.data || error.message });
