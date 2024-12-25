@@ -24,26 +24,25 @@
         }
       </select>
     </div>
-    <div class="contributors-card-container">
-      <ng-container
-        *ngIf="isLoading; then loading; else content"
-      ></ng-container>
+    <div class="contributors-card-container loading-spinner">
+      <i class="fa fa-spinner fa-spin" style="font-size:32px;" *ngIf="isLoading; else content"></i>
     </div>
+    
     <div class="pagination">
-      <button (click)="prevPage()" [disabled]="currentPage === 1">
+      <button (click)="prevPage()" [disabled]="isLoading || currentPage === 1">
         Previous
       </button>
       <span>Page {{ currentPage }} of {{ totalPages }}</span>
-      <button (click)="nextPage()" [disabled]="currentPage === totalPages">
+      <button (click)="nextPage()" [disabled]="isLoading || currentPage === totalPages">
         Next
       </button>
     </div>
   </section>
 </div>
-
+<!-- 
 <ng-template #loading>
   <div class="loader"></div>
-</ng-template>
+</ng-template> -->
 
 <ng-template #content>
   <div class="contributors-grid">
