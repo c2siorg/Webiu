@@ -49,9 +49,9 @@
     text-align: center;
   }
 
-  /* Centering icon and text */
+  
   .navbar__menu__items img {
-    width: 24px; /* Adjust size as needed */
+    width: 24px; 
     height: 24px;
     display: inline-block;
   }
@@ -62,7 +62,7 @@
     color:var(--navbar-p);
   }
 
-  /* Active state styling */
+  
   .navbar__menu__items.active {
     background-color: var(--blue, #2f80ed);
     color: #fff;
@@ -84,6 +84,60 @@
     filter: invert(1);
   }
 }
+
+.login-options {
+  margin-top: 200px;
+  margin-left: 800px;
+  background-color: #f8f9fa; 
+  border: 1px solid #ddd; 
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+  width: 220px; 
+  position: absolute; 
+  z-index: 1000;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px; 
+
+  button {
+    background-color: #ffffff; 
+    color: #333; 
+    border: 1px solid #ddd; 
+    padding: 10px;
+    text-align: center;
+    font-size: 14px; 
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 5px; 
+    transition: background-color 0.3s ease, transform 0.2s ease;
+
+    
+    outline: none;
+    box-shadow: none;
+
+    &:hover {
+      background-color: #f0f0f0; 
+      transform: scale(1.02); 
+    }
+
+    &:focus {
+      background-color: #ffffff; 
+      outline: none; 
+    }
+
+    &:active {
+      background-color: #e0e0e0; 
+    }
+
+    p {
+      margin: 10px; 
+      color: inherit; 
+      font-size: 14px; 
+    }
+  }
+}
+
 
 .navigation__buttons {
   display: none;
@@ -221,6 +275,13 @@
   opacity: 0.7;
   transform: scale(0.45) rotate(35deg);
 }
+
+
+
+
+
+
+
 
 @media (max-width: 1100px) {
   .navbar__menu {
