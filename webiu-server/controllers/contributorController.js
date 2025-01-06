@@ -11,6 +11,8 @@ const getAllContributors = async (req, res) => {
     let finalResponse = {};
     const orgName = 'c2siorg';
     const repositories = await fetchRepositories(orgName);
+    console.log(repositories);
+    
 
     if (!repositories) {
       return res.status(500).json({ error: 'Failed to fetch repositories' });
