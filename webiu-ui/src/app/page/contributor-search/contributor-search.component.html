@@ -1,76 +1,76 @@
 <div style="padding: 20px;">
-  <h2 class="title">Contributor Search</h2>
-
-  <!-- Search Bar -->
-  <div class="search-bar">
-    <input
-      type="text"
-      [(ngModel)]="username"
-      placeholder="Enter GitHub Username"
-      class="search-input"
-    />
-    <button (click)="onSearch()" class="search-button">Search</button>
-  </div>
-
-  <!-- Error Message -->
-  <p *ngIf="errorMessage" class="error-message">{{ errorMessage }}</p>
-
-  <!-- Loading State -->
-  <p *ngIf="loading" class="loading-message">Loading...</p>
-
-  
-
   <!-- Toggle Buttons for Issues and Pull Requests -->
-  <div class="toggle-buttons">
-    <button
-      (click)="toggleView('issues')"
-      [class.active]="activeView === 'issues'"
-      class="toggle-button"
-    >
-      <i class="fas fa-circle-notch icon-gap"></i> Issues Created: {{ issues.length }}
-    </button>
-    <button
-      (click)="toggleView('pullRequests')"
-      [class.active]="activeView === 'pullRequests'"
-      class="toggle-button"
-    >
-      <i class="fas fa-code-branch icon-gap"></i> Pull Requests: {{ pullRequests.length }}
-    </button>
+  <div class="action-bar">
+    <div class="toggle-buttons">
+      <button
+        (click)="toggleView('issues')"
+        [class.active]="activeView === 'issues'"
+        class="toggle-button"
+      >
+        <i class="fas fa-circle-notch icon-gap"></i> Issues Created: {{ filteredIssues.length }}
+      </button>
+      <button
+        (click)="toggleView('pullRequests')"
+        [class.active]="activeView === 'pullRequests'"
+        class="toggle-button"
+      >
+        <i class="fas fa-code-branch icon-gap"></i> Pull Requests: {{ filteredPullRequests.length }}
+      </button>
+    </div>
+    <div class="filter-section">
+      <p>Filter by repo</p>
+      <select class="repository-select" (change)="onRepoFilterChange($event)">
+        <option value="">All</option>
+        <option *ngFor="let repo of uniqueRepositories" [value]="repo">{{ repo }}</option>
+      </select>
+    </div>
   </div>
 
-  <!-- Display Issues or Pull Requests Based on Active View -->
-   <!-- User Profile Section -->
-    <div class="main-container">
-  <div *ngIf="userProfile" class="user-profile">
-    <img [src]="userProfile.avatar_url" alt="Profile Picture" class="profile-picture" />
-    <h3 class="username">{{ userProfile.login }}</h3>
-  </div>
-  <div *ngIf="activeView === 'issues'" class="data-section">
-    <h3 class="section-title">Created Issues</h3>
-    <ul class="data-list">
-      <li *ngFor="let issue of issues" class="data-item">
-        <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer">
-          {{ issue.title }}
-        </a>
-      </li>
-    </ul>
-  </div>
+  <!-- User Profile Section -->
+  <div class="main-container">
+    <div *ngIf="userProfile" class="user-profile">
+      <img [src]="userProfile.avatar_url" alt="Profile Picture" class="profile-picture" />
+      <h3 class="username">{{ userProfile.login }}</h3>
+      <button (click)="openGitHubProfile(userProfile.html_url)" class="github-button">
+        <i class="fab fa-github github-icon"></i>
+        <span class="username">{{ userProfile.login }}</span>
+      </button>
+    </div>
 
-  <div *ngIf="activeView === 'pullRequests'" class="data-section">
-    <h3 class="section-title">Created Pull Requests</h3>
-    <ul class="data-list">
-      <li *ngFor="let pr of pullRequests" class="data-item">
-        <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer">
-          {{ pr.title }}
-        </a>
-      </li>
-    </ul>
+    <!-- Display Issues or Pull Requests Based on Active View -->
+    <div *ngIf="activeView === 'issues'" class="data-section">
+      <ul class="data-list">
+        <li *ngFor="let issue of filteredIssues" class="data-item">
+          <ng-container *ngIf="issue.closed_at; else openIssue">
+            <i class="far fa-check-circle" style="color: #0056b3; font-size: 20px;"></i>
+          </ng-container>
+          <ng-template #openIssue>
+            <i class="fas fa-circle-notch icon-gap" style="color:green;font-size: 20px"></i>
+          </ng-template>
+          <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer">
+            {{ issue.title }}
+          </a>
+          <p>{{ formatLastUpdated(issue.updated_at) }}</p>
+        </li>
+      </ul>
+    </div>
+
+    <div *ngIf="activeView === 'pullRequests'" class="data-section">
+      <ul class="data-list">
+        <li *ngFor="let pr of filteredPullRequests" class="data-item">
+          <i class="fa-solid fa-code-pull-request" style="color: green;font-size: 18px;"></i>
+          <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer">
+            {{ pr.title }}
+          </a>
+          <p>{{ formatLastUpdated(pr.updated_at) }}</p>
+        </li>
+      </ul>
+    </div>
   </div>
-</div>
 
   <!-- No data message -->
   <p
-    *ngIf="!loading && !errorMessage && issues.length === 0 && pullRequests.length === 0"
+    *ngIf="!loading && !errorMessage && filteredIssues.length === 0 && filteredPullRequests.length === 0"
     class="no-data-message"
   >
     No issues or pull requests found for this contributor.
