@@ -1,6 +1,14 @@
 <div style="padding: 20px">
+  <!-- Loading  -->
+  <div class="contributors-card-container loading-spinner">
+    <i
+      class="fa fa-spinner fa-spin"
+      style="font-size: 32px ;color:blue"
+      *ngIf="loading"></i>
+  </div>
+
   <!-- Toggle Buttons for Issues and Pull Requests -->
-  <div *ngIf="hasData" class="action-bar">
+  <div   class="action-bar"  *ngIf="!errorMessage && !loading" >
     <div class="toggle-buttons">
       <button
         (click)="toggleView('issues')"
@@ -68,8 +76,8 @@
         </li>
       </ul>
       <ng-template #noIssuesMessage>
-        <p class="no-data-message" *ngIf="filteredIssues.length > 0">
-          No issues found for this contributor.
+        <p class="no-data-message"  *ngIf="!loading && !errorMessage">
+          No issues found for this contributor
         </p>
       </ng-template>
     </div>
@@ -88,22 +96,18 @@
         </li>
       </ul>
       <ng-template #noPullRequestMessage>
-        <p class="no-data-message" *ngIf="filteredPullRequests.length > 0">
-          No pull requests found for this contributor.
+        <p class="no-data-message"  *ngIf="!loading && !errorMessage">
+          No pull requests found for this contributor
         </p>
       </ng-template>
     </div>
   </div>
 
-  <!-- Global "No Data" Message -->
+  <!-- Error message while fetching-->
   <p
-    *ngIf="
-      !hasData &&
-      filteredIssues.length === 0 &&
-      filteredPullRequests.length === 0
-    "
+    *ngIf="!loading && !hasData && !filteredIssues.length && !filteredPullRequests.length"
     class="no-data-message"
   >
-    No issues or pull requests found for this contributor.
-  </p>
+   {{errorMessage}}
+  </p>  
 </div>
