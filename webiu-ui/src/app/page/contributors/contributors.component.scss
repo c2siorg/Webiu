@@ -251,13 +251,11 @@
 }
 
 
-.loading-spinner {
-
+i {
   color: #007bff;
-
-
+  display: flex;
+  justify-content: center;
 }
-
 
 .no-contributors-message {
   text-align: center;

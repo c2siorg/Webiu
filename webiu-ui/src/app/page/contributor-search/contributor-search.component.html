@@ -1,9 +1,8 @@
 <div style="padding: 20px">
   <!-- Loading  -->
-  <div class="contributors-card-container loading-spinner">
+  <div class="contributors-card-container">
     <i
-      class="fa fa-spinner fa-spin"
-      style="font-size: 32px ;color:blue"
+      class="fa fa-spinner fa-spin loadspinner"
       *ngIf="loading"></i>
   </div>
 
@@ -28,7 +27,7 @@
       </button>
     </div>
     <div class="filter-section">
-      <p>Filter by repo</p>
+      <p class="filter-name">Filter by repo</p>
       <select class="repository-select" (change)="onRepoFilterChange($event)">
         <option value="">All</option>
         <option *ngFor="let repo of uniqueRepositories" [value]="repo">
@@ -106,7 +105,7 @@
   <!-- Error message while fetching-->
   <p
     *ngIf="!loading && !hasData && !filteredIssues.length && !filteredPullRequests.length"
-    class="no-data-message"
+    class="error-message"
   >
    {{errorMessage}}
   </p>  
