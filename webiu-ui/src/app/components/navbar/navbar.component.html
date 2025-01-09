@@ -29,9 +29,13 @@
       <p>GSoC</p>
     </div>
     
-    <button class="navbar__menu__items" (click)="toggleLoginOptions()">
+    <button class="navbar__menu__items Login_Logout" (click)="toggleLoginOptions()">
+      <img [src]="isLoggedIn ? '../../../assets/logout.svg' : '../../../assets/login.svg'" 
+        alt="{{ isLoggedIn ? 'Logout Icon' : 'Login Icon' }}" 
+        class="login-logout-icon"
+      />
       <p>{{ isLoggedIn ? 'Logout' : 'Login' }}</p>
-  </button>
+    </button>
   
   <p *ngIf="isLoggedIn">Welcome, {{ user.name }}!</p>
   
