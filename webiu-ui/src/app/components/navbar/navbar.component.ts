@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
@@ -68,4 +68,17 @@ export class NavbarComponent implements OnInit {
     
     window.location.href = 'http://localhost:5000/auth/github';
   }
+   // Close login options if clicked outside
+   @HostListener('document:click', ['$event'])
+   onClickOutside(event: MouseEvent): void {
+     const loginOptionsElement = document.querySelector('.login-options');
+     const loginButton = document.querySelector('.Login_Logout');
+     
+     // If the click is outside of the login options or login button, close the login options
+     if (this.showLoginOptions && !loginOptionsElement?.contains(event.target as Node) && !loginButton?.contains(event.target as Node)) {
+       this.showLoginOptions = false;
+     }
+   }
+   
 }
+
