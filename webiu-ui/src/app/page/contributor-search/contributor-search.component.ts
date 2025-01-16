@@ -116,4 +116,10 @@ export class ContributorSearchComponent {
     const updatedAt = new Date(date);
     return formatDistanceToNow(updatedAt, { addSuffix: true });
   }
+  get hasData(): boolean {
+    return this.filteredIssues.length > 0 || this.filteredPullRequests.length > 0;
+  }
+  
 }
+
+

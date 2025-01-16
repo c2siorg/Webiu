@@ -1,4 +1,3 @@
-<!-- page/contributors/contributors.component.html -->
 <div class="contributors-page">
   <section class="search-section">
     <div class="search-container">
@@ -16,7 +15,7 @@
       </div>
     </div>
     <div class="filter-section">
-      <span>filter by repository</span>
+      <span>Filter by repository</span>
       <select class="repository-select" (change)="onRepoChange($event)">
         <option value="">Codelabz</option>
         @for (repo of allRepos; track $index) {
@@ -25,39 +24,48 @@
       </select>
     </div>
     <div class="contributors-card-container loading-spinner">
-      <i class="fa fa-spinner fa-spin" style="font-size:32px;" *ngIf="isLoading; else content"></i>
+      <i
+        class="fa fa-spinner fa-spin"
+        style="font-size: 32px"
+        *ngIf="isLoading; else content"
+      ></i>
     </div>
-    
-    <div class="pagination">
+
+    <div
+      class="pagination"
+      *ngIf="displayProfiles && displayProfiles.length > 0"
+    >
       <button (click)="prevPage()" [disabled]="isLoading || currentPage === 1">
         Previous
       </button>
       <span>Page {{ currentPage }} of {{ totalPages }}</span>
-      <button (click)="nextPage()" [disabled]="isLoading || currentPage === totalPages">
+      <button
+        (click)="nextPage()"
+        [disabled]="isLoading || currentPage === totalPages"
+      >
         Next
       </button>
     </div>
   </section>
 </div>
-<!-- 
-<ng-template #loading>
-  <div class="loader"></div>
-</ng-template> -->
-
 <ng-template #content>
   <div class="contributors-grid">
     @for (profile of displayProfiles; track $index) {
-      <app-profile-card
+    <app-profile-card
       *ngFor="let profile of displayProfiles; trackBy: trackByFn"
       [login]="profile.login"
       [contributions]="profile.contributions"
       [avatar_url]="profile.avatar_url"
       [followers]="profile.followers"
       [following]="profile.following"
-      (usernameClick)="onUsernameClick($event)" 
+      (usernameClick)="onUsernameClick($event)"
     ></app-profile-card>
-    
-    
     }
   </div>
+  <p
+    *ngIf="!isLoading && displayProfiles.length === 0"
+    class="no-contributors-message"
+  >
+    No contributors found matching the search criteria
+  </p>
 </ng-template>
