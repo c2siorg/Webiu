@@ -32,21 +32,12 @@
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC</p>
     </div>
-
-    <button
-      class="navbar__menu__items Login_Logout"
-      (click)="toggleLoginOptions()"
-    >
-      <img
-        [src]="
-          isLoggedIn
-            ? '../../../assets/logout.svg'
-            : '../../../assets/login.svg'
-        "
-        alt="{{ isLoggedIn ? 'Logout Icon' : 'Login Icon' }}"
+    <button class="navbar__menu__items Login_Logout" (click)="toggleLoginOptions()">
+      <img [src]="isLoggedIn ? '../../../assets/logout.svg' : '../../../assets/login.svg'" 
+        alt="{{ isLoggedIn ? 'Logout Icon' : 'Login Icon' }}" 
         class="login-logout-icon"
       />
-      <p>{{ isLoggedIn ? "Logout" : "Login" }}</p>
+      <p>{{ isLoggedIn ? 'Logout' : 'Login' }}</p>
     </button>
 
     <p *ngIf="isLoggedIn">Welcome, {{ user.name }}!</p>
