@@ -1,8 +1,12 @@
 <div class="navbar">
   <a href="/" class="logo-link">
-    <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="logo" />
+    <img
+      src="../../../assets/c2silogo-dark_no_bg.png"
+      alt="C2SI Logo"
+      class="logo"
+    />
   </a>
-  
+
   <div [ngClass]="{ navbar__menu: true, open: isMenuOpen }" id="navbarMenu">
     <div class="navbar__menu__items" routerLink="/">
       <img src="../../../assets/home.svg" alt="Home Icon" />
@@ -28,7 +32,6 @@
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC</p>
     </div>
-    
     <button class="navbar__menu__items Login_Logout" (click)="toggleLoginOptions()">
       <img [src]="isLoggedIn ? '../../../assets/logout.svg' : '../../../assets/login.svg'" 
         alt="{{ isLoggedIn ? 'Logout Icon' : 'Login Icon' }}" 
@@ -36,28 +39,31 @@
       />
       <p>{{ isLoggedIn ? 'Logout' : 'Login' }}</p>
     </button>
-  
-  <p *ngIf="isLoggedIn">Welcome, {{ user.name }}!</p>
-  
-  <div *ngIf="showLoginOptions && !isLoggedIn" class="login-options">
+
+    <p *ngIf="isLoggedIn">Welcome,<br> {{ user.name }}!</p>
+
+    <div *ngIf="showLoginOptions && !isLoggedIn" class="login-options">
       <button (click)="loginWithGoogle()">
-          <p>Login with Google</p>
+        <p>Login with Google</p>
       </button>
       <button (click)="loginWithGitHub()">
-          <p>Login with GitHub</p>
+        <p>Login with GitHub</p>
       </button>
-  </div>
-  
-    
-    
-      <button class="sun-moon-toggle" aria-label="Toggle color mode" title="Toggle color mode" (click)="toggleMode()">
-        <div class="sun" [class.visible]="isSunVisible"></div>
-  
-        <div class="moon" [class.visible]="!isSunVisible">
-          <div class="star"></div>
-          <div class="star small"></div>
-        </div>
-      </button>
+    </div>
+
+    <button
+      class="sun-moon-toggle"
+      aria-label="Toggle color mode"
+      title="Toggle color mode"
+      (click)="toggleMode()"
+    >
+      <div class="sun" [class.visible]="isSunVisible"></div>
+
+      <div class="moon" [class.visible]="!isSunVisible">
+        <div class="star"></div>
+        <div class="star small"></div>
+      </div>
+    </button>
   </div>
 
   <div class="navigation__buttons" (click)="toggleMenu()">
