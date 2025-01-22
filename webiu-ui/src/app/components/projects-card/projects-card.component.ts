@@ -1,10 +1,11 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-projects-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, HttpClientModule],
   templateUrl: './projects-card.component.html',
   styleUrls: ['./projects-card.component.scss'],
 })
@@ -18,6 +19,35 @@ export class ProjectsCardComponent {
   @Input() topics: string[] = [];
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
+  @Input() org!: string;
+  @Input() repo!: string;  
+
+  issueCount: number = 0;
+  pullRequestCount: number = 0; 
+  initialized: boolean = false; 
+
+  constructor(private http: HttpClient) {}
+
+  ngOnInit(): void {
+    if (!this.initialized) {
+      this.fetchIssuesAndPRs();
+    }
+  }
+
+  fetchIssuesAndPRs(): void {
+    const apiUrl = `http://localhost:5001/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+    this.http.get<{ issues: number; pullRequests: number }>(apiUrl).subscribe(
+      (data) => {
+        this.issueCount = data.issues;
+        this.pullRequestCount = data.pullRequests;
+        this.initialized = true;
+      },
+      (error) => {
+        console.error('Failed to fetch issues and PRs:', error);
+      }
+    );
+  }
+
 
   public detailsVisible: boolean = false;
 

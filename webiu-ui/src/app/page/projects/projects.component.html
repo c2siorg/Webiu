@@ -25,6 +25,8 @@
   >
     <app-projects-card
       [name]="project.name"
+      [org]="org"
+      [repo]="project.name"
       [description]="project.description || ''"
       [issue]="project.open_issues_count"
       [link]="project.html_url"
