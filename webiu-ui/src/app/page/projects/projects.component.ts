@@ -5,13 +5,16 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { projectsData } from './projects-data';
 import { Project, ProjectResponse } from './project.model';
-import { environment } from '../../../environments/environment'; 
+import { environment } from '../../../environments/environment';
+import { FormsModule } from '@angular/forms';
+
 @Component({
   selector: 'app-projects',
   standalone: true,
   imports: [
     CommonModule,
     HttpClientModule,
+    FormsModule, // Include FormsModule here
     NavbarComponent,
     ProjectsCardComponent,
   ],
@@ -20,6 +23,8 @@ import { environment } from '../../../environments/environment';
 })
 export class ProjectsComponent implements OnInit {
   projectsData: Project[] = [];
+  filteredProjects: Project[] = [];
+  searchTerm: string = '';
   isLoading = true;
   org = 'c2siorg';
   
@@ -35,10 +40,12 @@ export class ProjectsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.projectsData = response.repositories;
+          this.filteredProjects = [...this.projectsData]; // Initialize filteredProjects
           this.isLoading = false;
         },
         error: (error) => {
           this.projectsData = projectsData.repositories;
+          this.filteredProjects = [...this.projectsData];
           this.isLoading = false;
         },
         complete: () => {
@@ -49,5 +56,12 @@ export class ProjectsComponent implements OnInit {
 
   trackByProjectName(index: number, project: Project): string {
     return project.name;
+  }
+
+  filterProjects(): void {
+    const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
+    this.filteredProjects = this.projectsData.filter((project) =>
+      project.name.toLowerCase().includes(lowerCaseSearchTerm)
+    );
   }
 }

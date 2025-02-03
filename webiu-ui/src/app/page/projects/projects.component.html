@@ -11,6 +11,18 @@
   </div>
 
   <div class="projects-cards-container">
+    <div class="projects-search">
+      <div class="search-box-container">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="search-box"
+          placeholder="Search projects by name..."
+          [(ngModel)]="searchTerm"
+          (input)="filterProjects()"
+        />
+      </div>
+    </div>
     <ng-container *ngIf="isLoading; then loading; else content"></ng-container>
   </div>
 </div>
@@ -20,9 +32,7 @@
 </ng-template>
 
 <ng-template #content>
-  <ng-container
-    *ngFor="let project of projectsData; trackBy: trackByProjectName"
-  >
+  <ng-container *ngFor="let project of filteredProjects; trackBy: trackByProjectName">
     <app-projects-card
       [name]="project.name"
       [org]="org"
