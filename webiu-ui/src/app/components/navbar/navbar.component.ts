@@ -68,7 +68,15 @@ export class NavbarComponent implements OnInit {
     
     window.location.href = 'http://localhost:6000/auth/github';
   }
-   // Close login options if clicked outside
+  // Prevent page reload and navigate to homepage if not already there
+  preventReload(event: Event): void {
+    if (this.router.url === '/') {
+      event.preventDefault();
+    } else {
+      this.router.navigate(['/']);
+    }
+  }
+  // Close login options if clicked outside
    @HostListener('document:click', ['$event'])
    onClickOutside(event: MouseEvent): void {
      const loginOptionsElement = document.querySelector('.login-options');
