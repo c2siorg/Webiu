@@ -17,8 +17,8 @@ export const socialMedia: Media[] = [
     link: 'https://discord.com/',
   },
   {
-    media_icon: '../../../assets/community/instagram.png',
-    link: 'https://www.instagram.com/',
+    media_icon: '../../../assets/community/github.png',
+    link: 'https://github.com/c2siorg',
   },
   {
     media_icon: '../../../assets/community/linkedIn.png',
