@@ -16,36 +16,4 @@ export class CommmonUtilService {
   constructor() {
 
   }
-  // getProfiles() {
-  //   this.http.get<any>('http://localhost:5001/api/contributor/contributors').subscribe({
-  //     next: (res) => {
-  //       if (res) {
-  //         this.commonAllPro = res;
-  //         this.displayProfiles = this.profiles;
-  //         this.allRepos = this.getUniqueRepos();
-  //       }
-  //       else {
-  //         this.profiles = contributers.flatMap((profile: any) => profile);
-  //         this.displayProfiles = this.profiles;
-  //         this.allRepos = this.getUniqueRepos()
-  //       }
-  //     },
-  //     error: (error) => {
-  //       this.profiles = contributers.map((profile) => profile);
-  //       console.log(error);
-  //       this.displayProfiles = this.profiles;
-  //       this.allRepos = this.getUniqueRepos()
-  //     }
-  //   })
-
-  // }
-
-  // getUniqueRepos(): string[] {
-  //   let array: string[] = []
-  //   if (this.profiles?.length) {
-  //     const repos = this.profiles.flatMap(profile => profile.repos);
-  //     array = Array.from(new Set(repos));
-  //   }
-  //   return array
-  // }
 }
