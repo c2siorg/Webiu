@@ -5,6 +5,8 @@ const cors = require('cors');
 const contributorRoutes = require('./routes/contributorRoutes'); 
 const axios = require("axios");
 const { OAuth2Client } = require("google-auth-library");
+const projectRoutes = require('./routes/projectRoutes');
+const issueRoutes = require('./routes/repoIssuesRoutes'); // Adjust path as necessary
 dotenv.config(); 
 
 const app = express(); 
@@ -14,6 +16,8 @@ app.use(express.json());
 
 
 app.use('/api/contributor', contributorRoutes); 
+app.use('/api/projects', projectRoutes);
+app.use('/api/issues', issueRoutes);
 
 app.get("/", (req, res) => {
     res.send("Welcome to the OAuth Login API");
@@ -149,7 +153,7 @@ app.get("/auth/github/callback", async (req, res) => {
 });
 
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 5001;
 
 
 const server = app.listen(PORT, () => {

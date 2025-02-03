@@ -41,4 +41,31 @@ const getAllProjects = async (req, res, next) => {
   }
 };
 
-module.exports = { getAllProjects };
+const getIssuesAndPr = async (req, res) => {
+  const { org, repo } = req.query;
+
+  if (!org || !repo) {
+    return res.status(400).json({ error: 'Organization and repository are required' });
+  }
+
+  try {
+    const response = await axios.get(
+      `https://api.github.com/repos/${org}/${repo}/issues`,
+      {
+        headers: {
+          Authorization: `token ${accessToken}`,
+        },
+      }
+    );
+
+    const issues = response.data.filter((item) => !item.pull_request).length;
+    const pullRequests = response.data.filter((item) => item.pull_request).length;
+
+    res.status(200).json({ issues, pullRequests });
+  } catch (error) {
+    console.error('Error fetching issues and PRs:', error.response?.data || error.message);
+    res.status(500).json({ error: 'Failed to fetch issues and PRs' });
+  }
+}
+
+module.exports = { getAllProjects, getIssuesAndPr };

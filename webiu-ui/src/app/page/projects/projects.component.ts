@@ -21,7 +21,8 @@ import { environment } from '../../../environments/environment';
 export class ProjectsComponent implements OnInit {
   projectsData: Project[] = [];
   isLoading = true;
-
+  org = 'c2siorg';
+  
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -30,7 +31,7 @@ export class ProjectsComponent implements OnInit {
 
   fetchProjects(): void {
     this.http
-      .get<ProjectResponse>(`${environment.serverUrl}api/v1/project/projects/`)
+      .get<ProjectResponse>(`http://localhost:5000/api/projects/projects`)
       .subscribe({
         next: (response) => {
           this.projectsData = response.repositories;
