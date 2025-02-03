@@ -17,10 +17,8 @@
     <div class="filter-section">
       <span>Filter by repository</span>
       <select class="repository-select" (change)="onRepoChange($event)">
-        <option value="">Codelabz</option>
-        @for (repo of allRepos; track $index) {
-        <option [value]="repo">{{ repo }}</option>
-        }
+        <option value="">Select a Repository</option>
+        <option *ngFor="let repo of allRepos" [value]="repo">{{ repo }}</option>
       </select>
     </div>
     <div class="contributors-card-container loading-spinner">
