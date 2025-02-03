@@ -17,7 +17,7 @@ export class CommmonUtilService {
 
   }
   // getProfiles() {
-  //   this.http.get<any>('http://localhost:6000/api/contributor/contributors').subscribe({
+  //   this.http.get<any>('http://localhost:5001/api/contributor/contributors').subscribe({
   //     next: (res) => {
   //       if (res) {
   //         this.commonAllPro = res;
