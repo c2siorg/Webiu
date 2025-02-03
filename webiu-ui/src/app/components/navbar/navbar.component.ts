@@ -61,12 +61,12 @@ export class NavbarComponent implements OnInit {
   
   loginWithGoogle(): void {
     
-    window.location.href = 'http://localhost:5000/auth/google';
+    window.location.href = 'http://localhost:5001/auth/google';
   }
 
   loginWithGitHub(): void {
     
-    window.location.href = 'http://localhost:5000/auth/github';
+    window.location.href = 'http://localhost:5001/auth/github';
   }
    // Close login options if clicked outside
    @HostListener('document:click', ['$event'])
