@@ -81,7 +81,7 @@ The project leverages the GitHub API for retrieving project details and integrat
 2. **Create a `.env` file:**
 
    ```plaintext
-   PORT=6000
+   PORT=5001
    GITHUB_ACCESS_TOKEN=your_github_token
    ```
 
@@ -97,7 +97,7 @@ The project leverages the GitHub API for retrieving project details and integrat
    npm start
    ```
 
-   The backend should now be running on `http://localhost:6000`.
+   The backend should now be running on `http://localhost:5001`.
 
 ### Running with Docker
 
@@ -112,7 +112,7 @@ The project leverages the GitHub API for retrieving project details and integrat
 3. **Access the services:**
 
    - Frontend: `http://localhost:4200`
-   - Backend: `http://localhost:6000`
+   - Backend: `http://localhost:5001`
 
 ## Project Structure
 

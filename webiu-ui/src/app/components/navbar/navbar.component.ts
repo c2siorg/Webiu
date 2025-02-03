@@ -61,12 +61,12 @@ export class NavbarComponent implements OnInit {
   
   loginWithGoogle(): void {
     
-    window.location.href = 'http://localhost:6000/auth/google';
+    window.location.href = 'http://localhost:5001/auth/google';
   }
 
   loginWithGitHub(): void {
     
-    window.location.href = 'http://localhost:6000/auth/github';
+    window.location.href = 'http://localhost:5001/auth/github';
   }
   // Prevent page reload and navigate to homepage if not already there
   preventReload(event: Event): void {

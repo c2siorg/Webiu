@@ -6,7 +6,7 @@ services:
       context: ./webiu-server
     container_name: webiu-server
     ports:
-      - 6000:6000
+      - 5001:5001
     environment:
       - NODE_ENV=development
     volumes:
