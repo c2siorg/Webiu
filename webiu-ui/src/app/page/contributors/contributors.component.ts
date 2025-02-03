@@ -68,7 +68,8 @@ export class ContributorsComponent implements OnInit {
 
 
   getUniqueRepos(): string[] {
-    return Array.from(new Set(this.profiles.flatMap((profile) => profile.repos)));
+    return Array.from(new Set(this.profiles.flatMap((profile) => profile.repos)))
+      .sort();  // Sorting repositories alphabetically
   }
 
   onRepoChange(event: Event) {
