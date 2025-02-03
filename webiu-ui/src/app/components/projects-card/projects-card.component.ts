@@ -35,7 +35,7 @@ export class ProjectsCardComponent {
   }
 
   fetchIssuesAndPRs(): void {
-    const apiUrl = `http://localhost:5000/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+    const apiUrl = `http://localhost:6000/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
     this.http.get<{ issues: number; pullRequests: number }>(apiUrl).subscribe(
       (data) => {
         this.issueCount = data.issues;
