@@ -34,6 +34,6 @@ export const routes: Routes = [
     
 ];
 export const AppRoutingModule = RouterModule.forRoot(routes, {
-  scrollPositionRestoration: 'enabled',  // Enables scroll position restoration
-  anchorScrolling: 'enabled'  // Enables smooth scrolling to anchor links
+  scrollPositionRestoration: 'enabled',  
+  anchorScrolling: 'enabled'  
 }); 
