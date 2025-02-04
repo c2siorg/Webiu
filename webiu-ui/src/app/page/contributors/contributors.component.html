@@ -58,6 +58,13 @@
       (usernameClick)="onUsernameClick($event)"
     ></app-profile-card>
   </div>
+  <button 
+  class="back-to-top" 
+  (click)="scrollToTop()" 
+  [class.show]="showButton"
+>
+  <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24"> 
+</button>
   <p
     *ngIf="!isLoading && displayProfiles.length === 0"
     class="no-contributors-message"
