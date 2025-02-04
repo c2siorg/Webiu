@@ -48,7 +48,6 @@
 </div>
 <ng-template #content>
   <div class="contributors-grid">
-    @for (profile of displayProfiles; track $index) {
     <app-profile-card
       *ngFor="let profile of displayProfiles; trackBy: trackByFn"
       [login]="profile.login"
@@ -58,7 +57,6 @@
       [following]="profile.following"
       (usernameClick)="onUsernameClick($event)"
     ></app-profile-card>
-    }
   </div>
   <p
     *ngIf="!isLoading && displayProfiles.length === 0"
