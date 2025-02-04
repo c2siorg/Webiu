@@ -33,4 +33,7 @@ export const routes: Routes = [
   { path: 'search', component: ContributorSearchComponent },
     
 ];
-export const AppRoutingModule = RouterModule.forRoot(routes);
+export const AppRoutingModule = RouterModule.forRoot(routes, {
+  scrollPositionRestoration: 'enabled',  // Enables scroll position restoration
+  anchorScrolling: 'enabled'  // Enables smooth scrolling to anchor links
+}); 
