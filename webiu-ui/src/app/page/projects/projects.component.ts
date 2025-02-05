@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     HttpClientModule,
-    FormsModule,
+    FormsModule, // Include FormsModule here
     NavbarComponent,
     ProjectsCardComponent,
   ],
@@ -27,7 +27,7 @@ export class ProjectsComponent implements OnInit {
   searchTerm: string = '';
   isLoading = true;
   org = 'c2siorg';
-
+  
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -40,7 +40,7 @@ export class ProjectsComponent implements OnInit {
       .subscribe({
         next: (response) => {
           this.projectsData = response.repositories;
-          this.filteredProjects = [...this.projectsData];
+          this.filteredProjects = [...this.projectsData]; // Initialize filteredProjects
           this.isLoading = false;
         },
         error: (error) => {
@@ -63,8 +63,5 @@ export class ProjectsComponent implements OnInit {
     this.filteredProjects = this.projectsData.filter((project) =>
       project.name.toLowerCase().includes(lowerCaseSearchTerm)
     );
-    if (this.filteredProjects.length === 0) {
-      this.filteredProjects = [];
-    }
   }
 }
