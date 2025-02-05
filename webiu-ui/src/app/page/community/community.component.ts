@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component , ViewChild , ElementRef } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor, contributors } from '../../common/data/contributor';
@@ -17,6 +17,7 @@ export class CommunityComponent {
   }
   icons: Media[] = socialMedia;
   users: Contributor[] = this.shuffleArray(contributors);
+  @ViewChild('scrollTopButton') scrollTopButton!: ElementRef; 
   private shuffleArray(array: any[]): any[] {
     let currentIndex = array.length,
       randomIndex;
@@ -30,5 +31,22 @@ export class CommunityComponent {
     }
 
     return array;
+  }
+  ngOnInit(): void {
+    window.addEventListener('scroll', this.onWindowScroll);
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('scroll', this.onWindowScroll);
+  }
+
+  onWindowScroll = (): void => {
+    if (this.scrollTopButton) {
+      this.scrollTopButton.nativeElement.style.display = window.scrollY > 600 ? 'block' : 'none';
+    }
+  };
+
+  GoToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

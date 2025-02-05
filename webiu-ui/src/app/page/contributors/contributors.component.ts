@@ -1,5 +1,5 @@
 //page/contributors/contributors.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit , ViewChild , ElementRef, AfterViewInit} from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -22,7 +22,7 @@ import { environment } from '../../../environments/environment';
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
 })
-export class ContributorsComponent implements OnInit {
+export class ContributorsComponent implements OnInit, AfterViewInit {
   profiles: Contributor[] = [];
   displayProfiles: Contributor[] = [];
   searchText = new FormControl('');
@@ -33,7 +33,7 @@ export class ContributorsComponent implements OnInit {
   currentPage = 1;
   profilesPerPage = 9;
   totalPages = 1;
-
+  @ViewChild('scrollTopButton') scrollTopButton!: ElementRef; 
   constructor(
     private http: HttpClient,
     private commonUtil: CommmonUtilService,
@@ -46,6 +46,10 @@ export class ContributorsComponent implements OnInit {
     this.searchText.valueChanges.subscribe(() => {
     this.filterProfiles();
   });
+  }
+
+  ngAfterViewInit(): void {
+    window.addEventListener('scroll', this.onWindowScroll);
   }
 
   getProfiles() {
@@ -121,4 +125,18 @@ export class ContributorsComponent implements OnInit {
   trackByFn(_: number, profile: Contributor): string {
     return profile.login; // Use underscore to indicate 'index' is unused
   }  
+
+  ngOnDestroy(): void {
+    window.removeEventListener('scroll', this.onWindowScroll);
+  }
+
+  onWindowScroll = (): void => {
+    if (this.scrollTopButton) {
+      this.scrollTopButton.nativeElement.style.display = window.scrollY > 850 ? 'block' : 'none';
+    }
+  };
+
+  GoToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }

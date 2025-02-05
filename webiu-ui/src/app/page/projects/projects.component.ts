@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -21,11 +21,14 @@ import { environment } from '../../../environments/environment';
 export class ProjectsComponent implements OnInit {
   projectsData: Project[] = [];
   isLoading = true;
+  @ViewChild('scrollTopButton') scrollTopButton!: ElementRef; // Reference to button
+
 
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
     this.fetchProjects();
+    window.addEventListener('scroll', this.onWindowScroll);
   }
 
   fetchProjects(): void {
@@ -48,5 +51,19 @@ export class ProjectsComponent implements OnInit {
 
   trackByProjectName(index: number, project: Project): string {
     return project.name;
+  }
+
+  ngOnDestroy(): void {
+    window.removeEventListener('scroll', this.onWindowScroll);
+  }
+
+  onWindowScroll = (): void => {
+    if (this.scrollTopButton) {
+      this.scrollTopButton.nativeElement.style.display = window.scrollY > 850 ? 'block' : 'none';
+    }
+  };
+
+  GoToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
