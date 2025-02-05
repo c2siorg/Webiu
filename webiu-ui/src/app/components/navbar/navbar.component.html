@@ -54,14 +54,15 @@
       </button>
   </div>
 
-  <div class="navigation__buttons" (click)="toggleMenu()">
-    <div class="nav-btn">
-      <img
-        *ngIf="!isMenuOpen"
-        src="../../../assets/ham-menu.svg"
-        alt="ham menu"
-      />
-      <img *ngIf="isMenuOpen" src="../../../assets/cross.svg" alt="cross" />
-    </div>
+  <button 
+  class="navigation__buttons" 
+  (click)="toggleMenu()" 
+  (keydown)="toggleMenu()" 
+  (keyup)="toggleMenu()" 
+  tabindex="0" 
+  aria-label="Toggle Menu">
+  <div class="nav-btn">
+    <img *ngIf="!isMenuOpen" src="../../../assets/ham-menu.svg" alt="ham menu" />
+    <img *ngIf="isMenuOpen" src="../../../assets/cross.svg" alt="cross" />
   </div>
-</div>
+</button>

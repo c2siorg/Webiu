@@ -26,7 +26,7 @@ export class ContributorsComponent implements OnInit {
   profiles: Contributor[] = [];
   displayProfiles: Contributor[] = [];
   searchText = new FormControl('');
-  selectedRepo = '';
+  selectedRepo: string = '';
   allRepos: string[] = [];
   isLoading = true;
 

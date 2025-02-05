@@ -13,8 +13,8 @@ import { CommonModule } from '@angular/common';
 })
 export class ContributorSearchComponent {
   username = '';
-  issues: unknown[] = [];
-  pullRequests: unknown[] = [];
+  issues: any[] = [];
+  pullRequests: any[] = [];
   errorMessage = '';
   loading = false;
   activeView: 'issues' | 'pullRequests' = 'issues'; 

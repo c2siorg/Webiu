@@ -1,6 +1,5 @@
-import { HttpClient  } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { contributors, Contributor } from '../data/contributor';
+import { Contributor } from '../data/contributor';
 import { FormControl } from '@angular/forms';
 
 @Injectable({
@@ -13,9 +12,7 @@ export class CommmonUtilService {
   selectedRepo = '';
   commonAllRepos: string[] = [];
 
-  constructor() {
-
-  }
+  
   // getProfiles() {
   //   this.http.get<any>('http://localhost:5000/api/contributor/contributors').subscribe({
   //     next: (res) => {
