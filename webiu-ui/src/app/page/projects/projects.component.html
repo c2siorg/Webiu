@@ -25,12 +25,12 @@
     </div>
     <ng-container *ngIf="isLoading; then loading; else content"></ng-container>
   </div>
-  <button 
-  class="back-to-top" 
-  (click)="scrollToTop()" 
+  <button
+  class="back-to-top"
+  (click)="scrollToTop()"
   [class.show]="showButton"
 >
-  <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24"> 
+  <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24">
 </button>
 </div>
 
@@ -39,7 +39,8 @@
 </ng-template>
 
 <ng-template #content>
-  <ng-container *ngFor="let project of filteredProjects; trackBy: trackByProjectName">
+  <ng-container *ngIf="filteredProjects.length > 0; else noProjectsFound">
+    <ng-container *ngFor="let project of filteredProjects; trackBy: trackByProjectName">
     <app-projects-card
       [name]="project.name"
       [org]="org"
@@ -54,4 +55,13 @@
       [pullRequests]="project.pull_requests"
     ></app-projects-card>
   </ng-container>
+  </ng-container>
+
+  <ng-template #noProjectsFound>
+    <app-projects-card
+      [name]="'No projects found.'"
+      [description]="'Please enter a valid project name or check back later.'"
+      class="no-projects"
+    ></app-projects-card>
+  </ng-template>
 </ng-template>
