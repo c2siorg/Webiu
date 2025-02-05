@@ -1,7 +1,8 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-navbar',
@@ -16,9 +17,15 @@ export class NavbarComponent implements OnInit {
   isLoggedIn = false;
   showLoginOptions = false;
   user: any;
+  currentRoute: string = '/';
 
   constructor(private router: Router, private themeService: ThemeService) {
     this.isSunVisible = !this.themeService.isDarkMode();
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    ).subscribe((event: any) => {
+      this.currentRoute = event.url;
+    });
   }
 
   ngOnInit(): void {
@@ -58,17 +65,14 @@ export class NavbarComponent implements OnInit {
     console.log('Logged out');
   }
 
-  
   loginWithGoogle(): void {
-    
     window.location.href = 'http://localhost:5001/auth/google';
   }
 
   loginWithGitHub(): void {
-    
     window.location.href = 'http://localhost:5001/auth/github';
   }
-  // Prevent page reload and navigate to homepage if not already there
+
   preventReload(event: Event): void {
     if (this.router.url === '/') {
       event.preventDefault();
@@ -76,17 +80,19 @@ export class NavbarComponent implements OnInit {
       this.router.navigate(['/']);
     }
   }
-  // Close login options if clicked outside
-   @HostListener('document:click', ['$event'])
-   onClickOutside(event: MouseEvent): void {
-     const loginOptionsElement = document.querySelector('.login-options');
-     const loginButton = document.querySelector('.Login_Logout');
-     
-     // If the click is outside of the login options or login button, close the login options
-     if (this.showLoginOptions && !loginOptionsElement?.contains(event.target as Node) && !loginButton?.contains(event.target as Node)) {
-       this.showLoginOptions = false;
-     }
-   }
-   
+
+  @HostListener('document:click', ['$event'])
+  onClickOutside(event: MouseEvent): void {
+    const loginOptionsElement = document.querySelector('.login-options');
+    const loginButton = document.querySelector('.Login_Logout');
+    
+    if (this.showLoginOptions && !loginOptionsElement?.contains(event.target as Node) && !loginButton?.contains(event.target as Node)) {
+      this.showLoginOptions = false;
+    }
+  }
+
+  isRouteActive(route: string): boolean {
+    return this.currentRoute === route;
+  }
 }
 

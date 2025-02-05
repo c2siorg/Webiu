@@ -2,28 +2,28 @@
   <a [routerLink]="['/']" class="logo-link" (click)="preventReload($event)">
     <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="logo" />
   </a>  
-<div [ngClass]="{ navbar__menu: true, open: isMenuOpen }" id="navbarMenu">
-    <div class="navbar__menu__items" routerLink="/">
+  <div [ngClass]="{ navbar__menu: true, open: isMenuOpen }" id="navbarMenu">
+    <div class="navbar__menu__items" routerLink="/" [class.active]="isRouteActive('/')">
       <img src="../../../assets/home.svg" alt="Home Icon" />
       <p>Home</p>
     </div>
-    <div class="navbar__menu__items" routerLink="/projects">
+    <div class="navbar__menu__items" routerLink="/projects" [class.active]="isRouteActive('/projects')">
       <img src="../../../assets/projects.svg" alt="Projects Icon" />
       <p>Projects</p>
     </div>
-    <div class="navbar__menu__items" routerLink="/publications">
+    <div class="navbar__menu__items" routerLink="/publications" [class.active]="isRouteActive('/publications')">
       <img src="../../../assets/publications.svg" alt="Publications Icon" />
       <p>Publications</p>
     </div>
-    <div class="navbar__menu__items" routerLink="/contributors">
+    <div class="navbar__menu__items" routerLink="/contributors" [class.active]="isRouteActive('/contributors')">
       <img src="../../../assets/contributors.svg" alt="Contributors Icon" />
       <p>Contributors</p>
     </div>
-    <div class="navbar__menu__items" routerLink="/community">
+    <div class="navbar__menu__items" routerLink="/community" [class.active]="isRouteActive('/community')">
       <img src="../../../assets/community.svg" alt="Community Icon" />
       <p>Community</p>
     </div>
-    <div class="navbar__menu__items" routerLink="/gsoc">
+    <div class="navbar__menu__items" routerLink="/gsoc" [class.active]="isRouteActive('/gsoc')">
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC</p>
     </div>
@@ -53,7 +53,6 @@
       (click)="toggleMode()"
     >
       <div class="sun" [class.visible]="isSunVisible"></div>
-
       <div class="moon" [class.visible]="!isSunVisible">
         <div class="star"></div>
         <div class="star small"></div>
