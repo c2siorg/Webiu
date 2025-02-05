@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor, contributors } from '../../common/data/contributor';
@@ -17,6 +17,7 @@ export class CommunityComponent {
   }
   icons: Media[] = socialMedia;
   users: Contributor[] = this.shuffleArray(contributors);
+  showButton = false;
   private shuffleArray(array: any[]): any[] {
     let currentIndex = array.length,
       randomIndex;
@@ -30,5 +31,14 @@ export class CommunityComponent {
     }
 
     return array;
+  }
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    // Show button when user scrolls down 100px from the top
+    this.showButton = window.scrollY > 100;
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

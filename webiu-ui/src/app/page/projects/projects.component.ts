@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -26,8 +26,8 @@ export class ProjectsComponent implements OnInit {
   filteredProjects: Project[] = [];
   searchTerm: string = '';
   isLoading = true;
-  org = 'c2siorg';
-
+  org = 'c2siorg'
+  
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -67,4 +67,13 @@ export class ProjectsComponent implements OnInit {
       this.filteredProjects = [];
     }
   }
+  @HostListener('window:scroll')
+      onWindowScroll() {
+        // Show button when user scrolls down 100px from the top
+        this.showButton = window.scrollY > 100;
+      }
+    
+      scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 }
