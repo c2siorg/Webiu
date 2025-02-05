@@ -1,4 +1,11 @@
-<div class="projects__card">
+<div class="projects__card" [class.no-projects]="name === 'No projects found.'">
+
+  <ng-container *ngIf="name === 'No projects found.'; else regularCard">
+    <h3>{{ name }}</h3>
+    <p>{{ description }}</p>
+  </ng-container>
+
+  <ng-template #regularCard>
   <div class="projects__card__main">
     <div class="projects__card__desc">
       <h3>{{ name }}</h3>
@@ -121,4 +128,5 @@
       <p><strong> Updated at: </strong> {{ updatedAt }}</p>
     </div>
   </div>
+  </ng-template>
 </div>
