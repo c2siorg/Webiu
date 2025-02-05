@@ -15,7 +15,7 @@ export class NavbarComponent implements OnInit {
   isSunVisible = true;
   isLoggedIn = false;
   showLoginOptions = false;
-  user: any;
+  user: unknown;
 
   constructor(private router: Router, private themeService: ThemeService) {
     this.isSunVisible = !this.themeService.isDarkMode();

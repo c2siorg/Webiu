@@ -25,7 +25,7 @@ export class ProjectsComponent implements OnInit {
   projectsData: Project[] = [];
   filteredProjects: Project[] = [];
   isLoading = true;
-  searchQuery: string = '';
+  searchQuery = '';
 
   constructor(private http: HttpClient) {}
 

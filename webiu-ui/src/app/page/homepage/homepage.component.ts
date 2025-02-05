@@ -9,7 +9,7 @@ import { HomepageDetails } from '../../common/data/homepage';
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.scss',
 })
-export class HomepageComponent {
+export class HomepageComponent implements OnInit {
   homepageData = HomepageDetails;
 
   ngOnInit(): void {

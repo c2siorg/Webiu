@@ -19,7 +19,7 @@ export class ProjectsCardComponent {
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
 
-  public detailsVisible: boolean = false;
+  public detailsVisible = false;
 
   toggleDetails() {
     this.detailsVisible = !this.detailsVisible;
@@ -35,7 +35,7 @@ export class ProjectsCardComponent {
   }
 
   getLanguageColor(): string {
-    const languageColors: { [key: string]: string } = {
+    const languageColors: Record<string, string> = {
       Python: '#3572A5',
       JavaScript: '#F1E05A',
       TypeScript: '#2B7489',

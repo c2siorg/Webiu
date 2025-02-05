@@ -12,11 +12,11 @@ import { CommonModule } from '@angular/common';
   styleUrls: ['./contributor-search.component.scss'],
 })
 export class ContributorSearchComponent {
-  username: string = '';
-  issues: any[] = [];
-  pullRequests: any[] = [];
-  errorMessage: string = '';
-  loading: boolean = false;
+  username = '';
+  issues: unknown[] = [];
+  pullRequests: unknown[] = [];
+  errorMessage = '';
+  loading = false;
   activeView: 'issues' | 'pullRequests' = 'issues'; 
   userProfile: { login: string; avatar_url: string } | null = null; 
   private apiUrl = 'http://localhost:5000/api/contributor';

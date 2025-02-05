@@ -10,7 +10,7 @@ export class CommmonUtilService {
   commonProfiles?: Contributor[];
   commonDisplayProfiles?: Contributor[];
   searchText = new FormControl('');
-  selectedRepo: string = '';
+  selectedRepo = '';
   commonAllRepos: string[] = [];
 
   constructor() {
