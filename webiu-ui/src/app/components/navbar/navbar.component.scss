@@ -35,7 +35,7 @@
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.15);
     padding: 10px;
     border-radius: 8px;
-    border: 1px solid #f5f5f5;
+    border: 1px solid var(--border-color);
     box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.15);
   }
 
@@ -68,6 +68,7 @@
     background-color: var(--blue, #0066ff);
     color: #fff;
   }
+  
   .navbar__menu__items.active p {
     color: #fff;
   }
@@ -82,60 +83,67 @@
     p {
       color: #fff;
     }
-  }
-
-  .navbar__menu__items:hover img {
-    filter: invert(1);
+    img {
+      filter: invert(1);
+    }
   }
 }
 
 .login-options {
-  margin-top: 200px;
-  margin-left: 800px;
-  background-color: #f8f9fa; 
-  border: 1px solid #ddd; 
-  border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
-  width: 220px; 
-  position: absolute; 
+  position: absolute;
+  top: 100%;
+  right: 20px;
+  background: var(--navbar-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.15);
+  width: 220px;
   z-index: 1000;
   padding: 10px;
   display: flex;
   flex-direction: column;
-  gap: 15px; 
+  gap: 10px;
 
   button {
-    background-color: #ffffff; 
-    color: #333; 
-    border: 1px solid #ddd; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--navbar-bg);
+    color: var(--navbar-p);
+    border: 1px solid var(--border-color);
     padding: 10px;
     text-align: center;
-    font-size: 14px; 
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
-    border-radius: 5px; 
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    outline: none;
-    box-shadow: none;
+    border-radius: 7px;
+    transition: all 0.2s ease;
+    width: 100%;
 
     &:hover {
-      background-color: #f0f0f0; 
-      transform: scale(1.02); 
+      background: var(--blue, #2f80ed);
+      color: #fff;
+      transform: translateY(-1px);
+      
+      p {
+        color: #fff;
+      }
+      
+      img {
+        filter: brightness(0) invert(1);
+      }
     }
 
-    &:focus {
-      background-color: #ffffff; 
-      outline: none; 
-    }
-
-    &:active {
-      background-color: #e0e0e0; 
+    img {
+      width: 20px;
+      height: 20px;
     }
 
     p {
-      margin: 10px; 
-      color: inherit; 
-      font-size: 14px; 
+      margin: 0;
+      color: inherit;
+      font-size: 14px;
     }
   }
 }
@@ -287,7 +295,7 @@
   }
 
   .navbar__menu.open {
-    display: flex;
+    display: flex !important;
   }
 
   .navigation__buttons {
