@@ -52,7 +52,10 @@ const getAllContributors = async (req, res) => {
           contributors.map(async (contributor) => {
             const username = contributor.login;
             if (contributorsMap[username]) {
-              contributorsMap[username].repos.push(repo.name);
+              contributorsMap[username].contributions += contributor.contributions;
+              if (!contributorsMap[username].repos.includes(repo.name)) {
+                contributorsMap[username].repos.push(repo.name);
+              }
               return;
             }
 
@@ -76,8 +79,10 @@ const getAllContributors = async (req, res) => {
         );
       })
     );
+    const contributorsList = Object.values(contributorsMap);
+    console.log("🔹 API Response:", JSON.stringify(contributorsList, null, 2)); 
+    return res.json(contributorsList);
 
-    return res.json(Object.values(contributorsMap));
   } catch (error) {
     console.error('Error fetching organization info:', error);
     return res.status(500).json({ error: 'Failed to fetch organization info' });
