@@ -38,7 +38,8 @@ describe('FooterComponent', () => {
   });
 
 it('should have correct routerLinks on navigation links', () => {
-  fixture.detectChanges();  
+  fixture.detectChanges();
+  console.log(fixture.nativeElement.innerHTML);
   const routerLinks = fixture.debugElement.queryAll(By.css('a[routerLink]'));
   expect(routerLinks.length).toBeGreaterThan(0);
   const expectedLinks = [
