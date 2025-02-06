@@ -11,8 +11,6 @@ describe('FooterComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
-      ],
-      declarations: [
         FooterComponent
       ],
     }).compileComponents();
