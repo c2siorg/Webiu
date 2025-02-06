@@ -3,6 +3,7 @@ import { FooterComponent } from './footer.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { By } from '@angular/platform-browser';
 import { RouterLinkWithHref } from '@angular/router';
+import { Component } from '@angular/core';  
 
 @Component({ template: '' })
 class DummyComponent {}
@@ -27,7 +28,7 @@ describe('FooterComponent', () => {
         FooterComponent
       ],
     }).compileComponents();
-    
+
     fixture = TestBed.createComponent(FooterComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -50,7 +51,7 @@ describe('FooterComponent', () => {
     expect(firstLink.textContent).toContain('Home');
   });
 
- it('should have correct routerLinks on navigation links', fakeAsync(() => {
+  it('should have correct routerLinks on navigation links', fakeAsync(() => {
     fixture.detectChanges();
     tick(100);
     const routerLinks = fixture.debugElement.queryAll(By.directive(RouterLinkWithHref));
@@ -71,8 +72,7 @@ describe('FooterComponent', () => {
       expect(link.injector.get(RouterLinkWithHref).href).toBe(expectedLinks[index]);
     });
   }));
-});
-  
+
   it('should display current year in copyright', () => {
     const footerBottom = fixture.debugElement.query(By.css('.footer-bottom p')).nativeElement;
     const currentYear = new Date().getFullYear();
@@ -113,17 +113,17 @@ describe('FooterComponent', () => {
     expect(footer).toBeTruthy();
   });
 
- it('should render footer in mobile view correctly', fakeAsync(() => {
-  window.innerWidth = 500;
-  window.dispatchEvent(new Event('resize'));
-  fixture.detectChanges();
-  tick(100);
+  it('should render footer in mobile view correctly', fakeAsync(() => {
+    window.innerWidth = 500;
+    window.dispatchEvent(new Event('resize'));
+    fixture.detectChanges();
+    tick(100);
 
-  const footerContainer = fixture.debugElement.query(By.css('.footer-container'));
-  const computedStyle = window.getComputedStyle(footerContainer.nativeElement);
-  console.log(computedStyle.flexDirection);  
+    const footerContainer = fixture.debugElement.query(By.css('.footer-container'));
+    const computedStyle = window.getComputedStyle(footerContainer.nativeElement);
+    console.log(computedStyle.flexDirection);
 
-  expect(computedStyle.flexDirection).toBe('column');
-}));
-
+    expect(computedStyle.flexDirection).toBe('column');
+  }));
 });
+
