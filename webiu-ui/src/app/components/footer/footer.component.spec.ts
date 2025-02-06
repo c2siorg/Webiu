@@ -43,6 +43,7 @@ describe('FooterComponent', () => {
       const routerLink = link.nativeElement.getAttribute('routerLink');
       console.log(routerLink); 
       expect(routerLink).toBeTruthy();
+      expect(routerLink.length).toBeGreaterThan(0);
     });
   });
 
@@ -88,7 +89,8 @@ describe('FooterComponent', () => {
 
   it('should render footer in mobile view correctly', () => {
     const footerContainer = fixture.debugElement.query(By.css('.footer-container'));
-    window.innerWidth = 500; 
+    window.innerWidth = 500;
+    window.dispatchEvent(new Event('resize'));
     fixture.detectChanges();
 
     expect(footerContainer.nativeElement.style.flexDirection).toBe('column');
