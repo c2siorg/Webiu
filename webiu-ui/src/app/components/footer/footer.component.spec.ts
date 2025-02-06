@@ -10,11 +10,9 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule 
-      ],
-      declarations: [
+        RouterTestingModule,
         FooterComponent
-      ]
+      ],
     }).compileComponents();
     
     fixture = TestBed.createComponent(FooterComponent);
