@@ -16,7 +16,7 @@
     </div>
     <div class="filters-section">
       <div class="filter-group">
-        <span>Filter by repository</span>
+        <span>Filter by Repository</span>
         <select class="filter-select" (change)="onRepoChange($event)">
           <option value="">Select a Repository</option>
           <option *ngFor="let repo of allRepos" [value]="repo">{{ repo }}</option>
@@ -24,7 +24,7 @@
       </div>
 
       <div class="filter-group">
-        <span>Filter by contributions</span>
+        <span>Filter by Contributions</span>
         <select class="filter-select" (change)="onContributionRangeChange($event)">
           <option value="">Select Contribution Range</option>
           <option *ngFor="let range of contributionRanges" [value]="range.label">
@@ -34,7 +34,7 @@
       </div>
 
       <div class="filter-group">
-        <span>Filter by followers</span>
+        <span>Filter by Followers</span>
         <select class="filter-select" (change)="onFollowerRangeChange($event)">
           <option value="">Select Follower Range</option>
           <option *ngFor="let range of followerRanges" [value]="range.label">
@@ -68,6 +68,13 @@
       </button>
     </div>
   </section>
+  <button
+    class="back-to-top"
+    (click)="scrollToTop()"
+    [class.show]="showButton"
+  >
+    <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24" />
+  </button>
 </div>
 
 <ng-template #content>

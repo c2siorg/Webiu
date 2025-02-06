@@ -1,5 +1,5 @@
 // contributors.component.ts
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -44,6 +44,7 @@ export class ContributorsComponent implements OnInit {
   selectedFollowerRange: string = '';
   allRepos: string[] = [];
   isLoading = true;
+  showButton = false;
 
   contributionRanges: ContributionRange[] = [
     { label: '0 to 5', min: 0, max: 5 },
@@ -189,4 +190,13 @@ export class ContributorsComponent implements OnInit {
   trackByFn(_: number, profile: Contributor): string {
     return profile.login;
   }
+    @HostListener('window:scroll')
+      onWindowScroll() {
+        // Show button when user scrolls down 100px from the top
+        this.showButton = window.scrollY > 100;
+      }
+
+      scrollToTop() {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
 }
