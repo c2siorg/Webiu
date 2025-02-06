@@ -41,6 +41,7 @@ describe('FooterComponent', () => {
     const links = fixture.debugElement.queryAll(By.css('.footer-section ul li a'));
     links.forEach(link => {
       const routerLink = link.nativeElement.getAttribute('routerLink');
+      console.log(routerLink); 
       expect(routerLink).toBeTruthy();
     });
   });
@@ -87,10 +88,10 @@ describe('FooterComponent', () => {
 
   it('should render footer in mobile view correctly', () => {
     const footerContainer = fixture.debugElement.query(By.css('.footer-container'));
-    window.innerWidth = 500; // Example mobile screen width
+    window.innerWidth = 500; 
     fixture.detectChanges();
 
-    expect(footerContainer.styles['flex-direction']).toBe('column');
+    expect(footerContainer.nativeElement.style.flexDirection).toBe('column');
   });
 });
 
