@@ -37,11 +37,12 @@ describe('FooterComponent', () => {
     expect(firstLink.textContent).toContain('Home');
   });
 
-it('should have correct routerLinks on navigation links', () => {
+it('should have correct routerLinks on navigation links', fakeAsync(() => {
   fixture.detectChanges();
-  console.log(fixture.nativeElement.innerHTML);
+  tick(100);  
   const routerLinks = fixture.debugElement.queryAll(By.css('a[routerLink]'));
   expect(routerLinks.length).toBeGreaterThan(0);
+
   const expectedLinks = [
     '/',           
     '/projects',   
@@ -52,10 +53,11 @@ it('should have correct routerLinks on navigation links', () => {
     '/terms',       
     '/privacy'      
   ];
+
   routerLinks.forEach((link, index) => {
     expect(link.nativeElement.getAttribute('routerLink')).toBe(expectedLinks[index]);
   });
-});
+}));
   
   it('should display current year in copyright', () => {
     const footerBottom = fixture.debugElement.query(By.css('.footer-bottom p')).nativeElement;
