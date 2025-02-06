@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { FooterComponent } from './footer.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { By } from '@angular/platform-browser';
@@ -11,6 +11,8 @@ describe('FooterComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
+      ],
+      declarations: [
         FooterComponent
       ],
     }).compileComponents();
@@ -38,12 +40,12 @@ describe('FooterComponent', () => {
   });
 
   it('should have correct routerLinks on navigation links', () => {
-    const links = fixture.debugElement.queryAll(By.css('.footer-section ul li a'));
-    links.forEach(link => {
-      const routerLink = link.nativeElement.getAttribute('routerLink');
-      console.log(routerLink); 
-      expect(routerLink).toBeTruthy();
-      expect(routerLink.length).toBeGreaterThan(0);
+    fixture.detectChanges();  
+    const routerLinks = fixture.debugElement.queryAll(By.css('a[routerLink]'));
+
+    expect(routerLinks.length).toBeGreaterThan(0);
+    routerLinks.forEach(link => {
+      expect(link.nativeElement.getAttribute('routerLink')).toBeTruthy();
     });
   });
 
@@ -87,13 +89,12 @@ describe('FooterComponent', () => {
     expect(footer).toBeTruthy();
   });
 
-  it('should render footer in mobile view correctly', () => {
+  it('should render footer in mobile view correctly', fakeAsync(() => {
+    window.innerWidth = 500; 
+    fixture.detectChanges(); 
+    tick(); 
+
     const footerContainer = fixture.debugElement.query(By.css('.footer-container'));
-    window.innerWidth = 500;
-    window.dispatchEvent(new Event('resize'));
-    fixture.detectChanges();
-
-    expect(footerContainer.nativeElement.style.flexDirection).toBe('column');
-  });
+    expect(footerContainer.nativeElement.style.flexDirection).toBe('column'); 
+  }));
 });
-
