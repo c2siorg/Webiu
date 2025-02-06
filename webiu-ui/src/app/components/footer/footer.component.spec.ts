@@ -96,12 +96,17 @@ describe('FooterComponent', () => {
     expect(footer).toBeTruthy();
   });
 
-  it('should render footer in mobile view correctly', fakeAsync(() => {
-    window.innerWidth = 500; 
-    fixture.detectChanges(); 
-    tick(); 
+ it('should render footer in mobile view correctly', fakeAsync(() => {
+  window.innerWidth = 500;
+  window.dispatchEvent(new Event('resize'));
+  fixture.detectChanges();
+  tick(100);
 
-    const footerContainer = fixture.debugElement.query(By.css('.footer-container'));
-    expect(footerContainer.nativeElement.style.flexDirection).toBe('column'); 
-  }));
+  const footerContainer = fixture.debugElement.query(By.css('.footer-container'));
+  const computedStyle = window.getComputedStyle(footerContainer.nativeElement);
+  console.log(computedStyle.flexDirection);  
+
+  expect(computedStyle.flexDirection).toBe('column');
+}));
+
 });
