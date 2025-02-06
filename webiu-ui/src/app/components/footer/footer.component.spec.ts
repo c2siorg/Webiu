@@ -2,6 +2,10 @@ import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testin
 import { FooterComponent } from './footer.component';
 import { RouterTestingModule } from '@angular/router/testing';
 import { By } from '@angular/platform-browser';
+import { RouterLinkWithHref } from '@angular/router';
+
+@Component({ template: '' })
+class DummyComponent {}
 
 describe('FooterComponent', () => {
   let component: FooterComponent;
@@ -10,7 +14,16 @@ describe('FooterComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
-        RouterTestingModule,
+        RouterTestingModule.withRoutes([
+          { path: '', component: DummyComponent },
+          { path: 'projects', component: DummyComponent },
+          { path: 'publications', component: DummyComponent },
+          { path: 'contributors', component: DummyComponent },
+          { path: 'community', component: DummyComponent },
+          { path: 'gsoc', component: DummyComponent },
+          { path: 'terms', component: DummyComponent },
+          { path: 'privacy', component: DummyComponent }
+        ]),
         FooterComponent
       ],
     }).compileComponents();
@@ -37,27 +50,28 @@ describe('FooterComponent', () => {
     expect(firstLink.textContent).toContain('Home');
   });
 
-it('should have correct routerLinks on navigation links', fakeAsync(() => {
-  fixture.detectChanges();
-  tick(100);  
-  const routerLinks = fixture.debugElement.queryAll(By.css('a[routerLink]'));
-  expect(routerLinks.length).toBeGreaterThan(0);
+ it('should have correct routerLinks on navigation links', fakeAsync(() => {
+    fixture.detectChanges();
+    tick(100);
+    const routerLinks = fixture.debugElement.queryAll(By.directive(RouterLinkWithHref));
+    expect(routerLinks.length).toBeGreaterThan(0);
 
-  const expectedLinks = [
-    '/',           
-    '/projects',   
-    '/publications',
-    '/contributors', 
-    '/community',   
-    '/gsoc',        
-    '/terms',       
-    '/privacy'      
-  ];
+    const expectedLinks = [
+      '/',           
+      '/projects',   
+      '/publications',
+      '/contributors', 
+      '/community',   
+      '/gsoc',        
+      '/terms',       
+      '/privacy'      
+    ];
 
-  routerLinks.forEach((link, index) => {
-    expect(link.nativeElement.getAttribute('routerLink')).toBe(expectedLinks[index]);
-  });
-}));
+    routerLinks.forEach((link, index) => {
+      expect(link.injector.get(RouterLinkWithHref).href).toBe(expectedLinks[index]);
+    });
+  }));
+});
   
   it('should display current year in copyright', () => {
     const footerBottom = fixture.debugElement.query(By.css('.footer-bottom p')).nativeElement;
