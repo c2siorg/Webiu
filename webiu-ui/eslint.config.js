@@ -5,7 +5,7 @@ const angular = require("angular-eslint");
 
 module.exports = tseslint.config(
   {
-    files: ["**/*.ts"],
+    files: ["**/*.ts"], // Lint all TypeScript files in webiu-ui/
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -33,11 +33,11 @@ module.exports = tseslint.config(
     },
   },
   {
-    files: ["**/*.html"],
+    files: ["**/*.html"], // Lint all HTML files in webiu-ui/
     extends: [
       ...angular.configs.templateRecommended,
       ...angular.configs.templateAccessibility,
     ],
-    rules: {},
-  }
+    rules: {},
+  }
 );
