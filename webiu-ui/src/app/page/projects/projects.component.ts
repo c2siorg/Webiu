@@ -28,7 +28,7 @@ export class ProjectsComponent implements OnInit {
   isLoading = true;
   org = 'c2siorg';
   showButton = false;
-  
+
   constructor(private http: HttpClient) {}
 
   ngOnInit(): void {
@@ -64,13 +64,16 @@ export class ProjectsComponent implements OnInit {
     this.filteredProjects = this.projectsData.filter((project) =>
       project.name.toLowerCase().includes(lowerCaseSearchTerm)
     );
+    if (this.filteredProjects.length === 0) {
+      this.filteredProjects = [];
+    }
   }
   @HostListener('window:scroll')
       onWindowScroll() {
         // Show button when user scrolls down 100px from the top
         this.showButton = window.scrollY > 100;
       }
-    
+
       scrollToTop() {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
