@@ -45,6 +45,7 @@ export class ContributorsComponent implements OnInit {
   allRepos: string[] = [];
   isLoading = true;
   showButton = false;
+  contributors: Contributor[] = contributors;
 
   contributionRanges: ContributionRange[] = [
     { label: '0 to 5', min: 0, max: 5 },
@@ -82,15 +83,51 @@ export class ContributorsComponent implements OnInit {
     });
   }
 
+
   getProfiles() {
     this.http
-      .get<any>(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
       .subscribe({
-        next: (res) => this.handleProfileResponse(res || contributors),
-        error: () => this.handleProfileResponse(contributors),
+        next: (res) => {
+          this.contributors = res || []; // ✅ Store contributors
+          this.fetchFollowerData(); // ✅ Now call fetchFollowerData()
+        },
+        error: () => {
+          console.error('Error fetching contributors');
+          this.handleProfileResponse([]); // Ensure UI updates even on error
+        },
       });
   }
-
+  
+  fetchFollowerData() {
+    if (!this.contributors || this.contributors.length === 0) {
+      this.isLoading = false;
+      return;
+    }
+  
+    let requests = this.contributors.map((contributor) =>
+      this.http
+        .get<{ followers?: number; following?: number }>(
+          `${environment.serverUrl}/api/user/followersAndFollowing/${contributor.login}`
+        )
+        .toPromise()
+        .then((data) => {
+          contributor.followers = data?.followers ?? 0;
+          contributor.following = data?.following ?? 0;
+        })
+        .catch(() => {
+          contributor.followers = 0;
+          contributor.following = 0;
+        })
+    );
+  
+    Promise.all(requests).then(() => {
+      this.displayProfiles = [...this.contributors]; // ✅ Ensure profiles update
+      this.isLoading = false;
+    });
+  }
+  
+  
   handleProfileResponse(profiles: Contributor[]) {
     this.profiles = profiles;
     this.commonUtil.commonProfiles = this.profiles;
