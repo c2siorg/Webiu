@@ -89,12 +89,12 @@ export class ContributorsComponent implements OnInit {
       .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
       .subscribe({
         next: (res) => {
-          this.contributors = res || []; // ✅ Store contributors
-          this.fetchFollowerData(); // ✅ Now call fetchFollowerData()
+          this.contributors = res || [];
+          this.fetchFollowerData(); 
         },
         error: () => {
           console.error('Error fetching contributors');
-          this.handleProfileResponse([]); // Ensure UI updates even on error
+          this.handleProfileResponse([]); 
         },
       });
   }
@@ -122,7 +122,7 @@ export class ContributorsComponent implements OnInit {
     );
   
     Promise.all(requests).then(() => {
-      this.displayProfiles = [...this.contributors]; // ✅ Ensure profiles update
+      this.displayProfiles = [...this.contributors]; 
       this.isLoading = false;
     });
   }
