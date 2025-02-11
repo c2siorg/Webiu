@@ -41,6 +41,6 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# # Playwright
-# /playwright-report
-# /playwright
+# Playwright
+/playwright-report
+/playwright
