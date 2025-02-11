@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ChatbotComponent } from './chatbot.component';
+import { GeminiService } from '../../services/gemini.service';
 
 describe('ChatbotComponent', () => {
   let component: ChatbotComponent;
@@ -8,7 +9,9 @@ describe('ChatbotComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ChatbotComponent]
+      imports: [HttpClientTestingModule],
+      declarations: [ChatbotComponent],
+      providers: [GeminiService],
     })
     .compileComponents();
 
