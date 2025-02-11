@@ -6,7 +6,9 @@ const contributorRoutes = require('./routes/contributorRoutes');
 const axios = require("axios");
 const { OAuth2Client } = require("google-auth-library");
 const projectRoutes = require('./routes/projectRoutes');
-const issueRoutes = require('./routes/repoIssuesRoutes'); // Adjust path as necessary
+const issueRoutes = require('./routes/repoIssuesRoutes'); 
+const userFollowersAndFollowing = require("./routes/userFollowersAndFollowing");
+
 dotenv.config(); 
 
 const app = express(); 
@@ -18,6 +20,7 @@ app.use(express.json());
 app.use('/api/contributor', contributorRoutes); 
 app.use('/api/projects', projectRoutes);
 app.use('/api/issues', issueRoutes);
+app.use('/api/user', userFollowersAndFollowing);
 
 app.get("/", (req, res) => {
     res.send("Welcome to the OAuth Login API");
