@@ -9,8 +9,10 @@ describe('ChatbotComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HttpClientTestingModule],
-      declarations: [ChatbotComponent],
+      imports: [
+        HttpClientTestingModule,
+        ChatbotComponent 
+      ],
       providers: [GeminiService],
     })
     .compileComponents();
