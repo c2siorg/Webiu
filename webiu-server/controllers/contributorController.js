@@ -13,8 +13,9 @@ const getAllContributors = async (req, res) => {
     const contributorsMap = new Map();
 
     const repositories = await fetchRepositories(orgName);
-    if (!repositories?.length) {
-      return res.status(404).json({ error: 'No repositories found' });
+
+    if (repositories.length === 0) {
+      return res.status(200).json([]);
     }
 
     const BATCH_SIZE = 5;
@@ -62,7 +63,7 @@ const getAllContributors = async (req, res) => {
   } catch (error) {
     console.error('Error in getAllContributors:', error);
     return res.status(500).json({
-      error: 'Failed to fetch organization info',
+      error: 'Failed to fetch repositories',
       message: error.message,
     });
   }
@@ -112,7 +113,7 @@ async function fetchRepositories(orgName) {
     return response.data;
   } catch (error) {
     console.error('Error in fetching repositories', error);
-    return null;
+    throw error;
   }
 }
 
