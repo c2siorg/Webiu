@@ -20,11 +20,11 @@ export class ProjectsCardComponent {
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
   @Input() org!: string;
-  @Input() repo!: string;  
+  @Input() repo!: string;
 
   issueCount: number = 0;
-  pullRequestCount: number = 0; 
-  initialized: boolean = false; 
+  pullRequestCount: number = 0;
+  initialized: boolean = false;
 
   constructor(private http: HttpClient) {}
 
@@ -35,7 +35,7 @@ export class ProjectsCardComponent {
   }
 
   fetchIssuesAndPRs(): void {
-    const apiUrl = `http://localhost:5001/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+    const apiUrl = `http://localhost:5000/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
     this.http.get<{ issues: number; pullRequests: number }>(apiUrl).subscribe(
       (data) => {
         this.issueCount = data.issues;
@@ -47,7 +47,6 @@ export class ProjectsCardComponent {
       }
     );
   }
-
 
   public detailsVisible: boolean = false;
 

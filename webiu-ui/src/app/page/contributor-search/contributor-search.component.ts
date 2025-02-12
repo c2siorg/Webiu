@@ -22,8 +22,9 @@ export class ContributorSearchComponent {
   errorMessage: string = '';
   loading: boolean = false;
   activeView: 'issues' | 'pullRequests' = 'issues';
-  userProfile: { login: string; avatar_url: string; html_url: string } | null = null;
-  private apiUrl = 'http://localhost:5001/api/contributor';
+  userProfile: { login: string; avatar_url: string; html_url: string } | null =
+    null;
+  private apiUrl = 'http://localhost:5000/api/contributor';
 
   constructor(private route: ActivatedRoute) {}
 
@@ -47,13 +48,19 @@ export class ContributorSearchComponent {
     this.userProfile = null;
 
     try {
-      const issuesResponse = await axios.get(`${this.apiUrl}/issues/${this.username}`);
+      const issuesResponse = await axios.get(
+        `${this.apiUrl}/issues/${this.username}`
+      );
       this.issues = issuesResponse.data.issues;
 
-      const pullRequestsResponse = await axios.get(`${this.apiUrl}/pull-requests/${this.username}`);
+      const pullRequestsResponse = await axios.get(
+        `${this.apiUrl}/pull-requests/${this.username}`
+      );
       this.pullRequests = pullRequestsResponse.data.pullRequests;
 
-      const userProfileResponse = await axios.get(`https://api.github.com/users/${this.username}`);
+      const userProfileResponse = await axios.get(
+        `https://api.github.com/users/${this.username}`
+      );
       this.userProfile = {
         login: userProfileResponse.data.login,
         avatar_url: userProfileResponse.data.avatar_url,
@@ -64,7 +71,8 @@ export class ContributorSearchComponent {
       this.filteredIssues = [...this.issues];
       this.filteredPullRequests = [...this.pullRequests];
     } catch (error) {
-      this.errorMessage = 'Failed to fetch data. Please check the username or try again later.';
+      this.errorMessage =
+        'Failed to fetch data. Please check the username or try again later.';
     } finally {
       this.loading = false;
     }
@@ -82,25 +90,22 @@ export class ContributorSearchComponent {
 
   onRepoFilterChange(event: Event) {
     const selectedRepo = (event.target as HTMLSelectElement).value;
-  
+
     if (selectedRepo) {
-      // Ensure filtering is based on exact repository name
       this.filteredIssues = this.issues.filter((issue) => {
-        const repoName = issue.repository_url.split('/').pop(); // Extract the repo name from the URL
-        return repoName === selectedRepo; // Match with selected repo
+        const repoName = issue.repository_url.split('/').pop();
+        return repoName === selectedRepo;
       });
-  
+
       this.filteredPullRequests = this.pullRequests.filter((pr) => {
-        const repoName = pr.repository_url.split('/').pop(); // Extract the repo name from the URL
-        return repoName === selectedRepo; // Match with selected repo
+        const repoName = pr.repository_url.split('/').pop();
+        return repoName === selectedRepo;
       });
     } else {
-      // Reset to show all if no repository is selected
       this.filteredIssues = [...this.issues];
       this.filteredPullRequests = [...this.pullRequests];
     }
   }
-  
 
   toggleView(view: 'issues' | 'pullRequests') {
     this.activeView = view;
@@ -117,9 +122,8 @@ export class ContributorSearchComponent {
     return formatDistanceToNow(updatedAt, { addSuffix: true });
   }
   get hasData(): boolean {
-    return this.filteredIssues.length > 0 || this.filteredPullRequests.length > 0;
+    return (
+      this.filteredIssues.length > 0 || this.filteredPullRequests.length > 0
+    );
   }
-  
 }
-
-

@@ -21,11 +21,11 @@ export class NavbarComponent implements OnInit {
 
   constructor(private router: Router, private themeService: ThemeService) {
     this.isSunVisible = !this.themeService.isDarkMode();
-    this.router.events.pipe(
-      filter(event => event instanceof NavigationEnd)
-    ).subscribe((event: any) => {
-      this.currentRoute = event.url;
-    });
+    this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe((event: any) => {
+        this.currentRoute = event.url;
+      });
   }
 
   ngOnInit(): void {
@@ -66,11 +66,11 @@ export class NavbarComponent implements OnInit {
   }
 
   loginWithGoogle(): void {
-    window.location.href = 'http://localhost:5001/auth/google';
+    window.location.href = 'http://localhost:5000/auth/google';
   }
 
   loginWithGitHub(): void {
-    window.location.href = 'http://localhost:5001/auth/github';
+    window.location.href = 'http://localhost:5000/auth/github';
   }
 
   preventReload(event: Event): void {
@@ -85,8 +85,12 @@ export class NavbarComponent implements OnInit {
   onClickOutside(event: MouseEvent): void {
     const loginOptionsElement = document.querySelector('.login-options');
     const loginButton = document.querySelector('.Login_Logout');
-    
-    if (this.showLoginOptions && !loginOptionsElement?.contains(event.target as Node) && !loginButton?.contains(event.target as Node)) {
+
+    if (
+      this.showLoginOptions &&
+      !loginOptionsElement?.contains(event.target as Node) &&
+      !loginButton?.contains(event.target as Node)
+    ) {
       this.showLoginOptions = false;
     }
   }
@@ -95,4 +99,3 @@ export class NavbarComponent implements OnInit {
     return this.currentRoute === route;
   }
 }
-

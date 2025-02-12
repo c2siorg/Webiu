@@ -5,79 +5,70 @@ const router = express.Router();
 const port = process.env.PORT || 3000;
 const baseUrl = 'https://api.github.com';
 const accessToken = process.env.GITHUB_ACCESS_TOKEN;
-const GitHub = require("gh.js");
-
+const GitHub = require('gh.js');
 
 const getAllContributors = async (req, res) => {
   try {
-    let finalResponse = {};
     const orgName = 'c2siorg';
-    const repositories = await fetchRepositories(orgName);
-    console.log(repositories);
-    
+    const contributorsMap = new Map();
 
-    if (!repositories) {
-      return res.status(500).json({ error: 'Failed to fetch repositories' });
+    const repositories = await fetchRepositories(orgName);
+
+    if (repositories.length === 0) {
+      return res.status(200).json([]);
     }
 
-    await Promise.all(
-      repositories.map(async (repo) => {
-        try {
-          const contributors = await fetchContributors(orgName, repo.name);
-          if (!contributors) return;
+    const BATCH_SIZE = 5;
+    for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
+      const batch = repositories.slice(i, i + BATCH_SIZE);
 
-          await Promise.all(
-            contributors.map(async (contributor) => {
-              try {
-                const userDetails = await fetchUserDetails(contributor.login);
-                if (!userDetails) return;
+      await Promise.all(
+        batch.map(async (repo) => {
+          try {
+            const contributors = await fetchContributors(orgName, repo.name);
+            if (!contributors?.length) return;
 
-                // Fetch issues and pull requests for each contributor
-                const issues = await fetchUserCreatedIssues(userDetails.login);
-                const pullRequests = await fetchUserCreatedPullRequests(userDetails.login);
+            contributors.forEach((contributor) => {
+              const login = contributor.login;
 
-                // If user is already in the response, update their data
-                if (finalResponse[userDetails.login]) {
-                  finalResponse[userDetails.login].repos.push(repo.name);
-                  finalResponse[userDetails.login].issues = issues || [];
-                  finalResponse[userDetails.login].pullRequests = pullRequests || [];
-                } else {
-                  // If user is not yet in the response, create their entry
-                  finalResponse[userDetails.login] = {
-                    login: userDetails.login,
-                    contributions: contributor.contributions,
-                    repos: [repo.name],
-                    followers: userDetails.followers,
-                    following: userDetails.following,
-                    avatar_url: userDetails.avatar_url,
-                    issues: issues || [], // Ensure issues field is always present
-                    pullRequests: pullRequests || [] // Ensure pullRequests field is always present
-                  };
-                }
-              } catch (err) {
-                console.error('Error in fetching user details:', err);
+              if (!contributorsMap.has(login)) {
+                contributorsMap.set(login, {
+                  login,
+                  contributions: contributor.contributions,
+                  repos: new Set([repo.name]),
+                  avatar_url: contributor.avatar_url,
+                });
+              } else {
+                const userData = contributorsMap.get(login);
+                userData.contributions += contributor.contributions;
+                userData.repos.add(repo.name);
               }
-            })
-          );
-        } catch (err) {
-          console.error('Error in fetching contributors:', err);
-        }
+            });
+          } catch (err) {
+            console.error(`Error processing repo ${repo.name}:`, err);
+          }
+        })
+      );
+    }
+
+    const allContributors = Array.from(contributorsMap.values()).map(
+      (contributor) => ({
+        ...contributor,
+        repos: Array.from(contributor.repos),
       })
     );
 
-    let allContributors = [];
-    for (const contributor in finalResponse) {
-      allContributors.push(finalResponse[contributor]);
-    }
-
+    res.set('Cache-Control', 'public, max-age=300');
     return res.json(allContributors);
   } catch (error) {
-    console.error('Error fetching organization info:', error);
-    return res.status(500).json({ error: 'Failed to fetch organization info' });
+    console.error('Error in getAllContributors:', error);
+    return res.status(500).json({
+      error: 'Failed to fetch repositories',
+      message: error.message,
+    });
   }
 };
 
-// Helper functions to fetch issues and pull requests
 async function fetchUserCreatedIssues(username) {
   try {
     const issuesResponse = await axios.get(
@@ -88,10 +79,10 @@ async function fetchUserCreatedIssues(username) {
         },
       }
     );
-    return issuesResponse.data.items || []; // Return empty array if no issues found
+    return issuesResponse.data.items || [];
   } catch (error) {
     console.error('Error fetching user-created issues:', error);
-    return []; // Return empty array in case of error
+    return [];
   }
 }
 
@@ -105,13 +96,12 @@ async function fetchUserCreatedPullRequests(username) {
         },
       }
     );
-    return pullRequestsResponse.data.items || []; // Return empty array if no PRs found
+    return pullRequestsResponse.data.items || [];
   } catch (error) {
     console.error('Error fetching user-created pull requests:', error);
-    return []; // Return empty array in case of error
+    return [];
   }
 }
-
 
 async function fetchRepositories(orgName) {
   try {
@@ -123,17 +113,20 @@ async function fetchRepositories(orgName) {
     return response.data;
   } catch (error) {
     console.error('Error in fetching repositories', error);
-    return null;
+    throw error;
   }
 }
 
 async function fetchContributors(orgName, repoName) {
   try {
-    const response = await axios.get(`${baseUrl}/repos/${orgName}/${repoName}/contributors`, {
-      headers: {
-        Authorization: `token ${accessToken}`,
-      },
-    });
+    const response = await axios.get(
+      `${baseUrl}/repos/${orgName}/${repoName}/contributors`,
+      {
+        headers: {
+          Authorization: `token ${accessToken}`,
+        },
+      }
+    );
     return response.data;
   } catch (error) {
     console.error('Error in fetching contributors', error);
@@ -153,14 +146,13 @@ async function fetchUserDetails(username) {
       contributions: response.data.contributions,
       followers: response.data.followers,
       following: response.data.following,
-      avatar_url: response.data.avatar_url
+      avatar_url: response.data.avatar_url,
     };
   } catch (error) {
     console.error('Error in fetching contributor details', error);
     return null;
   }
 }
-
 
 const userCreatedIssues = async (req, res) => {
   try {
@@ -179,12 +171,17 @@ const userCreatedIssues = async (req, res) => {
     const issues = issuesResponse.data.items;
 
     if (!issues) {
-      return res.status(500).json({ error: 'Failed to fetch user-created issues' });
+      return res
+        .status(500)
+        .json({ error: 'Failed to fetch user-created issues' });
     }
 
     return res.status(200).json({ issues });
   } catch (error) {
-    console.error('Error fetching user created issues:', error.response ? error.response.data : error.message);
+    console.error(
+      'Error fetching user created issues:',
+      error.response ? error.response.data : error.message
+    );
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
@@ -206,55 +203,59 @@ const userCreatedPullRequests = async (req, res) => {
     const pullRequests = pullRequestsResponse.data.items;
 
     if (!pullRequests) {
-      return res.status(500).json({ error: 'Failed to fetch user-created pull requests' });
+      return res
+        .status(500)
+        .json({ error: 'Failed to fetch user-created pull requests' });
     }
 
     return res.status(200).json({ pullRequests });
   } catch (error) {
-    console.error('Error fetching user created pull requests:', error.response ? error.response.data : error.message);
+    console.error(
+      'Error fetching user created pull requests:',
+      error.response ? error.response.data : error.message
+    );
     return res.status(500).json({ error: 'Internal server error' });
   }
 };
 
-
 async function getUserFollowersAndFollowing(req, res) {
-  const username = req.params.username; 
-  const gh = new GitHub({
-    token: accessToken 
-  });
+  const username = req.params.username;
 
-  if (!username) {
-    return res.status(400).json({ error: "Username is required" });
-  }
+  return res.status(200).json({ 0: 0 });
+  // const gh = new GitHub({
+  //   token: accessToken,
+  // });
 
-  try {
-    const [followers, following] = await Promise.all([
-      new Promise((resolve, reject) => {
-        gh.get(`users/${username}/followers`, { all: true }, (err, data) => {
-          if (err) reject(err);
-          else resolve(data.length || 0);
-        });
-      }),
-      new Promise((resolve, reject) => {
-        gh.get(`users/${username}/following`, { all: true }, (err, data) => {
-          if (err) reject(err);
-          else resolve(data.length || 0);
-        });
-      }),
-    ]);
+  // if (!username) {
+  //   return res.status(400).json({ error: 'Username is required' });
+  // }
 
-    res.json({ followers, following });
-  } catch (error) {
-    console.error(`Error fetching GitHub data for ${username}:`, error.message);
-    res.status(500).json({ error: "Failed to fetch data from GitHub" });
-  }
+  // try {
+  //   const [followers, following] = await Promise.all([
+  //     new Promise((resolve, reject) => {
+  //       gh.get(`users/${username}/followers`, { all: true }, (err, data) => {
+  //         if (err) reject(err);
+  //         else resolve(data.length || 0);
+  //       });
+  //     }),
+  //     new Promise((resolve, reject) => {
+  //       gh.get(`users/${username}/following`, { all: true }, (err, data) => {
+  //         if (err) reject(err);
+  //         else resolve(data.length || 0);
+  //       });
+  //     }),
+  //   ]);
+
+  //   res.json({ followers, following });
+  // } catch (error) {
+  //   console.error(`Error fetching GitHub data for ${username}:`, error.message);
+  //   res.status(500).json({ error: 'Failed to fetch data from GitHub' });
+  // }
 }
-
-
 
 module.exports = {
   getAllContributors,
   userCreatedIssues,
   userCreatedPullRequests,
-  getUserFollowersAndFollowing
+  getUserFollowersAndFollowing,
 };
