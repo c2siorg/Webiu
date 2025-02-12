@@ -4,6 +4,7 @@
   justify-content: center;
   align-items: center;
   margin-bottom: 30px;
+  width: 100%;
 
   .projects-hero {
     max-width: 1000px;
@@ -14,14 +15,14 @@
 
     .projects-hero-content {
       h1 {
-        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        color: var(--primary-dark, #0a0a15);
         font-size: 48px;
         font-weight: 500;
         line-height: 150%;
       }
 
       p {
-        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        color: var(--primary-dark, #0a0a15);
         font-size: 16px;
         font-weight: light;
         line-height: 150%;
@@ -37,7 +38,104 @@
     border-radius: 10px;
     background: var(--cards-container);
     box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.05) inset;
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
   }
+}
+
+.projects-search {
+  width: 100%;
+  margin: 20px 0;
+
+  .search-box-container {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .search-box {
+    width: 100%;
+    padding: 10px 10px 10px 36px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    margin: 0;
+    transition: all 0.3s ease-in-out;
+    background-color: #f9f9f9;
+    height: 45px;
+    box-sizing: border-box;
+
+    &:hover {
+      border-color: #bdbdbd;
+      background-color: #f2f2f2;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    &:focus {
+      border-color: #007bff;
+      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+      background-color: #ffffff;
+    }
+
+    &::placeholder {
+      color: #070202;
+      font-style: italic;
+    }
+  }
+
+  .search-icon {
+    position: absolute;
+    top: 50%;
+    left: 10px;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #666;
+  }
+}
+
+.loader {
+  border: 8px solid #f3f3f3;
+  border-top: 8px solid #3498db;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 1s linear infinite;
+  margin: 20px auto;
+  display: block;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  z-index: 1000;
+}
+
+.back-to-top.show {
+  opacity: 1;
+  visibility: visible;
 }
 
 @media screen and (max-width: 1100px) {
@@ -85,98 +183,4 @@
       }
     }
   }
-}
-
-.loader {
-  border: 8px solid #f3f3f3;
-  border-top: 8px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-  margin: 0 auto;
-  display: block;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-.projects-search {
-  margin: 20px 0;
-  text-align: center;
-
-  .search-box-container {
-    position: relative;
-    display: inline-block;
-    width: 100%;
-    margin-bottom: -20px;
-  }
-
-  .search-box {
-    width: 100%;
-    padding: 10px 10px 10px 36px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    outline: none;
-    margin-bottom: -40px;
-    margin-top: -40px;
-    transition: all 0.3s ease-in-out;
-
-    background-color: #f9f9f9;
-
-    &:hover {
-      border-color: #bdbdbd;
-      background-color: #f2f2f2;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    }
-
-    &:focus {
-      border-color: #007bff;
-      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
-      background-color: #ffffff;
-    }
-
-    &::placeholder {
-      color: #070202;
-      font-style: italic;
-    }
-  }
-
-  .search-icon {
-    position: absolute;
-    top: 50%;
-    left: 10px;
-    transform: translateY(-50%);
-    font-size: 16px;
-    color: #666;
-  }
-}
-
-
-.back-to-top {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
-  z-index: 1000;
-}
-
-.back-to-top.show {
-  opacity: 1;
-  visibility: visible;
 }

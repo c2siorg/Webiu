@@ -14,7 +14,7 @@ import { FormsModule } from '@angular/forms';
   imports: [
     CommonModule,
     HttpClientModule,
-    FormsModule, // Include FormsModule here
+    FormsModule,
     NavbarComponent,
     ProjectsCardComponent,
   ],
@@ -40,12 +40,12 @@ export class ProjectsComponent implements OnInit {
       .get<ProjectResponse>(`http://localhost:5001/api/projects/projects`)
       .subscribe({
         next: (response) => {
-          this.projectsData = response.repositories;
-          this.filteredProjects = [...this.projectsData]; // Initialize filteredProjects
+          this.projectsData = this.sortProjects(response.repositories);
+          this.filteredProjects = [...this.projectsData];
           this.isLoading = false;
         },
         error: (error) => {
-          this.projectsData = projectsData.repositories;
+          this.projectsData = this.sortProjects(projectsData.repositories);
           this.filteredProjects = [...this.projectsData];
           this.isLoading = false;
         },
@@ -55,26 +55,32 @@ export class ProjectsComponent implements OnInit {
       });
   }
 
+  sortProjects(projects: Project[]): Project[] {
+    return projects.sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+  }
+
   trackByProjectName(index: number, project: Project): string {
     return project.name;
   }
 
   filterProjects(): void {
     const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
-    this.filteredProjects = this.projectsData.filter((project) =>
-      project.name.toLowerCase().includes(lowerCaseSearchTerm)
+    this.filteredProjects = this.sortProjects(
+      this.projectsData.filter((project) =>
+        project.name.toLowerCase().includes(lowerCaseSearchTerm)
+      )
     );
     if (this.filteredProjects.length === 0) {
       this.filteredProjects = [];
     }
   }
-  @HostListener('window:scroll')
-      onWindowScroll() {
-        // Show button when user scrolls down 100px from the top
-        this.showButton = window.scrollY > 100;
-      }
 
-      scrollToTop() {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    this.showButton = window.scrollY > 100;
+  }
+
+  scrollToTop() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 }
