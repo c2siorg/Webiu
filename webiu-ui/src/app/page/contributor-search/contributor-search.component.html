@@ -1,13 +1,9 @@
 <div style="padding: 20px">
-  <!-- Loading  -->
   <div class="contributors-card-container">
-    <i
-      class="fa fa-spinner fa-spin loadspinner"
-      *ngIf="loading"></i>
+    <i class="fa fa-spinner fa-spin loadspinner" *ngIf="loading"></i>
   </div>
 
-  <!-- Toggle Buttons for Issues and Pull Requests -->
-  <div   class="action-bar"  *ngIf="!errorMessage && !loading" >
+  <div class="action-bar" *ngIf="!errorMessage && !loading">
     <div class="toggle-buttons">
       <button
         (click)="toggleView('issues')"
@@ -37,7 +33,6 @@
     </div>
   </div>
 
-  <!-- User Profile Section -->
   <div class="main-container">
     <div *ngIf="userProfile" class="user-profile">
       <img
@@ -55,7 +50,6 @@
       </button>
     </div>
 
-    <!-- Display Issues or Pull Requests Based on Active View -->
     <div *ngIf="activeView === 'issues'" class="data-section">
       <ul
         class="data-list"
@@ -75,7 +69,7 @@
         </li>
       </ul>
       <ng-template #noIssuesMessage>
-        <p class="no-data-message"  *ngIf="!loading && !errorMessage">
+        <p class="no-data-message" *ngIf="!loading && !errorMessage">
           No issues found for this contributor
         </p>
       </ng-template>
@@ -95,18 +89,22 @@
         </li>
       </ul>
       <ng-template #noPullRequestMessage>
-        <p class="no-data-message"  *ngIf="!loading && !errorMessage">
+        <p class="no-data-message" *ngIf="!loading && !errorMessage">
           No pull requests found for this contributor
         </p>
       </ng-template>
     </div>
   </div>
 
-  <!-- Error message while fetching-->
   <p
-    *ngIf="!loading && !hasData && !filteredIssues.length && !filteredPullRequests.length"
+    *ngIf="
+      !loading &&
+      !hasData &&
+      !filteredIssues.length &&
+      !filteredPullRequests.length
+    "
     class="error-message"
   >
-   {{errorMessage}}
-  </p>  
+    {{ errorMessage }}
+  </p>
 </div>
