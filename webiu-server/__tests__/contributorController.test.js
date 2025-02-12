@@ -23,8 +23,6 @@ describe('GET /contributors', () => {
     ];
     const mockUserDetails = {
       login: 'user1',
-      followers: 100,
-      following: 50,
       avatar_url: 'https://example.com/avatar1.jpg',
     };
 
@@ -44,11 +42,9 @@ describe('GET /contributors', () => {
       login: 'user1',
       contributions: 10,
       repos: ['repo1', 'repo1'],
-      followers: 100,
-      following: 50,
       avatar_url: 'https://example.com/avatar1.jpg',
       issues: [],
-      pullRequests: []
+      pullRequests: [],
     });
   });
 
