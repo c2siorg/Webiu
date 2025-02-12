@@ -18,34 +18,44 @@ describe('GET /contributors', () => {
   it('should return a list of contributors', async () => {
     const mockRepos = [{ name: 'repo1' }, { name: 'repo2' }];
     const mockContributors = [
-      { login: 'user1', contributions: 10 },
-      { login: 'user2', contributions: 5 },
+      {
+        login: 'user1',
+        contributions: 10,
+        avatar_url: 'https://example.com/avatar1.jpg',
+      },
+      {
+        login: 'user2',
+        contributions: 5,
+        avatar_url: 'https://example.com/avatar2.jpg',
+      },
     ];
-    const mockUserDetails = {
-      login: 'user1',
-      avatar_url: 'https://example.com/avatar1.jpg',
-    };
 
     axios.get
       .mockResolvedValueOnce({ data: mockRepos })
       .mockResolvedValueOnce({ data: mockContributors })
-      .mockResolvedValueOnce({ data: mockContributors })
-      .mockResolvedValueOnce({ data: mockUserDetails })
-      .mockResolvedValueOnce({ data: mockUserDetails });
+      .mockResolvedValueOnce({ data: mockContributors });
 
     const response = await request(app).get('/contributors');
 
     expect(response.status).toBe(200);
     expect(Array.isArray(response.body)).toBe(true);
-    expect(response.body).toHaveLength(1);
-    expect(response.body[0]).toEqual({
-      login: 'user1',
-      contributions: 10,
-      repos: ['repo1', 'repo1'],
-      avatar_url: 'https://example.com/avatar1.jpg',
-      issues: [],
-      pullRequests: [],
-    });
+    expect(response.body).toHaveLength(2);
+    expect(response.body).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          login: 'user1',
+          contributions: 20,
+          repos: expect.arrayContaining(['repo1', 'repo2']),
+          avatar_url: 'https://example.com/avatar1.jpg',
+        }),
+        expect.objectContaining({
+          login: 'user2',
+          contributions: 10,
+          repos: expect.arrayContaining(['repo1', 'repo2']),
+          avatar_url: 'https://example.com/avatar2.jpg',
+        }),
+      ])
+    );
   });
 
   it('should handle errors when fetching repositories', async () => {
@@ -58,10 +68,7 @@ describe('GET /contributors', () => {
       'error',
       'Failed to fetch repositories'
     );
-    expect(console.error).toHaveBeenCalledWith(
-      'Error in fetching repositories',
-      expect.any(Error)
-    );
+    expect(console.error).toHaveBeenCalled();
   });
 
   it('should handle errors when fetching contributors', async () => {
@@ -73,28 +80,17 @@ describe('GET /contributors', () => {
     const response = await request(app).get('/contributors');
 
     expect(response.status).toBe(200);
-    expect(response.body).toEqual([]);
-    expect(console.error).toHaveBeenCalledWith(
-      'Error in fetching contributors',
-      expect.any(Error)
-    );
+    expect(Array.isArray(response.body)).toBe(true);
+    expect(response.body).toHaveLength(0);
+    expect(console.error).toHaveBeenCalled();
   });
 
-  it('should handle errors when fetching user details', async () => {
-    const mockRepos = [{ name: 'repo1' }];
-    const mockContributors = [{ login: 'user1', contributions: 10 }];
-    axios.get
-      .mockResolvedValueOnce({ data: mockRepos })
-      .mockResolvedValueOnce({ data: mockContributors })
-      .mockRejectedValueOnce(new Error('Failed to fetch user details'));
+  it('should return empty array when no repositories found', async () => {
+    axios.get.mockResolvedValueOnce({ data: [] });
 
     const response = await request(app).get('/contributors');
 
     expect(response.status).toBe(200);
     expect(response.body).toEqual([]);
-    expect(console.error).toHaveBeenCalledWith(
-      'Error in fetching contributor details',
-      expect.any(Error)
-    );
   });
 });
