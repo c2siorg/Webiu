@@ -1,4 +1,3 @@
-// contributors.component.ts
 import { Component, OnInit, HostListener } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
@@ -77,8 +76,8 @@ export class ContributorsComponent implements OnInit {
 
   ngOnInit() {
     this.getProfiles();
-
     this.searchText.valueChanges.subscribe(() => {
+      this.currentPage = 1;
       this.filterProfiles();
     });
   }
@@ -124,6 +123,8 @@ export class ContributorsComponent implements OnInit {
     );
 
     Promise.all(requests).then(() => {
+      this.profiles = [...this.contributors];
+      this.handleProfileResponse(this.profiles);
       this.displayProfiles = [...this.contributors];
       this.isLoading = false;
     });
@@ -141,82 +142,85 @@ export class ContributorsComponent implements OnInit {
   }
 
   getUniqueRepos(): string[] {
-    return Array.from(
-      new Set(this.profiles.flatMap((profile) => profile.repos))
-    ).sort();
+    const allRepos = new Set<string>();
+    this.profiles.forEach((profile) => {
+      if (profile.repos) {
+        profile.repos.forEach((repo) => allRepos.add(repo));
+      }
+    });
+    return Array.from(allRepos).sort();
   }
 
   onRepoChange(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     this.selectedRepo = selectElement.value;
+    this.currentPage = 1;
     this.filterProfiles();
   }
 
   onContributionRangeChange(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     this.selectedContributionRange = selectElement.value;
+    this.currentPage = 1;
     this.filterProfiles();
   }
 
-  // onFollowerRangeChange(event: Event) {
-  //   const selectElement = event.target as HTMLSelectElement;
-  //   this.selectedFollowerRange = selectElement.value;
-  //   this.filterProfiles();
-  // }
+  onFollowerRangeChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedFollowerRange = selectElement.value;
+    this.currentPage = 1;
+    this.filterProfiles();
+  }
 
   filterProfiles() {
-    const searchTextValue =
-      this.searchText.value?.toLocaleLowerCase().trim() || '';
-    const filteredProfiles = this.profiles.filter(
-      (doc) =>
-        this.matchesSearchText(doc, searchTextValue) &&
-        this.matchesSelectedRepo(doc) &&
-        this.matchesContributionRange(doc) &&
-        this.matchesFollowerRange(doc)
-    );
+    const searchTextValue = this.searchText.value?.toLowerCase().trim() || '';
+
+    let filteredProfiles = [...this.profiles];
+
+    if (searchTextValue) {
+      filteredProfiles = filteredProfiles.filter((profile) =>
+        profile.login.toLowerCase().includes(searchTextValue)
+      );
+    }
+
+    if (this.selectedRepo) {
+      filteredProfiles = filteredProfiles.filter((profile) =>
+        profile.repos?.includes(this.selectedRepo)
+      );
+    }
+
+    if (this.selectedContributionRange) {
+      const range = this.contributionRanges.find(
+        (r) => r.label === this.selectedContributionRange
+      );
+      if (range) {
+        filteredProfiles = filteredProfiles.filter(
+          (profile) =>
+            profile.contributions >= range.min &&
+            (range.max === null || profile.contributions <= range.max)
+        );
+      }
+    }
+
+    if (this.selectedFollowerRange) {
+      const range = this.followerRanges.find(
+        (r) => r.label === this.selectedFollowerRange
+      );
+      if (range) {
+        filteredProfiles = filteredProfiles.filter(
+          (profile) =>
+            profile.followers >= range.min &&
+            (range.max === null || profile.followers <= range.max)
+        );
+      }
+    }
 
     this.totalPages = Math.ceil(filteredProfiles.length / this.profilesPerPage);
+
+    const startIndex = (this.currentPage - 1) * this.profilesPerPage;
     this.displayProfiles = filteredProfiles.slice(
-      (this.currentPage - 1) * this.profilesPerPage,
-      this.currentPage * this.profilesPerPage
-    );
-  }
-
-  matchesSearchText(doc: Contributor, searchText: string): boolean {
-    return (
-      !searchText.length || doc.login.toLocaleLowerCase().includes(searchText)
-    );
-  }
-
-  matchesSelectedRepo(doc: Contributor): boolean {
-    return !this.selectedRepo.length || doc.repos.includes(this.selectedRepo);
-  }
-
-  matchesContributionRange(doc: Contributor): boolean {
-    if (!this.selectedContributionRange) return true;
-
-    const range = this.contributionRanges.find(
-      (r) => r.label === this.selectedContributionRange
-    );
-    if (!range) return true;
-
-    return (
-      doc.contributions >= range.min &&
-      (range.max === null || doc.contributions <= range.max)
-    );
-  }
-
-  matchesFollowerRange(doc: Contributor): boolean {
-    if (!this.selectedFollowerRange) return true;
-
-    const range = this.followerRanges.find(
-      (r) => r.label === this.selectedFollowerRange
-    );
-    if (!range) return true;
-
-    return (
-      doc.followers >= range.min &&
-      (range.max === null || doc.followers <= range.max)
+      startIndex,
+      startIndex + this.profilesPerPage
     );
   }
 
@@ -243,9 +247,9 @@ export class ContributorsComponent implements OnInit {
   trackByFn(_: number, profile: Contributor): string {
     return profile.login;
   }
+
   @HostListener('window:scroll')
   onWindowScroll() {
-    // Show button when user scrolls down 100px from the top
     this.showButton = window.scrollY > 100;
   }
 
