@@ -26,14 +26,13 @@
     
     <ng-container *ngIf="isLoading; then loading; else content"></ng-container>
   </div>
-  
-  <button
-    class="back-to-top"
-    (click)="scrollToTop()"
-    [class.show]="showButton"
-  >
-    <img src="../../../assets/up-arrow1.png" alt="Back to Top" width="24" height="24">
-  </button>
+  <button 
+  class="back-to-top" 
+  (click)="scrollToTop()" 
+  [class.show]="showButton"
+>
+  <img src="../../../assets/up-arrow1.png" alt="Back to Top" width="24" height="24"> 
+</button>
 </div>
 
 <ng-template #loading>
