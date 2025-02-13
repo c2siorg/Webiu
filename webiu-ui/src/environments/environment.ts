@@ -1,6 +1,6 @@
 export const environment = {
     production: false,
-    serverUrl: 'http://localhost:5001',
+    serverUrl: 'http://localhost:5000',
   };
   export const environment1 = {
     production: false,

@@ -80,7 +80,7 @@ Before you begin, ensure you have the following installed:
    In the root of the `webiu-server` directory, create a file named `.env` and add the following environment variables:
 
    ```plaintext
-   PORT=5001
+   PORT=5000
    GITHUB_ACCESS_TOKEN=
    ```
 
@@ -99,7 +99,7 @@ Before you begin, ensure you have the following installed:
    npm start
    ```
 
-   The server should now be running on `http://localhost:5001`.
+   The server should now be running on `http://localhost:5000`.
 
 ## Running the Project with Docker
 
@@ -120,7 +120,7 @@ If you prefer to use Docker, follow these steps:
 3. **Access the services:**
 
    - Frontend: `http://localhost:4200`
-   - Backend: `http://localhost:5001`
+   - Backend: `http://localhost:5000`
 
 ## Submitting Contributions
 
