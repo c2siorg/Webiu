@@ -15,6 +15,7 @@ The project leverages the GitHub API for retrieving project details and integrat
 - **Project Information Display**: Showcases detailed information about each project, including tech stack, issue count, contributors, forks, and stars.
 - **Individual Contributor Highlight**: Displays contributions made by each contributor, emphasizing their role and impact on the project.
 - **GitHub API Integration**: Retrieves project data directly from GitHub, ensuring real-time updates.
+- **AI Chatbot Integration**: An AI-powered chatbot using Google Gemini API to assist users in navigating the platform and answering queries.
 - **Comprehensive Documentation**: Guides future contributors on how to get started, contribute, and understand the project's architecture.
 
 ## Future Goals
@@ -41,6 +42,7 @@ The project leverages the GitHub API for retrieving project details and integrat
 - **Angular CLI** (v17.x.x)
 - **MongoDB** (for database)
 - **Git** (for version control)
+- **Google Gemini API Key** (for chatbot integration)
 
 ### Frontend Setup
 
@@ -61,8 +63,14 @@ The project leverages the GitHub API for retrieving project details and integrat
    ```bash
    npm install
    ```
+4. **Set up environment variables:**
 
-4. **Run the frontend development server:**
+   ```bash
+   cd src/environments
+   ```
+   now provide the gemini-api key in both the files in the directory
+
+5. **Run the frontend development server:**
 
    ```bash
    ng serve
@@ -128,6 +136,7 @@ webiu/
 ## APIs and Integrations
 
 - **GitHub API**: Used for fetching real-time data such as project details, issue counts, contributors, forks, and stars.
+- **Google Gemini API**: Powers the AI chatbot to assist users with inquiries about the website and its projects.
 - **Database Integration**: MongoDB is used to store project and contributor data efficiently.
 
 ## Future Goals

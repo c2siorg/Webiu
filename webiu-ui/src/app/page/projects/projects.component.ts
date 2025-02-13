@@ -5,7 +5,6 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { projectsData } from './projects-data';
 import { Project, ProjectResponse } from './project.model';
-import { environment } from '../../../environments/environment';
 import { FormsModule } from '@angular/forms';
 
 @Component({

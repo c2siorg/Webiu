@@ -1,0 +1,52 @@
+<div class="chat-widget-container">
+  <button class="chat-toggle-button" (click)="toggleChat()">
+    <span>{{ isChatOpen ? "Close" : "Chat with AI" }}</span>
+  </button>
+
+  <div class="chat-popup" [class.open]="isChatOpen">
+    <div class="chat-header">
+      <h3 style="color: white">AI Assistant</h3>
+      <div class="header-buttons">
+        <button
+          class="clear-button"
+          (click)="clearChat()"
+          *ngIf="messages.length > 0"
+        >
+          Clear
+        </button>
+        <button class="close-button" (click)="toggleChat()">X</button>
+      </div>
+    </div>
+
+    <div class="chat-container" #chatContainer>
+      <div class="messages-wrapper">
+        <div class="messages" *ngFor="let message of messages">
+          <div
+            [ngClass]="{
+              'user-message': message.sender === 'user',
+              'bot-message': message.sender === 'bot',
+              loading: message.loading
+            }"
+          >
+            <div class="message-content" [innerHTML]="message.text"></div>
+            <div class="timestamp" *ngIf="message.timestamp">
+              {{ message.timestamp | date : "shortTime" }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-container">
+      <input
+        [(ngModel)]="userInput"
+        (keydown.enter)="sendMessage()"
+        placeholder="Type a message..."
+        [disabled]="isLoading"
+      />
+      <button (click)="sendMessage()" [disabled]="isLoading">
+        <i class="fas fa-paper-plane" style="color: white"></i>
+      </button>
+    </div>
+  </div>
+</div>
