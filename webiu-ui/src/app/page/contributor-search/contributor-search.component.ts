@@ -24,7 +24,7 @@ export class ContributorSearchComponent {
   activeView: 'issues' | 'pullRequests' = 'issues';
   userProfile: { login: string; avatar_url: string; html_url: string } | null =
     null;
-  private apiUrl = 'http://localhost:5000/api/contributor';
+  private apiUrl = 'http://localhost:5001/api/contributor';
 
   constructor(private route: ActivatedRoute) {}
 

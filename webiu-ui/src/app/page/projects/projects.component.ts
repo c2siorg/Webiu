@@ -37,7 +37,7 @@ export class ProjectsComponent implements OnInit {
 
   fetchProjects(): void {
     this.http
-      .get<ProjectResponse>(`http://localhost:5000/api/projects/projects`)
+      .get<ProjectResponse>(`http://localhost:5001/api/projects/projects`)
       .subscribe({
         next: (response) => {
           this.projectsData = this.sortProjects(response.repositories);
