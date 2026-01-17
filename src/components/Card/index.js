@@ -17,7 +17,7 @@ export const Card = ({ header, data, card, services, buttonLink, buttonText }) =
         </div> : null}
         <Container>
            <Row>
-           {card && data && data.map((data, index) => (
+           {card && data.map((data, index) => (
                <Col lg={4} key={index} className="card-col">
                    <div className="card-div">
                        <img src={data.image} className="card-img" alt="logo" />
@@ -36,7 +36,7 @@ export const Card = ({ header, data, card, services, buttonLink, buttonText }) =
                    </div>
                </Col>
            ))}
-           {services && data && data.map((data, index) => (
+           {services && data.map((data, index) => (
                <Col lg={4} key={index} className="services-col">
                    <div className="services-div">
                        <img src={data.image} className="services-img" alt="logo" />
