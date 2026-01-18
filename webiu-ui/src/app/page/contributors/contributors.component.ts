@@ -89,14 +89,22 @@ export class ContributorsComponent implements OnInit {
       )
       .subscribe({
         next: (res) => {
-          this.contributors = res || [];
-          this.fetchFollowerData();
+          if (!res || res.length === 0) {
+    console.warn('Empty API response, using placeholder contributors');
+    this.contributors = contributors;
+} else {
+  this.contributors = res;
+}
+this.fetchFollowerData();
+
           console.log('fetched contributors');
         },
         error: () => {
-          console.error('Error fetching contributors');
-          this.handleProfileResponse([]);
-        },
+    console.error('Error fetching contributors, using placeholder data');
+    this.contributors = contributors;
+    this.fetchFollowerData();
+},
+
       });
   }
 
