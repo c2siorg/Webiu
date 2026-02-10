@@ -125,7 +125,6 @@ export class ContributorsComponent implements OnInit {
     Promise.all(requests).then(() => {
       this.profiles = [...this.contributors];
       this.handleProfileResponse(this.profiles);
-      this.isLoading = false;
     });
   }
 
