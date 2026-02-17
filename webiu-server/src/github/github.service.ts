@@ -22,28 +22,74 @@ export class GithubService {
     return this.orgName;
   }
 
+  /**
+   * Fetches all pages from a paginated GitHub REST API endpoint.
+   */
+  private async fetchAllPages(url: string): Promise<any[]> {
+    const results: any[] = [];
+    let page = 1;
+
+    while (true) {
+      const separator = url.includes('?') ? '&' : '?';
+      const response = await axios.get(
+        `${url}${separator}per_page=100&page=${page}`,
+        { headers: this.headers },
+      );
+
+      const data = response.data;
+      if (!Array.isArray(data) || data.length === 0) break;
+
+      results.push(...data);
+
+      if (data.length < 100) break;
+      page++;
+    }
+
+    return results;
+  }
+
+  /**
+   * Fetches all pages from the GitHub Search API (items are nested).
+   */
+  private async fetchAllSearchPages(url: string): Promise<any[]> {
+    const results: any[] = [];
+    let page = 1;
+
+    while (true) {
+      const separator = url.includes('?') ? '&' : '?';
+      const response = await axios.get(
+        `${url}${separator}per_page=100&page=${page}`,
+        { headers: this.headers },
+      );
+
+      const items = response.data.items || [];
+      if (items.length === 0) break;
+
+      results.push(...items);
+
+      if (items.length < 100) break;
+      page++;
+    }
+
+    return results;
+  }
+
   async getOrgRepos(): Promise<any[]> {
-    const response = await axios.get(
+    return this.fetchAllPages(
       `${this.baseUrl}/orgs/${this.orgName}/repos`,
-      { headers: this.headers },
     );
-    return response.data;
   }
 
   async getRepoPulls(repoName: string): Promise<any[]> {
-    const response = await axios.get(
+    return this.fetchAllPages(
       `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls`,
-      { headers: this.headers },
     );
-    return response.data;
   }
 
   async getRepoIssues(org: string, repo: string): Promise<any[]> {
-    const response = await axios.get(
+    return this.fetchAllPages(
       `${this.baseUrl}/repos/${org}/${repo}/issues`,
-      { headers: this.headers },
     );
-    return response.data;
   }
 
   async getRepoContributors(
@@ -51,11 +97,9 @@ export class GithubService {
     repoName: string,
   ): Promise<any[] | null> {
     try {
-      const response = await axios.get(
+      return await this.fetchAllPages(
         `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
-        { headers: this.headers },
       );
-      return response.data;
     } catch (error) {
       console.error('Error in fetching contributors', error);
       return null;
@@ -63,19 +107,15 @@ export class GithubService {
   }
 
   async searchUserIssues(username: string): Promise<any[]> {
-    const response = await axios.get(
+    return this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
-      { headers: this.headers },
     );
-    return response.data.items || [];
   }
 
   async searchUserPullRequests(username: string): Promise<any[]> {
-    const response = await axios.get(
+    return this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
-      { headers: this.headers },
     );
-    return response.data.items || [];
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
