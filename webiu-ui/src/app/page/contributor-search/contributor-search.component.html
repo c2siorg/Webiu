@@ -1,110 +1,143 @@
-<div style="padding: 20px">
-  <div class="contributors-card-container">
-    <i class="fa fa-spinner fa-spin loadspinner" *ngIf="loading"></i>
+<div class="search-page">
+  <!-- Loading Spinner -->
+  <div class="loading-container" *ngIf="loading">
+    <div class="spinner"></div>
+    <p class="loading-text">Fetching contributor data...</p>
   </div>
 
-  <div class="action-bar" *ngIf="!errorMessage && !loading">
-    <div class="toggle-buttons">
-      <button
-        (click)="toggleView('issues')"
-        [class.active]="activeView === 'issues'"
-        class="toggle-button"
-      >
-        <i class="fas fa-circle-notch icon-gap"></i> Issues Created:
-        {{ filteredIssues.length }}
-      </button>
-      <button
-        (click)="toggleView('pullRequests')"
-        [class.active]="activeView === 'pullRequests'"
-        class="toggle-button"
-      >
-        <i class="fas fa-code-branch icon-gap"></i> Pull Requests:
-        {{ filteredPullRequests.length }}
-      </button>
-    </div>
-    <div class="filter-section">
-      <p class="filter-name">Filter by repo</p>
-      <select class="repository-select" (change)="onRepoFilterChange($event)">
-        <option value="">All</option>
-        <option *ngFor="let repo of uniqueRepositories" [value]="repo">
-          {{ repo }}
-        </option>
-      </select>
-    </div>
+  <!-- Error Message -->
+  <div class="error-container" *ngIf="errorMessage && !loading">
+    <i class="fas fa-exclamation-triangle error-icon"></i>
+    <p class="error-text">{{ errorMessage }}</p>
   </div>
 
-  <div class="main-container">
-    <div *ngIf="userProfile" class="user-profile">
-      <img
-        [src]="userProfile.avatar_url"
-        alt="Profile Picture"
-        class="profile-picture"
-      />
-      <h3 class="username">{{ userProfile.login }}</h3>
-      <button
-        (click)="openGitHubProfile(userProfile.html_url)"
-        class="github-button"
-      >
-        <i class="fab fa-github github-icon"></i>
-        <span class="username">{{ userProfile.login }}</span>
-      </button>
-    </div>
+  <!-- Main Content -->
+  <div class="content-wrapper" *ngIf="!loading && !errorMessage && userProfile">
+    <!-- Sidebar: Profile Card -->
+    <aside class="sidebar">
+      <div class="profile-card">
+        <img
+          [src]="userProfile.avatar_url"
+          alt="{{ userProfile.login }}'s avatar"
+          class="profile-avatar"
+        />
+        <h2 class="profile-name">{{ userProfile.login }}</h2>
+        <button
+          (click)="openGitHubProfile(userProfile.html_url)"
+          class="github-link-btn"
+        >
+          <i class="fab fa-github"></i>
+          <span>View on GitHub</span>
+        </button>
 
-    <div *ngIf="activeView === 'issues'" class="data-section">
-      <ul
-        class="data-list"
-        *ngIf="filteredIssues.length > 0; else noIssuesMessage"
-      >
-        <li *ngFor="let issue of filteredIssues" class="data-item">
-          <ng-container *ngIf="issue.closed_at; else openIssue">
-            <i class="far fa-check-circle icon-closed"></i>
-          </ng-container>
-          <ng-template #openIssue>
-            <i class="fas fa-circle-notch icon-open"></i>
-          </ng-template>
-          <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer">
-            {{ issue.title }}
-          </a>
-          <p>{{ formatLastUpdated(issue.updated_at) }}</p>
-        </li>
-      </ul>
-      <ng-template #noIssuesMessage>
-        <p class="no-data-message" *ngIf="!loading && !errorMessage">
-          No issues found for this contributor
-        </p>
-      </ng-template>
-    </div>
+        <div class="profile-stats">
+          <div class="stat">
+            <span class="stat-value">{{ issues.length }}</span>
+            <span class="stat-label">Issues</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{{ pullRequests.length }}</span>
+            <span class="stat-label">PRs</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value">{{ uniqueRepositories.length }}</span>
+            <span class="stat-label">Repos</span>
+          </div>
+        </div>
+      </div>
+    </aside>
 
-    <div *ngIf="activeView === 'pullRequests'" class="data-section">
-      <ul
-        class="data-list"
-        *ngIf="filteredPullRequests.length > 0; else noPullRequestMessage"
-      >
-        <li *ngFor="let pr of filteredPullRequests" class="data-item">
-          <i class="fa-solid fa-code-pull-request icon-open"></i>
-          <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer">
-            {{ pr.title }}
-          </a>
-          <p>{{ formatLastUpdated(pr.updated_at) }}</p>
-        </li>
-      </ul>
-      <ng-template #noPullRequestMessage>
-        <p class="no-data-message" *ngIf="!loading && !errorMessage">
-          No pull requests found for this contributor
-        </p>
-      </ng-template>
-    </div>
+    <!-- Main Area -->
+    <main class="main-area">
+      <!-- Toolbar: Tabs + Filter -->
+      <div class="toolbar">
+        <div class="tabs">
+          <button
+            (click)="toggleView('issues')"
+            [class.active]="activeView === 'issues'"
+            class="tab-btn"
+          >
+            <i class="fas fa-dot-circle"></i>
+            <span>Issues</span>
+            <span class="badge">{{ filteredIssues.length }}</span>
+          </button>
+          <button
+            (click)="toggleView('pullRequests')"
+            [class.active]="activeView === 'pullRequests'"
+            class="tab-btn"
+          >
+            <i class="fas fa-code-branch"></i>
+            <span>Pull Requests</span>
+            <span class="badge">{{ filteredPullRequests.length }}</span>
+          </button>
+        </div>
+
+        <div class="filter-dropdown">
+          <label for="repoFilter">Repository</label>
+          <select id="repoFilter" (change)="onRepoFilterChange($event)">
+            <option value="">All repositories</option>
+            <option *ngFor="let repo of uniqueRepositories" [value]="repo">
+              {{ repo }}
+            </option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Issues List -->
+      <div *ngIf="activeView === 'issues'" class="items-list">
+        <div
+          *ngFor="let issue of filteredIssues"
+          class="list-item"
+        >
+          <div class="item-icon" [ngClass]="issue.closed_at ? 'closed' : 'open'">
+            <i [class]="issue.closed_at ? 'fas fa-check-circle' : 'fas fa-dot-circle'"></i>
+          </div>
+          <div class="item-content">
+            <a
+              [href]="issue.html_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="item-title"
+            >
+              {{ issue.title }}
+            </a>
+            <span class="item-meta">Updated {{ formatLastUpdated(issue.updated_at) }}</span>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="filteredIssues.length === 0">
+          <i class="fas fa-inbox"></i>
+          <p>No issues found for this contributor</p>
+        </div>
+      </div>
+
+      <!-- Pull Requests List -->
+      <div *ngIf="activeView === 'pullRequests'" class="items-list">
+        <div
+          *ngFor="let pr of filteredPullRequests"
+          class="list-item"
+        >
+          <div class="item-icon pr">
+            <i class="fas fa-code-branch"></i>
+          </div>
+          <div class="item-content">
+            <a
+              [href]="pr.html_url"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="item-title"
+            >
+              {{ pr.title }}
+            </a>
+            <span class="item-meta">Updated {{ formatLastUpdated(pr.updated_at) }}</span>
+          </div>
+        </div>
+
+        <div class="empty-state" *ngIf="filteredPullRequests.length === 0">
+          <i class="fas fa-inbox"></i>
+          <p>No pull requests found for this contributor</p>
+        </div>
+      </div>
+    </main>
   </div>
-
-  <p
-    *ngIf="
-      !loading &&
-      !hasData &&
-      !filteredIssues.length &&
-      !filteredPullRequests.length
-    "
-    class="error-message"
-  >
-    {{ errorMessage }}
-  </p>
 </div>
