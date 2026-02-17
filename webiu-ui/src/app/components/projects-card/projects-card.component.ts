@@ -1,6 +1,7 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-projects-card',
@@ -35,7 +36,7 @@ export class ProjectsCardComponent {
   }
 
   fetchIssuesAndPRs(): void {
-    const apiUrl = `http://localhost:5000/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+    const apiUrl = `${environment.serverUrl}/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
     this.http.get<{ issues: number; pullRequests: number }>(apiUrl).subscribe(
       (data) => {
         this.issueCount = data.issues;
