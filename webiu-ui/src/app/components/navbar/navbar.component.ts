@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { filter } from 'rxjs/operators';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -66,11 +67,11 @@ export class NavbarComponent implements OnInit {
   }
 
   loginWithGoogle(): void {
-    window.location.href = 'http://localhost:5000/auth/google';
+    window.location.href = `${environment.serverUrl}/auth/google`;
   }
 
   loginWithGitHub(): void {
-    window.location.href = 'http://localhost:5000/auth/github';
+    window.location.href = `${environment.serverUrl}/auth/github`;
   }
 
   preventReload(event: Event): void {

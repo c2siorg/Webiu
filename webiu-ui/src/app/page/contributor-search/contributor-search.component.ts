@@ -4,6 +4,7 @@ import axios from 'axios';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { formatDistanceToNow } from 'date-fns';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-contributor-search',
@@ -24,7 +25,7 @@ export class ContributorSearchComponent {
   activeView: 'issues' | 'pullRequests' = 'issues';
   userProfile: { login: string; avatar_url: string; html_url: string } | null =
     null;
-  private apiUrl = 'http://localhost:5000/api/contributor';
+  private apiUrl = `${environment.serverUrl}/api/contributor`;
 
   constructor(private route: ActivatedRoute) {}
 
