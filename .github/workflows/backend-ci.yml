@@ -8,7 +8,7 @@ on:
 
 jobs:
   build-webiu-server:
-    name: Build and Test Node.js (webiu-server)
+    name: Build and Test NestJS (webiu-server)
     runs-on: ubuntu-latest
 
     steps:
@@ -21,16 +21,13 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: |
-          cd webiu-server
-          npm install
+        working-directory: webiu-server
+        run: npm install
 
-      - name: Run Server Tests
-        run: |
-          cd webiu-server
-          npm test
+      - name: Build
+        working-directory: webiu-server
+        run: npm run build
 
-      - name: Start Server
-        run: |
-          cd webiu-server
-          npm start &
+      - name: Run Tests
+        working-directory: webiu-server
+        run: npm test
