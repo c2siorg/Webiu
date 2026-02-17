@@ -14,56 +14,32 @@
     <div class="projects-search">
       <div class="search-box-container">
         <span class="search-icon">🔍</span>
-        <input
-          type="text"
-          class="search-box"
-          placeholder="Search projects by name..."
-          [(ngModel)]="searchTerm"
-          (input)="filterProjects()"
-        />
+        <input type="text" class="search-box" placeholder="Search projects by name..." [(ngModel)]="searchTerm"
+          (input)="filterProjects()" />
       </div>
     </div>
-    
-    <ng-container *ngIf="isLoading; then loading; else content"></ng-container>
+
+    <app-loading-spinner *ngIf="isLoading" message="Loading projects..."></app-loading-spinner>
+
+    <ng-container *ngIf="!isLoading">
+      <ng-container *ngIf="filteredProjects.length > 0; else noProjectsFound">
+        <ng-container *ngFor="let project of filteredProjects; trackBy: trackByProjectName">
+          <app-projects-card [name]="project.name" [org]="org" [repo]="project.name"
+            [description]="project.description || ''" [issue]="project.open_issues_count" [link]="project.html_url"
+            [language]="project.language || ''" [topics]="project.topics" [createdAt]="project.created_at"
+            [updatedAt]="project.updated_at" [pullRequests]="project.pull_requests"></app-projects-card>
+        </ng-container>
+      </ng-container>
+
+      <ng-template #noProjectsFound>
+        <app-projects-card [name]="'No projects found.'"
+          [description]="'Please enter a valid project name or check back later.'"
+          class="no-projects"></app-projects-card>
+      </ng-template>
+    </ng-container>
   </div>
-  
-  <button
-    class="back-to-top"
-    (click)="scrollToTop()"
-    [class.show]="showButton"
-  >
+
+  <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
     <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24">
   </button>
 </div>
-
-<ng-template #loading>
-  <div class="loader"></div>
-</ng-template>
-
-<ng-template #content>
-  <ng-container *ngIf="filteredProjects.length > 0; else noProjectsFound">
-    <ng-container *ngFor="let project of filteredProjects; trackBy: trackByProjectName">
-      <app-projects-card
-        [name]="project.name"
-        [org]="org"
-        [repo]="project.name"
-        [description]="project.description || ''"
-        [issue]="project.open_issues_count"
-        [link]="project.html_url"
-        [language]="project.language || ''"
-        [topics]="project.topics"
-        [createdAt]="project.created_at"
-        [updatedAt]="project.updated_at"
-        [pullRequests]="project.pull_requests"
-      ></app-projects-card>
-    </ng-container>
-  </ng-container>
-
-  <ng-template #noProjectsFound>
-    <app-projects-card
-      [name]="'No projects found.'"
-      [description]="'Please enter a valid project name or check back later.'"
-      class="no-projects"
-    ></app-projects-card>
-  </ng-template>
-</ng-template>

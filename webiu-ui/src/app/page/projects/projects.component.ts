@@ -7,6 +7,7 @@ import { projectsData } from './projects-data';
 import { Project, ProjectResponse } from './project.model';
 import { environment } from '../../../environments/environment';
 import { FormsModule } from '@angular/forms';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-projects',
@@ -17,6 +18,7 @@ import { FormsModule } from '@angular/forms';
     FormsModule,
     NavbarComponent,
     ProjectsCardComponent,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
@@ -29,7 +31,7 @@ export class ProjectsComponent implements OnInit {
   org = 'c2siorg';
   showButton = false;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   ngOnInit(): void {
     this.fetchProjects();

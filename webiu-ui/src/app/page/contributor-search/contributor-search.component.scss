@@ -4,37 +4,6 @@
   background: var(--cards-container, #f2f2f2);
 }
 
-// ─── Loading ───
-
-.loading-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 120px 0;
-  gap: 16px;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid var(--select-border, #e5e5e5);
-  border-top-color: var(--primary-color, #3498db);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.loading-text {
-  font-size: 0.95rem;
-  color: var(--font-light, #898989);
-}
-
 // ─── Error ───
 
 .error-container {

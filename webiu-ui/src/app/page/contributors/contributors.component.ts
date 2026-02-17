@@ -8,6 +8,7 @@ import { ProfileCardComponent } from '../../components/profile-card/profile-card
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 
 interface ContributionRange {
   label: string;
@@ -30,6 +31,7 @@ interface FollowerRange {
     ReactiveFormsModule,
     CommonModule,
     ProfileCardComponent,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
@@ -72,7 +74,7 @@ export class ContributorsComponent implements OnInit {
     private http: HttpClient,
     private commonUtil: CommmonUtilService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.getProfiles();
@@ -125,7 +127,6 @@ export class ContributorsComponent implements OnInit {
     Promise.all(requests).then(() => {
       this.profiles = [...this.contributors];
       this.handleProfileResponse(this.profiles);
-      this.displayProfiles = [...this.contributors];
       this.isLoading = false;
     });
   }
@@ -236,6 +237,23 @@ export class ContributorsComponent implements OnInit {
       this.currentPage--;
       this.filterProfiles();
     }
+  }
+
+  goToFirstPage() {
+    this.currentPage = 1;
+    this.filterProfiles();
+  }
+
+  goToLastPage() {
+    this.currentPage = this.totalPages;
+    this.filterProfiles();
+  }
+
+  onItemsPerPageChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.profilesPerPage = parseInt(selectElement.value, 10);
+    this.currentPage = 1; // Reset to first page
+    this.filterProfiles();
   }
 
   onUsernameClick(username: string) {

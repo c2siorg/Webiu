@@ -1,9 +1,6 @@
 <div class="search-page">
   <!-- Loading Spinner -->
-  <div class="loading-container" *ngIf="loading">
-    <div class="spinner"></div>
-    <p class="loading-text">Fetching contributor data...</p>
-  </div>
+  <app-loading-spinner *ngIf="loading" message="Fetching contributor data..."></app-loading-spinner>
 
   <!-- Error Message -->
   <div class="error-container" *ngIf="errorMessage && !loading">
@@ -16,16 +13,9 @@
     <!-- Sidebar: Profile Card -->
     <aside class="sidebar">
       <div class="profile-card">
-        <img
-          [src]="userProfile.avatar_url"
-          alt="{{ userProfile.login }}'s avatar"
-          class="profile-avatar"
-        />
+        <img [src]="userProfile.avatar_url" alt="{{ userProfile.login }}'s avatar" class="profile-avatar" />
         <h2 class="profile-name">{{ userProfile.login }}</h2>
-        <button
-          (click)="openGitHubProfile(userProfile.html_url)"
-          class="github-link-btn"
-        >
+        <button (click)="openGitHubProfile(userProfile.html_url)" class="github-link-btn">
           <i class="fab fa-github"></i>
           <span>View on GitHub</span>
         </button>
@@ -52,20 +42,12 @@
       <!-- Toolbar: Tabs + Filter -->
       <div class="toolbar">
         <div class="tabs">
-          <button
-            (click)="toggleView('issues')"
-            [class.active]="activeView === 'issues'"
-            class="tab-btn"
-          >
+          <button (click)="toggleView('issues')" [class.active]="activeView === 'issues'" class="tab-btn">
             <i class="fas fa-dot-circle"></i>
             <span>Issues</span>
             <span class="badge">{{ filteredIssues.length }}</span>
           </button>
-          <button
-            (click)="toggleView('pullRequests')"
-            [class.active]="activeView === 'pullRequests'"
-            class="tab-btn"
-          >
+          <button (click)="toggleView('pullRequests')" [class.active]="activeView === 'pullRequests'" class="tab-btn">
             <i class="fas fa-code-branch"></i>
             <span>Pull Requests</span>
             <span class="badge">{{ filteredPullRequests.length }}</span>
@@ -85,20 +67,12 @@
 
       <!-- Issues List -->
       <div *ngIf="activeView === 'issues'" class="items-list">
-        <div
-          *ngFor="let issue of filteredIssues"
-          class="list-item"
-        >
+        <div *ngFor="let issue of filteredIssues" class="list-item">
           <div class="item-icon" [ngClass]="issue.closed_at ? 'closed' : 'open'">
             <i [class]="issue.closed_at ? 'fas fa-check-circle' : 'fas fa-dot-circle'"></i>
           </div>
           <div class="item-content">
-            <a
-              [href]="issue.html_url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="item-title"
-            >
+            <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer" class="item-title">
               {{ issue.title }}
             </a>
             <span class="item-meta">Updated {{ formatLastUpdated(issue.updated_at) }}</span>
@@ -113,20 +87,12 @@
 
       <!-- Pull Requests List -->
       <div *ngIf="activeView === 'pullRequests'" class="items-list">
-        <div
-          *ngFor="let pr of filteredPullRequests"
-          class="list-item"
-        >
+        <div *ngFor="let pr of filteredPullRequests" class="list-item">
           <div class="item-icon pr">
             <i class="fas fa-code-branch"></i>
           </div>
           <div class="item-content">
-            <a
-              [href]="pr.html_url"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="item-title"
-            >
+            <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer" class="item-title">
               {{ pr.title }}
             </a>
             <span class="item-meta">Updated {{ formatLastUpdated(pr.updated_at) }}</span>
