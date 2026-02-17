@@ -1,0 +1,56 @@
+name: CI for Webiu Frontend
+
+on:
+  push:
+    branches: [feature/webiu-2024]
+  pull_request:
+    branches: [feature/webiu-2024]
+
+jobs:
+  build-webiu-ui:
+    name: Build and Test Angular (webiu-ui)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+
+      - name: Checkout target branch
+        uses: actions/checkout@v4
+        with:
+          ref: feature/webiu-2024
+
+      - name: Fetch pull request changes
+        run: |
+          git fetch origin +refs/pull/${{ github.event.pull_request.number }}/merge:pr
+          git checkout pr
+
+      - name: Install Angular CLI
+        run: |
+          cd webiu-ui
+          npm install -g @angular/cli
+
+      - name: Install dependencies
+        run: |
+          cd webiu-ui
+          npm install
+
+      - name: Install Chrome
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
+      - name: Build Angular App
+        run: |
+          cd webiu-ui
+          npm run build
+
+      - name: Run Angular Tests
+        run: |
+          cd webiu-ui
+          npm test -- --browsers=ChromeHeadless --watch=false

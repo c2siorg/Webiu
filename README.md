@@ -1,74 +1,144 @@
-# WebiU
+# WebiU 2.0: C2SI/SCoRe Lab Website
 
 <p>
   <img width="400" height="auto" src="https://github.com/Grumpyyash/Webiu/blob/master/static/images/logo.png">
 </p>
 
-Building and maintaining a website is an essential task for any business or organization. This project aims to ease the workflow of getting a website up and running by developing reusable Gatsby Components which are easily plugable to create Gatsby websites with ease.
+## Project Summary
 
-Website built with Webiu: https://www.scorelab.org/
+WebiU 2.0 is a web application designed to provide a visually appealing and intuitive interface specifically for C2SI and SCoRe Lab. The website offers a comprehensive view of various projects, showcasing detailed information such as the tech stack, issue count, contributors, forks, and stars. Additionally, the site highlights individual contributions of each contributor, enhancing the visibility of their efforts.
+
+The project leverages the GitHub API for retrieving project details and integrates databases for efficient data management. Comprehensive documentation is provided to assist future contributors, ensuring the project remains accessible and understandable.
+
+## Features
+
+- **Project Information Display**: Showcases detailed information about each project, including tech stack, issue count, contributors, forks, and stars.
+- **Individual Contributor Highlight**: Displays contributions made by each contributor, emphasizing their role and impact on the project.
+- **GitHub API Integration**: Retrieves project data directly from GitHub, ensuring real-time updates.
+- **Comprehensive Documentation**: Guides future contributors on how to get started, contribute, and understand the project's architecture.
+
+## Future Goals
+
+- **User Authentication**: Implementing a system that allows users to log in and view their personalized contribution details.
+- **Admin Functionality**: Developing features that allow admins to manage the visibility of projects on the website.
+
+## Table of Contents
+
+1. [Installation](#installation)
+2. [Usage](#usage)
+3. [Project Structure](#project-structure)
+4. [APIs and Integrations](#apis-and-integrations)
+5. [Future Goals](#future-goals)
+6. [Contributing](#contributing)
+7. [License](#license)
 
 ## Installation
 
-The project is based on ReactJs, JavaScript and GatsbyJs. You need to make sure that you have compatible versions of node/yarn, npm installed. SASS as the stylesheet is used in this project.
+### Prerequisites
 
-## Initial Setup
+- **Node.js** (v18.x.x or higher)
+- **npm** (v9.x.x or higher)
+- **Angular CLI** (v17.x.x)
+- **MongoDB** (for database)
+- **Git** (for version control)
 
-Fork the repository as your own copy
-`https://github.com/ <Your Username> /Webiu.git`
+### Frontend Setup
 
-Clone the repository in your local system
-`git clone https://github.com/ <Your Username> /Webiu.git`
+1. **Navigate to the frontend directory:**
 
-## Local Development Setup
+   ```bash
+   cd webiu-ui
+   ```
 
-You will need to have Gatsby CLI installed into your system
-Go to the offical Gatsby documentation and proceed further to set up the Gatsby CLI https://www.gatsbyjs.com/docs/tutorial/
+2. **Install Angular CLI globally:**
 
-#### Cd into the project
+   ```bash
+   npm install -g @angular/cli
+   ```
 
-`cd Webiu`
+3. **Install project dependencies:**
 
-#### Install All Dependencies
+   ```bash
+   npm install
+   ```
 
-`npm install`
+4. **Run the frontend development server:**
 
-#### Errors if any?
+   ```bash
+   ng serve
+   ```
 
-Got Stuck? Don't forget to give a look to the troubleshooting guides https://www.gatsbyjs.com/docs/how-to/local-development/troubleshooting-common-errors/
+   The frontend should now be running on `http://localhost:4200`.
 
-If everythings seems normal, you are good to go :)
+### Backend Setup
 
-#### Develop the project
+1. **Navigate to the backend directory:**
 
-run `npm develop` or `gatsby develop`
+   ```bash
+   cd webiu-server
+   ```
 
-Your site must be visible at
-`http://localhost:8000`
+2. **Create a `.env` file:**
 
-## About The NPM Package
+   ```plaintext
+   PORT=5050
+   GITHUB_ACCESS_TOKEN=your_github_token
+   ```
 
-The webiu components now have a seperate dedicated npm-package which increases its reach to the developers. It has all the components exported and can be easily plugged into your next project. It is highly recommended to install and use the package:
+3. **Install project dependencies:**
 
-https://www.npmjs.com/package/webiu-npm
+   ```bash
+   npm install
+   ```
 
-## Usage of the NPM package
+4. **Start the backend server:**
 
-The npm package of webiu can be used in your next proejct. A sample project demonstrating he use-cases of the package is developed and is visible at:
+   ```bash
+   npm start
+   ```
 
-https://grumpyyash.github.io/webiu-npm-test/
+   The backend should now be running on `http://localhost:5050`.
 
-## StoryBook Visualization of the Components
+### Running with Docker
 
-All the webiu components are well-documented using StoryBook, a powerful visualization tool for reviewing UI. The storybook for webiu is deployed live on:
+1. **Ensure Docker is installed.**
 
-https://grumpyyash.github.io/Webiu
+2. **Build and start the Docker containers:**
 
-And, it is also deployed on chromatic - https://610d0e8b03a01e003b2f5070-rllntdhgdq.chromatic.com/
+   ```bash
+   docker-compose up --build
+   ```
 
-## Contributing to the Project
+3. **Access the services:**
 
-We value our contributers a lot and would appreciate contributions to our project. Please make sure to follow our contributing guidelines.
-Please clearly explain any bugs, issues or feature requests (use screenshots wherever applicable) before opening any issue or pull request.
+   - Frontend: `http://localhost:4200`
+   - Backend: `http://localhost:5050`
 
-### May the source be with you!
+## Project Structure
+
+```plaintext
+webiu/
+├── webiu-ui/        # Frontend (Angular 17)
+└── webiu-server/    # Backend (Node.js and Express)
+```
+
+- **webiu-ui**: Contains the frontend code built with Angular 17.
+- **webiu-server**: Contains the backend code using Node.js and Express.
+
+## APIs and Integrations
+
+- **GitHub API**: Used for fetching real-time data such as project details, issue counts, contributors, forks, and stars.
+- **Database Integration**: MongoDB is used to store project and contributor data efficiently.
+
+## Future Goals
+
+- **User Authentication**: Implementing a system that allows users to log in and view their personalized contribution details.
+- **Admin Functionality**: Developing features that allow admins to manage the visibility of projects on the website.
+
+## Contributing
+
+We welcome contributions! Please refer to our [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to get started, make changes, and submit your work.
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.

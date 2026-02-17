@@ -1,33 +1,145 @@
-## How to contribute to Webiu
+Here's a `CONTRIBUTING.md` file for your project:
 
-#### **Did you find a bug?**
+---
 
-- **Ensure the bug was not already reported** by searching on GitHub under [Issues](https://github.com/scorelab/Webiu/issues).
+# Contributing to Webiu
 
-- If you're unable to find an open issue addressing the problem, [open a new one](https://github.com/scorelab/Webiu/issues/new). Be sure to include a **title and clear description**, as much relevant information as possible, and a **code sample** or an **executable test case** demonstrating the expected behavior that is not occurring.
+Thank you for your interest in contributing to Webiu! This guide will help you set up the project on your local machine and get started with development.
 
-#### **Did you write a patch that fixes a bug?**
+## Table of Contents
 
-- Open a new GitHub pull request with the patch.
+1. [Folder Structure](#folder-structure)
+2. [Prerequisites](#prerequisites)
+3. [Setting Up the Project](#setting-up-the-project)
+   - [Frontend (webiu-ui)](#frontend-webiu-ui)
+   - [Backend (webiu-server)](#backend-webiu-server)
+4. [Running the Project](#running-the-project)
+   - [Running with Docker](#running-with-docker)
+5. [Submitting Contributions](#submitting-contributions)
 
-- Ensure the PR description clearly describes the problem and solution. Include the relevant issue number if applicable.
+## Folder Structure
 
-#### **Do you intend to add a new feature or change an existing one?**
+The Webiu project is structured as follows:
 
-- Suggest your change in the [Gitter](https://gitter.im/scorelab/Webiu) and start writing code.
+```
+webiu/
+├── webiu-ui/        # Frontend - Angular 17
+└── webiu-server/    # Backend - Node.js and Express
+```
 
-- Do not open an issue on GitHub until you have collected positive feedback about the change. GitHub issues are primarily intended for bug reports and fixes.
+## Prerequisites
 
-#### **Do you have questions about the source code?**
+Before you begin, ensure you have the following installed:
 
-- Ask any question about how to use Webiu in the [Glitter](https://gitter.im/scorelab/Webiu).
+- **Node.js** (v18.x.x or higher)
+- **npm** (v9.x.x or higher)
+- **Angular CLI** (v17.x.x)
+- **Git** (for version control)
+- **Docker** (optional, for containerized development)
 
-</br>
+## Setting Up the Project
 
-Webiu is a volunteer effort. We encourage you to pitch in and [join the team](https://github.com/scorelab/Webiu/graphs/contributors)!
+### Frontend (webiu-ui)
 
-Thanks! :heart: :heart: :heart:
+1. **Navigate to the frontend directory:**
 
-Webiu Team
+   ```bash
+   cd webiu/webiu-ui
+   ```
 
-CONTRIBUTING file inspired/based on [clocal-gcp contributing](https://github.com/leopardslab/clocal-gcp/blob/master/CONTRIBUTING.md)
+2. **Install Angular CLI globally:**
+
+   ```bash
+   npm install -g @angular/cli
+   ```
+
+3. **Install project dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+4. **Run the frontend development server:**
+
+   ```bash
+   ng serve
+   ```
+
+   The application should now be running on `http://localhost:4200`.
+
+### Backend (webiu-server)
+
+1. **Navigate to the backend directory:**
+
+   ```bash
+   cd webiu/webiu-server
+   ```
+
+2. **Create a `.env` file:**
+
+   In the root of the `webiu-server` directory, create a file named `.env` and add the following environment variables:
+
+   ```plaintext
+   PORT=5050
+   GITHUB_ACCESS_TOKEN=
+   ```
+
+   - **PORT:** The port number where the backend server will run.
+   - **GITHUB_ACCESS_TOKEN:** Your personal GitHub access token. You can create one [here](https://github.com/settings/tokens).
+
+3. **Install project dependencies:**
+
+   ```bash
+   npm install
+   ```
+
+4. **Run the backend server:**
+
+   ```bash
+   npm start
+   ```
+
+   The server should now be running on `http://localhost:5050`.
+
+## Running the Project with Docker
+
+If you prefer to use Docker, follow these steps:
+
+1. **Ensure Docker is installed on your system.**
+
+2. **Build and start the Docker containers:**
+
+   Navigate to the root directory of the project (`webiu/`) and run:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+   This will build and start both the frontend and backend services.
+
+3. **Access the services:**
+
+   - Frontend: `http://localhost:4200`
+   - Backend: `http://localhost:5050`
+
+## Submitting Contributions
+
+Once you've made changes to the project, follow these steps to submit your contributions:
+
+1. **Fork the repository** and create a new branch for your feature or bug fix.
+
+2. **Make your changes** and commit them with a descriptive commit message.
+
+3. **Push your changes** to your forked repository:
+
+   ```bash
+   git push --set-upstream origin your-branch-name
+   ```
+
+4. **Submit a Pull Request** to the main repository and describe the changes you've made.
+
+Thank you for contributing to Webiu! We look forward to your improvements.
+
+---
+
+This `CONTRIBUTING.md` file provides clear instructions for setting up and running the project, as well as guidelines for contributing.

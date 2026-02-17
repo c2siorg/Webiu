@@ -1,0 +1,112 @@
+.publications {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  .publications-hero {
+    max-width: 1000px;
+    margin: 50px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .publications-hero-content {
+      h1 {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 48px;
+        font-weight: 500;
+        line-height: 150%;
+      }
+
+      p {
+        color: var(--primary-dark, var(--primary-dark, #0a0a15));
+        font-size: 16px;
+        font-weight: light;
+        line-height: 150%;
+        max-width: 450px;
+      }
+    }
+  }
+
+  .publications-cards-container {
+    display: grid;
+    gap: 25px;
+    grid-template-columns: repeat(2, 1fr);
+    padding: 20px;
+  }
+}
+
+@media screen and (max-width: 1100px) {
+  .publications {
+    .publications-hero {
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+
+      .publications-hero-content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+
+        p {
+          max-width: 600px;
+          text-align: center;
+        }
+      }
+    }
+
+    .publications-cards-container {
+      grid-template-columns: repeat(1, 1fr);
+    }
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .publications {
+    .publications-hero {
+      img {
+        width: 400px;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .publications {
+    .publications-hero {
+      .publications-hero-content {
+        h1 {
+          font-size: 32px;
+        }
+      }
+      img {
+        width: 300px;
+      }
+    }
+  }
+}
+
+
+.back-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s, visibility 0.3s;
+  z-index: 1000;
+}
+
+.back-to-top.show {
+  opacity: 1;
+  visibility: visible;
+}

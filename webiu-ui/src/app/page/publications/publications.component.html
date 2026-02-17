@@ -1,0 +1,29 @@
+<div class="publications">
+  <div class="publications-hero">
+    <div class="publications-hero-content">
+      <h1>Our Publications</h1>
+      <p>
+        Discover a Spectrum of Publications by the researchers at Ceylon
+        Computer Science Institute
+      </p>
+    </div>
+    <img src="../../../assets/publications-img.png" alt="publications" />
+  </div>
+  <div class="publications-cards-container">
+    @for (publication of publicationsData; track $index) {
+    <app-publications-card
+      [heading]="publication.heading"
+      [link]="publication.link"
+      [issued_by]="publication.issued_by"
+      [description]="publication.description"
+    ></app-publications-card
+    >}
+  </div>
+  <button 
+  class="back-to-top" 
+  (click)="scrollToTop()" 
+  [class.show]="showButton"
+>
+  <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24"> 
+</button>
+</div>

@@ -1,0 +1,34 @@
+<div class="gsoc__page">
+  <div class="gsoc-hero">
+    <div class="gsoc-hero-content">
+      <h1>{{ gsocData.heroTitle }}</h1>
+      <p>{{ gsocData.heroDescription }}</p>
+    </div>
+    <img src="../../../assets/gsoc_no_bg.png" alt="GSOC" />
+  </div>
+
+  <div class="gsoc__details">
+    <p>{{ gsocData.details }}</p>
+  </div>
+
+  <div class="gsoc__idea__details">
+    <h3>Important Guidelines on Submitting Ideas</h3>
+    <p>There are some important guidelines to submit ideas, please read these carefully before adding your ideas!</p>
+    <ol>
+      <li *ngFor="let guideline of gsocData.guidelines">{{ guideline }}</li>
+    </ol>
+  </div>
+
+  <div class="gsoc__projects__list">
+    <div *ngFor="let project of gsocData.projects" class="gsoc__project">
+      <p>{{ project }}</p>
+    </div>
+  </div>
+  <button 
+  class="back-to-top" 
+  (click)="scrollToTop()" 
+  [class.show]="showButton"
+>
+  <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24"> 
+</button>
+</div>

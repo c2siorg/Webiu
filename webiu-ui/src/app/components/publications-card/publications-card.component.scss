@@ -1,0 +1,50 @@
+.publications__card {
+  display: flex;
+  padding: 16px 28px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 20px;
+  border-radius: 8px;
+  border: 2px solid var(--publications-card-border);
+  background: var(--publications-card-bg);
+  box-shadow: 0px 4px 24px 0px var(--publications-card-box-shadow);
+  width: 500px;
+
+  a {
+    color: var(--primary-dark, var(--primary-dark, #0a0a15));
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 150%;
+    text-decoration-line: underline;
+    max-width: 460px;
+  }
+
+  .publications__card__issued__by {
+    color: var(--primary-dark, var(--primary-dark, #0a0a15));
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    max-width: 460px;
+  }
+
+  .publications__card__desc {
+    color: var(--font-light, #898989);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 150%;
+    max-width: 460px;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .publications__card {
+    width: 400px;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .publications__card {
+    width: 300px;
+  }
+}
