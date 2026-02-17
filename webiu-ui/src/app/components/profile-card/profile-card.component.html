@@ -4,9 +4,13 @@
   <span class="profile-username" (click)="onUsernameClick(login)">
     {{ login }}
   </span>
-  <p class="profile-contributions">Contributions: {{ contributions }}</p>
-  <!-- <p class="profile-followers">Followers: {{ followers }}</p>
-  <p class="profile-following">Following: {{ following }}</p> -->
+  <p class="profile-contributions">{{ contributions }} commits</p>
+
+  <!-- Top Repos Chips -->
+  <div class="repo-chips" *ngIf="repos && repos.length > 0">
+    <span class="repo-chip" *ngFor="let repo of topRepos">{{ repo }}</span>
+    <span class="repo-more" *ngIf="repos.length > 3">+{{ repos.length - 3 }} more</span>
+  </div>
 
   <div class="profile-github">
     <div class="github-icon">

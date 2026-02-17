@@ -45,8 +45,9 @@
 
     <div class="contributors-grid" *ngIf="!isLoading">
       <app-profile-card *ngFor="let profile of displayProfiles; trackBy: trackByFn" [login]="profile.login"
-        [contributions]="profile.contributions" [avatar_url]="profile.avatar_url" [followers]="profile.followers"
-        [following]="profile.following" (usernameClick)="onUsernameClick($event)"></app-profile-card>
+        [contributions]="profile.contributions" [avatar_url]="profile.avatar_url" [repos]="profile.repos"
+        [followers]="profile.followers" [following]="profile.following"
+        (usernameClick)="onUsernameClick($event)"></app-profile-card>
     </div>
 
     <p *ngIf="!isLoading && displayProfiles.length === 0" class="no-contributors-message">

@@ -61,8 +61,43 @@
 .profile-username {
   cursor: pointer;
   color: var(--profile-username-color);
-  // text-decoration: underline;
   margin-bottom: 5px;
+}
+
+.profile-contributions {
+  font-size: 0.85rem;
+  color: var(--font-light, #898989);
+  margin-bottom: 8px;
+}
+
+.repo-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 12px;
+  margin-bottom: 4px;
+}
+
+.repo-chip {
+  display: inline-block;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  background: var(--select-bg, #e9f6ff);
+  color: var(--primary-color, #3498db);
+  border: 1px solid var(--select-border, #ddd);
+  border-radius: 12px;
+  white-space: nowrap;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.repo-more {
+  font-size: 0.72rem;
+  color: var(--font-light, #898989);
+  align-self: center;
 }
 
 /* Media Queries */

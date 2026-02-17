@@ -24,8 +24,17 @@ export class ContributorSearchComponent {
   errorMessage: string = '';
   loading: boolean = false;
   activeView: 'issues' | 'pullRequests' = 'issues';
-  userProfile: { login: string; avatar_url: string; html_url: string } | null =
-    null;
+  userProfile: {
+    login: string;
+    avatar_url: string;
+    html_url: string;
+    name: string | null;
+    bio: string | null;
+    location: string | null;
+    followers: number;
+    following: number;
+    created_at: string;
+  } | null = null;
   private apiUrl = `${environment.serverUrl}/api/contributor`;
 
   constructor(private route: ActivatedRoute) { }
@@ -67,6 +76,12 @@ export class ContributorSearchComponent {
         login: userProfileResponse.data.login,
         avatar_url: userProfileResponse.data.avatar_url,
         html_url: userProfileResponse.data.html_url,
+        name: userProfileResponse.data.name,
+        bio: userProfileResponse.data.bio,
+        location: userProfileResponse.data.location,
+        followers: userProfileResponse.data.followers || 0,
+        following: userProfileResponse.data.following || 0,
+        created_at: userProfileResponse.data.created_at,
       };
 
       this.extractRepositories();
@@ -127,5 +142,27 @@ export class ContributorSearchComponent {
     return (
       this.filteredIssues.length > 0 || this.filteredPullRequests.length > 0
     );
+  }
+
+  get openIssues(): number {
+    return this.issues.filter((i) => !i.closed_at).length;
+  }
+
+  get closedIssues(): number {
+    return this.issues.filter((i) => i.closed_at).length;
+  }
+
+  get openPRs(): number {
+    return this.pullRequests.filter((pr) => !pr.closed_at).length;
+  }
+
+  get mergedOrClosedPRs(): number {
+    return this.pullRequests.filter((pr) => pr.closed_at).length;
+  }
+
+  get memberSince(): string {
+    if (!this.userProfile?.created_at) return '';
+    const date = new Date(this.userProfile.created_at);
+    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   }
 }
