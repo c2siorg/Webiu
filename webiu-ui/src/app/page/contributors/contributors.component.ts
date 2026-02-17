@@ -127,7 +127,6 @@ export class ContributorsComponent implements OnInit {
     Promise.all(requests).then(() => {
       this.profiles = [...this.contributors];
       this.handleProfileResponse(this.profiles);
-      this.displayProfiles = [...this.contributors];
       this.isLoading = false;
     });
   }
@@ -238,6 +237,23 @@ export class ContributorsComponent implements OnInit {
       this.currentPage--;
       this.filterProfiles();
     }
+  }
+
+  goToFirstPage() {
+    this.currentPage = 1;
+    this.filterProfiles();
+  }
+
+  goToLastPage() {
+    this.currentPage = this.totalPages;
+    this.filterProfiles();
+  }
+
+  onItemsPerPageChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.profilesPerPage = parseInt(selectElement.value, 10);
+    this.currentPage = 1; // Reset to first page
+    this.filterProfiles();
   }
 
   onUsernameClick(username: string) {

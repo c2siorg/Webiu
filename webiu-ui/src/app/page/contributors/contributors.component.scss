@@ -100,7 +100,7 @@
           outline: none;
           color: var(--search-color);
           background-color: var(--select-bg);
-          
+
           &:focus {
             border-color: var(--primary-blue);
           }
@@ -113,43 +113,106 @@
     }
   }
 
-  .pagination {
+  .pagination-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
+    margin-top: 40px;
+    margin-bottom: 40px;
+    flex-wrap: wrap;
     gap: 16px;
-    margin-top: 20px;
+    width: 100%;
 
-    button {
-      padding: 10px 20px;
-      background-color: #2f80ed;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background-color 0.2s ease;
-      
-      &:disabled {
-        opacity: 0; // Hide button when disabled 
-        cursor: not-allowed;
+    .pagination {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+      min-width: 0;
+
+      button {
+        padding: 8px 12px;
+        background-color: #2f80ed;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 40px;
+        height: 40px;
+        flex-shrink: 0;
+
+        i {
+          font-size: 18px;
+          color: white;
+        }
+
+        &:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+        }
+
+        &:hover:not(:disabled) {
+          background-color: #004cbf;
+        }
       }
 
-      &:hover:not(:disabled) {
-        background-color: #004cbf;
+      span {
+        font-size: 14px;
+        color: var(--pagination-span);
+        padding: 0 8px;
+        white-space: nowrap;
       }
     }
 
-    span {
-      font-size: 16px;
-      color: var(--pagination-span);
+    .items-per-page {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-shrink: 0;
+
+      label {
+        font-size: 14px;
+        color: var(--filter-section-color);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      select {
+        padding: 8px 12px;
+        border: 1px solid var(--select-border);
+        border-radius: 6px;
+        font-size: 14px;
+        cursor: pointer;
+        outline: none;
+        color: var(--search-color);
+        background-color: var(--select-bg);
+        min-width: 60px;
+
+        &:focus {
+          border-color: #2f80ed;
+        }
+      }
     }
   }
 
   .contributors-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     gap: 24px;
+    margin-top: 40px;
+
+    app-profile-card {
+      flex: 0 0 auto;
+      width: 280px;
+      max-width: 100%;
+    }
 
     .contributor-card {
       padding: 24px;
@@ -227,6 +290,7 @@
             span {
               display: none;
             }
+
             padding: 16px;
           }
         }
@@ -241,16 +305,27 @@
         width: 100%;
       }
     }
+
+    .pagination-container {
+      flex-direction: column;
+      gap: 16px;
+
+      .items-per-page {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .pagination {
+        width: 100%;
+        justify-content: center;
+      }
+    }
   }
 }
 
 @media screen and (max-width: 480px) {
   .contributors-page {
     margin: 20px auto;
-
-    .contributors-grid {
-      grid-template-columns: 1fr;
-    }
 
     .search-section {
       .search-container {
