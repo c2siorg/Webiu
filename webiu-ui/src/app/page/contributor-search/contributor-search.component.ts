@@ -5,11 +5,12 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { formatDistanceToNow } from 'date-fns';
 import { environment } from '../../../environments/environment';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-contributor-search',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, LoadingSpinnerComponent],
   templateUrl: './contributor-search.component.html',
   styleUrls: ['./contributor-search.component.scss'],
 })
@@ -27,7 +28,7 @@ export class ContributorSearchComponent {
     null;
   private apiUrl = `${environment.serverUrl}/api/contributor`;
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private route: ActivatedRoute) { }
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {

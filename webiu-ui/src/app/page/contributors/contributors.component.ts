@@ -8,6 +8,7 @@ import { ProfileCardComponent } from '../../components/profile-card/profile-card
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
+import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 
 interface ContributionRange {
   label: string;
@@ -30,6 +31,7 @@ interface FollowerRange {
     ReactiveFormsModule,
     CommonModule,
     ProfileCardComponent,
+    LoadingSpinnerComponent,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
@@ -72,7 +74,7 @@ export class ContributorsComponent implements OnInit {
     private http: HttpClient,
     private commonUtil: CommmonUtilService,
     private router: Router
-  ) {}
+  ) { }
 
   ngOnInit() {
     this.getProfiles();

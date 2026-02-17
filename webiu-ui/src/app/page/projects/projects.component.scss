@@ -96,26 +96,6 @@
   }
 }
 
-.loader {
-  border: 8px solid #f3f3f3;
-  border-top: 8px solid #3498db;
-  border-radius: 50%;
-  width: 50px;
-  height: 50px;
-  animation: spin 1s linear infinite;
-  margin: 20px auto;
-  display: block;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
 .back-to-top {
   position: fixed;
   bottom: 20px;
@@ -178,6 +158,7 @@
           font-size: 32px;
         }
       }
+
       img {
         width: 300px;
       }
