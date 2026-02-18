@@ -242,31 +242,40 @@
   color: var(--font-color-dark, #333);
 }
 
-.filter-dropdown {
+
+.filter-controls {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 16px;
+  flex-wrap: wrap;
 
-  label {
-    font-size: 0.85rem;
-    font-weight: 500;
-    color: var(--font-light, #898989);
-    white-space: nowrap;
-  }
+  .filter-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-  select {
-    padding: 9px 14px;
-    font-size: 0.85rem;
-    border: 1px solid var(--select-border, #ddd);
-    border-radius: 10px;
-    background: var(--card-container-2, #fff);
-    color: var(--font-color-dark, #333);
-    cursor: pointer;
-    min-width: 180px;
+    label {
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--font-light, #898989);
+      white-space: nowrap;
+    }
 
-    &:focus {
-      border-color: var(--primary-color, #3498db);
-      outline: none;
+    select {
+      padding: 8px 12px;
+      font-size: 0.85rem;
+      border: 1px solid var(--select-border, #ddd);
+      border-radius: 8px;
+      background: var(--card-container-2, #fff);
+      color: var(--font-color-dark, #333);
+      cursor: pointer;
+      min-width: 140px;
+      transition: border-color 0.2s;
+
+      &:focus {
+        border-color: var(--primary-color, #3498db);
+        outline: none;
+      }
     }
   }
 }
@@ -302,25 +311,37 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  font-size: 0.85rem;
+  font-size: 1rem; // Increased icon size slightly since background is gone
   margin-top: 2px;
 
   &.open {
-    background: #e8f5e9;
+    background: transparent;
     color: #2e7d32;
   }
 
-  &.closed {
-    background: #f3e5f5;
+  &.closed,
+  &.merged {
+    background: transparent;
     color: #7b1fa2;
   }
 
+  &.closed-pr {
+    background: transparent;
+    color: #c62828;
+  }
+
+  &.draft {
+    background: transparent;
+    color: #616161;
+  }
+
   &.pr {
-    background: #e3f2fd;
+    background: transparent;
     color: #1565c0;
   }
 }
+
+
 
 .item-content {
   display: flex;

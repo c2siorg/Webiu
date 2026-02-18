@@ -16,11 +16,7 @@ interface ContributionRange {
   max: number | null;
 }
 
-interface FollowerRange {
-  label: string;
-  min: number;
-  max: number | null;
-}
+
 
 @Component({
   selector: 'app-contributors',
@@ -42,7 +38,8 @@ export class ContributorsComponent implements OnInit {
   searchText = new FormControl('');
   selectedRepo: string = '';
   selectedContributionRange: string = '';
-  selectedFollowerRange: string = '';
+
+  selectedSort: string = '';
   allRepos: string[] = [];
   isLoading = true;
   showButton = false;
@@ -57,14 +54,6 @@ export class ContributorsComponent implements OnInit {
     { label: '500+', min: 500, max: null },
   ];
 
-  followerRanges: FollowerRange[] = [
-    { label: '0 to 10', min: 0, max: 10 },
-    { label: '10 to 50', min: 10, max: 50 },
-    { label: '50 to 100', min: 50, max: 100 },
-    { label: '100 to 500', min: 100, max: 500 },
-    { label: '500 to 1000', min: 500, max: 1000 },
-    { label: '1000+', min: 1000, max: null },
-  ];
 
   currentPage = 1;
   profilesPerPage = 9;
@@ -153,23 +142,21 @@ export class ContributorsComponent implements OnInit {
   }
 
   onRepoChange(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    this.selectedRepo = selectElement.value;
+    const inputElement = event.target as HTMLInputElement;
+    this.selectedRepo = inputElement.value;
     this.currentPage = 1;
     this.filterProfiles();
   }
 
   onContributionRangeChange(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    this.selectedContributionRange = selectElement.value;
+    const inputElement = event.target as HTMLInputElement;
+    this.selectedContributionRange = inputElement.value;
     this.currentPage = 1;
     this.filterProfiles();
   }
 
-  onFollowerRangeChange(event: Event) {
-    const selectElement = event.target as HTMLSelectElement;
-    this.selectedFollowerRange = selectElement.value;
-    this.currentPage = 1;
+  clearSearch() {
+    this.searchText.setValue('');
     this.filterProfiles();
   }
 
@@ -203,17 +190,9 @@ export class ContributorsComponent implements OnInit {
       }
     }
 
-    if (this.selectedFollowerRange) {
-      const range = this.followerRanges.find(
-        (r) => r.label === this.selectedFollowerRange
-      );
-      if (range) {
-        filteredProfiles = filteredProfiles.filter(
-          (profile) =>
-            profile.followers >= range.min &&
-            (range.max === null || profile.followers <= range.max)
-        );
-      }
+    // Apply sorting
+    if (this.selectedSort) {
+      filteredProfiles = this.sortProfiles(filteredProfiles, this.selectedSort);
     }
 
     this.totalPages = Math.ceil(filteredProfiles.length / this.profilesPerPage);
@@ -254,6 +233,32 @@ export class ContributorsComponent implements OnInit {
     this.profilesPerPage = parseInt(selectElement.value, 10);
     this.currentPage = 1; // Reset to first page
     this.filterProfiles();
+  }
+
+
+
+  onSortChange(event: Event) {
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedSort = selectElement.value;
+    this.currentPage = 1;
+    this.filterProfiles();
+  }
+
+  sortProfiles(profiles: Contributor[], sortBy: string): Contributor[] {
+    const sorted = [...profiles];
+
+    switch (sortBy) {
+      case 'name-asc':
+        return sorted.sort((a, b) => a.login.toLowerCase().localeCompare(b.login.toLowerCase()));
+      case 'name-desc':
+        return sorted.sort((a, b) => b.login.toLowerCase().localeCompare(a.login.toLowerCase()));
+      case 'contributions-desc':
+        return sorted.sort((a, b) => b.contributions - a.contributions);
+      case 'contributions-asc':
+        return sorted.sort((a, b) => a.contributions - b.contributions);
+      default:
+        return sorted;
+    }
   }
 
   onUsernameClick(username: string) {

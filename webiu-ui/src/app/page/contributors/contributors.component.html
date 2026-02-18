@@ -2,7 +2,12 @@
   <section class="search-section">
     <div class="search-container">
       <div class="search-wrapper">
-        <input type="text" class="search-input" placeholder="search contributors" [formControl]="searchText" />
+        <div class="input-container">
+          <input type="text" class="search-input" placeholder="search contributors" [formControl]="searchText" />
+          <button class="clear-icon" *ngIf="searchText.value" (click)="clearSearch()" title="Clear search">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
         <button class="search-button" (click)="filterProfiles()">
           <span>search</span>
           <img src="../../../assets/search.svg" alt="Search Icon" />
@@ -12,33 +17,31 @@
     <div class="filters-section">
       <div class="filter-group">
         <span>Filter by Repository</span>
-        <select class="filter-select" (change)="onRepoChange($event)">
-          <option value="">Select a Repository</option>
-          <option *ngFor="let repo of allRepos" [value]="repo">
-            {{ repo }}
-          </option>
-        </select>
+        <input class="filter-input" list="repos" placeholder="All Repositories" (change)="onRepoChange($event)">
+        <datalist id="repos">
+          <option *ngFor="let repo of allRepos" [value]="repo"></option>
+        </datalist>
       </div>
 
       <div class="filter-group">
         <span>Filter by Contributions</span>
-        <select class="filter-select" (change)="onContributionRangeChange($event)">
-          <option value="">Select Contribution Range</option>
-          <option *ngFor="let range of contributionRanges" [value]="range.label">
-            {{ range.label }}
-          </option>
-        </select>
+        <input class="filter-input" list="contributions" placeholder="All Contributions"
+          (change)="onContributionRangeChange($event)">
+        <datalist id="contributions">
+          <option *ngFor="let range of contributionRanges" [value]="range.label"></option>
+        </datalist>
       </div>
 
-      <!-- <div class="filter-group">
-        <span>Filter by Followers</span>
-        <select class="filter-select" (change)="onFollowerRangeChange($event)">
-          <option value="">Select Follower Range</option>
-          <option *ngFor="let range of followerRanges" [value]="range.label">
-            {{ range.label }}
-          </option>
+      <div class="filter-group">
+        <span>Sort By</span>
+        <select class="filter-select" (change)="onSortChange($event)">
+          <option value="">Default</option>
+          <option value="name-asc">Name (A-Z)</option>
+          <option value="name-desc">Name (Z-A)</option>
+          <option value="contributions-desc">Contributions (High to Low)</option>
+          <option value="contributions-asc">Contributions (Low to High)</option>
         </select>
-      </div> -->
+      </div>
     </div>
 
     <app-loading-spinner *ngIf="isLoading" message="Loading contributors..."></app-loading-spinner>

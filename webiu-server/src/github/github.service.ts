@@ -150,8 +150,33 @@ export class GithubService {
     const prs = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
     );
-    this.cacheService.set(cacheKey, prs, CACHE_TTL);
-    return prs;
+
+    // Fetch details for closed PRs to determine if they were merged
+    const enrichedPrs = await Promise.all(
+      prs.map(async (pr) => {
+        // Only fetch details if closed and we don't know if merged (merged_at missing)
+        // Note: Search API results for PRs don't include merged_at at the top level usually
+        if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
+          try {
+            const response = await axios.get(pr.pull_request.url, {
+              headers: this.headers,
+            });
+            if (response.data.merged_at) {
+              pr.merged_at = response.data.merged_at;
+            }
+          } catch (error) {
+            // Ignore errors for individual PR fetches to avoid failing the whole request
+          }
+        }
+        return pr;
+      }),
+    );
+
+    // Sort by created_at descending
+    enrichedPrs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+    this.cacheService.set(cacheKey, enrichedPrs, CACHE_TTL);
+    return enrichedPrs;
   }
 
   async getUserInfo(accessToken: string): Promise<any> {

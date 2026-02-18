@@ -24,25 +24,55 @@
         width: 100%;
         margin-bottom: 2rem;
 
-        .search-input {
+        .input-container {
+          position: relative;
           flex: 1;
-          padding: 14px 24px;
-          border-radius: 12px;
-          border: 1px solid var(--search-border);
-          background: var(--search-bg);
-          font-size: 16px;
-          color: var(--search-color);
-          outline: none;
-          transition: all 0.2s ease;
 
-          &::placeholder {
+          .search-input {
+            width: 100%;
+            padding: 14px 44px 14px 24px; // Extra padding on right for clear button
+            border-radius: 12px;
+            border: 1px solid var(--search-border);
+            background: var(--search-bg);
+            font-size: 16px;
             color: var(--search-color);
-            opacity: 0.5;
+            outline: none;
+            transition: all 0.2s ease;
+
+            &::placeholder {
+              color: var(--search-color);
+              opacity: 0.5;
+            }
+
+            &:focus {
+              border-color: #0066ff;
+              background: var(--search-bg);
+            }
           }
 
-          &:focus {
-            border-color: #0066ff;
-            background: var(--search-bg);
+          .clear-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--search-color);
+            opacity: 0.5;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.2s;
+
+            &:hover {
+              opacity: 0.8;
+            }
+
+            i {
+              font-size: 16px;
+            }
           }
         }
 
@@ -90,7 +120,8 @@
           white-space: nowrap;
         }
 
-        .filter-select {
+        .filter-select,
+        .filter-input {
           flex: 1;
           padding: 8px 16px;
           border: 1px solid var(--select-border);
@@ -100,6 +131,7 @@
           outline: none;
           color: var(--search-color);
           background-color: var(--select-bg);
+          min-width: 0; // Fix checks
 
           &:focus {
             border-color: var(--primary-blue);
