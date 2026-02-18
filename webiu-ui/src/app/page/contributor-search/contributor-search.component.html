@@ -161,8 +161,8 @@
       <!-- Pull Requests List -->
       <div *ngIf="activeView === 'pullRequests'" class="items-list">
         <div *ngFor="let pr of filteredPullRequests" class="list-item">
-          <div class="item-icon pr">
-            <i class="fas fa-code-branch"></i>
+          <div class="item-icon" [ngClass]="getPrStatusClass(pr)">
+            <i [class]="getPrIconClass(pr)"></i>
           </div>
           <div class="item-content">
             <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer" class="item-title">

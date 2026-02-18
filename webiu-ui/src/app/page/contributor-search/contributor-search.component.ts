@@ -170,6 +170,20 @@ export class ContributorSearchComponent {
     }
   }
 
+  getPrStatusClass(pr: any): string {
+    if (pr.merged_at) return 'merged';
+    if (pr.closed_at) return 'closed-pr';
+    if (pr.draft) return 'draft';
+    return 'open';
+  }
+
+  getPrIconClass(pr: any): string {
+    if (pr.merged_at) return 'fas fa-code-branch';
+    if (pr.closed_at) return 'fas fa-ban'; // Changed from fa-times-circle to fa-ban which is cleaner
+    if (pr.draft) return 'far fa-file-alt';
+    return 'fas fa-code-branch';
+  }
+
   toggleView(view: 'issues' | 'pullRequests') {
     this.activeView = view;
   }
