@@ -162,25 +162,26 @@ Webiu/
 │       └── shared/            # Shared components (loading spinner)
 │
 ├── webiu-server/              # NestJS backend
-│   ├── src/
-│   │   ├── auth/              # Authentication (JWT + Google/GitHub OAuth)
-│   │   ├── project/           # Project data endpoints
-│   │   ├── contributor/       # Contributor data endpoints
-│   │   ├── github/            # GitHub API wrapper
-│   │   ├── user/              # User management
-│   │   ├── email/             # Email service
-│   │   └── common/            # Shared cache service
-│   └── docs/
-│       ├── Architecture.md              # Code structure & data flow
-│       ├── CONTRIBUTING.md              # Contribution guidelines
-│       ├── API_DOCUMENTATION.md         # Full API reference
-│       └── webiu.postman_collection.json
+│   └── src/
+│       ├── auth/              # Authentication (JWT + Google/GitHub OAuth)
+│       ├── project/           # Project data endpoints
+│       ├── contributor/       # Contributor data endpoints
+│       ├── github/            # GitHub API wrapper
+│       ├── user/              # User management
+│       ├── email/             # Email service
+│       └── common/            # Shared cache service
+│
+├── docs/
+│   ├── Architecture.md              # Code structure & data flow
+│   ├── CONTRIBUTING.md              # Contribution guidelines
+│   ├── API_DOCUMENTATION.md         # Full API reference
+│   └── webiu.postman_collection.json
 │
 ├── docker-compose.yml
 └── README.md                  # This file
 ```
 
-For a deep dive into the architecture, module system, data flow, and caching strategy, see **[Architecture.md](webiu-server/docs/Architecture.md)**.
+For a deep dive into the architecture, module system, data flow, and caching strategy, see **[Architecture.md](docs/Architecture.md)**.
 
 ## API Endpoints
 
@@ -198,9 +199,9 @@ For a deep dive into the architecture, module system, data flow, and caching str
 | `GET` | `/auth/google` | Google OAuth sign-in |
 | `GET` | `/auth/github` | GitHub OAuth sign-in |
 
-Full API documentation (request/response schemas, validation, error codes) is in [`webiu-server/docs/API_DOCUMENTATION.md`](webiu-server/docs/API_DOCUMENTATION.md).
+Full API documentation (request/response schemas, validation, error codes) is in [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md).
 
-A **Postman collection** for all endpoints is available at [`webiu-server/docs/webiu.postman_collection.json`](webiu-server/docs/webiu.postman_collection.json) — import it via **Postman → Import → File** to start testing immediately.
+A **Postman collection** for all endpoints is available at [`docs/webiu.postman_collection.json`](docs/webiu.postman_collection.json) — import it via **Postman → Import → File** to start testing immediately.
 
 ## Linting & Code Quality
 
@@ -230,17 +231,17 @@ cd webiu-ui && ng test
 
 ## Contributing
 
-We welcome contributions! Please see **[CONTRIBUTING.md](webiu-server/docs/CONTRIBUTING.md)** for guidelines on branching, code style, commit messages, and the pull request process.
+We welcome contributions! Please see **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** for guidelines on branching, code style, commit messages, and the pull request process.
 
 ## Documentation
 
 | Document | Description |
 |----------|-------------|
 | [README.md](README.md) | Project overview, setup, and quick reference |
-| [webiu-server/docs/Architecture.md](webiu-server/docs/Architecture.md) | Code structure, module system, data flow, and caching |
-| [webiu-server/docs/CONTRIBUTING.md](webiu-server/docs/CONTRIBUTING.md) | How to contribute (branching, code style, PRs) |
-| [webiu-server/docs/API_DOCUMENTATION.md](webiu-server/docs/API_DOCUMENTATION.md) | Full API reference — all endpoints, request/response schemas, error codes |
-| [webiu-server/docs/webiu.postman_collection.json](webiu-server/docs/webiu.postman_collection.json) | Postman collection — import and test all endpoints instantly |
+| [docs/Architecture.md](docs/Architecture.md) | Code structure, module system, data flow, and caching |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | How to contribute (branching, code style, PRs) |
+| [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | Full API reference — all endpoints, request/response schemas, error codes |
+| [docs/webiu.postman_collection.json](docs/webiu.postman_collection.json) | Postman collection — import and test all endpoints instantly |
 
 ## License
 
