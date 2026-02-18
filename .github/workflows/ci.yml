@@ -1,0 +1,80 @@
+name: CI Pipeline
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened        # PR is first opened
+      - synchronize   # new commit pushed to the PR branch
+      - reopened      # PR is re-opened
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # Backend: Lint + Test  (NestJS / Jest)
+  # ──────────────────────────────────────────────────────────
+  backend:
+    name: Backend - Lint & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: webiu-server
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: webiu-server/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Run ESLint WITHOUT --fix so CI only checks, never modifies files.
+      - name: Lint (ESLint + Prettier check)
+        run: npx eslint "{src,apps,libs,test}/**/*.ts"
+
+      - name: Run unit tests
+        run: npm test -- --passWithNoTests --forceExit
+
+  # ──────────────────────────────────────────────────────────
+  # Frontend: Lint + Test  (Angular 17 / Karma + ChromeHeadless)
+  # ──────────────────────────────────────────────────────────
+  frontend:
+    name: Frontend - Lint & Test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: webiu-ui
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: webiu-ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint (angular-eslint)
+        run: npm run lint
+
+      # Install a known-good Chrome version via the official action so
+      # CHROME_BIN is always set correctly regardless of the runner image.
+      - name: Set up Chrome
+        uses: browser-actions/setup-chrome@v1
+        id: setup-chrome
+
+      - name: Run unit tests (headless Chrome)
+        env:
+          CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+        run: npm test -- --browsers=ChromeHeadlessNoSandbox --watch=false --no-progress
