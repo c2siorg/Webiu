@@ -1,11 +1,21 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
+import { CacheService } from '../common/cache.service';
+
+const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class ContributorService {
-  constructor(private githubService: GithubService) {}
+  constructor(
+    private githubService: GithubService,
+    private cacheService: CacheService,
+  ) {}
 
   async getAllContributors() {
+    const cacheKey = 'all_contributors';
+    const cached = this.cacheService.get(cacheKey);
+    if (cached) return cached;
+
     try {
       const orgName = this.githubService.org;
       const contributorsMap = new Map();
@@ -16,7 +26,7 @@ export class ContributorService {
         return [];
       }
 
-      const BATCH_SIZE = 5;
+      const BATCH_SIZE = 10;
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
         const batch = repositories.slice(i, i + BATCH_SIZE);
 
@@ -60,6 +70,7 @@ export class ContributorService {
         }),
       );
 
+      this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
       return allContributors;
     } catch (error) {
       console.error('Error in getAllContributors:', error);
@@ -105,6 +116,30 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user created pull requests:',
+        error.response ? error.response.data : error.message,
+      );
+      throw new InternalServerErrorException('Internal server error');
+    }
+  }
+
+  /**
+   * Combined endpoint: fetches both issues and PRs in parallel.
+   * Saves the frontend from making 2 separate requests.
+   */
+  async getUserStats(username: string) {
+    try {
+      const [issues, pullRequests] = await Promise.all([
+        this.githubService.searchUserIssues(username),
+        this.githubService.searchUserPullRequests(username),
+      ]);
+
+      return {
+        issues: issues || [],
+        pullRequests: pullRequests || [],
+      };
+    } catch (error) {
+      console.error(
+        'Error fetching user stats:',
         error.response ? error.response.data : error.message,
       );
       throw new InternalServerErrorException('Internal server error');
