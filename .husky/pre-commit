@@ -1,0 +1,15 @@
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+echo "Running checks before commit..."
+
+# Check Backend
+echo "Linting Backend..."
+cd webiu-server && npx lint-staged || exit 1
+cd ..
+
+# Check Frontend
+echo "Linting Frontend..."
+cd webiu-ui && npx lint-staged || exit 2
+
+echo "All checks passed!"

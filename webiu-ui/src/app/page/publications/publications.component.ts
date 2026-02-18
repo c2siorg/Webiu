@@ -5,7 +5,6 @@ import { PublicationsCardComponent } from '../../components/publications-card/pu
 import { publicationsData } from './publications-data';
 
 
-
 @Component({
   selector: 'app-publications',
   standalone: true,
