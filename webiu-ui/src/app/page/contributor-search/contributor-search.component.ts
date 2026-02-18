@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import axios from 'axios';
 import { FormsModule } from '@angular/forms';
@@ -14,19 +14,19 @@ import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-sp
   templateUrl: './contributor-search.component.html',
   styleUrls: ['./contributor-search.component.scss'],
 })
-export class ContributorSearchComponent {
-  username: string = '';
+export class ContributorSearchComponent implements OnInit {
+  username = '';
   issues: any[] = [];
   pullRequests: any[] = [];
   uniqueRepositories: string[] = [];
   filteredIssues: any[] = [];
   filteredPullRequests: any[] = [];
-  errorMessage: string = '';
-  loading: boolean = false;
+  errorMessage = '';
+  loading = false;
   activeView: 'issues' | 'pullRequests' = 'issues';
-  selectedStatus: string = '';
-  selectedSort: string = 'updated-desc';
-  selectedRepo: string = '';
+  selectedStatus = '';
+  selectedSort = 'updated-desc';
+  selectedRepo = '';
   userProfile: {
     login: string;
     avatar_url: string;
@@ -40,7 +40,7 @@ export class ContributorSearchComponent {
   } | null = null;
   private apiUrl = `${environment.serverUrl}/api/contributor`;
 
-  constructor(private route: ActivatedRoute) { }
+  private route = inject(ActivatedRoute);
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
@@ -86,7 +86,7 @@ export class ContributorSearchComponent {
       this.extractRepositories();
       this.filteredIssues = [...this.issues];
       this.filteredPullRequests = [...this.pullRequests];
-    } catch (error) {
+    } catch {
       this.errorMessage =
         'Failed to fetch data. Please check the username or try again later.';
     } finally {

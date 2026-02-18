@@ -185,7 +185,10 @@ describe('GithubService', () => {
       });
 
       const result = await service.exchangeGithubCode(
-        'client-id', 'client-secret', 'auth-code', 'http://redirect',
+        'client-id',
+        'client-secret',
+        'auth-code',
+        'http://redirect',
       );
       expect(result).toEqual({ access_token: 'gh-token' });
     });

@@ -19,24 +19,24 @@
       </div>
     </div>
 
-    <app-loading-spinner *ngIf="isLoading" message="Loading projects..."></app-loading-spinner>
+    @if (isLoading) {
+      <app-loading-spinner message="Loading projects..."></app-loading-spinner>
+    }
 
-    <ng-container *ngIf="!isLoading">
-      <ng-container *ngIf="filteredProjects.length > 0; else noProjectsFound">
-        <ng-container *ngFor="let project of filteredProjects; trackBy: trackByProjectName">
+    @if (!isLoading) {
+      @if (filteredProjects.length > 0) {
+        @for (project of filteredProjects; track trackByProjectName($index, project)) {
           <app-projects-card [name]="project.name" [org]="org" [repo]="project.name"
             [description]="project.description || ''" [issue]="project.open_issues_count" [link]="project.html_url"
             [language]="project.language || ''" [topics]="project.topics" [createdAt]="project.created_at"
-            [updatedAt]="project.updated_at" [pullRequests]="project.pull_requests"></app-projects-card>
-        </ng-container>
-      </ng-container>
-
-      <ng-template #noProjectsFound>
+          [updatedAt]="project.updated_at" [pullRequests]="project.pull_requests"></app-projects-card>
+        }
+      } @else {
         <app-projects-card [name]="'No projects found.'"
           [description]="'Please enter a valid project name or check back later.'"
-          class="no-projects"></app-projects-card>
-      </ng-template>
-    </ng-container>
+        class="no-projects"></app-projects-card>
+      }
+    }
   </div>
 
   <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">

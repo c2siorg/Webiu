@@ -1,4 +1,4 @@
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
@@ -13,23 +13,24 @@ import { environment } from '../../../environments/environment';
   styleUrls: ['./navbar.component.scss'],
 })
 export class NavbarComponent implements OnInit {
+  private router = inject(Router);
+  private themeService = inject(ThemeService);
+
   isMenuOpen = false;
   isSunVisible = true;
   isLoggedIn = false;
   showLoginOptions = false;
   user: any;
-  currentRoute: string = '/';
-
-  constructor(private router: Router, private themeService: ThemeService) {
-    this.isSunVisible = !this.themeService.isDarkMode();
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe((event: any) => {
-        this.currentRoute = event.url;
-      });
-  }
+  currentRoute = '/';
 
   ngOnInit(): void {
+    this.isSunVisible = !this.themeService.isDarkMode();
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event: NavigationEnd) => {
+        this.currentRoute = event.url;
+      });
+
     const queryParams = new URLSearchParams(window.location.search);
     const user = queryParams.get('user');
     if (user) {

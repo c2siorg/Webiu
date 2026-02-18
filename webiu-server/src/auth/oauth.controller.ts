@@ -3,7 +3,6 @@ import {
   Get,
   Query,
   Res,
-  HttpStatus,
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -56,9 +55,7 @@ export class OAuthController {
       );
 
       if (tokenResponse.data.error) {
-        throw new BadRequestException(
-          tokenResponse.data.error_description,
-        );
+        throw new BadRequestException(tokenResponse.data.error_description);
       }
 
       const accessToken = tokenResponse.data.access_token;
@@ -119,9 +116,7 @@ export class OAuthController {
         throw new BadRequestException(tokenData.error_description);
       }
 
-      const user = await this.githubService.getUserInfo(
-        tokenData.access_token,
-      );
+      const user = await this.githubService.getUserInfo(tokenData.access_token);
 
       const frontendUrl = this.configService.get<string>(
         'FRONTEND_BASE_URL',

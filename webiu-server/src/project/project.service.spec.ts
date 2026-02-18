@@ -49,7 +49,7 @@ describe('ProjectService', () => {
         .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
         .mockResolvedValueOnce([{ id: 3 }]);
 
-      const result = await service.getAllProjects() as any;
+      const result = (await service.getAllProjects()) as any;
 
       expect(result.repositories).toHaveLength(2);
       expect(result.repositories[0].pull_requests).toBe(2);
@@ -76,7 +76,7 @@ describe('ProjectService', () => {
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValueOnce([{ id: 1 }]);
 
-      const result = await service.getAllProjects() as any;
+      const result = (await service.getAllProjects()) as any;
 
       expect(result.repositories[0].pull_requests).toBe(0);
       expect(result.repositories[1].pull_requests).toBe(1);
@@ -126,9 +126,9 @@ describe('ProjectService', () => {
 
     it('should throw InternalServerErrorException on API error', async () => {
       mockGithubService.getRepoIssues.mockRejectedValue(new Error('fail'));
-      await expect(
-        service.getIssuesAndPr('c2siorg', 'repo1'),
-      ).rejects.toThrow(InternalServerErrorException);
+      await expect(service.getIssuesAndPr('c2siorg', 'repo1')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 });

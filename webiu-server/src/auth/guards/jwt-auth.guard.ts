@@ -25,7 +25,7 @@ export class JwtAuthGuard implements CanActivate {
       // TODO: Look up user from DB when MongoDB is connected
       request.user = { id: decoded.id };
       return true;
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Token is not valid');
     }
   }

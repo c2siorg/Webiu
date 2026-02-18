@@ -4,9 +4,8 @@
       <h1>Join our community</h1>
       <div class="media-icons">
         @for (icon of icons; track $index) {
-        <a class="icon-link" href="{{ icon.link }}"
-          ><img class="icon" src="{{ icon.media_icon }}"
-        /></a>
+        <a class="icon-link" href="{{ icon.link }}"><img class="icon" src="{{ icon.media_icon }}"
+            alt="Social Media Icon" /></a>
         }
       </div>
     </div>
@@ -33,11 +32,7 @@
       </div>
     </div>
   </div>
-  <button 
-  class="back-to-top" 
-  (click)="scrollToTop()" 
-  [class.show]="showButton"
->
-<img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24">
-</button>
+  <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
+    <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24">
+  </button>
 </div>

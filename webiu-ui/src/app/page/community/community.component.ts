@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, inject } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor, contributors } from '../../common/data/contributor';
@@ -12,13 +12,11 @@ import { CommmonUtilService } from '../../common/service/commmon-util.service';
   styleUrls: ['./community.component.scss'],
 })
 export class CommunityComponent {
-  constructor(private commonUtil : CommmonUtilService){
-
-  }
+  private commonUtil = inject(CommmonUtilService);
   icons: Media[] = socialMedia;
   users: Contributor[] = this.shuffleArray(contributors);
   showButton = false;
-  private shuffleArray(array: any[]): any[] {
+  private shuffleArray(array: Contributor[]): Contributor[] {
     let currentIndex = array.length,
       randomIndex;
     while (currentIndex !== 0) {

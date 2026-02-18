@@ -56,9 +56,7 @@ export class ProjectService {
 
   async getIssuesAndPr(org: string, repo: string) {
     if (!org || !repo) {
-      throw new BadRequestException(
-        'Organization and repository are required',
-      );
+      throw new BadRequestException('Organization and repository are required');
     }
 
     const cacheKey = `issues_pr_count_${org}_${repo}`;
@@ -79,9 +77,7 @@ export class ProjectService {
         'Error fetching issues and PRs:',
         error.response?.data || error.message,
       );
-      throw new InternalServerErrorException(
-        'Failed to fetch issues and PRs',
-      );
+      throw new InternalServerErrorException('Failed to fetch issues and PRs');
     }
   }
 }

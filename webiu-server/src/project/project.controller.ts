@@ -18,10 +18,7 @@ export class IssuesController {
 
   @Get('issuesAndPr')
   @Header('Cache-Control', 'public, max-age=300')
-  async getIssuesAndPr(
-    @Query('org') org: string,
-    @Query('repo') repo: string,
-  ) {
+  async getIssuesAndPr(@Query('org') org: string, @Query('repo') repo: string) {
     return this.projectService.getIssuesAndPr(org, repo);
   }
 }

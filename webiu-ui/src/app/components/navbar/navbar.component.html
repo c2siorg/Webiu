@@ -1,7 +1,7 @@
 <div class="navbar">
   <a [routerLink]="['/']" class="logo-link" (click)="preventReload($event)">
     <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="logo" />
-  </a>  
+  </a>
   <div [ngClass]="{ navbar__menu: true, open: isMenuOpen }" id="navbarMenu">
     <div class="navbar__menu__items" routerLink="/" [class.active]="isRouteActive('/')">
       <img src="../../../assets/home.svg" alt="Home Icon" />
@@ -28,16 +28,17 @@
       <p>GSoC</p>
     </div>
     <button class="navbar__menu__items Login_Logout" (click)="toggleLoginOptions()">
-      <img [src]="isLoggedIn ? '../../../assets/logout.svg' : '../../../assets/login.svg'" 
-        alt="{{ isLoggedIn ? 'Logout Icon' : 'Login Icon' }}" 
-        class="login-logout-icon"
-      />
+      <img [src]="isLoggedIn ? '../../../assets/logout.svg' : '../../../assets/login.svg'"
+        alt="{{ isLoggedIn ? 'Logout Icon' : 'Login Icon' }}" class="login-logout-icon" />
       <p>{{ isLoggedIn ? 'Logout' : 'Login' }}</p>
     </button>
 
-    <p *ngIf="isLoggedIn">Welcome,<br> {{ user.name }}!</p>
+    @if (isLoggedIn) {
+    <p>Welcome,<br> {{ user.name }}!</p>
+    }
 
-    <div *ngIf="showLoginOptions && !isLoggedIn" class="login-options">
+    @if (showLoginOptions && !isLoggedIn) {
+    <div class="login-options">
       <button (click)="loginWithGoogle()">
         <img src="../../../assets/google.webp" alt="Google Icon">
         <p>Login with Google</p>
@@ -47,13 +48,9 @@
         <p>Login with GitHub</p>
       </button>
     </div>
+    }
 
-    <button
-      class="sun-moon-toggle"
-      aria-label="Toggle color mode"
-      title="Toggle color mode"
-      (click)="toggleMode()"
-    >
+    <button class="sun-moon-toggle" aria-label="Toggle color mode" title="Toggle color mode" (click)="toggleMode()">
       <div class="sun" [class.visible]="isSunVisible"></div>
       <div class="moon" [class.visible]="!isSunVisible">
         <div class="star"></div>
@@ -62,14 +59,14 @@
     </button>
   </div>
 
-  <div class="navigation__buttons" (click)="toggleMenu()">
+  <div class="navigation__buttons" (click)="toggleMenu()" (keyup.enter)="toggleMenu()" tabindex="0">
     <div class="nav-btn">
-      <img
-        *ngIf="!isMenuOpen"
-        src="../../../assets/ham-menu.svg"
-        alt="ham menu"
-      />
-      <img *ngIf="isMenuOpen" src="../../../assets/cross.svg" alt="cross" />
+      @if (!isMenuOpen) {
+      <img src="../../../assets/ham-menu.svg" alt="ham menu" />
+      }
+      @if (isMenuOpen) {
+      <img src="../../../assets/cross.svg" alt="cross" />
+      }
     </div>
   </div>
 </div>

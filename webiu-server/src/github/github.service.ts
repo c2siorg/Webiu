@@ -124,8 +124,7 @@ export class GithubService {
       );
       this.cacheService.set(cacheKey, contributors, CACHE_TTL);
       return contributors;
-    } catch (error) {
-      console.error('Error in fetching contributors', error);
+    } catch {
       return null;
     }
   }
@@ -164,7 +163,7 @@ export class GithubService {
             if (response.data.merged_at) {
               pr.merged_at = response.data.merged_at;
             }
-          } catch (error) {
+          } catch {
             // Ignore errors for individual PR fetches to avoid failing the whole request
           }
         }
@@ -173,7 +172,10 @@ export class GithubService {
     );
 
     // Sort by created_at descending
-    enrichedPrs.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    enrichedPrs.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
 
     this.cacheService.set(cacheKey, enrichedPrs, CACHE_TTL);
     return enrichedPrs;
