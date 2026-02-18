@@ -1,145 +1,113 @@
-Here's a `CONTRIBUTING.md` file for your project:
+# Contributing to Webiu 2.0
 
----
+Thank you for your interest in contributing to **WebiU 2.0**! We welcome improvements, bug reports, and new features from the community.
 
-# Contributing to Webiu
-
-Thank you for your interest in contributing to Webiu! This guide will help you set up the project on your local machine and get started with development.
+Please take a moment to review this document to understand our development process and coding standards.
 
 ## Table of Contents
 
-1. [Folder Structure](#folder-structure)
+1. [Code of Conduct](#code-of-conduct)
 2. [Prerequisites](#prerequisites)
-3. [Setting Up the Project](#setting-up-the-project)
-   - [Frontend (webiu-ui)](#frontend-webiu-ui)
-   - [Backend (webiu-server)](#backend-webiu-server)
-4. [Running the Project](#running-the-project)
-   - [Running with Docker](#running-with-docker)
-5. [Submitting Contributions](#submitting-contributions)
+3. [Setting Up for Development](#setting-up-for-development)
+4. [Branching Strategy](#branching-strategy)
+5. [Linting & Code Style](#linting--code-style)
+6. [Submitting a Pull Request](#submitting-a-pull-request)
+7. [Reporting Bugs & Requesting Features](#reporting-bugs--requesting-features)
 
-## Folder Structure
+## Code of Conduct
 
-The Webiu project is structured as follows:
-
-```
-webiu/
-├── webiu-ui/        # Frontend - Angular 17
-└── webiu-server/    # Backend - Node.js and Express
-```
+We are committed to providing a friendly, safe, and welcoming environment for all contributors. Please adhere to the [Contributor Covenant Code of Conduct](https://www.contributor-covenant.org/version/2/0/code_of_conduct/).
 
 ## Prerequisites
 
-Before you begin, ensure you have the following installed:
+Before contributing, please ensure you have the following installed:
+*   [Node.js](https://nodejs.org/) (v18.x or higher)
+*   [npm](https://www.npmjs.com/) (v9.x or higher)
+*   [Angular CLI](https://angular.io/cli) (v17.x or higher)
+*   [Git](https://git-scm.com/)
 
-- **Node.js** (v18.x.x or higher)
-- **npm** (v9.x.x or higher)
-- **Angular CLI** (v17.x.x)
-- **Git** (for version control)
-- **Docker** (optional, for containerized development)
+*Optional but recommended:*
+*   [Docker](https://www.docker.com/) for containerized development.
 
-## Setting Up the Project
+## Setting Up for Development
 
-### Frontend (webiu-ui)
+1.  **Fork the Repository**: Click the "Fork" button on the top right of the repository page.
 
-1. **Navigate to the frontend directory:**
+2.  **Clone Your Fork**:
+    ```bash
+    git clone https://github.com/YOUR-USERNAME/Webiu.git
+    cd Webiu
+    ```
 
-   ```bash
-   cd webiu/webiu-ui
-   ```
+3.  **Install Dependencies**:
+    *   **Frontend**:
+        ```bash
+        cd webiu-ui
+        npm install
+        ```
+    *   **Backend**:
+        ```bash
+        cd webiu-server
+        npm install
+        cp .env.example .env  # Configure your .env variables
+        ```
 
-2. **Install Angular CLI globally:**
+4.  **Run the Project**:
+    You can run the frontend and backend separately using `npm start` (backend) and `ng serve` (frontend), or use Docker Compose:
+    ```bash
+    docker-compose up
+    ```
 
-   ```bash
-   npm install -g @angular/cli
-   ```
+## Branching Strategy
 
-3. **Install project dependencies:**
+We follow a simple feature-branch workflow:
 
-   ```bash
-   npm install
-   ```
+1.  Create a **new branch** for your work. Do not work directly on `master`.
+    ```bash
+    git checkout -b feat/my-new-feature
+    # or
+    git checkout -b fix/issue-123
+    ```
+    *   Use `feat/` for new features.
+    *   Use `fix/` for bug fixes.
+    *   Use `docs/` for documentation updates.
 
-4. **Run the frontend development server:**
+## Linting & Code Style
 
-   ```bash
-   ng serve
-   ```
+We use **ESLint**, **Prettier**, and **Husky** to maintain high code quality.
 
-   The application should now be running on `http://localhost:4200`.
+*   **Pre-commit Hooks**: A git hook will automatically run when you try to commit your changes. It checks for linting errors in both the frontend and backend.
+    *   If the hook fails, please fix the reported errors before committing again.
+*   **Manual Checks**:
+    *   Frontend: `cd webiu-ui && npm run lint`
+    *   Backend: `cd webiu-server && npm run lint`
 
-### Backend (webiu-server)
+**Commit Messages**:
+Please follow the [Conventional Commits](https://www.conventionalcommits.org/) specification for your commit messages:
+*   `feat: add user profile page`
+*   `fix: resolve login timeout issue`
+*   `docs: update README installation steps`
 
-1. **Navigate to the backend directory:**
+## Submitting a Pull Request
 
-   ```bash
-   cd webiu/webiu-server
-   ```
+1.  **Push your branch** to your forked repository:
+    ```bash
+    git push origin feat/my-new-feature
+    ```
 
-2. **Create a `.env` file:**
+2.  **Open a Pull Request (PR)**:
+    *   Go to the [original repository](https://github.com/rajutkarsh07/Webiu).
+    *   Click "New Pull Request".
+    *   Select your fork and branch.
+    *   Fill out the PR template completely. Describe your changes, link related issues, and provide testing details.
 
-   In the root of the `webiu-server` directory, create a file named `.env` and add the following environment variables:
+3.  **Code Review**:
+    *   Maintainers will review your code.
+    *   Address any feedback or requested changes by pushing new commits to your branch.
 
-   ```plaintext
-   PORT=5050
-   GITHUB_ACCESS_TOKEN=
-   ```
+## Reporting Bugs & Requesting Features
 
-   - **PORT:** The port number where the backend server will run.
-   - **GITHUB_ACCESS_TOKEN:** Your personal GitHub access token. You can create one [here](https://github.com/settings/tokens).
+*   **Bugs**: Use the **Bug Report** issue template to provide detailed reproduction steps.
+*   **Features**: Use the **Feature Request** issue template to describe the proposed functionality and its use case.
 
-3. **Install project dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-4. **Run the backend server:**
-
-   ```bash
-   npm start
-   ```
-
-   The server should now be running on `http://localhost:5050`.
-
-## Running the Project with Docker
-
-If you prefer to use Docker, follow these steps:
-
-1. **Ensure Docker is installed on your system.**
-
-2. **Build and start the Docker containers:**
-
-   Navigate to the root directory of the project (`webiu/`) and run:
-
-   ```bash
-   docker-compose up --build
-   ```
-
-   This will build and start both the frontend and backend services.
-
-3. **Access the services:**
-
-   - Frontend: `http://localhost:4200`
-   - Backend: `http://localhost:5050`
-
-## Submitting Contributions
-
-Once you've made changes to the project, follow these steps to submit your contributions:
-
-1. **Fork the repository** and create a new branch for your feature or bug fix.
-
-2. **Make your changes** and commit them with a descriptive commit message.
-
-3. **Push your changes** to your forked repository:
-
-   ```bash
-   git push --set-upstream origin your-branch-name
-   ```
-
-4. **Submit a Pull Request** to the main repository and describe the changes you've made.
-
-Thank you for contributing to Webiu! We look forward to your improvements.
-
----
-
-This `CONTRIBUTING.md` file provides clear instructions for setting up and running the project, as well as guidelines for contributing.
+Thank you for contributing! 🚀

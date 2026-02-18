@@ -1,143 +1,137 @@
 # WebiU 2.0: C2SI/SCoRe Lab Website
 
-<p>
+<p align="center">
   <img width="400" height="auto" src="https://github.com/Grumpyyash/Webiu/blob/master/static/images/logo.png">
 </p>
 
 ## Project Summary
 
-WebiU 2.0 is a web application designed to provide a visually appealing and intuitive interface specifically for C2SI and SCoRe Lab. The website offers a comprehensive view of various projects, showcasing detailed information such as the tech stack, issue count, contributors, forks, and stars. Additionally, the site highlights individual contributions of each contributor, enhancing the visibility of their efforts.
+**WebiU 2.0** is the official web application for C2SI and SCoRe Lab, designed to provide a comprehensive and visually appealing interface for showcasing the organization's projects and contributors. It offers detailed insights into project tech stacks, issue counts, contributor activity, forks, and stars.
 
-The project leverages the GitHub API for retrieving project details and integrates databases for efficient data management. Comprehensive documentation is provided to assist future contributors, ensuring the project remains accessible and understandable.
-
-## Features
-
-- **Project Information Display**: Showcases detailed information about each project, including tech stack, issue count, contributors, forks, and stars.
-- **Individual Contributor Highlight**: Displays contributions made by each contributor, emphasizing their role and impact on the project.
-- **GitHub API Integration**: Retrieves project data directly from GitHub, ensuring real-time updates.
-- **Comprehensive Documentation**: Guides future contributors on how to get started, contribute, and understand the project's architecture.
-
-## Future Goals
-
-- **User Authentication**: Implementing a system that allows users to log in and view their personalized contribution details.
-- **Admin Functionality**: Developing features that allow admins to manage the visibility of projects on the website.
+Key features include:
+- **Real-time Project Data**: Integrates with the GitHub API to fetch and display up-to-date project statistics.
+- **Contributor Spotlights**: Highlights individual contributions to recognize community efforts.
+- **Modern Tech Stack**: Built with **Angular 17+** (Frontend) and **NestJS** (Backend).
 
 ## Table of Contents
 
-1. [Installation](#installation)
-2. [Usage](#usage)
-3. [Project Structure](#project-structure)
-4. [APIs and Integrations](#apis-and-integrations)
-5. [Future Goals](#future-goals)
+1. [Features](#features)
+2. [Tech Stack](#tech-stack)
+3. [Prerequisites](#prerequisites)
+4. [Installation & Setup](#installation--setup)
+    - [Frontend Setup](#frontend-setup-webiu-ui)
+    - [Backend Setup](#backend-setup-webiu-server)
+    - [Running with Docker](#running-with-docker)
+5. [Linting & Code Quality](#linting--code-quality)
 6. [Contributing](#contributing)
 7. [License](#license)
 
-## Installation
+## Features
 
-### Prerequisites
+- **Project Dashboard**: View detailed metrics for all C2SI/SCoRe Lab projects.
+- **Contributor Leaderboards**: Track and display top contributors across repositories.
+- **Search & Filter**: Easily find projects by language, topic, or popularity.
+- **Responsive Design**: Optimized for both desktop and mobile viewing.
 
+## Tech Stack
+
+- **Frontend**: Angular 17+, TypeScript, SCSS
+- **Backend**: NestJS, TypeScript, MongoDB
+- **Tools**: Docker, ESLint, Prettier, Husky (Git Hooks)
+
+## Prerequisites
+
+Before you begin, ensure you have the following installed:
 - **Node.js** (v18.x.x or higher)
 - **npm** (v9.x.x or higher)
 - **Angular CLI** (v17.x.x)
-- **MongoDB** (for database)
-- **Git** (for version control)
+- **Git**
+- **Docker** (optional, for containerized setup)
 
-### Frontend Setup
+## Installation & Setup
 
-1. **Navigate to the frontend directory:**
+### 1. Clone the Repository
 
-   ```bash
-   cd webiu-ui
-   ```
-
-2. **Install Angular CLI globally:**
-
-   ```bash
-   npm install -g @angular/cli
-   ```
-
-3. **Install project dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-4. **Run the frontend development server:**
-
-   ```bash
-   ng serve
-   ```
-
-   The frontend should now be running on `http://localhost:4200`.
-
-### Backend Setup
-
-1. **Navigate to the backend directory:**
-
-   ```bash
-   cd webiu-server
-   ```
-
-2. **Create a `.env` file:**
-
-   ```plaintext
-   PORT=5050
-   GITHUB_ACCESS_TOKEN=your_github_token
-   ```
-
-3. **Install project dependencies:**
-
-   ```bash
-   npm install
-   ```
-
-4. **Start the backend server:**
-
-   ```bash
-   npm start
-   ```
-
-   The backend should now be running on `http://localhost:5050`.
-
-### Running with Docker
-
-1. **Ensure Docker is installed.**
-
-2. **Build and start the Docker containers:**
-
-   ```bash
-   docker-compose up --build
-   ```
-
-3. **Access the services:**
-
-   - Frontend: `http://localhost:4200`
-   - Backend: `http://localhost:5050`
-
-## Project Structure
-
-```plaintext
-webiu/
-├── webiu-ui/        # Frontend (Angular 17)
-└── webiu-server/    # Backend (Node.js and Express)
+```bash
+git clone https://github.com/rajutkarsh07/Webiu.git
+cd Webiu
 ```
 
-- **webiu-ui**: Contains the frontend code built with Angular 17.
-- **webiu-server**: Contains the backend code using Node.js and Express.
+### 2. Frontend Setup (`webiu-ui`)
 
-## APIs and Integrations
+ Navigate to the frontend directory and install dependencies:
 
-- **GitHub API**: Used for fetching real-time data such as project details, issue counts, contributors, forks, and stars.
-- **Database Integration**: MongoDB is used to store project and contributor data efficiently.
+```bash
+cd webiu-ui
+npm install
+```
 
-## Future Goals
+Start the development server:
 
-- **User Authentication**: Implementing a system that allows users to log in and view their personalized contribution details.
-- **Admin Functionality**: Developing features that allow admins to manage the visibility of projects on the website.
+```bash
+ng serve
+```
+The application will be available at `http://localhost:4200`.
+
+### 3. Backend Setup (`webiu-server`)
+
+Navigate to the backend directory and install dependencies:
+
+```bash
+cd ../webiu-server
+npm install
+```
+
+**Environment Configuration:**
+
+Create a `.env` file in the `webiu-server` root directory:
+
+```plaintext
+PORT=5050
+GITHUB_ACCESS_TOKEN=your_github_token
+MONGO_URI=your_mongodb_connection_string
+```
+*Note: You can generate a GitHub Access Token [here](https://github.com/settings/tokens).*
+
+Start the backend server:
+
+```bash
+npm start
+```
+The server will run on `http://localhost:5050`.
+
+### 4. Running with Docker
+
+You can spin up the entire application stack using Docker Compose:
+
+```bash
+# From the root directory
+docker-compose up --build
+```
+- **Frontend**: `http://localhost:4200`
+- **Backend**: `http://localhost:5050`
+
+## Linting & Code Quality
+
+This project enforces code quality using **ESLint**, **Prettier**, and **Husky** pre-commit hooks.
+
+- **Check Frontend Linting**:
+  ```bash
+  cd webiu-ui
+  npm run lint
+  ```
+
+- **Check Backend Linting**:
+  ```bash
+  cd webiu-server
+  npm run lint
+  ```
+
+*Note: Pre-commit hooks will automatically prevent you from committing code that fails linting checks.*
 
 ## Contributing
 
-We welcome contributions! Please refer to our [CONTRIBUTING.md](CONTRIBUTING.md) file for guidelines on how to get started, make changes, and submit your work.
+We welcome contributions! Please see our [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines on how to propose bug fixes and new features.
 
 ## License
 
