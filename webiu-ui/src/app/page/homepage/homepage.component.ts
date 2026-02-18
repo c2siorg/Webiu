@@ -1,4 +1,4 @@
-import { Component , OnInit} from '@angular/core';
+import { Component } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { HomepageDetails } from '../../common/data/homepage';
 
@@ -11,8 +11,4 @@ import { HomepageDetails } from '../../common/data/homepage';
 })
 export class HomepageComponent {
   homepageData = HomepageDetails;
-
-  ngOnInit(): void {
-
-  }
 }

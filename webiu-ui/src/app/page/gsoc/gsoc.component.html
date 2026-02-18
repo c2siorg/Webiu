@@ -15,20 +15,24 @@
     <h3>Important Guidelines on Submitting Ideas</h3>
     <p>There are some important guidelines to submit ideas, please read these carefully before adding your ideas!</p>
     <ol>
-      <li *ngFor="let guideline of gsocData.guidelines">{{ guideline }}</li>
+      @for (guideline of gsocData.guidelines; track guideline) {
+        <li>{{ guideline }}</li>
+      }
     </ol>
   </div>
 
   <div class="gsoc__projects__list">
-    <div *ngFor="let project of gsocData.projects" class="gsoc__project">
-      <p>{{ project }}</p>
-    </div>
+    @for (project of gsocData.projects; track project) {
+      <div class="gsoc__project">
+        <p>{{ project }}</p>
+      </div>
+    }
   </div>
-  <button 
-  class="back-to-top" 
-  (click)="scrollToTop()" 
-  [class.show]="showButton"
->
-  <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24"> 
-</button>
+  <button
+    class="back-to-top"
+    (click)="scrollToTop()"
+    [class.show]="showButton"
+    >
+    <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24">
+  </button>
 </div>

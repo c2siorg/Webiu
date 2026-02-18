@@ -1,9 +1,9 @@
-import { Component, OnInit, HostListener } from '@angular/core';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor, contributors } from '../../common/data/contributor';
-import { CommonModule } from '@angular/common';
+
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
@@ -25,9 +25,8 @@ interface ContributionRange {
     NavbarComponent,
     HttpClientModule,
     ReactiveFormsModule,
-    CommonModule,
     ProfileCardComponent,
-    LoadingSpinnerComponent,
+    LoadingSpinnerComponent
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
@@ -36,10 +35,10 @@ export class ContributorsComponent implements OnInit {
   profiles: Contributor[] = [];
   displayProfiles: Contributor[] = [];
   searchText = new FormControl('');
-  selectedRepo: string = '';
-  selectedContributionRange: string = '';
+  selectedRepo = '';
+  selectedContributionRange = '';
 
-  selectedSort: string = '';
+  selectedSort = '';
   allRepos: string[] = [];
   isLoading = true;
   showButton = false;
@@ -59,11 +58,9 @@ export class ContributorsComponent implements OnInit {
   profilesPerPage = 9;
   totalPages = 1;
 
-  constructor(
-    private http: HttpClient,
-    private commonUtil: CommmonUtilService,
-    private router: Router
-  ) { }
+  private http = inject(HttpClient);
+  private commonUtil = inject(CommmonUtilService);
+  private router = inject(Router);
 
   ngOnInit() {
     this.getProfiles();
@@ -97,7 +94,7 @@ export class ContributorsComponent implements OnInit {
       return;
     }
 
-    let requests = this.contributors.map((contributor) =>
+    const requests = this.contributors.map((contributor) =>
       this.http
         .get<{ followers?: number; following?: number }>(
           `${environment.serverUrl}/api/user/followersAndFollowing/${contributor.login}`

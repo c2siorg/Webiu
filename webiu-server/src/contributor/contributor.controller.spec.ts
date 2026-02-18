@@ -54,7 +54,9 @@ describe('ContributorController', () => {
   describe('userCreatedPullRequests', () => {
     it('should return PRs for a username', async () => {
       const mockResult = { pullRequests: [{ id: 1 }] };
-      mockContributorService.getUserCreatedPullRequests.mockResolvedValue(mockResult);
+      mockContributorService.getUserCreatedPullRequests.mockResolvedValue(
+        mockResult,
+      );
 
       const result = await controller.userCreatedPullRequests('testuser');
       expect(result).toEqual(mockResult);
@@ -68,7 +70,9 @@ describe('ContributorController', () => {
 
       const result = await controller.getUserStats('testuser');
       expect(result).toEqual(mockResult);
-      expect(mockContributorService.getUserStats).toHaveBeenCalledWith('testuser');
+      expect(mockContributorService.getUserStats).toHaveBeenCalledWith(
+        'testuser',
+      );
     });
   });
 });

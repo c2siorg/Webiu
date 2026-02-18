@@ -1,10 +1,10 @@
-import { Component, OnInit, HostListener } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, HostListener, inject } from '@angular/core';
+
 import { HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { projectsData } from './projects-data';
-import { Project, ProjectResponse } from './project.model';
+import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
@@ -13,12 +13,11 @@ import { ProjectCacheService } from 'src/app/services/project-cache.service';
   selector: 'app-projects',
   standalone: true,
   imports: [
-    CommonModule,
     HttpClientModule,
     FormsModule,
     NavbarComponent,
     ProjectsCardComponent,
-    LoadingSpinnerComponent,
+    LoadingSpinnerComponent
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
@@ -26,12 +25,12 @@ import { ProjectCacheService } from 'src/app/services/project-cache.service';
 export class ProjectsComponent implements OnInit {
   projectsData: Project[] = [];
   filteredProjects: Project[] = [];
-  searchTerm: string = '';
+  searchTerm = '';
   isLoading = true;
   org = 'c2siorg';
   showButton = false;
 
-  constructor(private projectCacheService: ProjectCacheService) { }
+  private projectCacheService = inject(ProjectCacheService);
 
   ngOnInit(): void {
     this.fetchProjects();

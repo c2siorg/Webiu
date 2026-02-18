@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, of, tap, shareReplay } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface ProjectResponse {
@@ -12,8 +12,7 @@ export interface ProjectResponse {
 })
 export class ProjectCacheService {
     private cache$: Observable<ProjectResponse> | null = null;
-
-    constructor(private http: HttpClient) { }
+    private http = inject(HttpClient);
 
     getProjects(): Observable<ProjectResponse> {
         if (!this.cache$) {

@@ -1,90 +1,97 @@
 <div class="search-page">
   <!-- Loading Spinner -->
-  <app-loading-spinner *ngIf="loading" message="Fetching contributor data..."></app-loading-spinner>
+  @if (loading) {
+    <app-loading-spinner message="Fetching contributor data..."></app-loading-spinner>
+  }
 
   <!-- Error Message -->
-  <div class="error-container" *ngIf="errorMessage && !loading">
-    <i class="fas fa-exclamation-triangle error-icon"></i>
-    <p class="error-text">{{ errorMessage }}</p>
-  </div>
+  @if (errorMessage && !loading) {
+    <div class="error-container">
+      <i class="fas fa-exclamation-triangle error-icon"></i>
+      <p class="error-text">{{ errorMessage }}</p>
+    </div>
+  }
 
   <!-- Main Content -->
-  <div class="content-wrapper" *ngIf="!loading && !errorMessage && userProfile">
-    <!-- Sidebar: Profile Card -->
-    <aside class="sidebar">
-      <div class="profile-card">
-        <img [src]="userProfile.avatar_url" alt="{{ userProfile.login }}'s avatar" class="profile-avatar" />
-        <h2 class="profile-name">{{ userProfile.name || userProfile.login }}</h2>
-        <p class="profile-login" *ngIf="userProfile.name">&#64;{{ userProfile.login }}</p>
-        <p class="profile-bio" *ngIf="userProfile.bio">{{ userProfile.bio }}</p>
-
-        <button (click)="openGitHubProfile(userProfile.html_url)" class="github-link-btn">
-          <i class="fab fa-github"></i>
-          <span>View on GitHub</span>
-        </button>
-
-        <!-- Profile Meta -->
-        <div class="profile-meta">
-          <div class="meta-item" *ngIf="userProfile.location">
-            <i class="fas fa-map-marker-alt"></i>
-            <span>{{ userProfile.location }}</span>
-          </div>
-          <div class="meta-item" *ngIf="memberSince">
-            <i class="fas fa-calendar-alt"></i>
-            <span>Member since {{ memberSince }}</span>
-          </div>
-          <div class="meta-item">
-            <i class="fas fa-users"></i>
-            <span>{{ userProfile.followers }} followers &middot; {{ userProfile.following }} following</span>
-          </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="profile-stats">
-          <div class="stat">
-            <span class="stat-value">{{ issues.length }}</span>
-            <span class="stat-label">Issues</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">{{ pullRequests.length }}</span>
-            <span class="stat-label">PRs</span>
-          </div>
-          <div class="stat">
-            <span class="stat-value">{{ uniqueRepositories.length }}</span>
-            <span class="stat-label">Repos</span>
-          </div>
-        </div>
-
-        <!-- Open / Closed Breakdown -->
-        <div class="breakdown-section">
-          <h4 class="breakdown-title">Issues Breakdown</h4>
-          <div class="breakdown-bar">
-            <div class="bar-segment open" [style.width.%]="issues.length ? (openIssues / issues.length) * 100 : 0">
-            </div>
-            <div class="bar-segment closed" [style.width.%]="issues.length ? (closedIssues / issues.length) * 100 : 0">
+  @if (!loading && !errorMessage && userProfile) {
+    <div class="content-wrapper">
+      <!-- Sidebar: Profile Card -->
+      <aside class="sidebar">
+        <div class="profile-card">
+          <img [src]="userProfile.avatar_url" alt="{{ userProfile.login }}'s avatar" class="profile-avatar" />
+          <h2 class="profile-name">{{ userProfile.name || userProfile.login }}</h2>
+          @if (userProfile.name) {
+            <p class="profile-login">&#64;{{ userProfile.login }}</p>
+          }
+          @if (userProfile.bio) {
+            <p class="profile-bio">{{ userProfile.bio }}</p>
+          }
+          <button (click)="openGitHubProfile(userProfile.html_url)" class="github-link-btn">
+            <i class="fab fa-github"></i>
+            <span>View on GitHub</span>
+          </button>
+          <!-- Profile Meta -->
+          <div class="profile-meta">
+            @if (userProfile.location) {
+              <div class="meta-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ userProfile.location }}</span>
+              </div>
+            }
+            @if (memberSince) {
+              <div class="meta-item">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Member since {{ memberSince }}</span>
+              </div>
+            }
+            <div class="meta-item">
+              <i class="fas fa-users"></i>
+              <span>{{ userProfile.followers }} followers &middot; {{ userProfile.following }} following</span>
             </div>
           </div>
-          <div class="breakdown-legend">
-            <span class="legend-item"><i class="fas fa-circle open-dot"></i> {{ openIssues }} Open</span>
-            <span class="legend-item"><i class="fas fa-circle closed-dot"></i> {{ closedIssues }} Closed</span>
+          <!-- Stats -->
+          <div class="profile-stats">
+            <div class="stat">
+              <span class="stat-value">{{ issues.length }}</span>
+              <span class="stat-label">Issues</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ pullRequests.length }}</span>
+              <span class="stat-label">PRs</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value">{{ uniqueRepositories.length }}</span>
+              <span class="stat-label">Repos</span>
+            </div>
           </div>
-
-          <h4 class="breakdown-title" style="margin-top: 16px;">PR Breakdown</h4>
-          <div class="breakdown-bar">
-            <div class="bar-segment pr-open"
+          <!-- Open / Closed Breakdown -->
+          <div class="breakdown-section">
+            <h4 class="breakdown-title">Issues Breakdown</h4>
+            <div class="breakdown-bar">
+              <div class="bar-segment open" [style.width.%]="issues.length ? (openIssues / issues.length) * 100 : 0">
+              </div>
+              <div class="bar-segment closed" [style.width.%]="issues.length ? (closedIssues / issues.length) * 100 : 0">
+              </div>
+            </div>
+            <div class="breakdown-legend">
+              <span class="legend-item"><i class="fas fa-circle open-dot"></i> {{ openIssues }} Open</span>
+              <span class="legend-item"><i class="fas fa-circle closed-dot"></i> {{ closedIssues }} Closed</span>
+            </div>
+            <h4 class="breakdown-title" style="margin-top: 16px;">PR Breakdown</h4>
+            <div class="breakdown-bar">
+              <div class="bar-segment pr-open"
               [style.width.%]="pullRequests.length ? (openPRs / pullRequests.length) * 100 : 0"></div>
-            <div class="bar-segment pr-closed"
+              <div class="bar-segment pr-closed"
               [style.width.%]="pullRequests.length ? (mergedOrClosedPRs / pullRequests.length) * 100 : 0"></div>
-          </div>
-          <div class="breakdown-legend">
-            <span class="legend-item"><i class="fas fa-circle pr-open-dot"></i> {{ openPRs }} Open</span>
-            <span class="legend-item"><i class="fas fa-circle pr-closed-dot"></i> {{ mergedOrClosedPRs }}
-              Merged/Closed</span>
+            </div>
+            <div class="breakdown-legend">
+              <span class="legend-item"><i class="fas fa-circle pr-open-dot"></i> {{ openPRs }} Open</span>
+              <span class="legend-item"><i class="fas fa-circle pr-closed-dot"></i> {{ mergedOrClosedPRs }}
+            Merged/Closed</span>
           </div>
         </div>
       </div>
     </aside>
-
     <!-- Main Area -->
     <main class="main-area">
       <!-- Toolbar: Tabs + Filters -->
@@ -101,7 +108,6 @@
             <span class="badge">{{ filteredPullRequests.length }}</span>
           </button>
         </div>
-
         <div class="filter-controls">
           <div class="filter-dropdown">
             <label for="statusFilter">Status</label>
@@ -113,17 +119,17 @@
               <option value="draft">Draft</option>
             </select>
           </div>
-
           <div class="filter-dropdown">
             <label for="repoFilter">Repository</label>
             <select id="repoFilter" (change)="onRepoFilterChange($event)">
               <option value="">All repositories</option>
-              <option *ngFor="let repo of uniqueRepositories" [value]="repo">
-                {{ repo }}
-              </option>
+              @for (repo of uniqueRepositories; track repo) {
+                <option [value]="repo">
+                  {{ repo }}
+                </option>
+              }
             </select>
           </div>
-
           <div class="filter-dropdown">
             <label for="sortBy">Sort By</label>
             <select id="sortBy" (change)="onSortChange($event)">
@@ -137,46 +143,55 @@
           </div>
         </div>
       </div>
-
       <!-- Issues List -->
-      <div *ngIf="activeView === 'issues'" class="items-list">
-        <div *ngFor="let issue of filteredIssues" class="list-item">
-          <div class="item-icon" [ngClass]="issue.closed_at ? 'closed' : 'open'">
-            <i [class]="issue.closed_at ? 'fas fa-check-circle' : 'fas fa-dot-circle'"></i>
-          </div>
-          <div class="item-content">
-            <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer" class="item-title">
-              {{ issue.title }}
-            </a>
-            <span class="item-meta">Updated {{ formatLastUpdated(issue.updated_at) }}</span>
-          </div>
+      @if (activeView === 'issues') {
+        <div class="items-list">
+          @for (issue of filteredIssues; track issue) {
+            <div class="list-item">
+              <div class="item-icon" [ngClass]="issue.closed_at ? 'closed' : 'open'">
+                <i [class]="issue.closed_at ? 'fas fa-check-circle' : 'fas fa-dot-circle'"></i>
+              </div>
+              <div class="item-content">
+                <a [href]="issue.html_url" target="_blank" rel="noopener noreferrer" class="item-title">
+                  {{ issue.title }}
+                </a>
+                <span class="item-meta">Updated {{ formatLastUpdated(issue.updated_at) }}</span>
+              </div>
+            </div>
+          }
+          @if (filteredIssues.length === 0) {
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>No issues found for this contributor</p>
+            </div>
+          }
         </div>
-
-        <div class="empty-state" *ngIf="filteredIssues.length === 0">
-          <i class="fas fa-inbox"></i>
-          <p>No issues found for this contributor</p>
-        </div>
-      </div>
-
+      }
       <!-- Pull Requests List -->
-      <div *ngIf="activeView === 'pullRequests'" class="items-list">
-        <div *ngFor="let pr of filteredPullRequests" class="list-item">
-          <div class="item-icon" [ngClass]="getPrStatusClass(pr)">
-            <i [class]="getPrIconClass(pr)"></i>
-          </div>
-          <div class="item-content">
-            <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer" class="item-title">
-              {{ pr.title }}
-            </a>
-            <span class="item-meta">Updated {{ formatLastUpdated(pr.updated_at) }}</span>
-          </div>
+      @if (activeView === 'pullRequests') {
+        <div class="items-list">
+          @for (pr of filteredPullRequests; track pr) {
+            <div class="list-item">
+              <div class="item-icon" [ngClass]="getPrStatusClass(pr)">
+                <i [class]="getPrIconClass(pr)"></i>
+              </div>
+              <div class="item-content">
+                <a [href]="pr.html_url" target="_blank" rel="noopener noreferrer" class="item-title">
+                  {{ pr.title }}
+                </a>
+                <span class="item-meta">Updated {{ formatLastUpdated(pr.updated_at) }}</span>
+              </div>
+            </div>
+          }
+          @if (filteredPullRequests.length === 0) {
+            <div class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>No pull requests found for this contributor</p>
+            </div>
+          }
         </div>
-
-        <div class="empty-state" *ngIf="filteredPullRequests.length === 0">
-          <i class="fas fa-inbox"></i>
-          <p>No pull requests found for this contributor</p>
-        </div>
-      </div>
+      }
     </main>
   </div>
+}
 </div>

@@ -33,11 +33,10 @@ export class ContributorService {
         await Promise.all(
           batch.map(async (repo) => {
             try {
-              const contributors =
-                await this.githubService.getRepoContributors(
-                  orgName,
-                  repo.name,
-                );
+              const contributors = await this.githubService.getRepoContributors(
+                orgName,
+                repo.name,
+              );
               if (!contributors?.length) return;
 
               contributors.forEach((contributor) => {

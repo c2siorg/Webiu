@@ -4,9 +4,11 @@
       <div class="search-wrapper">
         <div class="input-container">
           <input type="text" class="search-input" placeholder="search contributors" [formControl]="searchText" />
-          <button class="clear-icon" *ngIf="searchText.value" (click)="clearSearch()" title="Clear search">
+          @if (searchText.value) {
+          <button class="clear-icon" (click)="clearSearch()" title="Clear search">
             <i class="fas fa-times"></i>
           </button>
+          }
         </div>
         <button class="search-button" (click)="filterProfiles()">
           <span>search</span>
@@ -19,7 +21,9 @@
         <span>Filter by Repository</span>
         <input class="filter-input" list="repos" placeholder="All Repositories" (change)="onRepoChange($event)">
         <datalist id="repos">
-          <option *ngFor="let repo of allRepos" [value]="repo"></option>
+          @for (repo of allRepos; track repo) {
+          <option [value]="repo"></option>
+          }
         </datalist>
       </div>
 
@@ -28,7 +32,9 @@
         <input class="filter-input" list="contributions" placeholder="All Contributions"
           (change)="onContributionRangeChange($event)">
         <datalist id="contributions">
-          <option *ngFor="let range of contributionRanges" [value]="range.label"></option>
+          @for (range of contributionRanges; track range) {
+          <option [value]="range.label"></option>
+          }
         </datalist>
       </div>
 
@@ -44,20 +50,28 @@
       </div>
     </div>
 
-    <app-loading-spinner *ngIf="isLoading" message="Loading contributors..."></app-loading-spinner>
+    @if (isLoading) {
+    <app-loading-spinner message="Loading contributors..."></app-loading-spinner>
+    }
 
-    <div class="contributors-grid" *ngIf="!isLoading">
-      <app-profile-card *ngFor="let profile of displayProfiles; trackBy: trackByFn" [login]="profile.login"
-        [contributions]="profile.contributions" [avatar_url]="profile.avatar_url" [repos]="profile.repos"
-        [followers]="profile.followers" [following]="profile.following"
-        (usernameClick)="onUsernameClick($event)"></app-profile-card>
+    @if (!isLoading) {
+    <div class="contributors-grid">
+      @for (profile of displayProfiles; track trackByFn($index, profile)) {
+      <app-profile-card [login]="profile.login" [contributions]="profile.contributions"
+        [avatar_url]="profile.avatar_url" [repos]="profile.repos" [followers]="profile.followers"
+        [following]="profile.following" (usernameClick)="onUsernameClick($event)"></app-profile-card>
+      }
     </div>
+    }
 
-    <p *ngIf="!isLoading && displayProfiles.length === 0" class="no-contributors-message">
+    @if (!isLoading && displayProfiles.length === 0) {
+    <p class="no-contributors-message">
       No contributors found matching the search criteria
     </p>
+    }
 
-    <div class="pagination-container" *ngIf="!isLoading && displayProfiles && displayProfiles.length > 0">
+    @if (!isLoading && displayProfiles && displayProfiles.length > 0) {
+    <div class="pagination-container">
       <div class="pagination">
         <button (click)="goToFirstPage()" [disabled]="currentPage === 1" title="First Page">
           <i class="fa fa-angle-double-left"></i>
@@ -73,10 +87,9 @@
           <i class="fa fa-angle-double-right"></i>
         </button>
       </div>
-
       <div class="items-per-page">
-        <label>Show:</label>
-        <select (change)="onItemsPerPageChange($event)">
+        <label for="itemsPerPage">Show:</label>
+        <select id="itemsPerPage" (change)="onItemsPerPageChange($event)">
           <option [value]="9" [selected]="profilesPerPage === 9">9</option>
           <option [value]="18" [selected]="profilesPerPage === 18">18</option>
           <option [value]="27" [selected]="profilesPerPage === 27">27</option>
@@ -84,6 +97,7 @@
         </select>
       </div>
     </div>
+    }
   </section>
 
   <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">

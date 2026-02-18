@@ -1,16 +1,17 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, Input, OnInit, inject } from '@angular/core';
+
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
+
 
 @Component({
   selector: 'app-projects-card',
   standalone: true,
-  imports: [CommonModule, HttpClientModule],
+  imports: [HttpClientModule],
   templateUrl: './projects-card.component.html',
   styleUrls: ['./projects-card.component.scss'],
 })
-export class ProjectsCardComponent {
+export class ProjectsCardComponent implements OnInit {
   @Input() name!: string;
   @Input() description: string | null = '';
   @Input() issue!: number;
@@ -23,11 +24,12 @@ export class ProjectsCardComponent {
   @Input() org!: string;
   @Input() repo!: string;
 
-  issueCount: number = 0;
-  pullRequestCount: number = 0;
-  initialized: boolean = false;
+  issueCount = 0;
+  pullRequestCount = 0;
+  initialized = false;
 
-  constructor(private http: HttpClient) {}
+  private http = inject(HttpClient);
+
 
   ngOnInit(): void {
     if (!this.initialized) {
@@ -49,7 +51,7 @@ export class ProjectsCardComponent {
     );
   }
 
-  public detailsVisible: boolean = false;
+  public detailsVisible = false;
 
   toggleDetails() {
     this.detailsVisible = !this.detailsVisible;
@@ -65,7 +67,7 @@ export class ProjectsCardComponent {
   }
 
   getLanguageColor(): string {
-    const languageColors: { [key: string]: string } = {
+    const languageColors: Record<string, string> = {
       Python: '#3572A5',
       JavaScript: '#F1E05A',
       TypeScript: '#2B7489',
