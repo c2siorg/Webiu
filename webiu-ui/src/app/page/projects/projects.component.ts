@@ -1,13 +1,13 @@
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { projectsData } from './projects-data';
 import { Project, ProjectResponse } from './project.model';
-import { environment } from '../../../environments/environment';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { ProjectCacheService } from '../../services/project-cache.service';
 
 @Component({
   selector: 'app-projects',
@@ -31,30 +31,25 @@ export class ProjectsComponent implements OnInit {
   org = 'c2siorg';
   showButton = false;
 
-  constructor(private http: HttpClient) { }
+  constructor(private projectCacheService: ProjectCacheService) { }
 
   ngOnInit(): void {
     this.fetchProjects();
   }
 
   fetchProjects(): void {
-    this.http
-      .get<ProjectResponse>(`${environment.serverUrl}/api/projects/projects`)
-      .subscribe({
-        next: (response) => {
-          this.projectsData = this.sortProjects(response.repositories);
-          this.filteredProjects = [...this.projectsData];
-          this.isLoading = false;
-        },
-        error: (error) => {
-          this.projectsData = this.sortProjects(projectsData.repositories);
-          this.filteredProjects = [...this.projectsData];
-          this.isLoading = false;
-        },
-        complete: () => {
-          console.log('Fetch projects request completed.');
-        },
-      });
+    this.projectCacheService.getProjects().subscribe({
+      next: (response) => {
+        this.projectsData = this.sortProjects(response.repositories);
+        this.filteredProjects = [...this.projectsData];
+        this.isLoading = false;
+      },
+      error: () => {
+        this.projectsData = this.sortProjects(projectsData.repositories);
+        this.filteredProjects = [...this.projectsData];
+        this.isLoading = false;
+      },
+    });
   }
 
   sortProjects(projects: Project[]): Project[] {

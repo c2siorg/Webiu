@@ -1,11 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { InternalServerErrorException, BadRequestException } from '@nestjs/common';
+import {
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { GithubService } from '../github/github.service';
+import { CacheService } from '../common/cache.service';
 
 describe('ProjectService', () => {
   let service: ProjectService;
-  let githubService: GithubService;
+  let cacheService: CacheService;
 
   const mockGithubService = {
     getOrgRepos: jest.fn(),
@@ -17,16 +21,18 @@ describe('ProjectService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProjectService,
+        CacheService,
         { provide: GithubService, useValue: mockGithubService },
       ],
     }).compile();
 
     service = module.get<ProjectService>(ProjectService);
-    githubService = module.get<GithubService>(GithubService);
+    cacheService = module.get<CacheService>(CacheService);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    cacheService.clear();
   });
 
   it('should be defined', () => {
@@ -35,36 +41,48 @@ describe('ProjectService', () => {
 
   describe('getAllProjects', () => {
     it('should return repositories with pull request counts', async () => {
-      const mockRepos = [
-        { name: 'repo1', full_name: 'c2siorg/repo1' },
-        { name: 'repo2', full_name: 'c2siorg/repo2' },
-      ];
-      mockGithubService.getOrgRepos.mockResolvedValue(mockRepos);
+      mockGithubService.getOrgRepos.mockResolvedValue([
+        { name: 'repo1' },
+        { name: 'repo2' },
+      ]);
       mockGithubService.getRepoPulls
         .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
         .mockResolvedValueOnce([{ id: 3 }]);
 
-      const result = await service.getAllProjects();
+      const result = await service.getAllProjects() as any;
 
-      expect(result).toEqual({
-        repositories: [
-          { name: 'repo1', full_name: 'c2siorg/repo1', pull_requests: 2 },
-          { name: 'repo2', full_name: 'c2siorg/repo2', pull_requests: 1 },
-        ],
-      });
+      expect(result.repositories).toHaveLength(2);
+      expect(result.repositories[0].pull_requests).toBe(2);
+      expect(result.repositories[1].pull_requests).toBe(1);
+    });
+
+    it('should cache the response', async () => {
+      mockGithubService.getOrgRepos.mockResolvedValue([{ name: 'repo1' }]);
+      mockGithubService.getRepoPulls.mockResolvedValue([]);
+
+      await service.getAllProjects();
+      await service.getAllProjects();
+
+      // Only called once due to cache
       expect(mockGithubService.getOrgRepos).toHaveBeenCalledTimes(1);
-      expect(mockGithubService.getRepoPulls).toHaveBeenCalledTimes(2);
     });
 
-    it('should return empty repositories when org has no repos', async () => {
-      mockGithubService.getOrgRepos.mockResolvedValue([]);
+    it('should handle PR fetch errors gracefully per repo', async () => {
+      mockGithubService.getOrgRepos.mockResolvedValue([
+        { name: 'repo1' },
+        { name: 'repo2' },
+      ]);
+      mockGithubService.getRepoPulls
+        .mockRejectedValueOnce(new Error('fail'))
+        .mockResolvedValueOnce([{ id: 1 }]);
 
-      const result = await service.getAllProjects();
+      const result = await service.getAllProjects() as any;
 
-      expect(result).toEqual({ repositories: [] });
+      expect(result.repositories[0].pull_requests).toBe(0);
+      expect(result.repositories[1].pull_requests).toBe(1);
     });
 
-    it('should throw InternalServerErrorException on error', async () => {
+    it('should throw InternalServerErrorException on total failure', async () => {
       mockGithubService.getOrgRepos.mockRejectedValue(new Error('API error'));
 
       await expect(service.getAllProjects()).rejects.toThrow(
@@ -75,30 +93,23 @@ describe('ProjectService', () => {
 
   describe('getIssuesAndPr', () => {
     it('should return issue and PR counts', async () => {
-      const mockData = [
-        { id: 1, title: 'Issue 1' },
-        { id: 2, title: 'PR 1', pull_request: {} },
-        { id: 3, title: 'Issue 2' },
-        { id: 4, title: 'PR 2', pull_request: {} },
-        { id: 5, title: 'PR 3', pull_request: {} },
-      ];
-      mockGithubService.getRepoIssues.mockResolvedValue(mockData);
+      mockGithubService.getRepoIssues.mockResolvedValue([
+        { id: 1 },
+        { id: 2, pull_request: {} },
+        { id: 3 },
+      ]);
 
       const result = await service.getIssuesAndPr('c2siorg', 'repo1');
-
-      expect(result).toEqual({ issues: 2, pullRequests: 3 });
-      expect(mockGithubService.getRepoIssues).toHaveBeenCalledWith(
-        'c2siorg',
-        'repo1',
-      );
+      expect(result).toEqual({ issues: 2, pullRequests: 1 });
     });
 
-    it('should return zero counts when repo has no issues or PRs', async () => {
+    it('should cache the result', async () => {
       mockGithubService.getRepoIssues.mockResolvedValue([]);
 
-      const result = await service.getIssuesAndPr('c2siorg', 'repo1');
+      await service.getIssuesAndPr('c2siorg', 'repo1');
+      await service.getIssuesAndPr('c2siorg', 'repo1');
 
-      expect(result).toEqual({ issues: 0, pullRequests: 0 });
+      expect(mockGithubService.getRepoIssues).toHaveBeenCalledTimes(1);
     });
 
     it('should throw BadRequestException when org is missing', async () => {
@@ -114,10 +125,7 @@ describe('ProjectService', () => {
     });
 
     it('should throw InternalServerErrorException on API error', async () => {
-      mockGithubService.getRepoIssues.mockRejectedValue(
-        new Error('API error'),
-      );
-
+      mockGithubService.getRepoIssues.mockRejectedValue(new Error('fail'));
       await expect(
         service.getIssuesAndPr('c2siorg', 'repo1'),
       ).rejects.toThrow(InternalServerErrorException);

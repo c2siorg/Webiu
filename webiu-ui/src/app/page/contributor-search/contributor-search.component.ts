@@ -59,19 +59,15 @@ export class ContributorSearchComponent {
     this.userProfile = null;
 
     try {
-      const issuesResponse = await axios.get(
-        `${this.apiUrl}/issues/${this.username}`
-      );
-      this.issues = issuesResponse.data.issues;
+      // Fetch stats (issues + PRs) and user profile in parallel
+      const [statsResponse, userProfileResponse] = await Promise.all([
+        axios.get(`${this.apiUrl}/stats/${this.username}`),
+        axios.get(`https://api.github.com/users/${this.username}`),
+      ]);
 
-      const pullRequestsResponse = await axios.get(
-        `${this.apiUrl}/pull-requests/${this.username}`
-      );
-      this.pullRequests = pullRequestsResponse.data.pullRequests;
+      this.issues = statsResponse.data.issues;
+      this.pullRequests = statsResponse.data.pullRequests;
 
-      const userProfileResponse = await axios.get(
-        `https://api.github.com/users/${this.username}`
-      );
       this.userProfile = {
         login: userProfileResponse.data.login,
         avatar_url: userProfileResponse.data.avatar_url,
