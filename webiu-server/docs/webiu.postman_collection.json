@@ -1,0 +1,596 @@
+{
+    "info": {
+        "_postman_id": "webiu-2-api-collection",
+        "name": "WebiU 2.0 API",
+        "description": "Complete API collection for WebiU 2.0 — the C2SI/SCoRe Lab website backend.\n\nBase URL is controlled by the `baseUrl` collection variable (default: `http://localhost:5050`).\n\nSee `webiu-server/docs/API_DOCUMENTATION.md` for full documentation.",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+        {
+            "key": "baseUrl",
+            "value": "http://localhost:5050",
+            "type": "string",
+            "description": "Backend base URL. Change this to point to a different environment."
+        }
+    ],
+    "item": [
+        {
+            "name": "Projects",
+            "description": "Endpoints for fetching GitHub repository and issue/PR data.",
+            "item": [
+                {
+                    "name": "Get All Projects",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/projects/projects",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "projects",
+                                "projects"
+                            ]
+                        },
+                        "description": "Returns all repositories in the c2siorg GitHub organisation, enriched with open pull-request counts.\n\nCached for 5 minutes on the backend."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"repositories\": [\n    {\n      \"id\": 123456789,\n      \"name\": \"Webiu\",\n      \"full_name\": \"c2siorg/Webiu\",\n      \"description\": \"The official website for C2SI and SCoRe Lab\",\n      \"html_url\": \"https://github.com/c2siorg/Webiu\",\n      \"stargazers_count\": 42,\n      \"forks_count\": 18,\n      \"open_issues_count\": 5,\n      \"language\": \"TypeScript\",\n      \"topics\": [\"angular\", \"nestjs\", \"open-source\"],\n      \"visibility\": \"public\",\n      \"default_branch\": \"master\",\n      \"pull_requests\": 3\n    }\n  ]\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Issues & PR Count for Repo",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/issues/issuesAndPr?org=c2siorg&repo=Webiu",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "issues",
+                                "issuesAndPr"
+                            ],
+                            "query": [
+                                {
+                                    "key": "org",
+                                    "value": "c2siorg",
+                                    "description": "GitHub organisation name (required)"
+                                },
+                                {
+                                    "key": "repo",
+                                    "value": "Webiu",
+                                    "description": "Repository name (required)"
+                                }
+                            ]
+                        },
+                        "description": "Returns the count of open issues and open pull requests for a specific repository.\n\nBoth `org` and `repo` query parameters are required."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"issues\": 5,\n  \"pullRequests\": 3\n}"
+                        },
+                        {
+                            "name": "400 Bad Request — Missing params",
+                            "status": "Bad Request",
+                            "code": 400,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"statusCode\": 400,\n  \"message\": \"Organization and repository are required\",\n  \"error\": \"Bad Request\"\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Contributors",
+            "description": "Endpoints for fetching contributor leaderboards and per-user activity within the c2siorg organisation.",
+            "item": [
+                {
+                    "name": "Get All Contributors",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/contributor/contributors",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contributor",
+                                "contributors"
+                            ]
+                        },
+                        "description": "Returns an aggregated leaderboard of all contributors across every repository in the c2siorg organisation.\n\nCached for 5 minutes. This is a heavy endpoint — it fetches all repos and their contributors."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "[\n  {\n    \"login\": \"octocat\",\n    \"contributions\": 247,\n    \"repos\": [\"Webiu\", \"SCoRe-Lab-Website\"],\n    \"avatar_url\": \"https://avatars.githubusercontent.com/u/583231?v=4\"\n  }\n]"
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Issues by Username",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/contributor/issues/octocat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contributor",
+                                "issues",
+                                "octocat"
+                            ]
+                        },
+                        "description": "Returns all issues created by a specific GitHub user within the c2siorg organisation.\n\nReplace `octocat` in the URL with the target GitHub username."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"issues\": [\n    {\n      \"id\": 987654321,\n      \"number\": 42,\n      \"title\": \"Fix navbar overflow on mobile\",\n      \"html_url\": \"https://github.com/c2siorg/Webiu/issues/42\",\n      \"state\": \"open\",\n      \"created_at\": \"2024-01-15T10:30:00Z\",\n      \"updated_at\": \"2024-01-16T08:00:00Z\",\n      \"repository_url\": \"https://api.github.com/repos/c2siorg/Webiu\"\n    }\n  ]\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Pull Requests by Username",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/contributor/pull-requests/octocat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contributor",
+                                "pull-requests",
+                                "octocat"
+                            ]
+                        },
+                        "description": "Returns all pull requests created by a specific GitHub user within the c2siorg organisation. Includes merge status for closed PRs.\n\nReplace `octocat` in the URL with the target GitHub username."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"pullRequests\": [\n    {\n      \"id\": 111222333,\n      \"number\": 17,\n      \"title\": \"feat: add dark mode toggle\",\n      \"html_url\": \"https://github.com/c2siorg/Webiu/pull/17\",\n      \"state\": \"closed\",\n      \"merged_at\": \"2024-02-01T14:00:00Z\",\n      \"created_at\": \"2024-01-28T09:00:00Z\",\n      \"updated_at\": \"2024-02-01T14:00:00Z\",\n      \"repository_url\": \"https://api.github.com/repos/c2siorg/Webiu\"\n    }\n  ]\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Get Contributor Stats (Issues + PRs)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/contributor/stats/octocat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "contributor",
+                                "stats",
+                                "octocat"
+                            ]
+                        },
+                        "description": "Returns both issues and pull requests for a user in a single request. Equivalent to calling /issues/:username and /pull-requests/:username in parallel.\n\nReplace `octocat` in the URL with the target GitHub username."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"issues\": [\n    {\n      \"id\": 987654321,\n      \"number\": 42,\n      \"title\": \"Fix navbar overflow on mobile\",\n      \"html_url\": \"https://github.com/c2siorg/Webiu/issues/42\",\n      \"state\": \"open\",\n      \"created_at\": \"2024-01-15T10:30:00Z\"\n    }\n  ],\n  \"pullRequests\": [\n    {\n      \"id\": 111222333,\n      \"number\": 17,\n      \"title\": \"feat: add dark mode toggle\",\n      \"html_url\": \"https://github.com/c2siorg/Webiu/pull/17\",\n      \"state\": \"closed\",\n      \"merged_at\": \"2024-02-01T14:00:00Z\",\n      \"created_at\": \"2024-01-28T09:00:00Z\"\n    }\n  ]\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "Authentication",
+            "description": "Email/password authentication endpoints.\n\n⚠️ These currently return 501 Not Implemented because they require a MongoDB database connection. They are scaffolded and ready to enable once a database is connected.",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"name\": \"John Doe\",\n  \"email\": \"johndoe@example.com\",\n  \"password\": \"password123\",\n  \"confirmPassword\": \"password123\",\n  \"githubId\": \"johndoe\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "description": "Registers a new user account.\n\nFields:\n- `name` (required): Full name\n- `email` (required): Valid email address\n- `password` (required): Minimum 6 characters\n- `confirmPassword` (required): Must match `password`\n- `githubId` (optional): GitHub username"
+                    },
+                    "response": [
+                        {
+                            "name": "201 Created — Success",
+                            "status": "Created",
+                            "code": 201,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"User registered successfully\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"userId123\",\n      \"name\": \"John Doe\",\n      \"email\": \"johndoe@example.com\"\n    },\n    \"token\": \"<JWT_TOKEN>\"\n  }\n}"
+                        },
+                        {
+                            "name": "400 Bad Request — Passwords don't match",
+                            "status": "Bad Request",
+                            "code": 400,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"status\": \"error\",\n  \"message\": \"Passwords do not match\"\n}"
+                        },
+                        {
+                            "name": "501 Not Implemented — DB not connected",
+                            "status": "Not Implemented",
+                            "code": 501,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"statusCode\": 501,\n  \"message\": \"Registration requires MongoDB. Connect a database to enable this feature.\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"johndoe@example.com\",\n  \"password\": \"password123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "description": "Logs in an existing user and returns a JWT token.\n\nFields:\n- `email` (required): Valid email address\n- `password` (required): Account password"
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Login successful\",\n  \"data\": {\n    \"user\": {\n      \"id\": \"userId123\",\n      \"name\": \"John Doe\",\n      \"email\": \"johndoe@example.com\",\n      \"githubId\": \"johndoe\"\n    },\n    \"token\": \"<JWT_TOKEN>\"\n  }\n}"
+                        },
+                        {
+                            "name": "401 Unauthorized — Wrong credentials",
+                            "status": "Unauthorized",
+                            "code": 401,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"status\": \"error\",\n  \"message\": \"Invalid email or password\"\n}"
+                        },
+                        {
+                            "name": "501 Not Implemented — DB not connected",
+                            "status": "Not Implemented",
+                            "code": 501,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"statusCode\": 501,\n  \"message\": \"Login requires MongoDB. Connect a database to enable this feature.\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Verify Email",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=<VERIFICATION_TOKEN>",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "v1",
+                                "auth",
+                                "verify-email"
+                            ],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "value": "<VERIFICATION_TOKEN>",
+                                    "description": "Email verification token received via email after registration"
+                                }
+                            ]
+                        },
+                        "description": "Verifies a user's email address using the token sent in the verification email after registration."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"status\": \"success\",\n  \"message\": \"Email verified successfully\"\n}"
+                        },
+                        {
+                            "name": "501 Not Implemented — DB not connected",
+                            "status": "Not Implemented",
+                            "code": 501,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"statusCode\": 501,\n  \"message\": \"Email verification requires MongoDB. Connect a database to enable this feature.\"\n}"
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "OAuth",
+            "description": "OAuth endpoints redirect the browser to the provider's authorization page. They are not JSON APIs — open them in a browser, not via Postman's Send button.\n\nAfter authorization, the backend redirects to the frontend with user data in the URL query string.",
+            "item": [
+                {
+                    "name": "Google OAuth — Initiate",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/google",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "google"
+                            ]
+                        },
+                        "description": "Initiates Google OAuth 2.0 flow. Open this URL in a browser — it redirects to Google's consent screen.\n\nRequired env vars: GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Google OAuth — Callback",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/google/callback?code=<AUTH_CODE>",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "google",
+                                "callback"
+                            ],
+                            "query": [
+                                {
+                                    "key": "code",
+                                    "value": "<AUTH_CODE>",
+                                    "description": "Authorization code provided by Google (handled automatically)"
+                                }
+                            ]
+                        },
+                        "description": "Google OAuth callback — called automatically by Google after user grants permission. Do not call this directly.\n\nOn success, redirects to: http://localhost:4200?user=<URL_ENCODED_USER_JSON>"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GitHub OAuth — Initiate",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/github",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "github"
+                            ]
+                        },
+                        "description": "Initiates GitHub OAuth flow. Open this URL in a browser — it redirects to GitHub's authorization page.\n\nRequired env vars: GITHUB_CLIENT_ID, GITHUB_REDIRECT_URI"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "GitHub OAuth — Callback",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/auth/github/callback?code=<AUTH_CODE>",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "auth",
+                                "github",
+                                "callback"
+                            ],
+                            "query": [
+                                {
+                                    "key": "code",
+                                    "value": "<AUTH_CODE>",
+                                    "description": "Authorization code provided by GitHub (handled automatically)"
+                                }
+                            ]
+                        },
+                        "description": "GitHub OAuth callback — called automatically by GitHub after user grants permission. Do not call this directly.\n\nOn success, redirects to: http://localhost:4200?user=<URL_ENCODED_USER_JSON>"
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "User",
+            "description": "User management endpoints.",
+            "item": [
+                {
+                    "name": "Get Followers & Following",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/user/followersAndFollowing/octocat",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "user",
+                                "followersAndFollowing",
+                                "octocat"
+                            ]
+                        },
+                        "description": "⚠️ Placeholder endpoint — returns a stub response. Full implementation is pending.\n\nReplace `octocat` in the URL with the target GitHub username."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Stub response",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{ \"0\": 0 }"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -81,17 +81,18 @@ Webiu/
 │   │   ├── common/            # Shared utilities (CacheService)
 │   │   ├── app.module.ts      # Root module
 │   │   └── main.ts            # Application entry point
-│   ├── docs/
-│   │   └── DOCUMENTATION.md   # API docs for auth endpoints
+│   ├── docs/                      ← you are here
+│   │   ├── Architecture.md                # This file
+│   │   ├── CONTRIBUTING.md                # Contribution guidelines
+│   │   ├── API_DOCUMENTATION.md           # Full API reference (all endpoints)
+│   │   └── webiu.postman_collection.json  # Postman collection (import-ready)
 │   ├── .env.example
 │   ├── Dockerfile
 │   └── package.json
 │
 ├── docker-compose.yml         # Multi-container orchestration
 ├── package.json               # Root (Husky pre-commit hooks)
-├── README.md
-├── CONTRIBUTING.md
-└── ARCHITECTURE.md            # This file
+└── README.md
 ```
 
 ---
@@ -164,6 +165,12 @@ The auth system supports three flows:
 
 ### API Reference
 
+For full request/response documentation, validation rules, error codes, and example payloads, see **[`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md)**.
+
+A **Postman collection** with all endpoints pre-configured is available at **[`webiu.postman_collection.json`](./webiu.postman_collection.json)**. Import it into Postman via **Import → File** to start testing immediately. The collection uses a `baseUrl` variable (default: `http://localhost:5050`) that you can override per-environment.
+
+**Quick endpoint summary:**
+
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | `GET` | `/api/projects/projects` | All org repos with PR counts |
@@ -179,6 +186,7 @@ The auth system supports three flows:
 | `GET` | `/auth/google/callback` | Google OAuth callback |
 | `GET` | `/auth/github` | Initiate GitHub OAuth |
 | `GET` | `/auth/github/callback` | GitHub OAuth callback |
+| `GET` | `/api/user/followersAndFollowing/:username` | User followers/following (stub) |
 
 ---
 
