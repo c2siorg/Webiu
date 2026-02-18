@@ -238,7 +238,7 @@ We welcome contributions! Please see **[CONTRIBUTING.md](docs/CONTRIBUTING.md)**
 | Document | Description |
 |----------|-------------|
 | [README.md](README.md) | Project overview, setup, and quick reference |
-| [docs/Architecture.md](docs/Architecture.md) | Code structure, module system, data flow, and caching |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Code structure, module system, data flow, and caching |
 | [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | How to contribute (branching, code style, PRs) |
 | [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | Full API reference — all endpoints, request/response schemas, error codes |
 | [docs/webiu.postman_collection.json](docs/webiu.postman_collection.json) | Postman collection — import and test all endpoints instantly |
