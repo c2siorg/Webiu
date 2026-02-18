@@ -7,7 +7,7 @@ import { projectsData } from './projects-data';
 import { Project, ProjectResponse } from './project.model';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
-import { ProjectCacheService } from '../../services/project-cache.service';
+import { ProjectCacheService } from 'src/app/services/project-cache.service';
 
 @Component({
   selector: 'app-projects',

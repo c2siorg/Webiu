@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, of, tap, shareReplay } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-interface ProjectResponse {
+export interface ProjectResponse {
     repositories: any[];
 }
 
