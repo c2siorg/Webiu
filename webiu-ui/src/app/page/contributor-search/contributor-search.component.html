@@ -59,14 +59,10 @@
         <div class="breakdown-section">
           <h4 class="breakdown-title">Issues Breakdown</h4>
           <div class="breakdown-bar">
-            <div
-              class="bar-segment open"
-              [style.width.%]="issues.length ? (openIssues / issues.length) * 100 : 0"
-            ></div>
-            <div
-              class="bar-segment closed"
-              [style.width.%]="issues.length ? (closedIssues / issues.length) * 100 : 0"
-            ></div>
+            <div class="bar-segment open" [style.width.%]="issues.length ? (openIssues / issues.length) * 100 : 0">
+            </div>
+            <div class="bar-segment closed" [style.width.%]="issues.length ? (closedIssues / issues.length) * 100 : 0">
+            </div>
           </div>
           <div class="breakdown-legend">
             <span class="legend-item"><i class="fas fa-circle open-dot"></i> {{ openIssues }} Open</span>
@@ -75,18 +71,15 @@
 
           <h4 class="breakdown-title" style="margin-top: 16px;">PR Breakdown</h4>
           <div class="breakdown-bar">
-            <div
-              class="bar-segment pr-open"
-              [style.width.%]="pullRequests.length ? (openPRs / pullRequests.length) * 100 : 0"
-            ></div>
-            <div
-              class="bar-segment pr-closed"
-              [style.width.%]="pullRequests.length ? (mergedOrClosedPRs / pullRequests.length) * 100 : 0"
-            ></div>
+            <div class="bar-segment pr-open"
+              [style.width.%]="pullRequests.length ? (openPRs / pullRequests.length) * 100 : 0"></div>
+            <div class="bar-segment pr-closed"
+              [style.width.%]="pullRequests.length ? (mergedOrClosedPRs / pullRequests.length) * 100 : 0"></div>
           </div>
           <div class="breakdown-legend">
             <span class="legend-item"><i class="fas fa-circle pr-open-dot"></i> {{ openPRs }} Open</span>
-            <span class="legend-item"><i class="fas fa-circle pr-closed-dot"></i> {{ mergedOrClosedPRs }} Merged/Closed</span>
+            <span class="legend-item"><i class="fas fa-circle pr-closed-dot"></i> {{ mergedOrClosedPRs }}
+              Merged/Closed</span>
           </div>
         </div>
       </div>
@@ -94,7 +87,7 @@
 
     <!-- Main Area -->
     <main class="main-area">
-      <!-- Toolbar: Tabs + Filter -->
+      <!-- Toolbar: Tabs + Filters -->
       <div class="toolbar">
         <div class="tabs">
           <button (click)="toggleView('issues')" [class.active]="activeView === 'issues'" class="tab-btn">
@@ -109,14 +102,39 @@
           </button>
         </div>
 
-        <div class="filter-dropdown">
-          <label for="repoFilter">Repository</label>
-          <select id="repoFilter" (change)="onRepoFilterChange($event)">
-            <option value="">All repositories</option>
-            <option *ngFor="let repo of uniqueRepositories" [value]="repo">
-              {{ repo }}
-            </option>
-          </select>
+        <div class="filter-controls">
+          <div class="filter-dropdown">
+            <label for="statusFilter">Status</label>
+            <select id="statusFilter" (change)="onStatusFilterChange($event)">
+              <option value="">All</option>
+              <option value="open">Open</option>
+              <option value="merged">Merged</option>
+              <option value="closed">Closed</option>
+              <option value="draft">Draft</option>
+            </select>
+          </div>
+
+          <div class="filter-dropdown">
+            <label for="repoFilter">Repository</label>
+            <select id="repoFilter" (change)="onRepoFilterChange($event)">
+              <option value="">All repositories</option>
+              <option *ngFor="let repo of uniqueRepositories" [value]="repo">
+                {{ repo }}
+              </option>
+            </select>
+          </div>
+
+          <div class="filter-dropdown">
+            <label for="sortBy">Sort By</label>
+            <select id="sortBy" (change)="onSortChange($event)">
+              <option value="updated-desc">Recently Updated</option>
+              <option value="updated-asc">Least Recently Updated</option>
+              <option value="created-desc">Newest First</option>
+              <option value="created-asc">Oldest First</option>
+              <option value="title-asc">Title (A-Z)</option>
+              <option value="title-desc">Title (Z-A)</option>
+            </select>
+          </div>
         </div>
       </div>
 

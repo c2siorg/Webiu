@@ -24,6 +24,9 @@ export class ContributorSearchComponent {
   errorMessage: string = '';
   loading: boolean = false;
   activeView: 'issues' | 'pullRequests' = 'issues';
+  selectedStatus: string = '';
+  selectedSort: string = 'updated-desc';
+  selectedRepo: string = '';
   userProfile: {
     login: string;
     avatar_url: string;
@@ -102,21 +105,68 @@ export class ContributorSearchComponent {
   }
 
   onRepoFilterChange(event: Event) {
-    const selectedRepo = (event.target as HTMLSelectElement).value;
+    this.selectedRepo = (event.target as HTMLSelectElement).value;
+    this.applyFilters();
+  }
 
-    if (selectedRepo) {
-      this.filteredIssues = this.issues.filter((issue) => {
-        const repoName = issue.repository_url.split('/').pop();
-        return repoName === selectedRepo;
-      });
+  onStatusFilterChange(event: Event) {
+    this.selectedStatus = (event.target as HTMLSelectElement).value;
+    this.applyFilters();
+  }
 
-      this.filteredPullRequests = this.pullRequests.filter((pr) => {
-        const repoName = pr.repository_url.split('/').pop();
-        return repoName === selectedRepo;
-      });
-    } else {
-      this.filteredIssues = [...this.issues];
-      this.filteredPullRequests = [...this.pullRequests];
+  onSortChange(event: Event) {
+    this.selectedSort = (event.target as HTMLSelectElement).value;
+    this.applyFilters();
+  }
+
+  applyFilters() {
+    // Filter by repository
+    let filteredIssues = this.selectedRepo
+      ? this.issues.filter((issue) => issue.repository_url.split('/').pop() === this.selectedRepo)
+      : [...this.issues];
+
+    let filteredPRs = this.selectedRepo
+      ? this.pullRequests.filter((pr) => pr.repository_url.split('/').pop() === this.selectedRepo)
+      : [...this.pullRequests];
+
+    // Filter by status
+    if (this.selectedStatus === 'open') {
+      filteredIssues = filteredIssues.filter((issue) => !issue.closed_at);
+      filteredPRs = filteredPRs.filter((pr) => !pr.closed_at);
+    } else if (this.selectedStatus === 'closed') {
+      filteredIssues = filteredIssues.filter((issue) => issue.closed_at);
+      filteredPRs = filteredPRs.filter((pr) => pr.closed_at && !pr.merged_at);
+    } else if (this.selectedStatus === 'merged') {
+      filteredIssues = []; // Issues cannot be merged
+      filteredPRs = filteredPRs.filter((pr) => pr.merged_at);
+    } else if (this.selectedStatus === 'draft') {
+      filteredIssues = []; // Issues cannot be drafts (usually)
+      filteredPRs = filteredPRs.filter((pr) => pr.draft);
+    }
+
+    // Apply sorting
+    this.filteredIssues = this.sortItems(filteredIssues, this.selectedSort);
+    this.filteredPullRequests = this.sortItems(filteredPRs, this.selectedSort);
+  }
+
+  sortItems(items: any[], sortBy: string): any[] {
+    const sorted = [...items];
+
+    switch (sortBy) {
+      case 'updated-desc':
+        return sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      case 'updated-asc':
+        return sorted.sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());
+      case 'created-desc':
+        return sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+      case 'created-asc':
+        return sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+      case 'title-asc':
+        return sorted.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+      case 'title-desc':
+        return sorted.sort((a, b) => b.title.toLowerCase().localeCompare(a.title.toLowerCase()));
+      default:
+        return sorted;
     }
   }
 
