@@ -55,31 +55,31 @@
     }
 
     .team {
-      width: 80%;
+      width: 100%;
       display: flex;
 
       .team-align {
-        display: flex;
-        flex-wrap: wrap;
-        flex-direction: row;
-        gap: 10px;
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
         margin: 2%;
-        justify-content: center;
+        width: 100%;
 
         .card {
-          width: fit-content;
           display: flex;
-          padding: 10px 20px;
           flex-direction: column;
-          align-items: flex-start;
-          gap: 5px;
+          align-items: center;
+          justify-content: center;
+          padding: 20px;
           border-radius: 10px;
           border: 1px solid var(--community-card-border);
           background: var(--community-card-bg);
           box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+          min-height: 100px;
 
           .card-data {
             padding: 8px 22px;
+            width: 100%;
 
             .user-name {
               text-align: center;
@@ -119,6 +119,18 @@
   }
 }
 
+@media screen and (max-width: 768px) {
+  .community {
+    .team-details {
+      .team {
+        .team-align {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    }
+  }
+}
+
 @media screen and (max-width: 600px) {
   .community {
     .community-hero {
@@ -145,6 +157,13 @@
       }
       img {
         width: 300px;
+      }
+    }
+    .team-details {
+      .team {
+        .team-align {
+          grid-template-columns: 1fr;
+        }
       }
     }
   }
