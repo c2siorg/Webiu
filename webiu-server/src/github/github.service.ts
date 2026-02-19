@@ -210,4 +210,41 @@ export class GithubService {
     );
     return response.data;
   }
+
+  async getUserFollowersAndFollowing(username: string): Promise<{
+    followers: number;
+    following: number;
+  }> {
+    const cacheKey = `user_social_${username}`;
+    const cached = this.cacheService.get<{
+      followers: number;
+      following: number;
+    }>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const [followersResponse, followingResponse] = await Promise.all([
+        axios.get(`${this.baseUrl}/users/${username}/followers`, {
+          headers: this.headers,
+        }),
+        axios.get(`${this.baseUrl}/users/${username}/following`, {
+          headers: this.headers,
+        }),
+      ]);
+
+      const result = {
+        followers: followersResponse.data.length || 0,
+        following: followingResponse.data.length || 0,
+      };
+
+      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      return result;
+    } catch (error) {
+      console.error(
+        `Error fetching GitHub social data for ${username}:`,
+        error.message,
+      );
+      throw error;
+    }
+  }
 }

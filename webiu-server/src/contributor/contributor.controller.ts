@@ -28,4 +28,10 @@ export class ContributorController {
   async getUserStats(@Param('username') username: string) {
     return this.contributorService.getUserStats(username);
   }
+
+  @Get('followers/:username')
+  @Header('Cache-Control', 'public, max-age=300')
+  async getUserFollowersAndFollowing(@Param('username') username: string) {
+    return this.contributorService.getUserFollowersAndFollowing(username);
+  }
 }
