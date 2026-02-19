@@ -1,7 +1,417 @@
 <div class="homepage">
-  <div class="homepage-hero-content">
-    <h1>{{ homepageData.title }}</h1>
-    <p>{{ homepageData.description }}</p>
-  </div>
-  <img src="../../../assets/homepage.png" alt="Homepage" />
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-text">
+        <h1 class="hero-title">{{ homepageData.hero.title }}</h1>
+        <h2 class="hero-subtitle">{{ homepageData.hero.subtitle }}</h2>
+        <p class="hero-description">{{ homepageData.hero.description }}</p>
+        <div class="hero-cta">
+          <a
+            [routerLink]="homepageData.hero.primaryCTA.link"
+            class="btn btn-primary"
+          >
+            {{ homepageData.hero.primaryCTA.text }}
+          </a>
+          <a
+            [routerLink]="homepageData.hero.secondaryCTA.link"
+            class="btn btn-secondary"
+          >
+            {{ homepageData.hero.secondaryCTA.text }}
+          </a>
+        </div>
+      </div>
+      <div class="hero-image">
+        <img src="../../../assets/homepage.png" alt="C2SI Homepage" />
+      </div>
+    </div>
+  </section>
+
+  <!-- Mission Section -->
+  <section class="mission-section">
+    <div class="container">
+      <h2 class="section-title">{{ homepageData.mission.title }}</h2>
+      <p class="mission-description">{{ homepageData.mission.description }}</p>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats-section">
+    <div class="container">
+      <div class="stats-grid">
+        @for (stat of homepageData.stats; track stat.label) {
+          <div class="stat-card">
+            <div class="stat-icon">
+              @switch (stat.icon) {
+                @case ("projects") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+                    ></path>
+                  </svg>
+                }
+                @case ("contributors") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                }
+                @case ("prs") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <circle cx="18" cy="18" r="3"></circle>
+                    <circle cx="6" cy="6" r="3"></circle>
+                    <path d="M13 6h3a2 2 0 0 1 2 2v7"></path>
+                    <line x1="6" y1="9" x2="6" y2="21"></line>
+                  </svg>
+                }
+                @case ("publications") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path
+                      d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                    ></path>
+                  </svg>
+                }
+              }
+            </div>
+            <div class="stat-value">{{ stat.value }}</div>
+            <div class="stat-label">{{ stat.label }}</div>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Projects Section -->
+  <section class="featured-projects-section">
+    <div class="container">
+      <h2 class="section-title">Featured Projects</h2>
+      <p class="section-subtitle">
+        Explore our most popular and impactful projects
+      </p>
+      <div class="projects-grid">
+        @for (project of homepageData.featuredProjects; track project.name) {
+          <div class="project-card">
+            <div class="project-header">
+              <h3 class="project-name">{{ project.name }}</h3>
+              <div class="project-stars">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                  />
+                </svg>
+                <span>{{ project.stars }}</span>
+              </div>
+            </div>
+            <p class="project-description">{{ project.description }}</p>
+            <div class="project-footer">
+              <div class="project-language">
+                <span
+                  class="language-dot"
+                  [style.background-color]="getLanguageColor(project.language)"
+                ></span>
+                {{ project.language }}
+              </div>
+              <a [href]="project.link" target="_blank" class="project-link">
+                View Project →
+              </a>
+            </div>
+            <div class="project-topics">
+              @for (topic of project.topics; track topic) {
+                <span class="topic-tag">{{ topic }}</span>
+              }
+            </div>
+          </div>
+        }
+      </div>
+      <div class="section-cta">
+        <a routerLink="/projects" class="btn btn-outline">View All Projects</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Core Sections -->
+  <section class="core-sections">
+    <div class="container">
+      <h2 class="section-title">Explore C2SI</h2>
+      <div class="sections-grid">
+        @for (section of homepageData.sections; track section.title) {
+          <a [routerLink]="section.link" class="section-card">
+            <div class="section-icon">
+              @switch (section.icon) {
+                @case ("code") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                }
+                @case ("book") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path
+                      d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"
+                    ></path>
+                  </svg>
+                }
+                @case ("users") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="9" cy="7" r="4"></circle>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                  </svg>
+                }
+              }
+            </div>
+            <div class="section-content">
+              <h3>{{ section.title }}</h3>
+              <div class="section-count">{{ section.count }}</div>
+              <p>{{ section.description }}</p>
+            </div>
+            <div class="section-arrow">→</div>
+          </a>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Recent Publications Section -->
+  <section class="recent-publications-section">
+    <div class="container">
+      <h2 class="section-title">Recent Publications</h2>
+      <p class="section-subtitle">Latest research from our team</p>
+      <div class="publications-list">
+        @for (
+          publication of homepageData.recentPublications;
+          track publication.heading
+        ) {
+          <div class="publication-item">
+            <a
+              [href]="publication.link"
+              target="_blank"
+              class="publication-title"
+            >
+              {{ publication.heading }}
+            </a>
+            <p class="publication-venue">{{ publication.issued_by }}</p>
+            <p class="publication-authors">{{ publication.description }}</p>
+          </div>
+        }
+      </div>
+      <div class="section-cta">
+        <a routerLink="/publications" class="btn btn-outline"
+          >View All Publications</a
+        >
+      </div>
+    </div>
+  </section>
+
+  <!-- Research Focus Areas Section -->
+  <section class="research-areas-section">
+    <div class="container">
+      <h2 class="section-title">Our Research Focus</h2>
+      <p class="section-subtitle">
+        Advancing computer science across multiple domains
+      </p>
+      <div class="research-grid">
+        @for (area of homepageData.researchAreas; track area.title) {
+          <div class="research-card">
+            <div
+              class="research-icon"
+              [style.background-color]="area.color + '20'"
+            >
+              @switch (area.icon) {
+                @case ("shield") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    [attr.stroke]="area.color"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"
+                    ></path>
+                  </svg>
+                }
+                @case ("brain") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    [attr.stroke]="area.color"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M12 2a4 4 0 0 0-4 4v1a4 4 0 0 0-3 4v2a4 4 0 0 0 1 2.646V18a4 4 0 0 0 4 4h4a4 4 0 0 0 4-4v-2.354A4 4 0 0 0 19 13v-2a4 4 0 0 0-3-4V6a4 4 0 0 0-4-4z"
+                    ></path>
+                    <path d="M8 12h.01M16 12h.01"></path>
+                  </svg>
+                }
+                @case ("search") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    [attr.stroke]="area.color"
+                    stroke-width="2"
+                  >
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <path d="M21 21l-4.35-4.35"></path>
+                  </svg>
+                }
+                @case ("lock") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    [attr.stroke]="area.color"
+                    stroke-width="2"
+                  >
+                    <rect
+                      x="3"
+                      y="11"
+                      width="18"
+                      height="11"
+                      rx="2"
+                      ry="2"
+                    ></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                  </svg>
+                }
+                @case ("cloud") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    [attr.stroke]="area.color"
+                    stroke-width="2"
+                  >
+                    <path
+                      d="M18 10h-1.26A8 8 0 1 0 9 20h9a5 5 0 0 0 0-10z"
+                    ></path>
+                  </svg>
+                }
+                @case ("globe") {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="32"
+                    height="32"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    [attr.stroke]="area.color"
+                    stroke-width="2"
+                  >
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="2" y1="12" x2="22" y2="12"></line>
+                    <path
+                      d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"
+                    ></path>
+                  </svg>
+                }
+              }
+            </div>
+            <h3 class="research-title">{{ area.title }}</h3>
+            <p class="research-description">{{ area.description }}</p>
+          </div>
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA Section -->
+  <section class="final-cta-section">
+    <div class="container">
+      <h2>Ready to Contribute?</h2>
+      <p>
+        Join our community of researchers and developers making an impact in
+        computer science
+      </p>
+      <div class="cta-buttons">
+        <a
+          href="https://github.com/c2siorg"
+          target="_blank"
+          class="btn btn-primary btn-large"
+          >Start Contributing</a
+        >
+        <a routerLink="/community" class="btn btn-outline btn-large"
+          >Learn More</a
+        >
+      </div>
+    </div>
+  </section>
 </div>
