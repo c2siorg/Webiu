@@ -1,20 +1,24 @@
 <div class="gsoc__page">
   <div class="gsoc-hero">
     <div class="gsoc-hero-content">
-      <h1>Google Summer of Code 2026</h1>
-      <p>
-        Score Lab has been participating in GSoC since 2013 and we are excited
-        to be part of GSoC 2026. Here are the project ideas for GSoC 2026.
-      </p>
+      <h1>{{ gsocData.heroTitle }}</h1>
+      <p>{{ gsocData.heroDescription }}</p>
     </div>
     <img src="../../../assets/gsoc_no_bg.png" alt="GSOC" />
   </div>
 
   <!-- Replaced legacy static text with dynamic innerHTML injection to allow rich blog-style intros from gsocData.ts -->
-  <div class="gsoc__details" [innerHTML]="gsocData.introHTML"></div>
+  <div class="gsoc__details">
+    <p>{{ gsocData.details }}</p>
+    <ul>
+      @for (guideline of gsocData.guidelines; track $index) {
+        <li>{{ guideline }}</li>
+      }
+    </ul>
+  </div>
 
   <div class="gsoc__projects__list accordion">
-    @for (project of gsocData.projects; track project.id) {
+    @for (project of gsocData.projects; track $index) {
       <div
         class="accordion-item"
         [class.active]="activeProjectIndex === $index"
@@ -25,7 +29,7 @@
           (keydown.enter)="toggleAccordion($index)"
           tabindex="0"
         >
-          <h4>{{ project.id }}. {{ project.title }}</h4>
+          <h4>{{ $index + 1 }}. {{ project }}</h4>
           <span class="icon">{{
             activeProjectIndex === $index ? "−" : "+"
           }}</span>
@@ -34,10 +38,12 @@
           <!-- Using Angular 17+ @if syntax instead of *ngIf for better performance and readability -->
           <div class="accordion-content">
             <!-- Project content is now built using rich HTML grid strings from gsocData to preserve the premium card layout -->
-            <div
-              class="project-details"
-              [innerHTML]="project.detailsHTML"
-            ></div>
+            <div class="project-details">
+              <p>
+                Details and ideas regarding this project were tracked internally
+                by mentors in 2024.
+              </p>
+            </div>
           </div>
         }
       </div>
