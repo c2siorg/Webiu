@@ -16,8 +16,6 @@ interface ContributionRange {
   max: number | null;
 }
 
-
-
 @Component({
   selector: 'app-contributors',
   standalone: true,
@@ -26,7 +24,7 @@ interface ContributionRange {
     HttpClientModule,
     ReactiveFormsModule,
     ProfileCardComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
@@ -53,7 +51,6 @@ export class ContributorsComponent implements OnInit {
     { label: '500+', min: 500, max: null },
   ];
 
-
   currentPage = 1;
   profilesPerPage = 9;
   totalPages = 1;
@@ -72,9 +69,9 @@ export class ContributorsComponent implements OnInit {
 
   getProfiles() {
     this.http
-      .get<Contributor[]>(
-        `${environment.serverUrl}/api/contributor/contributors`
-      )
+      .get<
+        Contributor[]
+      >(`${environment.serverUrl}/api/contributor/contributors`)
       .subscribe({
         next: (res) => {
           this.contributors = res || [];
@@ -97,7 +94,7 @@ export class ContributorsComponent implements OnInit {
     const requests = this.contributors.map((contributor) =>
       this.http
         .get<{ followers?: number; following?: number }>(
-          `${environment.serverUrl}/api/user/followersAndFollowing/${contributor.login}`
+          `${environment.serverUrl}/api/user/followersAndFollowing/${contributor.login}`,
         )
         .toPromise()
         .then((data) => {
@@ -107,7 +104,7 @@ export class ContributorsComponent implements OnInit {
         .catch(() => {
           contributor.followers = 0;
           contributor.following = 0;
-        })
+        }),
     );
 
     Promise.all(requests).then(() => {
@@ -122,7 +119,7 @@ export class ContributorsComponent implements OnInit {
     this.commonUtil.commonProfiles = this.profiles;
     this.allRepos = this.getUniqueRepos();
     this.totalPages = Math.ceil(
-      (this.profiles.length || 0) / this.profilesPerPage
+      (this.profiles.length || 0) / this.profilesPerPage,
     );
     this.filterProfiles();
     this.isLoading = false;
@@ -139,15 +136,15 @@ export class ContributorsComponent implements OnInit {
   }
 
   onRepoChange(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    this.selectedRepo = inputElement.value;
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedRepo = selectElement.value;
     this.currentPage = 1;
     this.filterProfiles();
   }
 
   onContributionRangeChange(event: Event) {
-    const inputElement = event.target as HTMLInputElement;
-    this.selectedContributionRange = inputElement.value;
+    const selectElement = event.target as HTMLSelectElement;
+    this.selectedContributionRange = selectElement.value;
     this.currentPage = 1;
     this.filterProfiles();
   }
@@ -164,25 +161,25 @@ export class ContributorsComponent implements OnInit {
 
     if (searchTextValue) {
       filteredProfiles = filteredProfiles.filter((profile) =>
-        profile.login.toLowerCase().includes(searchTextValue)
+        profile.login.toLowerCase().includes(searchTextValue),
       );
     }
 
     if (this.selectedRepo) {
       filteredProfiles = filteredProfiles.filter((profile) =>
-        profile.repos?.includes(this.selectedRepo)
+        profile.repos?.includes(this.selectedRepo),
       );
     }
 
     if (this.selectedContributionRange) {
       const range = this.contributionRanges.find(
-        (r) => r.label === this.selectedContributionRange
+        (r) => r.label === this.selectedContributionRange,
       );
       if (range) {
         filteredProfiles = filteredProfiles.filter(
           (profile) =>
             profile.contributions >= range.min &&
-            (range.max === null || profile.contributions <= range.max)
+            (range.max === null || profile.contributions <= range.max),
         );
       }
     }
@@ -197,7 +194,7 @@ export class ContributorsComponent implements OnInit {
     const startIndex = (this.currentPage - 1) * this.profilesPerPage;
     this.displayProfiles = filteredProfiles.slice(
       startIndex,
-      startIndex + this.profilesPerPage
+      startIndex + this.profilesPerPage,
     );
   }
 
@@ -232,8 +229,6 @@ export class ContributorsComponent implements OnInit {
     this.filterProfiles();
   }
 
-
-
   onSortChange(event: Event) {
     const selectElement = event.target as HTMLSelectElement;
     this.selectedSort = selectElement.value;
@@ -246,9 +241,13 @@ export class ContributorsComponent implements OnInit {
 
     switch (sortBy) {
       case 'name-asc':
-        return sorted.sort((a, b) => a.login.toLowerCase().localeCompare(b.login.toLowerCase()));
+        return sorted.sort((a, b) =>
+          a.login.toLowerCase().localeCompare(b.login.toLowerCase()),
+        );
       case 'name-desc':
-        return sorted.sort((a, b) => b.login.toLowerCase().localeCompare(a.login.toLowerCase()));
+        return sorted.sort((a, b) =>
+          b.login.toLowerCase().localeCompare(a.login.toLowerCase()),
+        );
       case 'contributions-desc':
         return sorted.sort((a, b) => b.contributions - a.contributions);
       case 'contributions-asc':
