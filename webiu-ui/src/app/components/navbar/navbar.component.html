@@ -6,11 +6,35 @@
       class="logo"
     />
   </a>
-  <div [ngClass]="{ navbar__menu: true, open: isMenuOpen }" id="navbarMenu">
+  @if (isMenuOpen) {
+  <div
+    class="menu-overlay"
+    (click)="closeMenu()"
+    (keydown.enter)="closeMenu()"
+    (keydown.space)="closeMenu(); $event.preventDefault()"
+    tabindex="0"
+    role="button"
+    aria-label="Close menu"
+  ></div>
+  }
+  <div
+    [ngClass]="{ navbar__menu: true, open: isMenuOpen }"
+    id="navbarMenu"
+    (click)="$event.stopPropagation()"
+    (keydown.enter)="$event.stopPropagation()"
+    (keydown.space)="$event.preventDefault(); $event.stopPropagation()"
+    tabindex="0"
+  >
     <div
       class="navbar__menu__items"
       routerLink="/"
       [class.active]="isRouteActive('/')"
+      (click)="navigateTo('/')"
+      (keydown.enter)="navigateTo('/')"
+      (keydown.space)="navigateTo('/'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      aria-label="Home"
     >
       <img src="../../../assets/home.svg" alt="Home Icon" />
       <p>Home</p>
@@ -19,6 +43,12 @@
       class="navbar__menu__items"
       routerLink="/projects"
       [class.active]="isRouteActive('/projects')"
+      (click)="navigateTo('/projects')"
+      (keydown.enter)="navigateTo('/projects')"
+      (keydown.space)="navigateTo('/projects'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      aria-label="Projects"
     >
       <img src="../../../assets/projects.svg" alt="Projects Icon" />
       <p>Projects</p>
@@ -27,6 +57,12 @@
       class="navbar__menu__items"
       routerLink="/publications"
       [class.active]="isRouteActive('/publications')"
+      (click)="navigateTo('/publications')"
+      (keydown.enter)="navigateTo('/publications')"
+      (keydown.space)="navigateTo('/publications'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      aria-label="Publications"
     >
       <img src="../../../assets/publications.svg" alt="Publications Icon" />
       <p>Publications</p>
@@ -35,6 +71,12 @@
       class="navbar__menu__items"
       routerLink="/contributors"
       [class.active]="isRouteActive('/contributors')"
+      (click)="navigateTo('/contributors')"
+      (keydown.enter)="navigateTo('/contributors')"
+      (keydown.space)="navigateTo('/contributors'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      aria-label="Contributors"
     >
       <img src="../../../assets/contributors.svg" alt="Contributors Icon" />
       <p>Contributors</p>
@@ -43,6 +85,12 @@
       class="navbar__menu__items"
       routerLink="/community"
       [class.active]="isRouteActive('/community')"
+      (click)="navigateTo('/community')"
+      (keydown.enter)="navigateTo('/community')"
+      (keydown.space)="navigateTo('/community'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      aria-label="Community"
     >
       <img src="../../../assets/community.svg" alt="Community Icon" />
       <p>Community</p>
@@ -51,6 +99,12 @@
       class="navbar__menu__items"
       routerLink="/gsoc"
       [class.active]="isRouteActive('/gsoc')"
+      (click)="navigateTo('/gsoc')"
+      (keydown.enter)="navigateTo('/gsoc')"
+      (keydown.space)="navigateTo('/gsoc'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      aria-label="Google Summer of Code"
     >
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC 26</p>
@@ -108,8 +162,11 @@
   <div
     class="navigation__buttons"
     (click)="toggleMenu()"
-    (keyup.enter)="toggleMenu()"
+    (keydown.enter)="toggleMenu()"
+    (keydown.space)="toggleMenu(); $event.preventDefault()"
     tabindex="0"
+    role="button"
+    aria-label="{{ isMenuOpen ? 'Close menu' : 'Open menu' }}"
   >
     <div class="nav-btn">
       @if (!isMenuOpen) {
