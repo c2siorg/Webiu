@@ -2,10 +2,8 @@ require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
 const router = express.Router();
-const port = process.env.PORT || 3000;
 const baseUrl = 'https://api.github.com';
 const accessToken = process.env.GITHUB_ACCESS_TOKEN;
-const GitHub = require('gh.js');
 
 const getAllContributors = async (req, res) => {
   try {
@@ -221,36 +219,32 @@ const userCreatedPullRequests = async (req, res) => {
 async function getUserFollowersAndFollowing(req, res) {
   const username = req.params.username;
 
-  return res.status(200).json({ 0: 0 });
-  // const gh = new GitHub({
-  //   token: accessToken,
-  // });
+  if (!username) {
+    return res.status(400).json({ error: 'Username is required' });
+  }
 
-  // if (!username) {
-  //   return res.status(400).json({ error: 'Username is required' });
-  // }
+  try {
+    const [followersResponse, followingResponse] = await Promise.all([
+      axios.get(`${baseUrl}/users/${username}/followers`, {
+        headers: {
+          Authorization: `token ${accessToken}`,
+        },
+      }),
+      axios.get(`${baseUrl}/users/${username}/following`, {
+        headers: {
+          Authorization: `token ${accessToken}`,
+        },
+      }),
+    ]);
 
-  // try {
-  //   const [followers, following] = await Promise.all([
-  //     new Promise((resolve, reject) => {
-  //       gh.get(`users/${username}/followers`, { all: true }, (err, data) => {
-  //         if (err) reject(err);
-  //         else resolve(data.length || 0);
-  //       });
-  //     }),
-  //     new Promise((resolve, reject) => {
-  //       gh.get(`users/${username}/following`, { all: true }, (err, data) => {
-  //         if (err) reject(err);
-  //         else resolve(data.length || 0);
-  //       });
-  //     }),
-  //   ]);
+    const followers = followersResponse.data.length || 0;
+    const following = followingResponse.data.length || 0;
 
-  //   res.json({ followers, following });
-  // } catch (error) {
-  //   console.error(`Error fetching GitHub data for ${username}:`, error.message);
-  //   res.status(500).json({ error: 'Failed to fetch data from GitHub' });
-  // }
+    return res.status(200).json({ followers, following });
+  } catch (error) {
+    console.error(`Error fetching GitHub data for ${username}:`, error.message);
+    return res.status(500).json({ error: 'Failed to fetch data from GitHub' });
+  }
 }
 
 module.exports = {
