@@ -26,9 +26,14 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {
     this.isSunVisible = !this.themeService.isDarkMode();
     this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .pipe(
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd,
+        ),
+      )
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
+        this.isMenuOpen = false;
       });
 
     const queryParams = new URLSearchParams(window.location.search);
