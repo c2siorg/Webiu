@@ -3,11 +3,20 @@
     <div class="search-container">
       <div class="search-wrapper">
         <div class="input-container">
-          <input type="text" class="search-input" placeholder="search contributors" [formControl]="searchText" />
+          <input
+            type="text"
+            class="search-input"
+            placeholder="search contributors"
+            [formControl]="searchText"
+          />
           @if (searchText.value) {
-          <button class="clear-icon" (click)="clearSearch()" title="Clear search">
-            <i class="fas fa-times"></i>
-          </button>
+            <button
+              class="clear-icon"
+              (click)="clearSearch()"
+              title="Clear search"
+            >
+              <i class="fas fa-times"></i>
+            </button>
           }
         </div>
         <button class="search-button" (click)="filterProfiles()">
@@ -19,23 +28,25 @@
     <div class="filters-section">
       <div class="filter-group">
         <span>Filter by Repository</span>
-        <input class="filter-input" list="repos" placeholder="All Repositories" (change)="onRepoChange($event)">
-        <datalist id="repos">
+        <select class="filter-select" (change)="onRepoChange($event)">
+          <option value="">All Repositories</option>
           @for (repo of allRepos; track repo) {
-          <option [value]="repo"></option>
+            <option [value]="repo">{{ repo }}</option>
           }
-        </datalist>
+        </select>
       </div>
 
       <div class="filter-group">
         <span>Filter by Contributions</span>
-        <input class="filter-input" list="contributions" placeholder="All Contributions"
-          (change)="onContributionRangeChange($event)">
-        <datalist id="contributions">
+        <select
+          class="filter-select"
+          (change)="onContributionRangeChange($event)"
+        >
+          <option value="">All Contributions</option>
           @for (range of contributionRanges; track range) {
-          <option [value]="range.label"></option>
+            <option [value]="range.label">{{ range.label }}</option>
           }
-        </datalist>
+        </select>
       </div>
 
       <div class="filter-group">
@@ -44,63 +55,94 @@
           <option value="">Default</option>
           <option value="name-asc">Name (A-Z)</option>
           <option value="name-desc">Name (Z-A)</option>
-          <option value="contributions-desc">Contributions (High to Low)</option>
+          <option value="contributions-desc">
+            Contributions (High to Low)
+          </option>
           <option value="contributions-asc">Contributions (Low to High)</option>
         </select>
       </div>
     </div>
 
     @if (isLoading) {
-    <app-loading-spinner message="Loading contributors..."></app-loading-spinner>
+      <app-loading-spinner
+        message="Loading contributors..."
+      ></app-loading-spinner>
     }
 
     @if (!isLoading) {
-    <div class="contributors-grid">
-      @for (profile of displayProfiles; track trackByFn($index, profile)) {
-      <app-profile-card [login]="profile.login" [contributions]="profile.contributions"
-        [avatar_url]="profile.avatar_url" [repos]="profile.repos" [followers]="profile.followers"
-        [following]="profile.following" (usernameClick)="onUsernameClick($event)"></app-profile-card>
-      }
-    </div>
+      <div class="contributors-grid">
+        @for (profile of displayProfiles; track trackByFn($index, profile)) {
+          <app-profile-card
+            [login]="profile.login"
+            [contributions]="profile.contributions"
+            [avatar_url]="profile.avatar_url"
+            [repos]="profile.repos"
+            [followers]="profile.followers"
+            [following]="profile.following"
+            (usernameClick)="onUsernameClick($event)"
+          ></app-profile-card>
+        }
+      </div>
     }
 
     @if (!isLoading && displayProfiles.length === 0) {
-    <p class="no-contributors-message">
-      No contributors found matching the search criteria
-    </p>
+      <p class="no-contributors-message">
+        No contributors found matching the search criteria
+      </p>
     }
 
     @if (!isLoading && displayProfiles && displayProfiles.length > 0) {
-    <div class="pagination-container">
-      <div class="pagination">
-        <button (click)="goToFirstPage()" [disabled]="currentPage === 1" title="First Page">
-          <i class="fa fa-angle-double-left"></i>
-        </button>
-        <button (click)="prevPage()" [disabled]="currentPage === 1" title="Previous Page">
-          <i class="fa fa-angle-left"></i>
-        </button>
-        <span>Page {{ currentPage }} of {{ totalPages }}</span>
-        <button (click)="nextPage()" [disabled]="currentPage === totalPages" title="Next Page">
-          <i class="fa fa-angle-right"></i>
-        </button>
-        <button (click)="goToLastPage()" [disabled]="currentPage === totalPages" title="Last Page">
-          <i class="fa fa-angle-double-right"></i>
-        </button>
+      <div class="pagination-container">
+        <div class="pagination">
+          <button
+            (click)="goToFirstPage()"
+            [disabled]="currentPage === 1"
+            title="First Page"
+          >
+            <i class="fa fa-angle-double-left"></i>
+          </button>
+          <button
+            (click)="prevPage()"
+            [disabled]="currentPage === 1"
+            title="Previous Page"
+          >
+            <i class="fa fa-angle-left"></i>
+          </button>
+          <span>Page {{ currentPage }} of {{ totalPages }}</span>
+          <button
+            (click)="nextPage()"
+            [disabled]="currentPage === totalPages"
+            title="Next Page"
+          >
+            <i class="fa fa-angle-right"></i>
+          </button>
+          <button
+            (click)="goToLastPage()"
+            [disabled]="currentPage === totalPages"
+            title="Last Page"
+          >
+            <i class="fa fa-angle-double-right"></i>
+          </button>
+        </div>
+        <div class="items-per-page">
+          <label for="itemsPerPage">Show:</label>
+          <select id="itemsPerPage" (change)="onItemsPerPageChange($event)">
+            <option [value]="9" [selected]="profilesPerPage === 9">9</option>
+            <option [value]="18" [selected]="profilesPerPage === 18">18</option>
+            <option [value]="27" [selected]="profilesPerPage === 27">27</option>
+            <option [value]="50" [selected]="profilesPerPage === 50">50</option>
+          </select>
+        </div>
       </div>
-      <div class="items-per-page">
-        <label for="itemsPerPage">Show:</label>
-        <select id="itemsPerPage" (change)="onItemsPerPageChange($event)">
-          <option [value]="9" [selected]="profilesPerPage === 9">9</option>
-          <option [value]="18" [selected]="profilesPerPage === 18">18</option>
-          <option [value]="27" [selected]="profilesPerPage === 27">27</option>
-          <option [value]="50" [selected]="profilesPerPage === 50">50</option>
-        </select>
-      </div>
-    </div>
     }
   </section>
 
   <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
-    <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24" />
+    <img
+      src="../../../assets/up-arrow.svg"
+      alt="Back to Top"
+      width="24"
+      height="24"
+    />
   </button>
 </div>

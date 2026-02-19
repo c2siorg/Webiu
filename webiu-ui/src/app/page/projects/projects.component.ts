@@ -17,7 +17,7 @@ import { ProjectCacheService } from 'src/app/services/project-cache.service';
     FormsModule,
     NavbarComponent,
     ProjectsCardComponent,
-    LoadingSpinnerComponent
+    LoadingSpinnerComponent,
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
@@ -25,10 +25,14 @@ import { ProjectCacheService } from 'src/app/services/project-cache.service';
 export class ProjectsComponent implements OnInit {
   projectsData: Project[] = [];
   filteredProjects: Project[] = [];
+  displayProjects: Project[] = [];
   searchTerm = '';
   isLoading = true;
   org = 'c2siorg';
   showButton = false;
+  currentPage = 1;
+  projectsPerPage = 9;
+  totalPages = 1;
 
   private projectCacheService = inject(ProjectCacheService);
 
@@ -41,11 +45,13 @@ export class ProjectsComponent implements OnInit {
       next: (response) => {
         this.projectsData = this.sortProjects(response.repositories);
         this.filteredProjects = [...this.projectsData];
+        this.updateDisplayProjects();
         this.isLoading = false;
       },
       error: () => {
         this.projectsData = this.sortProjects(projectsData.repositories);
         this.filteredProjects = [...this.projectsData];
+        this.updateDisplayProjects();
         this.isLoading = false;
       },
     });
@@ -53,7 +59,7 @@ export class ProjectsComponent implements OnInit {
 
   sortProjects(projects: Project[]): Project[] {
     return projects.sort((a, b) =>
-      a.name.toLowerCase().localeCompare(b.name.toLowerCase())
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
     );
   }
 
@@ -65,12 +71,54 @@ export class ProjectsComponent implements OnInit {
     const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
     this.filteredProjects = this.sortProjects(
       this.projectsData.filter((project) =>
-        project.name.toLowerCase().includes(lowerCaseSearchTerm)
-      )
+        project.name.toLowerCase().includes(lowerCaseSearchTerm),
+      ),
     );
-    if (this.filteredProjects.length === 0) {
-      this.filteredProjects = [];
+    this.currentPage = 1;
+    this.updateDisplayProjects();
+  }
+
+  updateDisplayProjects(): void {
+    this.totalPages = Math.max(
+      1,
+      Math.ceil(this.filteredProjects.length / this.projectsPerPage),
+    );
+    const startIndex = (this.currentPage - 1) * this.projectsPerPage;
+    this.displayProjects = this.filteredProjects.slice(
+      startIndex,
+      startIndex + this.projectsPerPage,
+    );
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updateDisplayProjects();
     }
+  }
+
+  prevPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updateDisplayProjects();
+    }
+  }
+
+  goToFirstPage(): void {
+    this.currentPage = 1;
+    this.updateDisplayProjects();
+  }
+
+  goToLastPage(): void {
+    this.currentPage = this.totalPages;
+    this.updateDisplayProjects();
+  }
+
+  onItemsPerPageChange(event: Event): void {
+    const selectElement = event.target as HTMLSelectElement;
+    this.projectsPerPage = parseInt(selectElement.value, 10);
+    this.currentPage = 1;
+    this.updateDisplayProjects();
   }
 
   @HostListener('window:scroll')

@@ -41,6 +41,94 @@
     width: 100%;
     max-width: 950px;
     margin: 0 auto;
+
+    .pagination-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+      gap: 16px;
+      width: 100%;
+
+      .pagination {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 8px;
+        flex: 1;
+        min-width: 0;
+
+        button {
+          padding: 8px 12px;
+          background-color: #2f80ed;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          font-size: 16px;
+          cursor: pointer;
+          transition: background-color 0.2s ease;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 40px;
+          height: 40px;
+          flex-shrink: 0;
+
+          i {
+            font-size: 18px;
+            color: white;
+          }
+
+          &:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+          }
+
+          &:hover:not(:disabled) {
+            background-color: #004cbf;
+          }
+        }
+
+        span {
+          font-size: 14px;
+          color: var(--pagination-span);
+          padding: 0 8px;
+          white-space: nowrap;
+        }
+      }
+
+      .items-per-page {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-shrink: 0;
+
+        label {
+          font-size: 14px;
+          color: var(--filter-section-color);
+          font-weight: 500;
+          white-space: nowrap;
+        }
+
+        select {
+          padding: 8px 12px;
+          border: 1px solid var(--select-border);
+          border-radius: 6px;
+          font-size: 14px;
+          cursor: pointer;
+          outline: none;
+          color: var(--search-color);
+          background-color: var(--select-bg);
+          min-width: 60px;
+
+          &:focus {
+            border-color: #2f80ed;
+          }
+        }
+      }
+    }
   }
 }
 
@@ -109,7 +197,9 @@
   cursor: pointer;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
   z-index: 1000;
 }
 
@@ -145,6 +235,23 @@
     .projects-hero {
       img {
         width: 400px;
+      }
+    }
+
+    .projects-cards-container {
+      .pagination-container {
+        flex-direction: column;
+        gap: 16px;
+
+        .items-per-page {
+          width: 100%;
+          justify-content: center;
+        }
+
+        .pagination {
+          width: 100%;
+          justify-content: center;
+        }
       }
     }
   }
