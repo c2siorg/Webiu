@@ -9,13 +9,14 @@
   border: 2px solid var(--border-color, #fff);
   background: var(--card-container-2, #fff);
   box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.1);
+  position: relative;
 
   &.no-projects {
     display: flex;
     justify-content: center;
     align-items: center;
     min-height: 200px;
-    min-width: 850px;
+    min-width: auto;
     text-align: center;
     padding: 40px;
     box-shadow: none;
@@ -28,13 +29,16 @@
   }
 
   .projects__card__main {
-    width: 850px;
+    width: 100%;
     display: flex;
     // align-items: center;
     justify-content: space-between;
     gap: 7px;
 
     .projects__card__desc {
+      padding-right: 50px;
+      flex: 1;
+
       h3 {
         color: var(--primary-dark, var(--primary-dark, #0a0a15));
         font-size: 16px;
@@ -59,6 +63,7 @@
       gap: 10px;
 
       span {
+        padding-right: 25px;
         display: flex;
         gap: 10px;
 
@@ -78,6 +83,8 @@
 
       .projects__card__details__info {
         display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
         gap: 10px;
 
         .pr-btn {
@@ -90,6 +97,8 @@
           border-radius: 4px;
           border: 1px solid var(--card-button-border);
           background: var(--card-button-bg);
+          white-space: nowrap;
+          flex-shrink: 0;
 
           p {
             color: var(--card-color-p);
@@ -106,9 +115,13 @@
             border-radius: 20px;
             background: var(--card-span, #fff);
             padding: 6px;
+            flex-shrink: 0;
+          }
+          svg {
+            flex-shrink: 0;
           }
           svg path {
-            fill: var(--card-color-p); /* Apply dynamic fill color */
+            fill: var(--card-color-p);
           }
         }
 
@@ -120,9 +133,10 @@
           gap: 8px;
           border-radius: 4px;
           color: var(--primary-dark, var(--primary-dark, #0a0a15));
-
           border: 1px solid var(--card-button-border);
           background: var(--card-button-bg);
+          white-space: nowrap;
+          flex-shrink: 0;
 
           span {
             color: var(--primary-dark, var(--primary-dark, #0a0a15));
@@ -131,6 +145,7 @@
             border-radius: 20px;
             background: var(--card-span, #fff);
             padding: 6px;
+            flex-shrink: 0;
           }
 
           p {
@@ -139,10 +154,12 @@
             font-weight: 500;
             line-height: 150%;
           }
-          svg path {
-            fill: var(--card-color-p); /* Apply dynamic fill color */
+          svg {
+            flex-shrink: 0;
           }
-
+          svg path {
+            fill: var(--card-color-p);
+          }
         }
 
         .git-btn {
@@ -153,6 +170,8 @@
           gap: 10px;
           border-radius: 4px;
           background: var(--Green-1, #219653);
+          white-space: nowrap;
+          flex-shrink: 0;
 
           p {
             color: var(--primary-white, #fff);
@@ -160,6 +179,10 @@
             font-weight: 400;
             line-height: 150%;
             text-decoration: none;
+          }
+
+          svg {
+            flex-shrink: 0;
           }
         }
       }
@@ -179,6 +202,10 @@
       background: var(--card-drop-button-bg);
       box-shadow: 0px 0px 14px 0px rgba(0, 0, 0, 0.1);
       transition: transform 0.3s ease;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      transform: rotate(-90deg);
 
       svg path {
         fill: var(--card-drop-button-svg);
@@ -186,12 +213,12 @@
     }
 
     .projects__card__open__btn.rotate-90 {
-      transform: rotate(5deg);
+      transform: rotate(0deg);
     }
   }
 
   .projects__card__hidden {
-    width: 850px;
+    width: 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -200,7 +227,9 @@
     opacity: 0;
     height: 0;
     overflow: hidden;
-    transition: opacity 0.3s ease, height 0.3s ease;
+    transition:
+      opacity 0.3s ease,
+      height 0.3s ease;
 
     .projects__card__hidden__tags {
       display: flex;
@@ -213,7 +242,7 @@
         font-size: 12px;
         border: 2px solid var(--card-drop-tag-border);
         background-color: var(--card-drop-tag-bg);
-        color:var(--card-color-p);
+        color: var(--card-color-p);
         // box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.2);
         padding: 4px 6px;
         border-radius: 20px;
@@ -239,79 +268,177 @@
 
 @media screen and (max-width: 1000px) {
   .projects__card {
+    padding: 16px 20px 16px 16px;
+
     .projects__card__main {
-      width: 550px;
+      width: 100%;
       flex-direction: column;
-      width: fit-content;
+
+      .projects__card__desc {
+        padding-right: 40px;
+      }
 
       .projects__card__details {
         flex-direction: column;
 
         .projects__card__details__info {
-          width: 550px;
+          width: 100%;
+          flex-direction: row;
+          flex-wrap: wrap;
           justify-content: space-between;
         }
       }
     }
 
     .projects__card__hidden {
-      width: 550px;
+      width: 100%;
+      flex-direction: column;
     }
   }
 }
 
 @media screen and (max-width: 700px) {
   .projects__card {
-    width: 330px;
+    padding: 16px 14px 16px 14px;
 
     .projects__card__main {
-      width: 300px;
+      width: 100%;
       flex-direction: column;
+
       .projects__card__desc {
+        padding-right: 40px;
+
         p {
-          width: 300px;
+          width: 100%;
         }
       }
 
       .projects__card__details {
         align-items: flex-start;
+        width: 100%;
 
         .projects__card__details__info {
-          width: 270px;
-          flex-direction: column;
-          align-items: flex-start;
+          width: 100%;
+          flex-direction: row;
+          flex-wrap: wrap;
+          align-items: center;
           justify-content: flex-start;
+          gap: 6px;
         }
       }
     }
   }
 
   .projects__card__hidden {
-    max-width: 260px;
+    width: 100%;
     flex-direction: column;
+    max-width: 100%;
   }
 
   .projects__card.no-projects {
+    width: 100%;
     text-align: center;
     justify-content: center;
     align-items: center;
     padding: 30px;
+    min-height: 150px;
+
     p {
-      font-size: 16px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--primary-dark);
     }
-    width: 100%;
+  }
+}
+
+@media screen and (max-width: 450px) {
+  .projects__card {
+    padding: 14px 12px;
+    gap: 15px;
+
+    .projects__card__main {
+      gap: 12px;
+
+      .projects__card__desc {
+        padding-right: 45px;
+
+        h3 {
+          font-size: 14px;
+        }
+
+        p {
+          font-size: 12px;
+          width: 100%;
+        }
+      }
+
+      .projects__card__details {
+        span {
+          .circle-box {
+            height: 16px;
+            width: 16px;
+          }
+        }
+
+        h4 {
+          font-size: 12px;
+        }
+
+        .projects__card__details__info {
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 6px;
+          align-items: center;
+
+          a {
+            padding: 2px 4px;
+            white-space: nowrap;
+
+            svg {
+              width: 20px;
+              height: 20px;
+              flex-shrink: 0;
+            }
+
+            p {
+              font-size: 11px;
+              display: none;
+            }
+
+            span {
+              padding: 4px;
+              font-size: 11px;
+            }
+          }
+        }
+      }
+    }
+
+    .projects__card__hidden {
+      .projects__card__hidden__tags {
+        max-width: 100%;
+        .projects__card__tag {
+          font-size: 10px;
+          padding: 3px 5px;
+        }
+      }
+
+      .projects__card__details {
+        align-items: flex-start;
+        p {
+          font-size: 12px;
+        }
+      }
+    }
   }
 
-  @media screen and (max-width: 700px) {
-    .projects__card {
-      width: 330px;
-
-      &.no-projects {
-        min-width: 330px;
-        min-height: 150px;
-      }
+  .projects__card.no-projects {
+    padding: 20px;
+    h3 {
+      font-size: 16px;
+    }
+    p {
+      font-size: 12px;
     }
   }
 }
