@@ -5,11 +5,9 @@ import { PublicationsComponent } from './page/publications/publications.componen
 import { ContributorsComponent } from './page/contributors/contributors.component';
 import { CommunityComponent } from './page/community/community.component';
 import { GsocComponent } from './page/gsoc/gsoc.component';
+import { Gsoc2024Component } from './page/gsoc2024/gsoc2024.component';
 import { GsocProjectIdeaComponent } from './page/gsoc-project-idea/gsoc-project-idea.component';
 import { ContributorSearchComponent } from './page/contributor-search/contributor-search.component';
-
-
-
 export const routes: Routes = [
   { path: '', component: HomepageComponent },
   {
@@ -29,11 +27,11 @@ export const routes: Routes = [
     component: CommunityComponent,
   },
   { path: 'gsoc', component: GsocComponent },
+  { path: 'gsoc/2024', component: Gsoc2024Component },
   { path: 'idea', component: GsocProjectIdeaComponent },
   { path: 'search', component: ContributorSearchComponent },
-    
 ];
 export const AppRoutingModule = RouterModule.forRoot(routes, {
-  scrollPositionRestoration: 'enabled',  
-  anchorScrolling: 'enabled'  
-}); 
+  scrollPositionRestoration: 'enabled',
+  anchorScrolling: 'enabled',
+});
