@@ -1,0 +1,115 @@
+.app-footer {
+  width: 100%;
+  background: var(--navbar-bg, #11111e); // Sync background with navbar
+  border-top: 1px solid var(--border-color, #282a3b);
+  padding: 40px 20px 20px;
+  margin-top: auto;
+  font-family: "Poppins", sans-serif;
+
+  :host-context([data-theme="dark"]) & {
+    background: #11111e;
+    border-top: 1px solid #282a3b;
+  }
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr 1fr;
+  gap: 30px;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+}
+
+.footer-column {
+  display: flex;
+  flex-direction: column;
+
+  &.org-info {
+    @media (max-width: 600px) {
+      align-items: center;
+    }
+  }
+
+  h3 {
+    color: var(--font-color-dark);
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    margin-top: 0;
+
+    :host-context([data-theme="dark"]) & {
+      color: #e0e0e0;
+    }
+  }
+
+  .footer-logo {
+    width: 100px;
+    margin-bottom: 12px;
+
+    :host-context([data-theme="dark"]) & {
+      filter: invert(1);
+    }
+  }
+
+  .tagline,
+  .copyright {
+    color: var(--navbar-p, #586069);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 5px 0;
+
+    :host-context([data-theme="dark"]) & {
+      color: #e8e6e3;
+    }
+  }
+
+  .copyright {
+    margin-top: 15px;
+    font-size: 13px;
+    opacity: 0.8;
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+
+    li {
+      margin-bottom: 10px;
+
+      a {
+        color: var(--navbar-p, #586069);
+        text-decoration: none;
+        font-size: 15px;
+        transition:
+          color 0.2s ease,
+          transform 0.2s ease;
+        display: inline-block;
+
+        :host-context([data-theme="dark"]) & {
+          color: #e8e6e3;
+        }
+
+        &:hover,
+        &.active {
+          color: var(--primary-color, #2f80ed);
+          transform: translateX(2px);
+
+          :host-context([data-theme="dark"]) & {
+            color: #4a90e2;
+          }
+        }
+      }
+    }
+  }
+}
