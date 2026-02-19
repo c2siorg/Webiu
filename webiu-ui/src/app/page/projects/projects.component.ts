@@ -49,9 +49,6 @@ export class ProjectsComponent implements OnInit {
           this.filteredProjects = [...this.projectsData];
           this.isLoading = false;
         },
-        complete: () => {
-          console.log('Fetch projects request completed.');
-        },
       });
   }
 
