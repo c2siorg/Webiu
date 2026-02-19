@@ -9,14 +9,14 @@ import { HomepageDetails } from '../../common/data/homepage';
   standalone: true,
   imports: [NavbarComponent, CommonModule, RouterModule],
   templateUrl: './homepage.component.html',
-  styleUrl: './homepage.component.scss',
+  styleUrl: './homepage.component.scss'
 })
 export class HomepageComponent {
   homepageData = HomepageDetails;
 
   // Get language color for projects
   getLanguageColor(language: string): string {
-    const languageColors: { [key: string]: string } = {
+    const languageColors: Record<string, string> = {
       JavaScript: '#f1e05a',
       TypeScript: '#2b7489',
       Python: '#3572A5',
@@ -26,13 +26,13 @@ export class HomepageComponent {
       Rust: '#dea584',
       Ruby: '#701516',
       PHP: '#4F5D95',
-      Swift: '#ffac45',
+      Swift: '#ffac45'
     };
     return languageColors[language] || '#333';
   }
 
   // Navigate to section
-  navigateToSection(link: string): void {
+  navigateToSection(): void {
     // Router navigation will be handled by routerLink in template
   }
 }
