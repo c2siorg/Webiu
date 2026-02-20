@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectController, IssuesController } from './project.controller';
 import { ProjectService } from './project.service';
+import { OrgRepoQueryDto } from './dto/org-repo-query.dto';
 
 describe('ProjectController', () => {
   let controller: ProjectController;
@@ -75,7 +76,8 @@ describe('IssuesController', () => {
       const mockResult = { issues: 5, pullRequests: 3 };
       mockProjectService.getIssuesAndPr.mockResolvedValue(mockResult);
 
-      const result = await controller.getIssuesAndPr('c2siorg', 'repo1');
+      const dto: OrgRepoQueryDto = { org: 'c2siorg', repo: 'repo1' };
+      const result = await controller.getIssuesAndPr(dto);
 
       expect(result).toEqual(mockResult);
       expect(mockProjectService.getIssuesAndPr).toHaveBeenCalledWith(

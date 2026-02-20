@@ -1,5 +1,6 @@
 import { Controller, Get, Query, Header } from '@nestjs/common';
 import { ProjectService } from './project.service';
+import { OrgRepoQueryDto } from './dto/org-repo-query.dto';
 
 @Controller('api/projects')
 export class ProjectController {
@@ -18,7 +19,7 @@ export class IssuesController {
 
   @Get('issuesAndPr')
   @Header('Cache-Control', 'public, max-age=300')
-  async getIssuesAndPr(@Query('org') org: string, @Query('repo') repo: string) {
+  async getIssuesAndPr(@Query() { org, repo }: OrgRepoQueryDto) {
     return this.projectService.getIssuesAndPr(org, repo);
   }
 }
