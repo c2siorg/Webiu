@@ -15,4 +15,9 @@ export class UserController {
   async batchSocial(@Body() dto: BatchSocialDto) {
     return this.userService.batchFollowersAndFollowing(dto.usernames);
   }
+
+  @Get('profile/:username')
+  async getUserProfile(@Param('username') username: string) {
+    return this.userService.getUserProfile(username);
+  }
 }
