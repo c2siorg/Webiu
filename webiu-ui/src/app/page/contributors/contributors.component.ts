@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { Contributor, contributors } from '../../common/data/contributor';
+import { Contributor } from '../../common/data/contributor';
 
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
@@ -40,7 +40,7 @@ export class ContributorsComponent implements OnInit {
   allRepos: string[] = [];
   isLoading = true;
   showButton = false;
-  contributors: Contributor[] = contributors;
+  contributors: Contributor[] = [];
 
   contributionRanges: ContributionRange[] = [
     { label: '0 to 5', min: 0, max: 5 },

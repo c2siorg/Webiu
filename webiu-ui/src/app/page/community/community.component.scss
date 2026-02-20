@@ -54,46 +54,72 @@
       text-align: center;
     }
 
+    .loading-spinner {
+      margin: 2rem 0;
+      font-size: 1.2rem;
+      color: var(--primary-dark, #0a0a15);
+    }
+
     .team {
-      width: 80%;
+      width: 100%;
+      max-width: 1200px;
       display: flex;
+      flex-direction: column;
+      align-items: center;
 
-      .team-align {
-        display: flex;
-        flex-wrap: wrap;
-        flex-direction: row;
-        gap: 10px;
-        margin: 2%;
-        justify-content: center;
+      .top-contributors-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2rem;
+        margin: 2rem 0;
+        width: 100%;
 
-        .card {
-          width: fit-content;
-          display: flex;
-          padding: 10px 20px;
-          flex-direction: column;
-          align-items: flex-start;
-          gap: 5px;
-          border-radius: 10px;
-          border: 1px solid var(--community-card-border);
-          background: var(--community-card-bg);
-          box-shadow: 0px 4px 15px 0px rgba(0, 0, 0, 0.1);
+        .enhanced-card {
+          /* Slight emphasis for Community page over standard Contributors page */
+          transition:
+            transform 0.2s ease-in-out,
+            box-shadow 0.2s ease-in-out;
+          border-radius: 12px;
+          overflow: hidden;
 
-          .card-data {
-            padding: 8px 22px;
+          &:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+          }
+        }
+      }
 
-            .user-name {
-              text-align: center;
-              font-size: larger;
-            }
+      .view-all-container {
+        margin: 2rem 0 4rem;
 
-            .user-designation {
-              text-align: center;
-              font-size: medium;
-            }
+        .view-all-link {
+          display: inline-block;
+          padding: 10px 24px;
+          background: var(--primary-blue, #007bff);
+          color: white;
+          text-decoration: none;
+          border-radius: 8px;
+          font-weight: 500;
+          transition: background 0.2s;
+
+          &:hover {
+            background: var(--primary-blue-dark, #0056b3);
           }
         }
       }
     }
+  }
+}
+
+@media screen and (max-width: 900px) {
+  .community .team-details .team .top-contributors-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .community .team-details .team .top-contributors-grid {
+    grid-template-columns: 1fr;
   }
 }
 
@@ -163,7 +189,9 @@
   cursor: pointer;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
   z-index: 1000;
 }
 
