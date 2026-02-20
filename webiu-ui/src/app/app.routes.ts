@@ -62,6 +62,13 @@ export const routes: Routes = [
         (m) => m.ContributorSearchComponent,
       ),
   },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./page/not-found/not-found.component').then(
+        (m) => m.NotFoundComponent,
+      ),
+  },
 ];
 
 export const AppRoutingModule = RouterModule.forRoot(routes, {
