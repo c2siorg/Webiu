@@ -72,8 +72,8 @@
       }
     </div>
     <div class="projects__card__details">
-      <p><strong> Created at: </strong> {{ createdAt }}</p>
-      <p><strong> Updated at: </strong> {{ updatedAt }}</p>
+      <p><strong> Created at: </strong> {{ createdAt | date:'medium' }}</p>
+      <p><strong> Updated at: </strong> {{ updatedAt | date:'medium' }}</p>
     </div>
   </div>
   }

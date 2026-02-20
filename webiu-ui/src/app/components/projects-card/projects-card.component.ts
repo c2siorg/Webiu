@@ -1,13 +1,14 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
 
 import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
 
 @Component({
   selector: 'app-projects-card',
   standalone: true,
-  imports: [HttpClientModule],
+  imports: [HttpClientModule, CommonModule],
   templateUrl: './projects-card.component.html',
   styleUrls: ['./projects-card.component.scss'],
 })
