@@ -1,38 +1,76 @@
 import { Routes, RouterModule } from '@angular/router';
-import { HomepageComponent } from './page/homepage/homepage.component';
-import { ProjectsComponent } from './page/projects/projects.component';
-import { PublicationsComponent } from './page/publications/publications.component';
-import { ContributorsComponent } from './page/contributors/contributors.component';
-import { CommunityComponent } from './page/community/community.component';
-import { GsocComponent } from './page/gsoc/gsoc.component';
-import { Gsoc2024Component } from './page/gsoc2024/gsoc2024.component';
-import { GsocProjectIdeaComponent } from './page/gsoc-project-idea/gsoc-project-idea.component';
-import { ContributorSearchComponent } from './page/contributor-search/contributor-search.component';
-import { NotFoundComponent } from './page/not-found/not-found.component';
+
 export const routes: Routes = [
-  { path: '', component: HomepageComponent },
+  {
+    path: '',
+    loadComponent: () =>
+      import('./page/homepage/homepage.component').then(
+        (m) => m.HomepageComponent,
+      ),
+  },
   {
     path: 'projects',
-    component: ProjectsComponent,
+    loadComponent: () =>
+      import('./page/projects/projects.component').then(
+        (m) => m.ProjectsComponent,
+      ),
   },
   {
     path: 'publications',
-    component: PublicationsComponent,
+    loadComponent: () =>
+      import('./page/publications/publications.component').then(
+        (m) => m.PublicationsComponent,
+      ),
   },
   {
     path: 'contributors',
-    component: ContributorsComponent,
+    loadComponent: () =>
+      import('./page/contributors/contributors.component').then(
+        (m) => m.ContributorsComponent,
+      ),
   },
   {
     path: 'community',
-    component: CommunityComponent,
+    loadComponent: () =>
+      import('./page/community/community.component').then(
+        (m) => m.CommunityComponent,
+      ),
   },
-  { path: 'gsoc', component: GsocComponent },
-  { path: 'gsoc/2024', component: Gsoc2024Component },
-  { path: 'idea', component: GsocProjectIdeaComponent },
-  { path: 'search', component: ContributorSearchComponent },
-  { path: '**', component: NotFoundComponent },
+  {
+    path: 'gsoc',
+    loadComponent: () =>
+      import('./page/gsoc/gsoc.component').then((m) => m.GsocComponent),
+  },
+  {
+    path: 'gsoc/2024',
+    loadComponent: () =>
+      import('./page/gsoc2024/gsoc2024.component').then(
+        (m) => m.Gsoc2024Component,
+      ),
+  },
+  {
+    path: 'idea',
+    loadComponent: () =>
+      import('./page/gsoc-project-idea/gsoc-project-idea.component').then(
+        (m) => m.GsocProjectIdeaComponent,
+      ),
+  },
+  {
+    path: 'search',
+    loadComponent: () =>
+      import('./page/contributor-search/contributor-search.component').then(
+        (m) => m.ContributorSearchComponent,
+      ),
+  },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./page/not-found/not-found.component').then(
+        (m) => m.NotFoundComponent,
+      ),
+  },
 ];
+
 export const AppRoutingModule = RouterModule.forRoot(routes, {
   scrollPositionRestoration: 'enabled',
   anchorScrolling: 'enabled',
