@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -13,6 +13,18 @@ import { HomepageDetails } from '../../common/data/homepage';
 })
 export class HomepageComponent {
   homepageData = HomepageDetails;
+  showButton = false;
+
+  // Scroll Listener
+  @HostListener('window:scroll', [])
+  onWindowScroll() {
+    this.showButton = window.scrollY > 300;
+  }
+
+  // Scroll to top function
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
 
   // Get language color for projects
   getLanguageColor(language: string): string {
@@ -29,10 +41,5 @@ export class HomepageComponent {
       Swift: '#ffac45'
     };
     return languageColors[language] || '#333';
-  }
-
-  // Navigate to section
-  navigateToSection(): void {
-    // Router navigation will be handled by routerLink in template
   }
 }
