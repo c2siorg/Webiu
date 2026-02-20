@@ -6,7 +6,6 @@ export class UserService {
   constructor(private githubService: GithubService) {}
 
   async getFollowersAndFollowing(_username: string) {
-    // Placeholder implementation (same as original)
     return { 0: 0 };
   }
 
@@ -35,5 +34,9 @@ export class UserService {
     }
 
     return map;
+  }
+
+  async getUserProfile(username: string) {
+    return this.githubService.getPublicUserProfile(username);
   }
 }
