@@ -6,6 +6,7 @@
       class="logo"
     />
   </a>
+
   @if (isMenuOpen) {
   <div
     class="menu-overlay"
@@ -111,6 +112,7 @@
     </div>
     <button
       class="navbar__menu__items Login_Logout"
+      type="button"
       (click)="toggleLoginOptions()"
     >
       <img
@@ -134,11 +136,11 @@
 
     @if (showLoginOptions && !isLoggedIn) {
       <div class="login-options">
-        <button (click)="loginWithGoogle()">
+        <button type="button" (click)="loginWithGoogle()">
           <img src="../../../assets/google.webp" alt="Google Icon" />
           <p>Login with Google</p>
         </button>
-        <button (click)="loginWithGitHub()">
+        <button type="button" (click)="loginWithGitHub()">
           <img src="../../../assets/community/github.png" alt="GitHub Icon" />
           <p>Login with GitHub</p>
         </button>
@@ -147,6 +149,7 @@
 
     <button
       class="sun-moon-toggle"
+      type="button"
       aria-label="Toggle color mode"
       title="Toggle color mode"
       (click)="toggleMode()"
@@ -170,10 +173,10 @@
   >
     <div class="nav-btn">
       @if (!isMenuOpen) {
-        <img src="../../../assets/ham-menu.svg" alt="ham menu" />
+        <img src="../../../assets/ham-menu.svg" alt="Open menu" />
       }
       @if (isMenuOpen) {
-        <img src="../../../assets/cross.svg" alt="cross" />
+        <img src="../../../assets/cross.svg" alt="Close menu" />
       }
     </div>
   </div>
