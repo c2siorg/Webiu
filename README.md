@@ -123,10 +123,18 @@ Open `.env` and fill in the required values:
 PORT=5050
 JWT_SECRET=your_jwt_secret_here
 GITHUB_ACCESS_TOKEN=your_github_personal_access_token
+GITHUB_ORG=c2siorg
 FRONTEND_BASE_URL=http://localhost:4200
 ```
 
-At minimum, `JWT_SECRET` and `GITHUB_ACCESS_TOKEN` are required. OAuth and email features need their respective variables — see `.env.example` for the full list.
+**Required Environment Variables:**
+
+- `JWT_SECRET` — Secret key for JWT token signing
+- `GITHUB_ACCESS_TOKEN` — GitHub Personal Access Token (for API calls)
+- `GITHUB_ORG` — GitHub organization name (e.g., `c2siorg`)
+- `FRONTEND_BASE_URL` — Frontend base URL (used in email verification links)
+
+> **Note:** The application will **fail to start** if any of these required variables are missing. Additional OAuth and email features require their respective variables — see `.env.example` for the full list.
 
 Start the backend:
 

@@ -7,6 +7,18 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
+  // Validate required environment variables
+  const requiredEnvVars = ['GITHUB_ORG', 'FRONTEND_BASE_URL'];
+  const missingEnvVars = requiredEnvVars.filter(
+    (envVar) => !configService.get<string>(envVar),
+  );
+
+  if (missingEnvVars.length > 0) {
+    throw new Error(
+      `Missing required environment variables: ${missingEnvVars.join(', ')}`,
+    );
+  }
+
   app.enableCors();
   app.useGlobalPipes(
     new ValidationPipe({
@@ -19,4 +31,8 @@ async function bootstrap() {
   await app.listen(port);
   console.log(`Server is listening at port ${port}`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('Failed to bootstrap application:', error.message);
+  process.exit(1);
+});

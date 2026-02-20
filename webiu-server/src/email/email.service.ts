@@ -21,10 +21,7 @@ export class EmailService {
     email: string,
     verificationToken: string,
   ): Promise<void> {
-    const frontendBaseUrl = this.configService.get<string>(
-      'FRONTEND_BASE_URL',
-      'http://localhost:4200',
-    );
+    const frontendBaseUrl = this.configService.get<string>('FRONTEND_BASE_URL');
 
     const mailOptions = {
       from: `"Webiu" <${this.configService.get<string>('GMAIL_USER')}>`,

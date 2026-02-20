@@ -1,6 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
+import { extractErrorMessage } from '../common/utils/error.util';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -72,11 +73,8 @@ export class ContributorService {
       this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
       return allContributors;
     } catch (error) {
-      console.error('Error in getAllContributors:', error);
-      throw new InternalServerErrorException({
-        error: 'Failed to fetch repositories',
-        message: error.message,
-      });
+      console.error('Error in getAllContributors:', extractErrorMessage(error));
+      throw new InternalServerErrorException('Failed to fetch repositories');
     }
   }
 
@@ -94,7 +92,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user created issues:',
-        error.response ? error.response.data : error.message,
+        extractErrorMessage(error),
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -115,7 +113,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user created pull requests:',
-        error.response ? error.response.data : error.message,
+        extractErrorMessage(error),
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -137,10 +135,7 @@ export class ContributorService {
         pullRequests: pullRequests || [],
       };
     } catch (error) {
-      console.error(
-        'Error fetching user stats:',
-        error.response ? error.response.data : error.message,
-      );
+      console.error('Error fetching user stats:', extractErrorMessage(error));
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -153,7 +148,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user followers and following:',
-        error.response ? error.response.data : error.message,
+        extractErrorMessage(error),
       );
       throw new InternalServerErrorException(
         'Failed to fetch followers and following data',

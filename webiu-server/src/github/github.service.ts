@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
+import { extractErrorMessage } from '../common/utils/error.util';
 import axios from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
@@ -9,13 +10,14 @@ const CACHE_TTL = 300; // 5 minutes
 export class GithubService {
   private readonly baseUrl = 'https://api.github.com';
   private readonly accessToken: string;
-  private readonly orgName = 'c2siorg';
+  private readonly orgName: string;
 
   constructor(
     private configService: ConfigService,
     private cacheService: CacheService,
   ) {
     this.accessToken = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
+    this.orgName = this.configService.get<string>('GITHUB_ORG');
   }
 
   private get headers() {
@@ -242,7 +244,7 @@ export class GithubService {
     } catch (error) {
       console.error(
         `Error fetching GitHub social data for ${username}:`,
-        error.message,
+        extractErrorMessage(error),
       );
       throw error;
     }
