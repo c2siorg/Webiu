@@ -3,8 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
 
-const CACHE_TTL = 300; // 5 minutes
-
 @Injectable()
 export class GithubService {
   private readonly baseUrl = 'https://api.github.com';
@@ -82,7 +80,7 @@ export class GithubService {
     const repos = await this.fetchAllPages(
       `${this.baseUrl}/orgs/${this.orgName}/repos`,
     );
-    this.cacheService.set(cacheKey, repos, CACHE_TTL);
+    this.cacheService.set(cacheKey, repos);
     return repos;
   }
 
@@ -94,7 +92,7 @@ export class GithubService {
     const pulls = await this.fetchAllPages(
       `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls`,
     );
-    this.cacheService.set(cacheKey, pulls, CACHE_TTL);
+    this.cacheService.set(cacheKey, pulls);
     return pulls;
   }
 
@@ -106,7 +104,7 @@ export class GithubService {
     const issues = await this.fetchAllPages(
       `${this.baseUrl}/repos/${org}/${repo}/issues`,
     );
-    this.cacheService.set(cacheKey, issues, CACHE_TTL);
+    this.cacheService.set(cacheKey, issues);
     return issues;
   }
 
@@ -122,7 +120,7 @@ export class GithubService {
       const contributors = await this.fetchAllPages(
         `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
       );
-      this.cacheService.set(cacheKey, contributors, CACHE_TTL);
+      this.cacheService.set(cacheKey, contributors);
       return contributors;
     } catch {
       return null;
@@ -137,7 +135,7 @@ export class GithubService {
     const issues = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
     );
-    this.cacheService.set(cacheKey, issues, CACHE_TTL);
+    this.cacheService.set(cacheKey, issues);
     return issues;
   }
 
@@ -177,7 +175,7 @@ export class GithubService {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
-    this.cacheService.set(cacheKey, enrichedPrs, CACHE_TTL);
+    this.cacheService.set(cacheKey, enrichedPrs);
     return enrichedPrs;
   }
 
@@ -196,7 +194,7 @@ export class GithubService {
     const response = await axios.get(`${this.baseUrl}/users/${username}`, {
       headers: this.headers,
     });
-    this.cacheService.set(cacheKey, response.data, CACHE_TTL);
+    this.cacheService.set(cacheKey, response.data);
     return response.data;
   }
 
@@ -249,7 +247,7 @@ export class GithubService {
         following: followingResponse.data.length || 0,
       };
 
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
       console.error(
