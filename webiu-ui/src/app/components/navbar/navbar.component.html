@@ -15,7 +15,7 @@
     (keydown.space)="closeMenu(); $event.preventDefault()"
     tabindex="0"
     role="button"
-    aria-label="Close menu"
+    [attr.aria-label]="'Close menu'"
   ></div>
   }
   <div
@@ -35,7 +35,7 @@
       (keydown.space)="navigateTo('/'); $event.preventDefault()"
       tabindex="0"
       role="link"
-      aria-label="Home"
+      [attr.aria-label]="'Home'"
     >
       <img src="../../../assets/home.svg" alt="Home Icon" />
       <p>Home</p>
@@ -49,7 +49,7 @@
       (keydown.space)="navigateTo('/projects'); $event.preventDefault()"
       tabindex="0"
       role="link"
-      aria-label="Projects"
+      [attr.aria-label]="'Projects'"
     >
       <img src="../../../assets/projects.svg" alt="Projects Icon" />
       <p>Projects</p>
@@ -63,7 +63,7 @@
       (keydown.space)="navigateTo('/publications'); $event.preventDefault()"
       tabindex="0"
       role="link"
-      aria-label="Publications"
+      [attr.aria-label]="'Publications'"
     >
       <img src="../../../assets/publications.svg" alt="Publications Icon" />
       <p>Publications</p>
@@ -77,7 +77,7 @@
       (keydown.space)="navigateTo('/contributors'); $event.preventDefault()"
       tabindex="0"
       role="link"
-      aria-label="Contributors"
+      [attr.aria-label]="'Contributors'"
     >
       <img src="../../../assets/contributors.svg" alt="Contributors Icon" />
       <p>Contributors</p>
@@ -91,7 +91,7 @@
       (keydown.space)="navigateTo('/community'); $event.preventDefault()"
       tabindex="0"
       role="link"
-      aria-label="Community"
+      [attr.aria-label]="'Community'"
     >
       <img src="../../../assets/community.svg" alt="Community Icon" />
       <p>Community</p>
@@ -105,7 +105,7 @@
       (keydown.space)="navigateTo('/gsoc'); $event.preventDefault()"
       tabindex="0"
       role="link"
-      aria-label="Google Summer of Code"
+      [attr.aria-label]="'Google Summer of Code'"
     >
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC 26</p>
@@ -169,7 +169,7 @@
     (keydown.space)="toggleMenu(); $event.preventDefault()"
     tabindex="0"
     role="button"
-    aria-label="{{ isMenuOpen ? 'Close menu' : 'Open menu' }}"
+    [attr.aria-label]="isMenuOpen ? 'Close menu' : 'Open menu'"
   >
     <div class="nav-btn">
       @if (!isMenuOpen) {
