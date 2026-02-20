@@ -45,7 +45,7 @@ export class CommunityComponent implements OnInit {
           const sorted = (res || []).sort(
             (a, b) => b.contributions - a.contributions,
           );
-          this.users = sorted.slice(0, 9);
+          this.users = sorted.slice(0, 8);
           this.fetchFollowerData();
         },
         error: () => {

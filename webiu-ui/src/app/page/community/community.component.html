@@ -30,18 +30,21 @@
 
     @if (!isLoading) {
       <div class="team">
-        <div class="top-contributors-grid">
+        <div class="team-align">
           @for (user of users; track $index) {
-            <div class="enhanced-card">
-              <app-profile-card
-                [login]="user.login"
-                [repos]="user.repos"
-                [avatar_url]="user.avatar_url"
-                [contributions]="user.contributions"
-                [followers]="user.followers"
-                [following]="user.following"
-              >
-              </app-profile-card>
+            <div class="card">
+              <div class="card-data">
+                <a
+                  class="user-name"
+                  href="https://github.com/{{ user.login }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="text-decoration: none; display: block"
+                >
+                  {{ user.login }}
+                </a>
+                <p class="user-designation">{{ user.contributions }} commits</p>
+              </div>
             </div>
           }
         </div>
