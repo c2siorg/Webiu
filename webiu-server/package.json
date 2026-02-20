@@ -30,6 +30,7 @@
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.0",
     "google-auth-library": "^9.15.0",
+    "helmet": "^8.1.0",
     "mongoose": "^8.8.1",
     "nodemailer": "^6.9.16",
     "passport": "^0.7.0",
