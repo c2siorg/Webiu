@@ -75,7 +75,7 @@ export class GithubService {
   }
 
   async getOrgRepos(): Promise<any[]> {
-    const cacheKey = `org_repos_${this.orgName}`;
+    const cacheKey = `org_repos:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -87,7 +87,7 @@ export class GithubService {
   }
 
   async getRepoPulls(repoName: string): Promise<any[]> {
-    const cacheKey = `pulls_${this.orgName}_${repoName}`;
+    const cacheKey = `pulls:${this.orgName}:${repoName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -99,7 +99,7 @@ export class GithubService {
   }
 
   async getRepoIssues(org: string, repo: string): Promise<any[]> {
-    const cacheKey = `issues_${org}_${repo}`;
+    const cacheKey = `issues:${org}:${repo}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -114,7 +114,7 @@ export class GithubService {
     orgName: string,
     repoName: string,
   ): Promise<any[] | null> {
-    const cacheKey = `contributors_${orgName}_${repoName}`;
+    const cacheKey = `contributors:${orgName}:${repoName}`;
     const cached = this.cacheService.get<any[] | null>(cacheKey);
     if (cached !== null) return cached;
 
@@ -130,7 +130,8 @@ export class GithubService {
   }
 
   async searchUserIssues(username: string): Promise<any[]> {
-    const cacheKey = `search_issues_${username}_${this.orgName}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `search_issues:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -142,7 +143,8 @@ export class GithubService {
   }
 
   async searchUserPullRequests(username: string): Promise<any[]> {
-    const cacheKey = `search_prs_${username}_${this.orgName}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `search_prs:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -215,7 +217,8 @@ export class GithubService {
     followers: number;
     following: number;
   }> {
-    const cacheKey = `user_social_${username}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `user_social:${normalizedUsername}`;
     const cached = this.cacheService.get<{
       followers: number;
       following: number;
