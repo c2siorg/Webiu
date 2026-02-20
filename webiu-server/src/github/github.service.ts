@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+
+const AXIOS_TIMEOUT = 10000; // 10 seconds
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -34,18 +36,22 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
-        `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
-      );
+      try {
+        const response = await axios.get(
+          `${url}${separator}per_page=100&page=${page}`,
+          { headers: this.headers, timeout: AXIOS_TIMEOUT },
+        );
 
-      const data = response.data;
-      if (!Array.isArray(data) || data.length === 0) break;
+        const data = response.data;
+        if (!Array.isArray(data) || data.length === 0) break;
 
-      results.push(...data);
+        results.push(...data);
 
-      if (data.length < 100) break;
-      page++;
+        if (data.length < 100) break;
+        page++;
+      } catch (error) {
+        this.handleGitHubError(error);
+      }
     }
 
     return results;
@@ -57,18 +63,22 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
-        `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
-      );
+      try {
+        const response = await axios.get(
+          `${url}${separator}per_page=100&page=${page}`,
+          { headers: this.headers, timeout: AXIOS_TIMEOUT },
+        );
 
-      const items = response.data.items || [];
-      if (items.length === 0) break;
+        const items = response.data.items || [];
+        if (items.length === 0) break;
 
-      results.push(...items);
+        results.push(...items);
 
-      if (items.length < 100) break;
-      page++;
+        if (items.length < 100) break;
+        page++;
+      } catch (error) {
+        this.handleGitHubError(error);
+      }
     }
 
     return results;
@@ -159,6 +169,7 @@ export class GithubService {
           try {
             const response = await axios.get(pr.pull_request.url, {
               headers: this.headers,
+              timeout: AXIOS_TIMEOUT,
             });
             if (response.data.merged_at) {
               pr.merged_at = response.data.merged_at;
@@ -182,10 +193,15 @@ export class GithubService {
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
-    const response = await axios.get(`${this.baseUrl}/user`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    return response.data;
+    try {
+      const response = await axios.get(`${this.baseUrl}/user`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        timeout: AXIOS_TIMEOUT,
+      });
+      return response.data;
+    } catch (error) {
+      this.handleGitHubError(error);
+    }
   }
 
   async exchangeGithubCode(
@@ -194,21 +210,26 @@ export class GithubService {
     code: string,
     redirectUri: string,
   ): Promise<any> {
-    const response = await axios.post(
-      'https://github.com/login/oauth/access_token',
-      new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-        redirect_uri: redirectUri,
-      }).toString(),
-      {
-        headers: {
-          Accept: 'application/json',
+    try {
+      const response = await axios.post(
+        'https://github.com/login/oauth/access_token',
+        new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+          redirect_uri: redirectUri,
+        }).toString(),
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+          timeout: AXIOS_TIMEOUT,
         },
-      },
-    );
-    return response.data;
+      );
+      return response.data;
+    } catch (error) {
+      this.handleGitHubError(error);
+    }
   }
 
   async getUserFollowersAndFollowing(username: string): Promise<{
@@ -226,9 +247,11 @@ export class GithubService {
       const [followersResponse, followingResponse] = await Promise.all([
         axios.get(`${this.baseUrl}/users/${username}/followers`, {
           headers: this.headers,
+          timeout: AXIOS_TIMEOUT,
         }),
         axios.get(`${this.baseUrl}/users/${username}/following`, {
           headers: this.headers,
+          timeout: AXIOS_TIMEOUT,
         }),
       ]);
 
@@ -240,11 +263,50 @@ export class GithubService {
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
-      console.error(
-        `Error fetching GitHub social data for ${username}:`,
-        error.message,
-      );
-      throw error;
+      this.handleGitHubError(error);
     }
+  }
+
+  private handleGitHubError(error: unknown): never {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+
+      // Handle rate limit exceeded
+      if (axiosError.response?.status === 429) {
+        const remaining = axiosError.response.headers['x-ratelimit-remaining'];
+        const resetTime = axiosError.response.headers['x-ratelimit-reset'];
+        const message = `GitHub API rate limit exceeded.${remaining ? ` Remaining: ${remaining}.` : ''}${resetTime ? ` Reset at: ${new Date(parseInt(resetTime) * 1000).toISOString()}` : ''}`;
+        console.error(message);
+        throw new Error(message);
+      }
+
+      // Handle timeout
+      if (error.code === 'ECONNABORTED') {
+        const message = `GitHub API request timeout after ${AXIOS_TIMEOUT}ms`;
+        console.error(message);
+        throw new Error(message);
+      }
+
+      // Log rate limit info on any successful response
+      if (axiosError.response) {
+        const remaining = axiosError.response.headers['x-ratelimit-remaining'];
+        if (remaining) {
+          console.warn(`GitHub API calls remaining: ${remaining}`);
+        }
+      }
+
+      // Handle other Axios errors
+      const message =
+        axiosError.response?.statusText ||
+        axiosError.message ||
+        'Unknown GitHub API error';
+      console.error(`GitHub API error: ${message}`);
+      throw new Error(`GitHub API error: ${message}`);
+    }
+
+    // Handle generic errors
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`GitHub API error: ${message}`);
+    throw new Error(`GitHub API error: ${message}`);
   }
 }
