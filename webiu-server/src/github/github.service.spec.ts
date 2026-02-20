@@ -173,7 +173,10 @@ describe('GithubService', () => {
       expect(result).toEqual({ login: 'testuser' });
       expect(mockedAxios.get).toHaveBeenCalledWith(
         'https://api.github.com/user',
-        { headers: { Authorization: 'Bearer user-access-token' } },
+        {
+          headers: { Authorization: 'Bearer user-access-token' },
+          timeout: 10000,
+        },
       );
     });
   });
