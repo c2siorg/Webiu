@@ -39,13 +39,13 @@ describe('ContributorService', () => {
   });
 
   describe('getAllContributors', () => {
-    it('should return empty array when no repositories', async () => {
+    it('should return paginated empty array when no repositories', async () => {
       mockGithubService.getOrgRepos.mockResolvedValue([]);
-      const result = await service.getAllContributors();
-      expect(result).toEqual([]);
+      const result = await service.getAllContributors(1, 10);
+      expect(result).toEqual({ data: [], total: 0, page: 1, limit: 10 });
     });
 
-    it('should aggregate contributors across repos', async () => {
+    it('should aggregate contributors across repos and paginate', async () => {
       mockGithubService.getOrgRepos.mockResolvedValue([
         { name: 'repo1' },
         { name: 'repo2' },
@@ -59,20 +59,21 @@ describe('ContributorService', () => {
           { login: 'user2', contributions: 5, avatar_url: 'url2' },
         ]);
 
-      const result = (await service.getAllContributors()) as any[];
+      const result = (await service.getAllContributors(1, 10)) as any;
 
-      expect(result).toHaveLength(2);
-      const user1 = result.find((c) => c.login === 'user1');
+      expect(result.total).toBe(2);
+      expect(result.data).toHaveLength(2);
+      const user1 = result.data.find((c) => c.login === 'user1');
       expect(user1.contributions).toBe(13);
       expect(user1.repos).toEqual(expect.arrayContaining(['repo1', 'repo2']));
     });
 
-    it('should cache the response', async () => {
+    it('should cache the response and still paginate', async () => {
       mockGithubService.getOrgRepos.mockResolvedValue([{ name: 'repo1' }]);
       mockGithubService.getRepoContributors.mockResolvedValue([]);
 
-      await service.getAllContributors();
-      await service.getAllContributors();
+      await service.getAllContributors(1, 1);
+      await service.getAllContributors(1, 1);
 
       expect(mockGithubService.getOrgRepos).toHaveBeenCalledTimes(1);
     });
@@ -88,13 +89,13 @@ describe('ContributorService', () => {
           { login: 'user1', contributions: 5, avatar_url: 'url' },
         ]);
 
-      const result = await service.getAllContributors();
-      expect(result).toHaveLength(1);
+      const result = await service.getAllContributors(1, 10);
+      expect(result.data).toHaveLength(1);
     });
 
     it('should throw InternalServerErrorException on total failure', async () => {
       mockGithubService.getOrgRepos.mockRejectedValue(new Error('fail'));
-      await expect(service.getAllContributors()).rejects.toThrow(
+      await expect(service.getAllContributors(1, 10)).rejects.toThrow(
         InternalServerErrorException,
       );
     });

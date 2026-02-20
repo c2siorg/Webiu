@@ -7,8 +7,13 @@ export class ProjectController {
 
   @Get('projects')
   @Header('Cache-Control', 'public, max-age=300')
-  async getAllProjects() {
-    return this.projectService.getAllProjects();
+  async getAllProjects(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    const pageNum = parseInt(page, 10) || 1;
+    const limitNum = parseInt(limit, 10) || 10;
+    return this.projectService.getAllProjects(pageNum, limitNum);
   }
 }
 

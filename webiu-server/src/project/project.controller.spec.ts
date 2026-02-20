@@ -28,19 +28,24 @@ describe('ProjectController', () => {
   });
 
   describe('getAllProjects', () => {
-    it('should return all projects from the service', async () => {
-      const mockResult = {
-        repositories: [
-          { name: 'repo1', pull_requests: 3 },
-          { name: 'repo2', pull_requests: 1 },
-        ],
-      };
+    it('should pass parsed page/limit to service and return its value', async () => {
+      const mockResult = { data: [{ name: 'repo1' }], total: 1, page: 1, limit: 10 };
+      mockProjectService.getAllProjects.mockResolvedValue(mockResult);
+
+      const result = await controller.getAllProjects('2', '5');
+
+      expect(result).toEqual(mockResult);
+      expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(2, 5);
+    });
+
+    it('should default page/limit when none provided', async () => {
+      const mockResult = { data: [], total: 0, page: 1, limit: 10 };
       mockProjectService.getAllProjects.mockResolvedValue(mockResult);
 
       const result = await controller.getAllProjects();
 
       expect(result).toEqual(mockResult);
-      expect(mockProjectService.getAllProjects).toHaveBeenCalledTimes(1);
+      expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(1, 10);
     });
   });
 });

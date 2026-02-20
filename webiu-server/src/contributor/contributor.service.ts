@@ -11,73 +11,80 @@ export class ContributorService {
     private cacheService: CacheService,
   ) {}
 
-  async getAllContributors() {
+  async getAllContributors(page = 1, limit = 10) {
     const cacheKey = 'all_contributors';
-    const cached = this.cacheService.get(cacheKey);
-    if (cached) return cached;
+    let allContributors: any[];
+    const cached: any = this.cacheService.get(cacheKey);
+    if (cached) {
+      allContributors = cached as any[];
+    } else {
+      try {
+        const orgName = this.githubService.org;
+        const contributorsMap = new Map();
 
-    try {
-      const orgName = this.githubService.org;
-      const contributorsMap = new Map();
+        const repositories = await this.githubService.getOrgRepos();
 
-      const repositories = await this.githubService.getOrgRepos();
+        if (repositories.length === 0) {
+          allContributors = [];
+          this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
+        } else {
+          const BATCH_SIZE = 10;
+          for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
+            const batch = repositories.slice(i, i + BATCH_SIZE);
 
-      if (repositories.length === 0) {
-        return [];
-      }
+            await Promise.all(
+              batch.map(async (repo) => {
+                try {
+                  const contributors = await this.githubService.getRepoContributors(
+                    orgName,
+                    repo.name,
+                  );
+                  if (!contributors?.length) return;
 
-      const BATCH_SIZE = 10;
-      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
-        const batch = repositories.slice(i, i + BATCH_SIZE);
+                  contributors.forEach((contributor) => {
+                    const login = contributor.login;
 
-        await Promise.all(
-          batch.map(async (repo) => {
-            try {
-              const contributors = await this.githubService.getRepoContributors(
-                orgName,
-                repo.name,
-              );
-              if (!contributors?.length) return;
-
-              contributors.forEach((contributor) => {
-                const login = contributor.login;
-
-                if (!contributorsMap.has(login)) {
-                  contributorsMap.set(login, {
-                    login,
-                    contributions: contributor.contributions,
-                    repos: new Set([repo.name]),
-                    avatar_url: contributor.avatar_url,
+                    if (!contributorsMap.has(login)) {
+                      contributorsMap.set(login, {
+                        login,
+                        contributions: contributor.contributions,
+                        repos: new Set([repo.name]),
+                        avatar_url: contributor.avatar_url,
+                      });
+                    } else {
+                      const userData = contributorsMap.get(login);
+                      userData.contributions += contributor.contributions;
+                      userData.repos.add(repo.name);
+                    }
                   });
-                } else {
-                  const userData = contributorsMap.get(login);
-                  userData.contributions += contributor.contributions;
-                  userData.repos.add(repo.name);
+                } catch (err) {
+                  console.error(`Error processing repo ${repo.name}:`, err);
                 }
-              });
-            } catch (err) {
-              console.error(`Error processing repo ${repo.name}:`, err);
-            }
-          }),
-        );
+              }),
+            );
+          }
+
+          allContributors = Array.from(contributorsMap.values()).map(
+            (contributor) => ({
+              ...contributor,
+              repos: Array.from(contributor.repos),
+            }),
+          );
+          this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
+        }
+      } catch (error) {
+        console.error('Error in getAllContributors:', error);
+        throw new InternalServerErrorException({
+          error: 'Failed to fetch repositories',
+          message: error.message,
+        });
       }
-
-      const allContributors = Array.from(contributorsMap.values()).map(
-        (contributor) => ({
-          ...contributor,
-          repos: Array.from(contributor.repos),
-        }),
-      );
-
-      this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
-      return allContributors;
-    } catch (error) {
-      console.error('Error in getAllContributors:', error);
-      throw new InternalServerErrorException({
-        error: 'Failed to fetch repositories',
-        message: error.message,
-      });
     }
+
+    const total = allContributors.length;
+    const start = (page - 1) * limit;
+    const data = allContributors.slice(start, start + limit);
+    return { data, total, page, limit };
   }
 
   async getUserCreatedIssues(username: string) {

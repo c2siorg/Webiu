@@ -32,12 +32,22 @@ describe('ContributorController', () => {
   });
 
   describe('getAllContributors', () => {
-    it('should return all contributors', async () => {
-      const mockResult = [{ login: 'user1', contributions: 10 }];
+    it('should forward page/limit and return service response', async () => {
+      const mockResult = { data: [{ login: 'user1' }], total: 1, page: 2, limit: 5 };
+      mockContributorService.getAllContributors.mockResolvedValue(mockResult);
+
+      const result = await controller.getAllContributors('2', '5');
+      expect(result).toEqual(mockResult);
+      expect(mockContributorService.getAllContributors).toHaveBeenCalledWith(2, 5);
+    });
+
+    it('should default page/limit when not provided', async () => {
+      const mockResult = { data: [], total: 0, page: 1, limit: 10 };
       mockContributorService.getAllContributors.mockResolvedValue(mockResult);
 
       const result = await controller.getAllContributors();
       expect(result).toEqual(mockResult);
+      expect(mockContributorService.getAllContributors).toHaveBeenCalledWith(1, 10);
     });
   });
 
