@@ -104,7 +104,7 @@ export class GithubService {
     const repos = await this.fetchAllPages(
       `${this.baseUrl}/orgs/${this.orgName}/repos`,
     );
-    this.cacheService.set(cacheKey, repos, CACHE_TTL);
+    this.cacheService.set(cacheKey, repos);
     return repos;
   }
 
@@ -116,7 +116,7 @@ export class GithubService {
     const pulls = await this.fetchAllPages(
       `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls`,
     );
-    this.cacheService.set(cacheKey, pulls, CACHE_TTL);
+    this.cacheService.set(cacheKey, pulls);
     return pulls;
   }
 
@@ -128,7 +128,7 @@ export class GithubService {
     const issues = await this.fetchAllPages(
       `${this.baseUrl}/repos/${org}/${repo}/issues`,
     );
-    this.cacheService.set(cacheKey, issues, CACHE_TTL);
+    this.cacheService.set(cacheKey, issues);
     return issues;
   }
 
@@ -155,7 +155,7 @@ export class GithubService {
     const issues = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
     );
-    this.cacheService.set(cacheKey, issues, CACHE_TTL);
+    this.cacheService.set(cacheKey, issues);
     return issues;
   }
 
@@ -196,7 +196,7 @@ export class GithubService {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
-    this.cacheService.set(cacheKey, enrichedPrs, CACHE_TTL);
+    this.cacheService.set(cacheKey, enrichedPrs);
     return enrichedPrs;
   }
 
@@ -206,6 +206,22 @@ export class GithubService {
         headers: { Authorization: `Bearer ${accessToken}` },
         timeout: AXIOS_TIMEOUT,
       });
+      return response.data;
+    } catch (error) {
+      this.handleGitHubError(error);
+    }
+  }
+
+  async getPublicUserProfile(username: string): Promise<any> {
+    const cacheKey = `public_profile_${username}`;
+    const cached = this.cacheService.get<any>(cacheKey);
+    if (cached) return cached;
+    try {
+      const response = await axios.get(`${this.baseUrl}/users/${username}`, {
+        headers: this.headers,
+        timeout: AXIOS_TIMEOUT,
+      });
+      this.cacheService.set(cacheKey, response.data, CACHE_TTL);
       return response.data;
     } catch (error) {
       this.handleGitHubError(error);
@@ -240,23 +256,6 @@ export class GithubService {
     }
   }
 
-  async getPublicUserProfile(username: string): Promise<any> {
-    const cacheKey = `public_profile_${username}`;
-    const cached = this.cacheService.get<any>(cacheKey);
-    if (cached) return cached;
-
-    try {
-      const response = await axios.get(`${this.baseUrl}/users/${username}`, {
-        headers: this.headers,
-        timeout: AXIOS_TIMEOUT,
-      });
-      this.cacheService.set(cacheKey, response.data, CACHE_TTL);
-      return response.data;
-    } catch (error) {
-      this.handleGitHubError(error);
-    }
-  }
-
   async getUserFollowersAndFollowing(username: string): Promise<{
     followers: number;
     following: number;
@@ -285,7 +284,7 @@ export class GithubService {
         following: followingResponse.data.length || 0,
       };
 
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
       this.handleGitHubError(error);
