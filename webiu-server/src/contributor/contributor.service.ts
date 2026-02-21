@@ -11,7 +11,7 @@ export class ContributorService {
     private cacheService: CacheService,
   ) {}
 
-  async getAllContributors(page = 1, limit = 10) {
+  async getAllContributors() {
     const cacheKey = 'all_contributors';
     let allContributors: any[];
     const cached: any = this.cacheService.get(cacheKey);
@@ -35,10 +35,11 @@ export class ContributorService {
             await Promise.all(
               batch.map(async (repo) => {
                 try {
-                  const contributors = await this.githubService.getRepoContributors(
-                    orgName,
-                    repo.name,
-                  );
+                  const contributors =
+                    await this.githubService.getRepoContributors(
+                      orgName,
+                      repo.name,
+                    );
                   if (!contributors?.length) return;
 
                   contributors.forEach((contributor) => {
@@ -81,10 +82,7 @@ export class ContributorService {
       }
     }
 
-    const total = allContributors.length;
-    const start = (page - 1) * limit;
-    const data = allContributors.slice(start, start + limit);
-    return { data, total, page, limit };
+    return allContributors;
   }
 
   async getUserCreatedIssues(username: string) {

@@ -29,7 +29,7 @@ describe('ProjectController', () => {
 
   describe('getAllProjects', () => {
     it('should pass parsed page/limit to service and return its value', async () => {
-      const mockResult = { data: [{ name: 'repo1' }], total: 1, page: 1, limit: 10 };
+      const mockResult = { repositories: [{ name: 'repo1' }] };
       mockProjectService.getAllProjects.mockResolvedValue(mockResult);
 
       const result = await controller.getAllProjects('2', '5');
@@ -39,7 +39,7 @@ describe('ProjectController', () => {
     });
 
     it('should default page/limit when none provided', async () => {
-      const mockResult = { data: [], total: 0, page: 1, limit: 10 };
+      const mockResult = { repositories: [] };
       mockProjectService.getAllProjects.mockResolvedValue(mockResult);
 
       const result = await controller.getAllProjects();
