@@ -1,5 +1,5 @@
-import { Component, HostListener, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, inject, PLATFORM_ID, OnInit } from '@angular/core';
+import { isPlatformBrowser, CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor } from '../../common/data/contributor';
@@ -24,6 +24,7 @@ import { RouterModule } from '@angular/router';
 })
 export class CommunityComponent implements OnInit {
   private commonUtil = inject(CommmonUtilService);
+  private platformId = inject(PLATFORM_ID);
   private http = inject(HttpClient);
   icons: Media[] = socialMedia;
   users: Contributor[] = [];
@@ -88,10 +89,14 @@ export class CommunityComponent implements OnInit {
   @HostListener('window:scroll')
   onWindowScroll() {
     // Show button when user scrolls down 100px from the top
-    this.showButton = window.scrollY > 100;
+    if (isPlatformBrowser(this.platformId)) {
+      this.showButton = window.scrollY > 100;
+    }
   }
 
   scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }

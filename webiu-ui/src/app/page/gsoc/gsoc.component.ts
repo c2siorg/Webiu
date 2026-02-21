@@ -1,7 +1,7 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, PLATFORM_ID, inject } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { gsocData } from '../../common/data/gsoc';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 
 @Component({
   selector: 'app-gsoc',
@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
   styleUrl: './gsoc.component.scss',
 })
 export class GsocComponent {
+  private platformId = inject(PLATFORM_ID);
   gsocData = gsocData;
   showButton = false;
   activeProjectIndex: number | null = null;
@@ -25,10 +26,14 @@ export class GsocComponent {
 
   @HostListener('window:scroll')
   onWindowScroll() {
-    this.showButton = window.scrollY > 100;
+    if (isPlatformBrowser(this.platformId)) {
+      this.showButton = window.scrollY > 100;
+    }
   }
 
   scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }
