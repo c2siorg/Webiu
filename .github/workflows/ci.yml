@@ -5,9 +5,9 @@ on:
     branches:
       - master
     types:
-      - opened        # PR is first opened
-      - synchronize   # new commit pushed to the PR branch
-      - reopened      # PR is re-opened
+      - opened # PR is first opened
+      - synchronize # new commit pushed to the PR branch
+      - reopened # PR is re-opened
 
 jobs:
   # ──────────────────────────────────────────────────────────
@@ -27,12 +27,15 @@ jobs:
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: webiu-server/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build
+        run: npm run build
 
       # Run ESLint WITHOUT --fix so CI only checks, never modifies files.
       - name: Lint (ESLint + Prettier check)
@@ -58,12 +61,15 @@ jobs:
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'npm'
+          node-version: "20"
+          cache: "npm"
           cache-dependency-path: webiu-ui/package-lock.json
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Build
+        run: npm run build
 
       - name: Lint (angular-eslint)
         run: npm run lint
