@@ -9,13 +9,14 @@ const CACHE_TTL = 300; // 5 minutes
 export class GithubService {
   private readonly baseUrl = 'https://api.github.com';
   private readonly accessToken: string;
-  private readonly orgName = 'c2siorg';
+  private readonly orgName: string;
 
   constructor(
     private configService: ConfigService,
     private cacheService: CacheService,
   ) {
     this.accessToken = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
+    this.orgName = this.configService.get<string>('GITHUB_ORG_NAME', 'c2siorg');
   }
 
   private get headers() {
