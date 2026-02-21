@@ -58,8 +58,13 @@ export class ProjectsCardComponent implements OnInit {
 
   fetchTechStack(): void {
     const apiUrl = `${environment.serverUrl}/api/projects/tech-stack/${this.repo}`;
-    this.http.get<{ languages: string[] }>(apiUrl).subscribe((data) => {
-      this.languages = data.languages;
+    this.http.get<{ languages: string[] }>(apiUrl).subscribe({
+      next: (data) => {
+        this.languages = data.languages ?? [];
+      },
+      error: (error) => {
+        console.error('Failed to fetch tech stack:', error);
+      },
     });
   }
 
