@@ -1,4 +1,6 @@
 import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 
 import { HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -35,9 +37,35 @@ export class ProjectsComponent implements OnInit {
   totalPages = 1;
 
   private projectCacheService = inject(ProjectCacheService);
+  private searchSubject = new Subject<string>();
 
   ngOnInit(): void {
     this.fetchProjects();
+    this.setupSearchDebounce();
+  }
+
+  setupSearchDebounce(): void {
+    this.searchSubject.pipe(
+      debounceTime(300)
+    ).subscribe(searchTerm => {
+      this.performSearch(searchTerm);
+    });
+  }
+
+  onSearchInput(searchTerm: string): void {
+    this.searchTerm = searchTerm;
+    this.searchSubject.next(searchTerm);
+  }
+
+  performSearch(searchTerm: string): void {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    this.filteredProjects = this.sortProjects(
+      this.projectsData.filter((project) =>
+        project.name.toLowerCase().includes(lowerCaseSearchTerm),
+      ),
+    );
+    this.currentPage = 1;
+    this.updateDisplayProjects();
   }
 
   fetchProjects(): void {
@@ -68,14 +96,8 @@ export class ProjectsComponent implements OnInit {
   }
 
   filterProjects(): void {
-    const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
-    this.filteredProjects = this.sortProjects(
-      this.projectsData.filter((project) =>
-        project.name.toLowerCase().includes(lowerCaseSearchTerm),
-      ),
-    );
-    this.currentPage = 1;
-    this.updateDisplayProjects();
+    // This method is now called by performSearch after debounce
+    this.onSearchInput(this.searchTerm);
   }
 
   updateDisplayProjects(): void {
