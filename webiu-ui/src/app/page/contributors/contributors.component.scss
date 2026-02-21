@@ -239,6 +239,7 @@
     justify-content: center;
     gap: 24px;
     margin-top: 40px;
+    min-height: 600px;
 
     app-profile-card {
       flex: 0 0 auto;
@@ -382,10 +383,11 @@ i {
 }
 
 .no-contributors-message {
-  text-align: center;
+  text-align: left;
   color: #888;
   font-size: 1.2em;
   margin-top: 20px;
+  width: 100%;
 }
 
 

@@ -9,7 +9,7 @@ import { ProfileCardComponent } from '../../components/profile-card/profile-card
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
-import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
 
 interface ContributionRange {
   label: string;
@@ -25,7 +25,7 @@ interface ContributionRange {
     HttpClientModule,
     ReactiveFormsModule,
     ProfileCardComponent,
-    LoadingSpinnerComponent,
+    SkeletonLoaderComponent,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
