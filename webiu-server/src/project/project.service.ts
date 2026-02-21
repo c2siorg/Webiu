@@ -24,17 +24,23 @@ export class ProjectService {
       // Use GitHub's native pagination instead of fetching everything
       const repositories = await this.githubService.getOrgRepos(page, limit);
 
-      // Fetch PR counts only for the repos on this page
-      const repositoriesWithPRs = await Promise.all(
-        repositories.map(async (repo) => {
-          try {
-            const pulls = await this.githubService.getRepoPulls(repo.name);
-            return { ...repo, pull_requests: pulls.length };
-          } catch {
-            return { ...repo, pull_requests: 0 };
-          }
-        }),
-      );
+      // Fetch PR counts in batches to avoid overwhelming the API
+      const BATCH_SIZE = 10;
+      const repositoriesWithPRs = [];
+      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
+        const batch = repositories.slice(i, i + BATCH_SIZE);
+        const batchResults = await Promise.all(
+          batch.map(async (repo) => {
+            try {
+              const pulls = await this.githubService.getRepoPulls(repo.name);
+              return { ...repo, pull_requests: pulls.length };
+            } catch {
+              return { ...repo, pull_requests: 0 };
+            }
+          }),
+        );
+        repositoriesWithPRs.push(...batchResults);
+      }
 
       const result = { repositories: repositoriesWithPRs };
       this.cacheService.set(cacheKey, result, CACHE_TTL);
