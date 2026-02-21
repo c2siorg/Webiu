@@ -1,14 +1,14 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
-
 @Component({
   selector: 'app-projects-card',
   standalone: true,
-  imports: [HttpClientModule, CommonModule],
+  imports: [HttpClientModule, CommonModule, RouterModule],
   templateUrl: './projects-card.component.html',
   styleUrls: ['./projects-card.component.scss'],
 })
@@ -31,7 +31,6 @@ export class ProjectsCardComponent implements OnInit {
 
   private http = inject(HttpClient);
 
-
   ngOnInit(): void {
     if (!this.initialized) {
       this.fetchIssuesAndPRs();
@@ -48,7 +47,7 @@ export class ProjectsCardComponent implements OnInit {
       },
       (error) => {
         console.error('Failed to fetch issues and PRs:', error);
-      }
+      },
     );
   }
 
