@@ -40,16 +40,15 @@ export class ProjectsCardComponent implements OnInit {
 
   fetchIssuesAndPRs(): void {
     const apiUrl = `${environment.serverUrl}/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
-    this.http.get<{ issues: number; pullRequests: number }>(apiUrl).subscribe(
-      (data) => {
-        this.issueCount = data.issues;
-        this.pullRequestCount = data.pullRequests;
-        this.initialized = true;
-      },
-      (error) => {
-        console.error('Failed to fetch issues and PRs:', error);
-      }
-    );
+    this.http
+      .get<{ issues: number; pullRequests: number }>(apiUrl)
+      .subscribe({
+        next: (data) => {
+          this.issueCount = data.issues;
+          this.pullRequestCount = data.pullRequests;
+          this.initialized = true;
+        },
+      });
   }
 
   public detailsVisible = false;
