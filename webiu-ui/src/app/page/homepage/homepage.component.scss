@@ -9,21 +9,22 @@
     padding: 0 20px;
   }
 
-
   .back-to-top {
     position: fixed;
     bottom: 20px;
     right: 20px;
     padding: 10px 20px;
     font-size: 16px;
-    background-color: #007bff;
+    background-color: #3498db;
     color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     opacity: 0;
     visibility: hidden;
-    transition: opacity 0.3s, visibility 0.3s;
+    transition:
+      opacity 0.3s,
+      visibility 0.3s;
     z-index: 1000;
   }
 
@@ -71,7 +72,7 @@
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(52, 152, 219, 0.3);
-        color: #fff; 
+        color: #fff;
       }
     }
 
@@ -81,7 +82,7 @@
       border: 2px solid var(--border-color);
 
       &:hover {
-        background: #3498db; 
+        background: #3498db;
         border-color: #3498db;
         color: #fff;
       }
@@ -94,9 +95,9 @@
 
       &:hover {
         background: var(--primary-dark);
-        color: var(--navbar-bg, #11111e); 
+        color: var(--navbar-bg, #11111e);
         :host-context([data-theme="dark"]) & {
-        color: #11111e !important; // Forces text to be dark on hover
+          color: #11111e !important; // Forces text to be dark on hover
         }
       }
     }
@@ -109,9 +110,11 @@
   // Hero Section
   .hero-section {
     padding: 120px 20px;
-    background: linear-gradient(135deg,
-        var(--cards-container) 0%,
-        var(--card-container-2) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--cards-container) 0%,
+      var(--card-container-2) 100%
+    );
 
     .hero-content {
       max-width: 1200px;
@@ -528,9 +531,11 @@
 
   // Final CTA Section
   .final-cta-section {
-    background: linear-gradient(135deg,
-        var(--cards-container) 0%,
-        var(--card-container-2) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--cards-container) 0%,
+      var(--card-container-2) 100%
+    );
     text-align: center;
 
     h2 {
