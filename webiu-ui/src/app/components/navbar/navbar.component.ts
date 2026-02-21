@@ -73,7 +73,6 @@ export class NavbarComponent implements OnInit {
   logout(): void {
     this.isLoggedIn = false;
     this.user = null;
-    console.log('Logged out');
   }
 
   loginWithGoogle(): void {
