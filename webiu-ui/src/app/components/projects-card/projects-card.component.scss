@@ -62,15 +62,24 @@
       align-items: flex-end;
       gap: 10px;
 
-      span {
-        padding-right: 25px;
+      .projects__card__tech_stack {
         display: flex;
-        gap: 10px;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+        justify-content: flex-end;
 
-        .circle-box {
-          height: 20px;
-          width: 20px;
-          border-radius: 50%;
+        span {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+
+          .circle-box {
+            height: 16px;
+            width: 16px;
+            border-radius: 50%;
+          }
         }
       }
 

@@ -129,6 +129,90 @@ export class GithubService {
     }
   }
 
+  async inferTechStack(
+    org: string,
+    repo: string,
+    topics: string[],
+  ): Promise<string[]> {
+    const defaultHeaders = this.headers;
+    const cacheKey = `techstack_${org}_${repo}`;
+    const cached = this.cacheService.get<string[]>(cacheKey);
+    if (cached) return cached;
+
+    const stack: Set<string> = new Set();
+
+    // 1. Add Topics
+    if (Array.isArray(topics)) {
+      topics.forEach((t) => stack.add(t));
+    }
+
+    // 2. Fetch Languages
+    try {
+      const langRes = await axios.get(
+        `${this.baseUrl}/repos/${org}/${repo}/languages`,
+        { headers: defaultHeaders },
+      );
+      if (langRes.data) {
+        Object.keys(langRes.data).forEach((lang) => stack.add(lang));
+      }
+    } catch {
+      // Ignore API errors for languages
+    }
+
+    // 3. Check package.json for key dependencies
+    try {
+      const pkgRes = await axios.get(
+        `${this.baseUrl}/repos/${org}/${repo}/contents/package.json`,
+        { headers: defaultHeaders },
+      );
+      if (pkgRes.data && pkgRes.data.content) {
+        const pkgContent = Buffer.from(pkgRes.data.content, 'base64').toString(
+          'utf-8',
+        );
+        const pkgJson = JSON.parse(pkgContent);
+        const allDeps = {
+          ...(pkgJson.dependencies || {}),
+          ...(pkgJson.devDependencies || {}),
+        };
+
+        const keyDependencies = [
+          '@nestjs/core',
+          '@angular/core',
+          'react',
+          'express',
+          'vue',
+          'svelte',
+          'next',
+          'nuxt',
+          'tailwindcss',
+        ];
+
+        keyDependencies.forEach((dep) => {
+          if (allDeps[dep]) {
+            let techName = dep;
+            if (dep === '@nestjs/core') techName = 'NestJS';
+            if (dep === '@angular/core') techName = 'Angular';
+            if (dep === 'tailwindcss') techName = 'Tailwind CSS';
+            if (
+              ['react', 'express', 'vue', 'svelte', 'next', 'nuxt'].includes(
+                dep,
+              )
+            ) {
+              techName = dep.charAt(0).toUpperCase() + dep.slice(1);
+            }
+            stack.add(techName);
+          }
+        });
+      }
+    } catch {
+      // Ignore API errors if no package.json
+    }
+
+    const result = Array.from(stack);
+    this.cacheService.set(cacheKey, result, CACHE_TTL);
+    return result;
+  }
+
   async searchUserIssues(username: string): Promise<any[]> {
     const cacheKey = `search_issues_${username}_${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);

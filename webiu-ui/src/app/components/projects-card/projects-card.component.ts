@@ -4,7 +4,6 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
-
 @Component({
   selector: 'app-projects-card',
   standalone: true,
@@ -19,6 +18,7 @@ export class ProjectsCardComponent implements OnInit {
   @Input() pullRequests!: number;
   @Input() link!: string;
   @Input() language!: string;
+  @Input() techStack?: string[];
   @Input() topics: string[] = [];
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
@@ -30,7 +30,6 @@ export class ProjectsCardComponent implements OnInit {
   initialized = false;
 
   private http = inject(HttpClient);
-
 
   ngOnInit(): void {
     if (!this.initialized) {
@@ -48,7 +47,7 @@ export class ProjectsCardComponent implements OnInit {
       },
       (error) => {
         console.error('Failed to fetch issues and PRs:', error);
-      }
+      },
     );
   }
 
@@ -80,5 +79,31 @@ export class ProjectsCardComponent implements OnInit {
     };
 
     return languageColors[this.language] || languageColors['Default'];
+  }
+
+  getTechColor(tech: string): string {
+    const techColors: Record<string, string> = {
+      Python: '#3572A5',
+      JavaScript: '#F1E05A',
+      TypeScript: '#2B7489',
+      Java: '#B07219',
+      HTML: '#E34C26',
+      'C++': '#F34B7D',
+      HCL: '#0298C3',
+      SCSS: '#c6538c',
+      CSS: '#563d7c',
+      NestJS: '#E0234E',
+      Angular: '#DD0031',
+      React: '#61DAFB',
+      Express: '#000000',
+      Vue: '#41B883',
+      Svelte: '#FF3E00',
+      TailwindCSS: '#38B2AC',
+      Next: '#000000',
+      Nuxt: '#00C58E',
+      Default: '#607466',
+    };
+
+    return techColors[tech] || techColors['Default'];
   }
 }

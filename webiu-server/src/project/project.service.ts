@@ -31,12 +31,26 @@ export class ProjectService {
         const batch = repositories.slice(i, i + BATCH_SIZE);
         const batchResults = await Promise.all(
           batch.map(async (repo) => {
+            let pull_requests = 0;
             try {
               const pulls = await this.githubService.getRepoPulls(repo.name);
-              return { ...repo, pull_requests: pulls.length };
+              pull_requests = pulls.length;
             } catch {
-              return { ...repo, pull_requests: 0 };
+              pull_requests = 0;
             }
+
+            let techStack = [];
+            try {
+              techStack = await this.githubService.inferTechStack(
+                this.githubService.org,
+                repo.name,
+                repo.topics,
+              );
+            } catch {
+              techStack = []; // Fallback to empty if inference fails
+            }
+
+            return { ...repo, pull_requests, techStack };
           }),
         );
         repositoriesWithPRs.push(...batchResults);
