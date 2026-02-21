@@ -1,0 +1,149 @@
+@if (type === 'profile') {
+@for (item of items; track $index) {
+<div class="skeleton-profile-card">
+    <div class="skeleton-avatar skeleton-shimmer"></div>
+    <div class="skeleton-username skeleton-shimmer"></div>
+    <div class="skeleton-contributions skeleton-shimmer"></div>
+    <div class="skeleton-repos">
+        <div class="skeleton-repo-chip skeleton-shimmer"></div>
+        <div class="skeleton-repo-chip skeleton-shimmer"></div>
+        <div class="skeleton-repo-chip skeleton-shimmer"></div>
+    </div>
+    <div class="skeleton-github skeleton-shimmer"></div>
+</div>
+}
+}
+
+@if (type === 'project') {
+@for (item of items; track $index) {
+<div class="skeleton-project-card">
+    <div class="skeleton-project-header">
+        <div class="skeleton-project-title skeleton-shimmer"></div>
+        <div class="skeleton-project-language skeleton-shimmer"></div>
+    </div>
+    <div class="skeleton-project-description skeleton-shimmer"></div>
+    <div class="skeleton-project-description skeleton-shimmer" style="width: 80%;"></div>
+    <div class="skeleton-project-tags">
+        <div class="skeleton-tag skeleton-shimmer"></div>
+        <div class="skeleton-tag skeleton-shimmer"></div>
+        <div class="skeleton-tag skeleton-shimmer"></div>
+    </div>
+    <div class="skeleton-project-stats">
+        <div class="skeleton-stat skeleton-shimmer"></div>
+        <div class="skeleton-stat skeleton-shimmer"></div>
+        <div class="skeleton-stat skeleton-shimmer"></div>
+    </div>
+</div>
+}
+}
+
+@if (type === 'card') {
+@for (item of items; track $index) {
+<div class="skeleton-card" [style.width]="width" [style.height]="height" [style.border-radius]="borderRadius">
+    <div class="skeleton-shimmer"></div>
+</div>
+}
+}
+
+@if (type === 'text') {
+@for (item of items; track $index) {
+<div class="skeleton-text skeleton-shimmer" [style.width]="width" [style.height]="height"></div>
+}
+}
+
+@if (type === 'circle') {
+@for (item of items; track $index) {
+<div class="skeleton-circle skeleton-shimmer" [style.width]="width" [style.height]="height"></div>
+}
+}
+
+@if (type === 'rectangle') {
+@for (item of items; track $index) {
+<div class="skeleton-rectangle skeleton-shimmer" [style.width]="width" [style.height]="height"
+    [style.border-radius]="borderRadius"></div>
+}
+}
+
+
+@if (type === 'homepage') {
+<div class="skeleton-homepage">
+    <!-- Hero Section Skeleton -->
+    <div class="skeleton-hero">
+        <div class="skeleton-hero-content">
+            <div class="skeleton-hero-text">
+                <div class="skeleton-title skeleton-shimmer"></div>
+                <div class="skeleton-subtitle skeleton-shimmer"></div>
+                <div class="skeleton-description skeleton-shimmer"></div>
+                <div class="skeleton-description skeleton-shimmer" style="width: 80%;"></div>
+                <div class="skeleton-buttons">
+                    <div class="skeleton-button skeleton-shimmer"></div>
+                    <div class="skeleton-button skeleton-shimmer"></div>
+                </div>
+            </div>
+            <div class="skeleton-hero-image skeleton-shimmer"></div>
+        </div>
+    </div>
+
+    <!-- Mission Section Skeleton -->
+    <div class="skeleton-mission">
+        <div class="skeleton-section-title skeleton-shimmer"></div>
+        <div class="skeleton-mission-text skeleton-shimmer"></div>
+        <div class="skeleton-mission-text skeleton-shimmer" style="width: 90%;"></div>
+    </div>
+
+    <!-- Stats Section Skeleton -->
+    <div class="skeleton-stats">
+        @for (item of [1,2,3,4]; track $index) {
+        <div class="skeleton-stat-card">
+            <div class="skeleton-stat-icon skeleton-shimmer"></div>
+            <div class="skeleton-stat-value skeleton-shimmer"></div>
+            <div class="skeleton-stat-label skeleton-shimmer"></div>
+        </div>
+        }
+    </div>
+
+    <!-- Featured Projects Section Skeleton -->
+    <div class="skeleton-featured">
+        <div class="skeleton-section-title skeleton-shimmer"></div>
+        <div class="skeleton-section-subtitle skeleton-shimmer"></div>
+        <div class="skeleton-projects-grid">
+            @for (item of [1,2,3]; track $index) {
+            <div class="skeleton-project-card">
+                <div class="skeleton-project-header">
+                    <div class="skeleton-project-name skeleton-shimmer"></div>
+                    <div class="skeleton-project-stars skeleton-shimmer"></div>
+                </div>
+                <div class="skeleton-project-desc skeleton-shimmer"></div>
+                <div class="skeleton-project-desc skeleton-shimmer" style="width: 85%;"></div>
+                <div class="skeleton-project-footer">
+                    <div class="skeleton-language skeleton-shimmer"></div>
+                    <div class="skeleton-link skeleton-shimmer"></div>
+                </div>
+                <div class="skeleton-topics">
+                    <div class="skeleton-topic skeleton-shimmer"></div>
+                    <div class="skeleton-topic skeleton-shimmer"></div>
+                    <div class="skeleton-topic skeleton-shimmer"></div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+
+    <!-- Core Sections Skeleton -->
+    <div class="skeleton-sections">
+        <div class="skeleton-section-title skeleton-shimmer"></div>
+        <div class="skeleton-sections-grid">
+            @for (item of [1,2,3]; track $index) {
+            <div class="skeleton-section-card">
+                <div class="skeleton-section-icon skeleton-shimmer"></div>
+                <div class="skeleton-section-content">
+                    <div class="skeleton-section-heading skeleton-shimmer"></div>
+                    <div class="skeleton-section-count skeleton-shimmer"></div>
+                    <div class="skeleton-section-text skeleton-shimmer"></div>
+                </div>
+            </div>
+            }
+        </div>
+    </div>
+</div>
+}
