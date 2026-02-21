@@ -15,9 +15,9 @@ export class ProjectService {
     private cacheService: CacheService,
   ) {}
 
-  async getAllProjects() {
+  async getAllProjects(): Promise<{ repositories: any[] }> {
     const cacheKey = 'all_projects';
-    const cached = this.cacheService.get(cacheKey);
+    const cached = this.cacheService.get<{ repositories: any[] }>(cacheKey);
     if (cached) return cached;
 
     try {
