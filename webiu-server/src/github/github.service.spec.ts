@@ -175,7 +175,7 @@ describe('GithubService', () => {
         'https://api.github.com/user',
         {
           headers: { Authorization: 'Bearer user-access-token' },
-          timeout: 10000,
+          timeout: 35000,
         },
       );
     });

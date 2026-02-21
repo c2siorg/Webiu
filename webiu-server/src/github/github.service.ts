@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios, { AxiosError } from 'axios';
 
-const AXIOS_TIMEOUT = 10000; // 10 seconds
+const AXIOS_TIMEOUT = 35000; // 10 seconds
 
 const CACHE_TTL = 300; // 5 minutes
 
