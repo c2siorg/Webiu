@@ -30,6 +30,18 @@ export class GithubService {
     return this.orgName;
   }
 
+  /**
+   * Fetch all paginated results from a GitHub API endpoint.
+   *
+   * @param url The API endpoint URL to fetch from
+   * @returns All accumulated results from all pages
+   * @throws Error with details if any page request fails (all-or-nothing behavior)
+   *
+   * Note: This method uses all-or-nothing semantics. If any page fails to fetch,
+   * all accumulated results are discarded and an error is thrown. This ensures
+   * callers work with complete datasets. If partial results are acceptable,
+   * implement a separate method with partial-fetch semantics.
+   */
   private async fetchAllPages(url: string): Promise<any[]> {
     const results: any[] = [];
     let page = 1;
@@ -128,15 +140,11 @@ export class GithubService {
     const cached = this.cacheService.get<any[] | null>(cacheKey);
     if (cached !== null) return cached;
 
-    try {
-      const contributors = await this.fetchAllPages(
-        `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
-      );
-      this.cacheService.set(cacheKey, contributors, CACHE_TTL);
-      return contributors;
-    } catch {
-      return null;
-    }
+    const contributors = await this.fetchAllPages(
+      `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
+    );
+    this.cacheService.set(cacheKey, contributors, CACHE_TTL);
+    return contributors;
   }
 
   async searchUserIssues(username: string): Promise<any[]> {
@@ -232,6 +240,23 @@ export class GithubService {
     }
   }
 
+  async getPublicUserProfile(username: string): Promise<any> {
+    const cacheKey = `public_profile_${username}`;
+    const cached = this.cacheService.get<any>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(`${this.baseUrl}/users/${username}`, {
+        headers: this.headers,
+        timeout: AXIOS_TIMEOUT,
+      });
+      this.cacheService.set(cacheKey, response.data, CACHE_TTL);
+      return response.data;
+    } catch (error) {
+      this.handleGitHubError(error);
+    }
+  }
+
   async getUserFollowersAndFollowing(username: string): Promise<{
     followers: number;
     following: number;
@@ -275,7 +300,11 @@ export class GithubService {
       if (axiosError.response?.status === 429) {
         const remaining = axiosError.response.headers['x-ratelimit-remaining'];
         const resetTime = axiosError.response.headers['x-ratelimit-reset'];
-        const message = `GitHub API rate limit exceeded.${remaining ? ` Remaining: ${remaining}.` : ''}${resetTime ? ` Reset at: ${new Date(parseInt(resetTime) * 1000).toISOString()}` : ''}`;
+        const reset = parseInt(resetTime, 10);
+        const resetStr = !isNaN(reset)
+          ? new Date(reset * 1000).toISOString()
+          : resetTime;
+        const message = `GitHub API rate limit exceeded.${remaining ? ` Remaining: ${remaining}.` : ''}${resetTime ? ` Reset at: ${resetStr}` : ''}`;
         console.error(message);
         throw new Error(message);
       }
