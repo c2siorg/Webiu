@@ -2,9 +2,10 @@
   width: 100%;
   background: var(--navbar-bg, #11111e);
   border-top: 1px solid var(--border-color, #282a3b);
-  padding: 60px 20px 40px; // Increased padding
+  padding: 60px 20px 40px;
   margin-top: auto;
   font-family: "Poppins", sans-serif;
+  min-height: 400px; // Reserve space to prevent shift
 
   :host-context([data-theme="dark"]) & {
     background: #11111e;
@@ -12,7 +13,8 @@
   }
 
   @media (max-width: 600px) {
-    padding-bottom: 80px; 
+    padding-bottom: 80px;
+    min-height: 500px; // More space on mobile
   }
 }
 
@@ -55,7 +57,7 @@
       /* Left-aligning links in a 2-column grid looks much cleaner than centering */
       align-items: flex-start;
       text-align: left;
-      padding-left: 10px; 
+      padding-left: 10px;
     }
   }
 
@@ -78,6 +80,8 @@
 
   .footer-logo {
     width: 100px;
+    height: 40px; // Fixed height to prevent shift
+    object-fit: contain;
     margin-bottom: 12px;
 
     :host-context([data-theme="dark"]) & {
