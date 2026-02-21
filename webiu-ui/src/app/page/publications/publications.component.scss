@@ -88,21 +88,22 @@
   }
 }
 
-
 .back-to-top {
   position: fixed;
   bottom: 20px;
   right: 20px;
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #007bff;
+  background-color: #3498db;
   color: white;
   border: none;
   border-radius: 4px;
   cursor: pointer;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
   z-index: 1000;
 }
 

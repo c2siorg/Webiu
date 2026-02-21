@@ -62,7 +62,7 @@
 
         button {
           padding: 8px 12px;
-          background-color: #2f80ed;
+          background-color: #3498db;
           color: white;
           border: none;
           border-radius: 8px;
@@ -124,7 +124,7 @@
           min-width: 60px;
 
           &:focus {
-            border-color: #2f80ed;
+            border-color: #3498db;
           }
         }
       }
@@ -163,8 +163,8 @@
     }
 
     &:focus {
-      border-color: #007bff;
-      box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+      border-color: #3498db;
+      box-shadow: 0 2px 8px rgba(52, 152, 219, 0.3);
       background-color: #ffffff;
     }
 
