@@ -362,18 +362,32 @@
     .search-section {
       .search-container {
         .search-wrapper {
-          flex-direction: column;
+          gap: 8px;
+
+          .input-container {
+            flex: 1;
+            min-width: 0;
+          }
 
           .search-button {
-            width: 100%;
-            justify-content: center;
+            flex-shrink: 0;
+            padding: 14px 18px;
+            width: auto;
+
+            span {
+              display: none;
+            }
+
+            img {
+              width: 18px;
+              height: 18px;
+            }
           }
         }
       }
     }
   }
 }
-
 
 i {
   color: #007bff;
@@ -388,7 +402,6 @@ i {
   margin-top: 20px;
 }
 
-
 .back-to-top {
   position: fixed;
   bottom: 20px;
@@ -402,7 +415,9 @@ i {
   cursor: pointer;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
   z-index: 1000;
 }
 
