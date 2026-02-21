@@ -41,12 +41,13 @@ describe('ContributorController', () => {
   });
 
   describe('getAllContributors', () => {
-    it('should return all contributors', async () => {
-      const mockResult = [{ login: 'user1', contributions: 10 }];
+    it('should return all contributors from service', async () => {
+      const mockResult = [{ login: 'user1' }, { login: 'user2' }];
       mockContributorService.getAllContributors.mockResolvedValue(mockResult);
 
       const result = await controller.getAllContributors();
       expect(result).toEqual(mockResult);
+      expect(mockContributorService.getAllContributors).toHaveBeenCalled();
     });
   });
 
