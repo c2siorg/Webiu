@@ -4,8 +4,40 @@
     <app-loading-spinner message="Fetching contributor data..."></app-loading-spinner>
   }
 
-  <!-- Error Message -->
-  @if (errorMessage && !loading) {
+  <!-- Default Search Hero — shown when no profile is loaded yet -->
+  @if (!loading && !userProfile) {
+    <div class="search-hero">
+      <div class="search-hero-icon">
+        <i class="fas fa-search"></i>
+      </div>
+      <h1 class="search-hero-title">Search Contributors</h1>
+      <p class="search-hero-desc">
+        Enter a GitHub username to view their issues and pull requests in C2SI projects.
+      </p>
+      <div class="search-input-group">
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Enter GitHub username..."
+          [(ngModel)]="username"
+          (keyup.enter)="onSearch()"
+        />
+        <button class="search-btn" (click)="onSearch()" [disabled]="!username.trim()">
+          <i class="fas fa-search"></i>
+          <span>Search</span>
+        </button>
+      </div>
+      @if (errorMessage) {
+        <p class="hero-error">
+          <i class="fas fa-exclamation-triangle"></i>
+          {{ errorMessage }}
+        </p>
+      }
+    </div>
+  }
+
+  <!-- Error Message (shown only after a profile was loaded previously) -->
+  @if (errorMessage && !loading && userProfile) {
     <div class="error-container">
       <i class="fas fa-exclamation-triangle error-icon"></i>
       <p class="error-text">{{ errorMessage }}</p>
