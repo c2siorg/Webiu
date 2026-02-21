@@ -323,10 +323,6 @@ export class GithubService {
     return issues;
   }
 
-  /**
-   * Fetches the full language breakdown (bytes per language) for a specific repository.
-   * Results are cached to minimize GitHub API quota consumption.
-   */
   async getRepoLanguages(repoName: string): Promise<Record<string, number>> {
     const cacheKey = `languages_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<Record<string, number>>(cacheKey);
