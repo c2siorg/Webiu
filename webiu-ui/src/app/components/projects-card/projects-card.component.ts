@@ -28,12 +28,14 @@ export class ProjectsCardComponent implements OnInit {
   issueCount = 0;
   pullRequestCount = 0;
   initialized = false;
+  languages: string[] = [];
 
   private http = inject(HttpClient);
 
   ngOnInit(): void {
     if (!this.initialized) {
       this.fetchIssuesAndPRs();
+      this.fetchTechStack();
     }
   }
 
@@ -52,6 +54,13 @@ export class ProjectsCardComponent implements OnInit {
           this.initialized = true;
         }
       });
+  }
+
+  fetchTechStack(): void {
+    const apiUrl = `${environment.serverUrl}/api/projects/tech-stack/${this.repo}`;
+    this.http.get<{ languages: string[] }>(apiUrl).subscribe((data) => {
+      this.languages = data.languages;
+    });
   }
 
   public detailsVisible = false;
