@@ -3,12 +3,25 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
+import helmet from 'helmet';
+import * as compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  app.enableCors();
+  app.use(helmet());
+  app.use(compression());
+
+  const frontendUrl = configService.get<string>(
+    'FRONTEND_BASE_URL',
+    'http://localhost:4200',
+  );
+  app.enableCors({
+    origin: frontendUrl,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

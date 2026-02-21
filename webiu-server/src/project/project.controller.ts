@@ -10,8 +10,18 @@ export class ProjectController {
   @Get('projects')
   @Header('Cache-Control', 'public, max-age=300')
   @ApiOperation({ summary: 'Get all projects (paginated)' })
-  @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number (default: 1)' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page (default: 10)' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (default: 1)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page (default: 10)',
+  })
   async getAllProjects() {
     return this.projectService.getAllProjects();
   }
@@ -25,8 +35,18 @@ export class IssuesController {
   @Get('issuesAndPr')
   @Header('Cache-Control', 'public, max-age=300')
   @ApiOperation({ summary: 'Get issue and pull-request counts for a repo' })
-  @ApiQuery({ name: 'org', required: true, type: String, description: 'GitHub organization name' })
-  @ApiQuery({ name: 'repo', required: true, type: String, description: 'Repository name' })
+  @ApiQuery({
+    name: 'org',
+    required: true,
+    type: String,
+    description: 'GitHub organization name',
+  })
+  @ApiQuery({
+    name: 'repo',
+    required: true,
+    type: String,
+    description: 'Repository name',
+  })
   async getIssuesAndPr(@Query('org') org: string, @Query('repo') repo: string) {
     return this.projectService.getIssuesAndPr(org, repo);
   }

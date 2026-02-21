@@ -1,0 +1,50 @@
+.not-found-container {
+  min-height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+
+  .content {
+    max-width: 600px;
+  }
+
+  h1 {
+    font-size: 8rem;
+    font-weight: 800;
+    margin: 0;
+    line-height: 1;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    color: var(--font-color-p);
+    margin-bottom: 1rem;
+  }
+
+  p {
+    font-size: 1.1rem;
+    color: var(--font-color-p);
+    opacity: 0.8;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+  }
+
+  /* Reusing global .btn styles instead of custom .btn-primary */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .not-found-container {
+    h1 {
+      font-size: 6rem;
+    }
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+}

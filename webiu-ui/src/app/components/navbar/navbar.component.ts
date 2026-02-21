@@ -26,16 +26,27 @@ export class NavbarComponent implements OnInit {
   ngOnInit(): void {
     this.isSunVisible = !this.themeService.isDarkMode();
     this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .pipe(
+        filter(
+          (event): event is NavigationEnd => event instanceof NavigationEnd,
+        ),
+      )
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
+        this.isMenuOpen = false;
       });
 
     const queryParams = new URLSearchParams(window.location.search);
     const user = queryParams.get('user');
     if (user) {
-      this.user = JSON.parse(decodeURIComponent(user));
-      this.isLoggedIn = true;
+      try {
+        this.user = JSON.parse(decodeURIComponent(user));
+        this.isLoggedIn = true;
+      } catch (e) {
+        console.warn('Failed to parse user query param:', e);
+        this.user = null;
+        this.isLoggedIn = false;
+      }
       window.history.replaceState({}, document.title, window.location.pathname);
     }
   }
@@ -52,6 +63,10 @@ export class NavbarComponent implements OnInit {
     this.isMenuOpen = !this.isMenuOpen;
   }
 
+  closeMenu(): void {
+    this.isMenuOpen = false;
+  }
+
   toggleTheme(): void {
     this.themeService.toggleDarkMode();
   }
@@ -64,7 +79,6 @@ export class NavbarComponent implements OnInit {
   logout(): void {
     this.isLoggedIn = false;
     this.user = null;
-    console.log('Logged out');
   }
 
   loginWithGoogle(): void {
@@ -87,7 +101,10 @@ export class NavbarComponent implements OnInit {
   onClickOutside(event: MouseEvent): void {
     const loginOptionsElement = document.querySelector('.login-options');
     const loginButton = document.querySelector('.Login_Logout');
+    const navbarMenu = document.querySelector('#navbarMenu');
+    const navigationButtons = document.querySelector('.navigation__buttons');
 
+    // Handle login options closing
     if (
       this.showLoginOptions &&
       !loginOptionsElement?.contains(event.target as Node) &&
@@ -95,9 +112,27 @@ export class NavbarComponent implements OnInit {
     ) {
       this.showLoginOptions = false;
     }
+
+    // Handle menu closing when clicking outside (but not on the toggle button)
+    if (
+      this.isMenuOpen &&
+      navbarMenu &&
+      !navbarMenu.contains(event.target as Node) &&
+      !navigationButtons?.contains(event.target as Node)
+    ) {
+      this.isMenuOpen = false;
+    }
   }
 
   isRouteActive(route: string): boolean {
     return this.currentRoute === route;
+  }
+
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
+    // Close menu after navigation on mobile
+    if (this.isMenuOpen) {
+      this.isMenuOpen = false;
+    }
   }
 }
