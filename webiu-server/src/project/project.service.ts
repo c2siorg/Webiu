@@ -13,10 +13,10 @@ export class ProjectService {
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
-  ) {}
+  ) { }
 
-  async getAllProjects() {
-    const cacheKey = 'all_projects';
+  async getAllProjects(page: number = 1, limit: number = 10) {
+    const cacheKey = `all_projects_page_${page}_limit_${limit}`;
     const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
@@ -42,7 +42,20 @@ export class ProjectService {
         repositoriesWithPRs.push(...batchResults);
       }
 
-      const result = { repositories: repositoriesWithPRs };
+      // Capture total before applying the pagination slice
+      const total = repositoriesWithPRs.length;
+      const startIndex = (page - 1) * limit;
+      const paginatedRepositories = repositoriesWithPRs.slice(
+        startIndex,
+        startIndex + limit,
+      );
+
+      const result = {
+        total,
+        page,
+        limit,
+        repositories: paginatedRepositories,
+      };
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
