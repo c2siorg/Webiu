@@ -50,13 +50,12 @@
       height: auto;
     }
   }
-
   // ==============================
   // Team Details Section
   // ==============================
   .team-details {
     margin-top: 60px;
-    width: 90%; // Use more screen space
+    width: 90%; 
     max-width: 1200px;
     display: flex;
     flex-direction: column;
@@ -67,35 +66,33 @@
       font-weight: 600;
       text-align: center;
       margin-bottom: 10px;
-      color: var(--primary-dark, #0a0a15);
+      color: var(--primary-dark, #0a0a15); // This variable should handle dark mode
+      
+      // Manual override if variable isn't set for dark mode
+      :host-context([data-theme="dark"]) & {
+        color: #ffffff;
+      }
     }
 
     .team-description {
       text-align: center;
       max-width: 700px;
-      color: #586069;
+      color: #586069; 
       margin-bottom: 40px;
       line-height: 1.6;
-    }
 
-    .loading-spinner {
-      margin: 2rem 0;
-      font-size: 1.2rem;
-      color: var(--primary-dark, #0a0a15);
+      :host-context([data-theme="dark"]) & {
+        color: #cbd5e0; // Light grey for dark mode
+      }
     }
 
     .team {
-      width: 80%;
-      max-width: 1200px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-
+      width: 100%;
+      
       .team-align {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(4, 1fr); 
         gap: 20px;
-        margin: 2rem 0;
         width: 100%;
 
         @media screen and (max-width: 1024px) {
@@ -106,71 +103,65 @@
           grid-template-columns: repeat(2, 1fr);
           gap: 12px;
         }
-
-        .card {
-          width: 100%;
-          display: flex;
-          flex-direction: column;
-          border-radius: 12px;
-          border: 1px solid var(--community-card-border, #e1e4e8);
-          background: var(--community-card-bg, #ffffff);
-          box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
-          transition: all 0.3s ease;
-
-          &:hover {
-            transform: translateY(-5px);
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
-          }
-
-          .card-data {
-            padding: 20px 10px; // Optimized padding
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-
-            .user-name {
-              font-size: 16px;
-              font-weight: 600;
-              color: #24292e;
-              margin-bottom: 5px;
-              width: 100%;
-              word-break: break-word; // Ensures long GitHub names don't break layout
-
-              @media screen and (max-width: 480px) {
-                font-size: 14px;
-              }
-            }
-
-            .user-designation {
-              font-size: 13px;
-              color: #586069;
-              margin: 0;
-
-              @media screen and (max-width: 480px) {
-                font-size: 11px;
-              }
-            }
-          }
-        }
       }
 
-      .view-all-container {
-        margin: 2rem 0 4rem;
+      .card {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        border-radius: 12px;
+        // Updated border and background to use variables
+        border: 1px solid var(--community-card-border, #e1e4e8);
+        background: var(--community-card-bg, #ffffff);
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
 
-        .view-all-link {
-          display: inline-block;
-          padding: 10px 24px;
-          background: var(--primary-blue, #007bff);
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: background 0.2s;
+        &:hover {
+          transform: translateY(-5px);
+          box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+        }
 
-          &:hover {
-            background: var(--primary-blue-dark, #0056b3);
+        .card-data {
+          padding: 20px 10px;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+
+          .user-name {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            width: 100%;
+            word-break: break-word;
+
+            // FIX: Use variable or dark mode override
+            color: var(--primary-dark, #24292e); 
+            
+            :host-context([data-theme="dark"]) & {
+              color: #ffffff; // White text in dark mode
+            }
+
+            @media screen and (max-width: 480px) {
+              font-size: 14px;
+            }
+          }
+
+          .user-designation {
+            font-size: 13px;
+            margin: 0;
+            
+            // FIX: Lighten the grey for dark mode
+            color: #586069; 
+
+            :host-context([data-theme="dark"]) & {
+              color: #a0aec0; // Lighter grey for dark mode
+            }
+
+            @media screen and (max-width: 480px) {
+              font-size: 11px;
+            }
           }
         }
       }
@@ -189,12 +180,8 @@
 
     .community-hero-content {
       align-items: center;
-      h1 {
-        font-size: 36px;
-      }
-      .media-icons {
-        justify-content: center;
-      }
+      h1 { font-size: 36px; }
+      .media-icons { justify-content: center; }
     }
 
     img {
@@ -207,7 +194,7 @@
 @media screen and (max-width: 600px) {
   .community .team-details {
     width: 95%; // Maximum width on tiny screens
-
+    
     .team-caption {
       font-size: 32px;
     }
@@ -231,12 +218,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
   opacity: 0;
   visibility: hidden;
-  transition:
-    opacity 0.3s,
-    visibility 0.3s;
+  transition: all 0.3s ease;
   z-index: 1000;
 
   &.show {
