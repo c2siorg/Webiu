@@ -235,18 +235,14 @@ export class GithubService {
     if (cached) return cached;
 
     try {
-      const [followersResponse, followingResponse] = await Promise.all([
-        axios.get(`${this.baseUrl}/users/${username}/followers`, {
-          headers: this.headers,
-        }),
-        axios.get(`${this.baseUrl}/users/${username}/following`, {
-          headers: this.headers,
-        }),
-      ]);
+      const response = await axios.get(
+        `${this.baseUrl}/users/${username}`,
+        { headers: this.headers },
+      );
 
       const result = {
-        followers: followersResponse.data.length || 0,
-        following: followingResponse.data.length || 0,
+        followers: response.data.followers ?? 0,
+        following: response.data.following ?? 0,
       };
 
       this.cacheService.set(cacheKey, result, CACHE_TTL);
