@@ -43,9 +43,9 @@
             [link]="project.html_url"
             [language]="project.language || ''"
             [topics]="project.topics"
-            [createdAt]="project.created_at"
             [updatedAt]="project.updated_at"
             [pullRequests]="project.pull_requests"
+            [techStack]="project.techStack"
           ></app-projects-card>
         }
       } @else {
