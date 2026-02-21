@@ -62,6 +62,7 @@
     transition: all 0.3s ease;
     cursor: pointer;
     border: 2px solid transparent;
+    text-align: center;
 
     &.btn-primary {
       background: linear-gradient(135deg, #3498db, #2980b9);
@@ -70,6 +71,7 @@
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(52, 152, 219, 0.3);
+        color: #fff; 
       }
     }
 
@@ -79,8 +81,9 @@
       border: 2px solid var(--border-color);
 
       &:hover {
-        background: var(--cards-container);
+        background: #3498db; 
         border-color: #3498db;
+        color: #fff;
       }
     }
 
@@ -91,7 +94,10 @@
 
       &:hover {
         background: var(--primary-dark);
-        color: var(--font-color-light);
+        color: var(--navbar-bg, #11111e); 
+        :host-context([data-theme="dark"]) & {
+        color: #11111e !important; // Forces text to be dark on hover
+        }
       }
     }
 
@@ -100,7 +106,6 @@
       font-size: 18px;
     }
   }
-
   // Hero Section
   .hero-section {
     padding: 120px 20px;
