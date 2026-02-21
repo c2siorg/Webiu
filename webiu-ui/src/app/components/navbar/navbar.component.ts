@@ -43,7 +43,9 @@ export class NavbarComponent implements OnInit {
         this.user = JSON.parse(decodeURIComponent(user));
         this.isLoggedIn = true;
       } catch {
+        console.warn('Failed to parse user query param:', e);
         this.user = null;
+        this.isLoggedIn = false;
       }
       window.history.replaceState({}, document.title, window.location.pathname);
     }
