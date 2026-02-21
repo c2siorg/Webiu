@@ -42,7 +42,7 @@ export class NavbarComponent implements OnInit {
       try {
         this.user = JSON.parse(decodeURIComponent(user));
         this.isLoggedIn = true;
-      } catch {
+      } catch (e) {
         console.warn('Failed to parse user query param:', e);
         this.user = null;
         this.isLoggedIn = false;
