@@ -8,7 +8,7 @@ import { ProjectsCardComponent } from '../../components/projects-card/projects-c
 import { projectsData } from './projects-data';
 import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
-import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
 
 @Component({
@@ -19,7 +19,7 @@ import { ProjectCacheService } from 'src/app/services/project-cache.service';
     FormsModule,
     NavbarComponent,
     ProjectsCardComponent,
-    LoadingSpinnerComponent,
+    SkeletonLoaderComponent,
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],

@@ -12,6 +12,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    min-height: 200px; // Reserve space
 
     .projects-hero-content {
       h1 {
@@ -19,6 +20,7 @@
         font-size: 48px;
         font-weight: 500;
         line-height: 150%;
+        min-height: 72px; // Reserve space for title
       }
 
       p {
@@ -26,6 +28,7 @@
         font-size: 16px;
         font-weight: light;
         line-height: 150%;
+        min-height: 48px; // Reserve space for description
       }
     }
   }
@@ -41,6 +44,17 @@
     width: 100%;
     max-width: 950px;
     margin: 0 auto;
+    min-height: 900px; // Increased to prevent shift
+
+    // Ensure skeleton loaders use the same layout
+    app-skeleton-loader {
+      display: contents;
+    }
+
+    // Reserve space for project cards
+    app-projects-card {
+      min-height: 200px; // Reserve space for each card
+    }
 
     .pagination-container {
       display: flex;
@@ -135,6 +149,7 @@
 .projects-search {
   width: 100%;
   margin: 20px 0;
+  min-height: 65px; // Reserve space for search box
 
   .search-box-container {
     position: relative;
