@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
-import { extractErrorMessage } from '../common/utils/error.util';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -49,7 +48,7 @@ export class ProjectService {
     } catch (error) {
       console.error(
         'Error fetching repositories or pull requests:',
-        extractErrorMessage(error),
+        error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -74,10 +73,7 @@ export class ProjectService {
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
-      console.error(
-        'Error fetching issues and PRs:',
-        extractErrorMessage(error),
-      );
+      console.error('Error fetching issues and PRs:', error.message);
       throw new InternalServerErrorException('Failed to fetch issues and PRs');
     }
   }

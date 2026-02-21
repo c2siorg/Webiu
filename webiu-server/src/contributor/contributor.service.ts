@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
-import { extractErrorMessage } from '../common/utils/error.util';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -77,7 +76,7 @@ export class ContributorService {
       this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
       return allContributors;
     } catch (error) {
-      console.error('Error in getAllContributors:', extractErrorMessage(error));
+      console.error('Error in getAllContributors:', error.message);
       throw new InternalServerErrorException('Failed to fetch repositories');
     }
   }
@@ -98,10 +97,7 @@ export class ContributorService {
 
       return { issues };
     } catch (error) {
-      console.error(
-        'Error fetching user created issues:',
-        extractErrorMessage(error),
-      );
+      console.error('Error fetching user created issues:', error.message);
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -125,7 +121,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user created pull requests:',
-        extractErrorMessage(error),
+        error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -151,7 +147,7 @@ export class ContributorService {
         pullRequests: pullRequests || [],
       };
     } catch (error) {
-      console.error('Error fetching user stats:', extractErrorMessage(error));
+      console.error('Error fetching user stats:', error.message);
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -168,7 +164,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user followers and following:',
-        extractErrorMessage(error),
+        error.message,
       );
       throw new InternalServerErrorException(
         'Failed to fetch followers and following data',

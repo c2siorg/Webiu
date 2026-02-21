@@ -8,18 +8,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
-  // Validate required environment variables
-  const requiredEnvVars = ['GITHUB_ORG', 'FRONTEND_BASE_URL'];
-  const missingEnvVars = requiredEnvVars.filter(
-    (envVar) => !configService.get<string>(envVar),
-  );
-
-  if (missingEnvVars.length > 0) {
-    throw new Error(
-      `Missing required environment variables: ${missingEnvVars.join(', ')}`,
-    );
-  }
-
   // Security headers
   app.use(helmet());
 
