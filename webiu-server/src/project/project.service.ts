@@ -59,7 +59,7 @@ export class ProjectService {
       throw new BadRequestException('Organization and repository are required');
     }
 
-    const cacheKey = `issues_pr_count:${org}:${repo}`;
+    const cacheKey = `issues_pr_count_${org}_${repo}`;
     const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 

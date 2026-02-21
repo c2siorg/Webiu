@@ -75,7 +75,7 @@ export class GithubService {
   }
 
   async getOrgRepos(): Promise<any[]> {
-    const cacheKey = `org_repos:${this.orgName}`;
+    const cacheKey = `org_repos_${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -87,7 +87,7 @@ export class GithubService {
   }
 
   async getRepoPulls(repoName: string): Promise<any[]> {
-    const cacheKey = `pulls:${this.orgName}:${repoName}`;
+    const cacheKey = `pulls_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -99,7 +99,7 @@ export class GithubService {
   }
 
   async getRepoIssues(org: string, repo: string): Promise<any[]> {
-    const cacheKey = `issues:${org}:${repo}`;
+    const cacheKey = `issues_${org}_${repo}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -114,7 +114,7 @@ export class GithubService {
     orgName: string,
     repoName: string,
   ): Promise<any[] | null> {
-    const cacheKey = `contributors:${orgName}:${repoName}`;
+    const cacheKey = `contributors_${orgName}_${repoName}`;
     const cached = this.cacheService.get<any[] | null>(cacheKey);
     if (cached !== null) return cached;
 
