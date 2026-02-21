@@ -1,10 +1,8 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
+
+const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class ContributorService {
@@ -15,72 +13,53 @@ export class ContributorService {
 
   async getAllContributors() {
     const cacheKey = 'all_contributors';
-    let allContributors: any[];
-    const cached: any = this.cacheService.get(cacheKey);
-    if (cached) {
-      allContributors = cached as any[];
-    } else {
-      try {
-        const orgName = this.githubService.org;
-        const contributorsMap = new Map();
+    const cached = this.cacheService.get(cacheKey);
+    if (cached) return cached;
 
-        const repositories = await this.githubService.getOrgRepos();
+    try {
+      const orgName = this.githubService.org;
+      const contributorsMap = new Map();
 
-        if (repositories.length === 0) {
-          allContributors = [];
-          this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
-        } else {
-          const BATCH_SIZE = 10;
-          for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
-            const batch = repositories.slice(i, i + BATCH_SIZE);
+      const repositories = await this.githubService.getOrgRepos();
 
-            await Promise.all(
-              batch.map(async (repo) => {
-                try {
-                  const contributors =
-                    await this.githubService.getRepoContributors(
-                      orgName,
-                      repo.name,
-                    );
-                  if (!contributors?.length) return;
+      if (repositories.length === 0) {
+        return [];
+      }
 
-                  contributors.forEach((contributor) => {
-                    const login = contributor.login;
+      const BATCH_SIZE = 10;
+      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
+        const batch = repositories.slice(i, i + BATCH_SIZE);
 
-                    if (!contributorsMap.has(login)) {
-                      contributorsMap.set(login, {
-                        login,
-                        contributions: contributor.contributions,
-                        repos: new Set([repo.name]),
-                        avatar_url: contributor.avatar_url,
-                      });
-                    } else {
-                      const userData = contributorsMap.get(login);
-                      userData.contributions += contributor.contributions;
-                      userData.repos.add(repo.name);
-                    }
+        await Promise.all(
+          batch.map(async (repo) => {
+            try {
+              const contributors = await this.githubService.getRepoContributors(
+                orgName,
+                repo.name,
+              );
+              if (!contributors?.length) return;
+
+              contributors.forEach((contributor) => {
+                const login = contributor.login;
+
+                if (!contributorsMap.has(login)) {
+                  contributorsMap.set(login, {
+                    login,
+                    contributions: contributor.contributions,
+                    repos: new Set([repo.name]),
+                    avatar_url: contributor.avatar_url,
                   });
-                } catch (err) {
-                  console.error(`Error processing repo ${repo.name}:`, err);
+                } else {
+                  const userData = contributorsMap.get(login);
+                  userData.contributions += contributor.contributions;
+                  userData.repos.add(repo.name);
                 }
-              }),
-            );
-          }
-
-          allContributors = Array.from(contributorsMap.values()).map(
-            (contributor) => ({
-              ...contributor,
-              repos: Array.from(contributor.repos),
-            }),
-          );
-          this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
-        }
-      } catch (error) {
-        console.error('Error in getAllContributors:', error);
-        throw new InternalServerErrorException({
-          error: 'Failed to fetch repositories',
-          message: error.message,
-        });
+              });
+            } catch (err) {
+              console.error(`Error processing repo ${repo.name}:`, err);
+            }
+          }),
+        );
       }
 
       const allContributors = Array.from(contributorsMap.values()).map(
@@ -90,7 +69,7 @@ export class ContributorService {
         }),
       );
 
-      this.cacheService.set(cacheKey, allContributors);
+      this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
       return allContributors;
     } catch (error) {
       console.error('Error in getAllContributors:', error);
@@ -99,15 +78,9 @@ export class ContributorService {
         message: error.message,
       });
     }
-
-    return allContributors;
   }
 
   async getUserCreatedIssues(username: string) {
-    if (!username || username.trim().length === 0) {
-      throw new BadRequestException('Username is required');
-    }
-
     try {
       const issues = await this.githubService.searchUserIssues(username);
 
@@ -128,10 +101,6 @@ export class ContributorService {
   }
 
   async getUserCreatedPullRequests(username: string) {
-    if (!username || username.trim().length === 0) {
-      throw new BadRequestException('Username is required');
-    }
-
     try {
       const pullRequests =
         await this.githubService.searchUserPullRequests(username);
@@ -157,10 +126,6 @@ export class ContributorService {
    * Saves the frontend from making 2 separate requests.
    */
   async getUserStats(username: string) {
-    if (!username || username.trim().length === 0) {
-      throw new BadRequestException('Username is required');
-    }
-
     try {
       const [issues, pullRequests] = await Promise.all([
         this.githubService.searchUserIssues(username),
@@ -181,10 +146,6 @@ export class ContributorService {
   }
 
   async getUserFollowersAndFollowing(username: string) {
-    if (!username || username.trim().length === 0) {
-      throw new BadRequestException('Username is required');
-    }
-
     try {
       const result =
         await this.githubService.getUserFollowersAndFollowing(username);
