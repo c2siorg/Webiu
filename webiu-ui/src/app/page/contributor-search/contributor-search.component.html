@@ -1,4 +1,41 @@
 <div class="search-page">
+  <!-- Hero Section -->
+  <div class="search-hero">
+    <div class="search-hero-content">
+      <h1>Contributor Search</h1>
+      <p>
+        Look up any contributor to explore their issues and pull requests
+        across all C2SI repositories.
+      </p>
+    </div>
+    <img src="../../../assets/projects-img.png" alt="Contributor Search" />
+  </div>
+
+  <!-- Search Bar (always visible) -->
+  <div class="search-bar-container">
+    <div class="search-bar-wrapper">
+      <div class="search-input-wrapper">
+        <i class="fas fa-search search-input-icon"></i>
+        <input
+          type="text"
+          class="search-input"
+          placeholder="Enter a GitHub username..."
+          [(ngModel)]="username"
+          (keyup.enter)="onSearch()"
+        />
+        @if (username) {
+          <button class="clear-btn" (click)="username = ''" title="Clear">
+            <i class="fas fa-times"></i>
+          </button>
+        }
+      </div>
+      <button class="search-btn" (click)="onSearch()" [disabled]="loading">
+        <span>Search</span>
+        <img src="../../../assets/search.svg" alt="Search Icon" />
+      </button>
+    </div>
+  </div>
+
   <!-- Loading Spinner -->
   @if (loading) {
     <app-loading-spinner message="Fetching contributor data..."></app-loading-spinner>
@@ -12,7 +49,18 @@
     </div>
   }
 
-  <!-- Main Content -->
+  <!-- Default State: No search performed yet -->
+  @if (!loading && !errorMessage && !userProfile) {
+    <div class="default-state">
+      <div class="default-state-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <h3>Search for a Contributor</h3>
+      <p>Enter a GitHub username above to view their issues, pull requests, and contribution stats within C2SI.</p>
+    </div>
+  }
+
+  <!-- Main Content (after successful search) -->
   @if (!loading && !errorMessage && userProfile) {
     <div class="content-wrapper">
       <!-- Sidebar: Profile Card -->
