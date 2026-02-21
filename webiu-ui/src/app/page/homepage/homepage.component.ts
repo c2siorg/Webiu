@@ -1,19 +1,28 @@
-import { Component, HostListener } from '@angular/core';
+import { Component, HostListener, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { HomepageDetails } from '../../common/data/homepage';
+import { SkeletonLoaderComponent } from '../../shared/skeleton-loader/skeleton-loader.component';
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, RouterModule],
+  imports: [NavbarComponent, CommonModule, RouterModule, SkeletonLoaderComponent],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.scss'
 })
-export class HomepageComponent {
+export class HomepageComponent implements OnInit {
   homepageData = HomepageDetails;
   showButton = false;
+  isLoading = true;
+
+  ngOnInit(): void {
+    // Simulate data loading - replace with actual API call if needed
+    setTimeout(() => {
+      this.isLoading = false;
+    }, 500);
+  }
 
   // Scroll Listener
   @HostListener('window:scroll', [])

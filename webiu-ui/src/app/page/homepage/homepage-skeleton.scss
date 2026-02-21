@@ -1,0 +1,57 @@
+// Add to homepage.component.scss to prevent CLS
+
+.homepage {
+    min-height: calc(100vh - 80px); // Reserve space (viewport height minus navbar)
+    width: 100%;
+
+    // Ensure skeleton and actual content have same structure
+    app-skeleton-loader {
+        display: block;
+        width: 100%;
+    }
+}
+
+// Ensure consistent spacing
+.hero-section,
+.skeleton-hero {
+    min-height: 500px;
+
+    @media (max-width: 768px) {
+        min-height: 600px; // Taller on mobile due to stacked layout
+    }
+}
+
+.mission-section,
+.skeleton-mission {
+    min-height: 200px;
+}
+
+.stats-section,
+.skeleton-stats {
+    min-height: 300px;
+}
+
+.featured-projects-section,
+.skeleton-featured {
+    min-height: 600px;
+}
+
+.core-sections,
+.skeleton-sections {
+    min-height: 400px;
+}
+
+// Prevent layout shift during image loading
+.hero-image img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+// Ensure consistent card heights
+.project-card,
+.section-card,
+.research-card {
+    min-height: 200px;
+}

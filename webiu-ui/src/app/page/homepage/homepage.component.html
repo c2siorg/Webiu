@@ -1,4 +1,9 @@
 <div class="homepage">
+  @if (isLoading) {
+  <app-skeleton-loader type="homepage"></app-skeleton-loader>
+  }
+
+  @if (!isLoading) {
   <!-- Hero Section -->
   <section class="hero-section">
     <div class="hero-content">
@@ -16,7 +21,7 @@
         </div>
       </div>
       <div class="hero-image">
-        <img src="../../../assets/homepage.png" alt="C2SI Homepage" />
+        <img src="../../../assets/homepage.png" alt="C2SI Homepage" width="600" height="400" loading="eager" />
       </div>
     </div>
   </section>
@@ -276,5 +281,5 @@
   <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
     <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24">
   </button>
-
+  }
 </div>
