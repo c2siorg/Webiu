@@ -1,10 +1,14 @@
 import { CacheService } from './cache.service';
 
+function mockConfig(ttl?: string) {
+  return { get: jest.fn().mockReturnValue(ttl) } as any;
+}
+
 describe('CacheService', () => {
   let service: CacheService;
 
   beforeEach(() => {
-    service = new CacheService();
+    service = new CacheService(mockConfig());
   });
 
   it('should store and retrieve values', () => {
@@ -43,5 +47,37 @@ describe('CacheService', () => {
     const data = { repos: [{ name: 'repo1' }], count: 5 };
     service.set('complex', data, 60);
     expect(service.get('complex')).toEqual(data);
+  });
+
+  describe('TTL configuration', () => {
+    it('should use valid CACHE_TTL_SECONDS from config', () => {
+      const s = new CacheService(mockConfig('600'));
+      s.set('key', 'value');
+      expect(s.get('key')).toBe('value');
+    });
+
+    it('should fall back to 300 when CACHE_TTL_SECONDS is missing', () => {
+      const s = new CacheService(mockConfig(undefined));
+      s.set('key', 'value');
+      expect(s.get('key')).toBe('value');
+    });
+
+    it('should fall back to 300 when CACHE_TTL_SECONDS is invalid (NaN)', () => {
+      const s = new CacheService(mockConfig('abc'));
+      s.set('key', 'value');
+      expect(s.get('key')).toBe('value');
+    });
+
+    it('should fall back to 300 when CACHE_TTL_SECONDS is zero or negative', () => {
+      const s = new CacheService(mockConfig('0'));
+      s.set('key', 'value');
+      expect(s.get('key')).toBe('value');
+    });
+
+    it('should use defaultTtl when set() is called without ttlSeconds', () => {
+      const s = new CacheService(mockConfig('120'));
+      s.set('key', 'value');
+      expect(s.get('key')).toBe('value');
+    });
   });
 });
