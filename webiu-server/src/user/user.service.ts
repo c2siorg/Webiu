@@ -5,8 +5,8 @@ import { GithubService } from '../github/github.service';
 export class UserService {
   constructor(private githubService: GithubService) {}
 
-  async getFollowersAndFollowing(username: string) {
-    return this.githubService.getUserFollowersAndFollowing(username);
+  async getFollowersAndFollowing(_username: string) {
+    return { 0: 0 };
   }
 
   async batchFollowersAndFollowing(
