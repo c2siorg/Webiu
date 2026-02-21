@@ -28,6 +28,7 @@ export class ProjectsCardComponent implements OnInit {
   issueCount = 0;
   pullRequestCount = 0;
   initialized = false;
+  languages: string[] = [];
 
   private http = inject(HttpClient);
 
@@ -35,6 +36,7 @@ export class ProjectsCardComponent implements OnInit {
   ngOnInit(): void {
     if (!this.initialized) {
       this.fetchIssuesAndPRs();
+      this.fetchTechStack();
     }
   }
 
@@ -50,6 +52,18 @@ export class ProjectsCardComponent implements OnInit {
         console.error('Failed to fetch issues and PRs:', error);
       }
     );
+  }
+
+  fetchTechStack(): void {
+    const apiUrl = `${environment.serverUrl}/api/projects/tech-stack/${this.repo}`;
+    this.http.get<{ languages: string[] }>(apiUrl).subscribe({
+      next: (data) => {
+        this.languages = data.languages ?? [];
+      },
+      error: (error) => {
+        console.error('Failed to fetch tech stack:', error);
+      },
+    });
   }
 
   public detailsVisible = false;

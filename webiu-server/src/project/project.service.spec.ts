@@ -16,6 +16,7 @@ describe('ProjectService', () => {
     getOrgRepos: jest.fn(),
     getRepoPulls: jest.fn(),
     getRepoIssues: jest.fn(),
+    getRepoLanguages: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -99,6 +100,45 @@ describe('ProjectService', () => {
       mockGithubService.getOrgRepos.mockRejectedValue(new Error('API error'));
 
       await expect(service.getAllProjects()).rejects.toThrow(
+        InternalServerErrorException,
+      );
+      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('getRepoTechStack', () => {
+    it('should return languages for the repo', async () => {
+      mockGithubService.getRepoLanguages.mockResolvedValue([
+        'TypeScript',
+        'JavaScript',
+      ]);
+
+      const result = await service.getRepoTechStack('repo1');
+      expect(result).toEqual({ languages: ['TypeScript', 'JavaScript'] });
+    });
+
+    it('should cache the result', async () => {
+      mockGithubService.getRepoLanguages.mockResolvedValue(['TypeScript']);
+
+      await service.getRepoTechStack('repo1');
+      await service.getRepoTechStack('repo1');
+
+      expect(mockGithubService.getRepoLanguages).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw BadRequestException when repo is missing', async () => {
+      await expect(service.getRepoTechStack('')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw InternalServerErrorException on API error', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
+      mockGithubService.getRepoLanguages.mockRejectedValue(new Error('fail'));
+
+      await expect(service.getRepoTechStack('repo1')).rejects.toThrow(
         InternalServerErrorException,
       );
       consoleSpy.mockRestore();

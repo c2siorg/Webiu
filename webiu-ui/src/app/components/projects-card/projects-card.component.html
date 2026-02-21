@@ -70,6 +70,11 @@
         {{ tag }}
       </div>
       }
+      @for (lang of languages; track lang) {
+      <div class="projects__card__tag projects__card__lang-tag">
+        {{ lang }}
+      </div>
+      }
     </div>
     <div class="projects__card__details">
       <p><strong> Created at: </strong> {{ createdAt | date:'medium' }}</p>

@@ -52,6 +52,29 @@ export class ProjectService {
     }
   }
 
+  async getRepoTechStack(repoName: string) {
+    if (!repoName) {
+      throw new BadRequestException('Repository name is required');
+    }
+
+    const cacheKey = `tech_stack_${repoName}`;
+    const cached = this.cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const languages = await this.githubService.getRepoLanguages(repoName);
+      const result = { languages };
+      this.cacheService.set(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error(
+        'Error fetching tech stack:',
+        error.response?.data || error.message,
+      );
+      throw new InternalServerErrorException('Failed to fetch tech stack');
+    }
+  }
+
   async getIssuesAndPr(org: string, repo: string) {
     if (!org || !repo) {
       throw new BadRequestException('Organization and repository are required');

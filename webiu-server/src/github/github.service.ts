@@ -108,6 +108,20 @@ export class GithubService {
     return issues;
   }
 
+  async getRepoLanguages(repoName: string): Promise<string[]> {
+    const cacheKey = `languages_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<string[]>(cacheKey);
+    if (cached) return cached;
+
+    const response = await axios.get(
+      `${this.baseUrl}/repos/${this.orgName}/${repoName}/languages`,
+      { headers: this.headers },
+    );
+    const languages = Object.keys(response.data);
+    this.cacheService.set(cacheKey, languages);
+    return languages;
+  }
+
   async getRepoContributors(
     orgName: string,
     repoName: string,

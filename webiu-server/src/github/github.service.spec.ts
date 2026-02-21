@@ -108,6 +108,34 @@ describe('GithubService', () => {
     });
   });
 
+  describe('getRepoLanguages', () => {
+    it('should fetch and cache repo languages', async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: { TypeScript: 12345, JavaScript: 6789 },
+      });
+
+      const result = await service.getRepoLanguages('repo1');
+      expect(result).toEqual(['TypeScript', 'JavaScript']);
+
+      // Cached
+      await service.getRepoLanguages('repo1');
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty array when repo has no languages', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: {} });
+      const result = await service.getRepoLanguages('repo1');
+      expect(result).toEqual([]);
+    });
+
+    it('should propagate errors', async () => {
+      mockedAxios.get.mockRejectedValue(new Error('API error'));
+      await expect(service.getRepoLanguages('repo1')).rejects.toThrow(
+        'API error',
+      );
+    });
+  });
+
   describe('getRepoContributors', () => {
     it('should fetch and cache contributors', async () => {
       mockedAxios.get.mockResolvedValueOnce({
