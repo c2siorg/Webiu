@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Header } from '@nestjs/common';
 
 @Controller()
 export class AppController {
@@ -10,5 +10,17 @@ export class AppController {
   @Get('api/v1/test')
   getTest() {
     return { message: 'Server is running and working fine!' };
+  }
+
+  @Get('health')
+  @Header('Cache-Control', 'no-cache')
+  healthCheck() {
+    return { status: 'ok', timestamp: new Date().toISOString() };
+  }
+
+  @Get('ready')
+  @Header('Cache-Control', 'no-cache')
+  readinessCheck() {
+    return { ready: true, timestamp: new Date().toISOString() };
   }
 }
