@@ -7,7 +7,7 @@
         to be part of GSoC 2026. Here are the project ideas for GSoC 2026.
       </p>
     </div>
-    <img src="../../../assets/gsoc_no_bg.png" alt="GSOC" />
+    <img src="../../../assets/gsoc_no_bg.png" alt="GSOC" width="400" height="400" loading="eager" />
   </div>
 
   <!-- Replaced legacy static text with dynamic innerHTML injection to allow rich blog-style intros from gsocData.ts -->
@@ -15,40 +15,25 @@
 
   <div class="gsoc__projects__list accordion">
     @for (project of gsocData.projects; track project.id) {
-      <div
-        class="accordion-item"
-        [class.active]="activeProjectIndex === $index"
-      >
-        <div
-          class="accordion-header"
-          (click)="toggleAccordion($index)"
-          (keydown.enter)="toggleAccordion($index)"
-          tabindex="0"
-        >
-          <h4>{{ project.id }}. {{ project.title }}</h4>
-          <span class="icon">{{
-            activeProjectIndex === $index ? "−" : "+"
+    <div class="accordion-item" [class.active]="activeProjectIndex === $index">
+      <div class="accordion-header" (click)="toggleAccordion($index)" (keydown.enter)="toggleAccordion($index)"
+        tabindex="0">
+        <h4>{{ project.id }}. {{ project.title }}</h4>
+        <span class="icon">{{
+          activeProjectIndex === $index ? "−" : "+"
           }}</span>
-        </div>
-        @if (activeProjectIndex === $index) {
-          <!-- Using Angular 17+ @if syntax instead of *ngIf for better performance and readability -->
-          <div class="accordion-content">
-            <!-- Project content is now built using rich HTML grid strings from gsocData to preserve the premium card layout -->
-            <div
-              class="project-details"
-              [innerHTML]="project.detailsHTML"
-            ></div>
-          </div>
-        }
       </div>
+      @if (activeProjectIndex === $index) {
+      <!-- Using Angular 17+ @if syntax instead of *ngIf for better performance and readability -->
+      <div class="accordion-content">
+        <!-- Project content is now built using rich HTML grid strings from gsocData to preserve the premium card layout -->
+        <div class="project-details" [innerHTML]="project.detailsHTML"></div>
+      </div>
+      }
+    </div>
     }
   </div>
   <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
-    <img
-      src="../../../assets/up-arrow.svg"
-      alt="Back to Top"
-      width="24"
-      height="24"
-    />
+    <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24" />
   </button>
 </div>

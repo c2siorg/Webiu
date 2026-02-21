@@ -4,7 +4,7 @@
       <h1>{{ gsocData.heroTitle }}</h1>
       <p>{{ gsocData.heroDescription }}</p>
     </div>
-    <img src="../../../assets/gsoc_no_bg.png" alt="GSOC" />
+    <img src="../../../assets/gsoc_no_bg.png" alt="GSOC" width="400" height="400" loading="eager" />
   </div>
 
   <!-- Replaced legacy static text with dynamic innerHTML injection to allow rich blog-style intros from gsocData.ts -->
@@ -12,49 +12,37 @@
     <p>{{ gsocData.details }}</p>
     <ul>
       @for (guideline of gsocData.guidelines; track $index) {
-        <li>{{ guideline }}</li>
+      <li>{{ guideline }}</li>
       }
     </ul>
   </div>
 
   <div class="gsoc__projects__list accordion">
     @for (project of gsocData.projects; track $index) {
-      <div
-        class="accordion-item"
-        [class.active]="activeProjectIndex === $index"
-      >
-        <div
-          class="accordion-header"
-          (click)="toggleAccordion($index)"
-          (keydown.enter)="toggleAccordion($index)"
-          tabindex="0"
-        >
-          <h4>{{ $index + 1 }}. {{ project }}</h4>
-          <span class="icon">{{
-            activeProjectIndex === $index ? "−" : "+"
+    <div class="accordion-item" [class.active]="activeProjectIndex === $index">
+      <div class="accordion-header" (click)="toggleAccordion($index)" (keydown.enter)="toggleAccordion($index)"
+        tabindex="0">
+        <h4>{{ $index + 1 }}. {{ project }}</h4>
+        <span class="icon">{{
+          activeProjectIndex === $index ? "−" : "+"
           }}</span>
-        </div>
-        @if (activeProjectIndex === $index) {
-          <!-- Using Angular 17+ @if syntax instead of *ngIf for better performance and readability -->
-          <div class="accordion-content">
-            <!-- Project content is now built using rich HTML grid strings from gsocData to preserve the premium card layout -->
-            <div class="project-details">
-              <p>
-                Details and ideas regarding this project were tracked internally
-                by mentors in 2024.
-              </p>
-            </div>
-          </div>
-        }
       </div>
+      @if (activeProjectIndex === $index) {
+      <!-- Using Angular 17+ @if syntax instead of *ngIf for better performance and readability -->
+      <div class="accordion-content">
+        <!-- Project content is now built using rich HTML grid strings from gsocData to preserve the premium card layout -->
+        <div class="project-details">
+          <p>
+            Details and ideas regarding this project were tracked internally
+            by mentors in 2024.
+          </p>
+        </div>
+      </div>
+      }
+    </div>
     }
   </div>
   <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
-    <img
-      src="../../../assets/up-arrow.svg"
-      alt="Back to Top"
-      width="24"
-      height="24"
-    />
+    <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24" />
   </button>
 </div>
