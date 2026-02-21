@@ -48,7 +48,7 @@ export class ProjectService {
     } catch (error) {
       console.error(
         'Error fetching repositories or pull requests:',
-        error.response ? error.response.data : error.message,
+        error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -73,10 +73,7 @@ export class ProjectService {
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
-      console.error(
-        'Error fetching issues and PRs:',
-        error.response?.data || error.message,
-      );
+      console.error('Error fetching issues and PRs:', error.message);
       throw new InternalServerErrorException('Failed to fetch issues and PRs');
     }
   }

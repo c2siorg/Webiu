@@ -76,11 +76,8 @@ export class ContributorService {
       this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
       return allContributors;
     } catch (error) {
-      console.error('Error in getAllContributors:', error);
-      throw new InternalServerErrorException({
-        error: 'Failed to fetch repositories',
-        message: error.message,
-      });
+      console.error('Error in getAllContributors:', error.message);
+      throw new InternalServerErrorException('Failed to fetch repositories');
     }
   }
 
@@ -100,10 +97,7 @@ export class ContributorService {
 
       return { issues };
     } catch (error) {
-      console.error(
-        'Error fetching user created issues:',
-        error.response ? error.response.data : error.message,
-      );
+      console.error('Error fetching user created issues:', error.message);
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -127,7 +121,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user created pull requests:',
-        error.response ? error.response.data : error.message,
+        error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -153,10 +147,7 @@ export class ContributorService {
         pullRequests: pullRequests || [],
       };
     } catch (error) {
-      console.error(
-        'Error fetching user stats:',
-        error.response ? error.response.data : error.message,
-      );
+      console.error('Error fetching user stats:', error.message);
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -173,7 +164,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user followers and following:',
-        error.response ? error.response.data : error.message,
+        error.message,
       );
       throw new InternalServerErrorException(
         'Failed to fetch followers and following data',
