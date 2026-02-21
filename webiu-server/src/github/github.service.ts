@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
 
+const CACHE_TTL = 300; // 5 minutes
+
 @Injectable()
 export class GithubService {
   private readonly baseUrl = 'https://api.github.com';
