@@ -1,5 +1,5 @@
-import { Component, HostListener, OnInit, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, HostListener, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { filter } from 'rxjs/operators';
@@ -15,6 +15,7 @@ import { environment } from '../../../environments/environment';
 export class NavbarComponent implements OnInit {
   private router = inject(Router);
   private themeService = inject(ThemeService);
+  private platformId = inject(PLATFORM_ID);
 
   isMenuOpen = false;
   isSunVisible = true;
@@ -36,12 +37,14 @@ export class NavbarComponent implements OnInit {
         this.isMenuOpen = false;
       });
 
-    const queryParams = new URLSearchParams(window.location.search);
-    const user = queryParams.get('user');
-    if (user) {
-      this.user = JSON.parse(decodeURIComponent(user));
-      this.isLoggedIn = true;
-      window.history.replaceState({}, document.title, window.location.pathname);
+    if (isPlatformBrowser(this.platformId)) {
+      const queryParams = new URLSearchParams(window.location.search);
+      const user = queryParams.get('user');
+      if (user) {
+        this.user = JSON.parse(decodeURIComponent(user));
+        this.isLoggedIn = true;
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
     }
   }
 
@@ -77,11 +80,15 @@ export class NavbarComponent implements OnInit {
   }
 
   loginWithGoogle(): void {
-    window.location.href = `${environment.serverUrl}/auth/google`;
+    if (isPlatformBrowser(this.platformId)) {
+      window.location.href = `${environment.serverUrl}/auth/google`;
+    }
   }
 
   loginWithGitHub(): void {
-    window.location.href = `${environment.serverUrl}/auth/github`;
+    if (isPlatformBrowser(this.platformId)) {
+      window.location.href = `${environment.serverUrl}/auth/github`;
+    }
   }
 
   preventReload(event: Event): void {
@@ -94,6 +101,8 @@ export class NavbarComponent implements OnInit {
 
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+
     const loginOptionsElement = document.querySelector('.login-options');
     const loginButton = document.querySelector('.Login_Logout');
     const navbarMenu = document.querySelector('#navbarMenu');
