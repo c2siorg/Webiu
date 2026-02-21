@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import helmet from 'helmet';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,7 +20,18 @@ async function bootstrap() {
     );
   }
 
-  app.enableCors();
+  // Security headers
+  app.use(helmet());
+
+  const frontendUrl = configService.get<string>(
+    'FRONTEND_BASE_URL',
+    'http://localhost:4200',
+  );
+  app.enableCors({
+    origin: frontendUrl,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    credentials: true,
+  });
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,

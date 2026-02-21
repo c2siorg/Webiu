@@ -34,6 +34,10 @@ describe('ContributorService', () => {
     cacheService.clear();
   });
 
+  afterAll(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
@@ -78,6 +82,9 @@ describe('ContributorService', () => {
     });
 
     it('should handle repo errors gracefully', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockGithubService.getOrgRepos.mockResolvedValue([
         { name: 'repo1' },
         { name: 'repo2' },
@@ -90,13 +97,18 @@ describe('ContributorService', () => {
 
       const result = await service.getAllContributors();
       expect(result).toHaveLength(1);
+      consoleSpy.mockRestore();
     });
 
     it('should throw InternalServerErrorException on total failure', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockGithubService.getOrgRepos.mockRejectedValue(new Error('fail'));
       await expect(service.getAllContributors()).rejects.toThrow(
         InternalServerErrorException,
       );
+      consoleSpy.mockRestore();
     });
   });
 
@@ -109,10 +121,14 @@ describe('ContributorService', () => {
     });
 
     it('should throw on error', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockGithubService.searchUserIssues.mockRejectedValue(new Error('fail'));
       await expect(service.getUserCreatedIssues('testuser')).rejects.toThrow(
         InternalServerErrorException,
       );
+      consoleSpy.mockRestore();
     });
   });
 
@@ -125,12 +141,16 @@ describe('ContributorService', () => {
     });
 
     it('should throw on error', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockGithubService.searchUserPullRequests.mockRejectedValue(
         new Error('fail'),
       );
       await expect(
         service.getUserCreatedPullRequests('testuser'),
       ).rejects.toThrow(InternalServerErrorException);
+      consoleSpy.mockRestore();
     });
   });
 
@@ -154,10 +174,14 @@ describe('ContributorService', () => {
     });
 
     it('should throw on error', async () => {
+      const consoleSpy = jest
+        .spyOn(console, 'error')
+        .mockImplementation(() => {});
       mockGithubService.searchUserIssues.mockRejectedValue(new Error('fail'));
       await expect(service.getUserStats('testuser')).rejects.toThrow(
         InternalServerErrorException,
       );
+      consoleSpy.mockRestore();
     });
   });
 });
