@@ -21,6 +21,7 @@ describe('GithubService', () => {
           useValue: {
             get: jest.fn((key: string) => {
               if (key === 'GITHUB_ACCESS_TOKEN') return 'test-token';
+              if (key === 'GITHUB_ORG_NAME') return 'c2siorg';
               return null;
             }),
           },
