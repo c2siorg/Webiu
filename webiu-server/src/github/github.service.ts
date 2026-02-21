@@ -188,6 +188,18 @@ export class GithubService {
     return response.data;
   }
 
+  async getPublicUserProfile(username: string): Promise<any> {
+    const cacheKey = `user_profile_${username}`;
+    const cached = this.cacheService.get<any>(cacheKey);
+    if (cached) return cached;
+
+    const response = await axios.get(`${this.baseUrl}/users/${username}`, {
+      headers: this.headers,
+    });
+    this.cacheService.set(cacheKey, response.data, CACHE_TTL);
+    return response.data;
+  }
+
   async exchangeGithubCode(
     clientId: string,
     clientSecret: string,
