@@ -1,12 +1,21 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
+import { GithubService } from '../github/github.service';
 
 describe('UserService', () => {
   let service: UserService;
 
+  const mockGithubService = {
+    getPublicUserProfile: jest.fn(),
+    getUserFollowersAndFollowing: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [UserService],
+      providers: [
+        UserService,
+        { provide: GithubService, useValue: mockGithubService },
+      ],
     }).compile();
 
     service = module.get<UserService>(UserService);
@@ -14,18 +23,5 @@ describe('UserService', () => {
 
   it('should be defined', () => {
     expect(service).toBeDefined();
-  });
-
-  describe('getFollowersAndFollowing', () => {
-    it('should return placeholder data', async () => {
-      const result = await service.getFollowersAndFollowing('testuser');
-      expect(result).toEqual({ 0: 0 });
-    });
-
-    it('should return the same result regardless of username', async () => {
-      const result1 = await service.getFollowersAndFollowing('user1');
-      const result2 = await service.getFollowersAndFollowing('user2');
-      expect(result1).toEqual(result2);
-    });
   });
 });

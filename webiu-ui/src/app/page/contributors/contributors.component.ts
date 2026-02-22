@@ -2,7 +2,7 @@ import { Component, OnInit, HostListener, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { Contributor, contributors } from '../../common/data/contributor';
+import { Contributor } from '../../common/data/contributor';
 
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
@@ -40,7 +40,7 @@ export class ContributorsComponent implements OnInit {
   allRepos: string[] = [];
   isLoading = true;
   showButton = false;
-  contributors: Contributor[] = contributors;
+  contributors: Contributor[] = [];
 
   contributionRanges: ContributionRange[] = [
     { label: '0 to 5', min: 0, max: 5 },
@@ -91,27 +91,30 @@ export class ContributorsComponent implements OnInit {
       return;
     }
 
-    const requests = this.contributors.map((contributor) =>
-      this.http
-        .get<{ followers?: number; following?: number }>(
-          `${environment.serverUrl}/api/user/followersAndFollowing/${contributor.login}`,
-        )
-        .toPromise()
-        .then((data) => {
-          contributor.followers = data?.followers ?? 0;
-          contributor.following = data?.following ?? 0;
-        })
-        .catch(() => {
-          contributor.followers = 0;
-          contributor.following = 0;
-        }),
-    );
+    const usernames = this.contributors.map((c) => c.login);
 
-    Promise.all(requests).then(() => {
-      this.profiles = [...this.contributors];
-      this.handleProfileResponse(this.profiles);
-      this.isLoading = false;
-    });
+    this.http
+      .post<Record<string, { followers: number; following: number }>>(
+        `${environment.serverUrl}/api/user/batch-social`,
+        { usernames },
+      )
+      .subscribe({
+        next: (data) => {
+          this.contributors.forEach((contributor) => {
+            const social = data[contributor.login];
+            contributor.followers = social?.followers ?? 0;
+            contributor.following = social?.following ?? 0;
+          });
+          this.profiles = [...this.contributors];
+          this.handleProfileResponse(this.profiles);
+          this.isLoading = false;
+        },
+        error: () => {
+          this.profiles = [...this.contributors];
+          this.handleProfileResponse(this.profiles);
+          this.isLoading = false;
+        },
+      });
   }
 
   handleProfileResponse(profiles: Contributor[]) {
