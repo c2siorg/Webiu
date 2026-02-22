@@ -13,11 +13,16 @@ export class ProjectService {
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
-  ) { }
+  ) {}
 
   async getAllProjects(page = 1, limit = 10) {
     const cacheKey = `projects_p${page}_pp${limit}`;
-    const cached = this.cacheService.get<{ total: number; page: number; limit: number; repositories: any[] }>(cacheKey);
+    const cached = this.cacheService.get<{
+      total: number;
+      page: number;
+      limit: number;
+      repositories: any[];
+    }>(cacheKey);
     if (cached) return cached;
 
     try {
@@ -43,7 +48,9 @@ export class ProjectService {
       }
 
       // Get the true total number of public repositories to pass to frontend pagination
-      const orgInfo = await this.githubService.getPublicUserProfile(this.githubService.org);
+      const orgInfo = await this.githubService.getPublicUserProfile(
+        this.githubService.org,
+      );
       const total = orgInfo.public_repos || 0;
 
       const result = {
@@ -52,7 +59,7 @@ export class ProjectService {
         limit,
         repositories: repositoriesWithPRs,
       };
-      
+
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
