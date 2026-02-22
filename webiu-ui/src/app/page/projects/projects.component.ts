@@ -1,4 +1,6 @@
-import { Component, OnInit, HostListener, inject, PLATFORM_ID } from '@angular/core';
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
+import { Component, OnInit, HostListener, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
 
@@ -10,6 +12,7 @@ import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-projects',
@@ -38,8 +41,10 @@ export class ProjectsComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private titleService = inject(Title);
   private metaService = inject(Meta);
+  private destroyRef = inject(DestroyRef);
 
   private projectCacheService = inject(ProjectCacheService);
+  private searchSubject = new Subject<string>();
 
   ngOnInit(): void {
     this.titleService.setTitle('Projects | Webiu 2.0');
@@ -48,6 +53,31 @@ export class ProjectsComponent implements OnInit {
     this.metaService.updateTag({ property: 'og:description', content: 'Explore the open-source projects hosted by C2SI and SCoRe Lab.' });
 
     this.fetchProjects();
+    this.setupSearchDebounce();
+  }
+
+  setupSearchDebounce(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(searchTerm => {
+      this.performSearch(searchTerm);
+    });
+  }
+
+  onSearchInput(searchTerm: string): void {
+    this.searchSubject.next(searchTerm);
+  }
+
+  performSearch(searchTerm: string): void {
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    this.filteredProjects = this.sortProjects(
+      this.projectsData.filter((project) =>
+        project.name.toLowerCase().includes(lowerCaseSearchTerm),
+      ),
+    );
+    this.currentPage = 1;
+    this.updateDisplayProjects();
   }
 
   fetchProjects(): void {
@@ -78,14 +108,8 @@ export class ProjectsComponent implements OnInit {
   }
 
   filterProjects(): void {
-    const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
-    this.filteredProjects = this.sortProjects(
-      this.projectsData.filter((project) =>
-        project.name.toLowerCase().includes(lowerCaseSearchTerm),
-      ),
-    );
-    this.currentPage = 1;
-    this.updateDisplayProjects();
+    // Delegates to debounced search handler
+    this.onSearchInput(this.searchTerm);
   }
 
   updateDisplayProjects(): void {
