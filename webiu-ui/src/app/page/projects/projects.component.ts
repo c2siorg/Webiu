@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { Component, OnInit, HostListener, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, HostListener, inject, PLATFORM_ID, DestroyRef} from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
 
@@ -12,6 +12,7 @@ import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-projects',
@@ -40,6 +41,7 @@ export class ProjectsComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   private titleService = inject(Title);
   private metaService = inject(Meta);
+  private destroyRef = inject(DestroyRef);
 
   private projectCacheService = inject(ProjectCacheService);
   private searchSubject = new Subject<string>();
@@ -56,7 +58,8 @@ export class ProjectsComponent implements OnInit {
 
   setupSearchDebounce(): void {
     this.searchSubject.pipe(
-      debounceTime(300)
+      debounceTime(300),
+      takeUntilDestroyed(this.destroyRef)
     ).subscribe(searchTerm => {
       this.performSearch(searchTerm);
     });
