@@ -1,14 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios, { AxiosError } from 'axios';
 
-const AXIOS_TIMEOUT = 35000; // 10 seconds
+const AXIOS_TIMEOUT = 35000; // 35 seconds
 
 const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class GithubService {
+  private readonly logger = new Logger(GithubService.name);
   private readonly baseUrl = 'https://api.github.com';
   private readonly accessToken: string;
   private readonly orgName = 'c2siorg';
@@ -307,14 +308,14 @@ export class GithubService {
           ? new Date(reset * 1000).toISOString()
           : resetTime;
         const message = `GitHub API rate limit exceeded.${remaining ? ` Remaining: ${remaining}.` : ''}${resetTime ? ` Reset at: ${resetStr}` : ''}`;
-        console.error(message);
+        this.logger.error(message);
         throw new Error(message);
       }
 
       // Handle timeout
       if (error.code === 'ECONNABORTED') {
         const message = `GitHub API request timeout after ${AXIOS_TIMEOUT}ms`;
-        console.error(message);
+        this.logger.error(message);
         throw new Error(message);
       }
 
@@ -322,7 +323,7 @@ export class GithubService {
       if (axiosError.response) {
         const remaining = axiosError.response.headers['x-ratelimit-remaining'];
         if (remaining) {
-          console.warn(`GitHub API calls remaining: ${remaining}`);
+          this.logger.warn(`GitHub API calls remaining: ${remaining}`);
         }
       }
 
@@ -331,13 +332,13 @@ export class GithubService {
         axiosError.response?.statusText ||
         axiosError.message ||
         'Unknown GitHub API error';
-      console.error(`GitHub API error: ${message}`);
+      this.logger.error(`GitHub API error: ${message}`);
       throw new Error(`GitHub API error: ${message}`);
     }
 
     // Handle generic errors
     const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error(`GitHub API error: ${message}`);
+    this.logger.error(`GitHub API error: ${message}`);
     throw new Error(`GitHub API error: ${message}`);
   }
 }
