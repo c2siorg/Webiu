@@ -63,7 +63,6 @@ export class ProjectsComponent implements OnInit {
   }
 
   onSearchInput(searchTerm: string): void {
-    this.searchTerm = searchTerm;
     this.searchSubject.next(searchTerm);
   }
 
