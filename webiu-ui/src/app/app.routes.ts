@@ -49,6 +49,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'opportunities',
+    loadComponent: () =>
+      import('./page/opportunities/opportunities.component').then(
+        (m) => m.OpportunitiesComponent,
+      ),
+  },
+  {
     path: 'idea',
     loadComponent: () =>
       import('./page/gsoc-project-idea/gsoc-project-idea.component').then(
