@@ -1,6 +1,6 @@
 import { Subject } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
-import { Component, OnInit, HostListener, inject, PLATFORM_ID, DestroyRef} from '@angular/core';
+import { Component, OnInit, HostListener, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
 
@@ -108,7 +108,7 @@ export class ProjectsComponent implements OnInit {
   }
 
   filterProjects(): void {
-    // This method is now called by performSearch after debounce
+    // Delegates to debounced search handler
     this.onSearchInput(this.searchTerm);
   }
 
