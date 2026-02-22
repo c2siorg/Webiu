@@ -6,6 +6,8 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
+const CACHE_TTL = 300; // 5 minutes
+
 @Injectable()
 export class ProjectService {
   constructor(
@@ -15,7 +17,12 @@ export class ProjectService {
 
   async getAllProjects(page = 1, limit = 10) {
     const cacheKey = `projects_p${page}_pp${limit}`;
-    const cached = this.cacheService.get<{ repositories: any[] }>(cacheKey);
+    const cached = this.cacheService.get<{
+      total: number;
+      page: number;
+      limit: number;
+      repositories: any[];
+    }>(cacheKey);
     if (cached) return cached;
 
     try {
@@ -40,8 +47,20 @@ export class ProjectService {
         repositoriesWithPRs.push(...batchResults);
       }
 
-      const result = { repositories: repositoriesWithPRs };
-      this.cacheService.set(cacheKey, result);
+      // Get the true total number of public repositories to pass to frontend pagination
+      const orgInfo = await this.githubService.getPublicUserProfile(
+        this.githubService.org,
+      );
+      const total = orgInfo.public_repos || 0;
+
+      const result = {
+        total,
+        page,
+        limit,
+        repositories: repositoriesWithPRs,
+      };
+
+      this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
       console.error(
