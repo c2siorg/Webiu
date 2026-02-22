@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 
 import { HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -7,6 +7,7 @@ import { projectsData } from './projects-data';
 import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
 
 @Component({
@@ -18,6 +19,7 @@ import { ProjectCacheService } from 'src/app/services/project-cache.service';
     NavbarComponent,
     ProjectsCardComponent,
     LoadingSpinnerComponent,
+    BackToTopComponent,
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
@@ -29,7 +31,6 @@ export class ProjectsComponent implements OnInit {
   searchTerm = '';
   isLoading = true;
   org = 'c2siorg';
-  showButton = false;
   currentPage = 1;
   projectsPerPage = 9;
   totalPages = 1;
@@ -119,14 +120,5 @@ export class ProjectsComponent implements OnInit {
     this.projectsPerPage = parseInt(selectElement.value, 10);
     this.currentPage = 1;
     this.updateDisplayProjects();
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    this.showButton = window.scrollY > 100;
-  }
-
-  scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

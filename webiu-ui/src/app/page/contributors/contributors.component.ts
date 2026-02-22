@@ -1,4 +1,4 @@
-import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -9,6 +9,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 
 interface ContributionRange {
   label: string;
@@ -25,6 +26,7 @@ interface ContributionRange {
     ReactiveFormsModule,
     ProfileCardComponent,
     LoadingSpinnerComponent,
+    BackToTopComponent,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
@@ -39,7 +41,6 @@ export class ContributorsComponent implements OnInit {
   selectedSort = '';
   allRepos: string[] = [];
   isLoading = true;
-  showButton = false;
   contributors: Contributor[] = [];
 
   contributionRanges: ContributionRange[] = [
@@ -94,10 +95,9 @@ export class ContributorsComponent implements OnInit {
     const usernames = this.contributors.map((c) => c.login);
 
     this.http
-      .post<Record<string, { followers: number; following: number }>>(
-        `${environment.serverUrl}/api/user/batch-social`,
-        { usernames },
-      )
+      .post<
+        Record<string, { followers: number; following: number }>
+      >(`${environment.serverUrl}/api/user/batch-social`, { usernames })
       .subscribe({
         next: (data) => {
           this.contributors.forEach((contributor) => {
@@ -268,14 +268,5 @@ export class ContributorsComponent implements OnInit {
 
   trackByFn(_: number, profile: Contributor): string {
     return profile.login;
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    this.showButton = window.scrollY > 100;
-  }
-
-  scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

@@ -9,44 +9,6 @@
     padding: 0 20px;
   }
 
-
-  .back-to-top {
-    position: fixed;
-    bottom: 25px;
-    right: 25px;
-    width: 50px;
-    height: 50px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    opacity: 0;
-    visibility: hidden;
-    transition:
-      opacity 0.3s,
-      visibility 0.3s;
-    z-index: 1000;
-
-    &.show {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    &:hover {
-      background-color: #0056b3;
-      transform: scale(1.1);
-    }
-
-    img {
-      filter: brightness(0) invert(1); // Makes black arrow white
-    }
-  }
-
   section {
     padding: 80px 20px;
   }
@@ -86,7 +48,7 @@
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 16px rgba(52, 152, 219, 0.3);
-        color: #fff; 
+        color: #fff;
       }
     }
 
@@ -96,7 +58,7 @@
       border: 2px solid var(--border-color);
 
       &:hover {
-        background: #3498db; 
+        background: #3498db;
         border-color: #3498db;
         color: #fff;
       }
@@ -109,9 +71,9 @@
 
       &:hover {
         background: var(--primary-dark);
-        color: var(--navbar-bg, #11111e); 
+        color: var(--navbar-bg, #11111e);
         :host-context([data-theme="dark"]) & {
-        color: #11111e !important; // Forces text to be dark on hover
+          color: #11111e !important; // Forces text to be dark on hover
         }
       }
     }
@@ -124,9 +86,11 @@
   // Hero Section
   .hero-section {
     padding: 120px 20px;
-    background: linear-gradient(135deg,
-        var(--cards-container) 0%,
-        var(--card-container-2) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--cards-container) 0%,
+      var(--card-container-2) 100%
+    );
 
     .hero-content {
       max-width: 1200px;
@@ -543,9 +507,11 @@
 
   // Final CTA Section
   .final-cta-section {
-    background: linear-gradient(135deg,
-        var(--cards-container) 0%,
-        var(--card-container-2) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--cards-container) 0%,
+      var(--card-container-2) 100%
+    );
     text-align: center;
 
     h2 {
