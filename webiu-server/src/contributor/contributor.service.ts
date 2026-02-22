@@ -1,21 +1,23 @@
 import {
   Injectable,
+  Inject,
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { GithubService } from '../github/github.service';
-import { CacheService } from '../common/cache.service';
 
 @Injectable()
 export class ContributorService {
   constructor(
     private githubService: GithubService,
-    private cacheService: CacheService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async getAllContributors() {
     const cacheKey = 'all_contributors';
-    const cached = this.cacheService.get(cacheKey);
+    const cached = await this.cacheManager.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -71,7 +73,7 @@ export class ContributorService {
         }),
       );
 
-      this.cacheService.set(cacheKey, allContributors);
+      await this.cacheManager.set(cacheKey, allContributors);
       return allContributors;
     } catch (error) {
       console.error('Error in getAllContributors:', error);

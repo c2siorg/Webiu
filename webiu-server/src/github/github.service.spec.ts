@@ -1,7 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { GithubService } from './github.service';
-import { CacheService } from '../common/cache.service';
 import axios from 'axios';
 
 jest.mock('axios');
@@ -9,13 +10,20 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('GithubService', () => {
   let service: GithubService;
-  let cacheService: CacheService;
+  let _cacheManager: Cache;
+  let fakeCache: Map<string, any>;
 
   beforeEach(async () => {
+    fakeCache = new Map();
+    const mockCacheManager = {
+      get: jest.fn((key) => Promise.resolve(fakeCache.get(key))),
+      set: jest.fn((key, val) => Promise.resolve(fakeCache.set(key, val))),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         GithubService,
-        CacheService,
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
         {
           provide: ConfigService,
           useValue: {
@@ -29,12 +37,12 @@ describe('GithubService', () => {
     }).compile();
 
     service = module.get<GithubService>(GithubService);
-    cacheService = module.get<CacheService>(CacheService);
+    _cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    cacheService.clear();
+    jest.resetAllMocks();
+    fakeCache.clear();
   });
 
   it('should be defined', () => {
