@@ -1,7 +1,8 @@
 import { Component, OnInit, HostListener, inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Title, Meta } from '@angular/platform-browser';
-
+import { Subject } from 'rxjs';
+import { debounceTime } from 'rxjs/operators';
 import { HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
@@ -99,7 +100,7 @@ export class ProjectsComponent implements OnInit {
     );
   }
 
-  trackByProjectName(index: number, project: Project): string {
+  trackByProjectName(_index: number, project: Project): string {
     return project.name;
   }
 
