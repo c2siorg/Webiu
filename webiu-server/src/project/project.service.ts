@@ -13,18 +13,18 @@ export class ProjectService {
     private cacheService: CacheService,
   ) {}
 
-  async getAllProjects() {
-    const cacheKey = 'all_projects';
-    const cached = this.cacheService.get(cacheKey);
+  async getAllProjects(page = 1, limit = 10) {
+    const cacheKey = `projects_p${page}_pp${limit}`;
+    const cached = this.cacheService.get<{ repositories: any[] }>(cacheKey);
     if (cached) return cached;
 
     try {
-      const repositories = await this.githubService.getOrgRepos();
+      // Use GitHub's native pagination instead of fetching everything
+      const repositories = await this.githubService.getOrgRepos(page, limit);
 
-      // Batch PR fetches (10 at a time) to avoid GitHub abuse detection
+      // Fetch PR counts in batches to avoid overwhelming the API
       const BATCH_SIZE = 10;
       const repositoriesWithPRs = [];
-
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
         const batch = repositories.slice(i, i + BATCH_SIZE);
         const batchResults = await Promise.all(
