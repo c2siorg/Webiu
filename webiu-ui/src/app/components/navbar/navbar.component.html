@@ -6,11 +6,36 @@
       class="logo"
     />
   </a>
-  <div [ngClass]="{ navbar__menu: true, open: isMenuOpen }" id="navbarMenu">
+
+  @if (isMenuOpen) {
+  <div
+    class="menu-overlay"
+    (click)="closeMenu()"
+    (keydown.enter)="closeMenu()"
+    (keydown.space)="closeMenu(); $event.preventDefault()"
+    tabindex="0"
+    role="button"
+    [attr.aria-label]="'Close menu'"
+  ></div>
+  }
+  <div
+    [ngClass]="{ navbar__menu: true, open: isMenuOpen }"
+    id="navbarMenu"
+    (click)="$event.stopPropagation()"
+    (keydown.enter)="$event.stopPropagation()"
+    (keydown.space)="$event.preventDefault(); $event.stopPropagation()"
+    tabindex="0"
+  >
     <div
       class="navbar__menu__items"
       routerLink="/"
       [class.active]="isRouteActive('/')"
+      (click)="navigateTo('/')"
+      (keydown.enter)="navigateTo('/')"
+      (keydown.space)="navigateTo('/'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Home'"
     >
       <img src="../../../assets/home.svg" alt="Home Icon" />
       <p>Home</p>
@@ -19,6 +44,12 @@
       class="navbar__menu__items"
       routerLink="/projects"
       [class.active]="isRouteActive('/projects')"
+      (click)="navigateTo('/projects')"
+      (keydown.enter)="navigateTo('/projects')"
+      (keydown.space)="navigateTo('/projects'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Projects'"
     >
       <img src="../../../assets/projects.svg" alt="Projects Icon" />
       <p>Projects</p>
@@ -27,6 +58,12 @@
       class="navbar__menu__items"
       routerLink="/publications"
       [class.active]="isRouteActive('/publications')"
+      (click)="navigateTo('/publications')"
+      (keydown.enter)="navigateTo('/publications')"
+      (keydown.space)="navigateTo('/publications'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Publications'"
     >
       <img src="../../../assets/publications.svg" alt="Publications Icon" />
       <p>Publications</p>
@@ -35,6 +72,12 @@
       class="navbar__menu__items"
       routerLink="/contributors"
       [class.active]="isRouteActive('/contributors')"
+      (click)="navigateTo('/contributors')"
+      (keydown.enter)="navigateTo('/contributors')"
+      (keydown.space)="navigateTo('/contributors'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Contributors'"
     >
       <img src="../../../assets/contributors.svg" alt="Contributors Icon" />
       <p>Contributors</p>
@@ -43,6 +86,12 @@
       class="navbar__menu__items"
       routerLink="/community"
       [class.active]="isRouteActive('/community')"
+      (click)="navigateTo('/community')"
+      (keydown.enter)="navigateTo('/community')"
+      (keydown.space)="navigateTo('/community'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Community'"
     >
       <img src="../../../assets/community.svg" alt="Community Icon" />
       <p>Community</p>
@@ -51,12 +100,19 @@
       class="navbar__menu__items"
       routerLink="/gsoc"
       [class.active]="isRouteActive('/gsoc')"
+      (click)="navigateTo('/gsoc')"
+      (keydown.enter)="navigateTo('/gsoc')"
+      (keydown.space)="navigateTo('/gsoc'); $event.preventDefault()"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Google Summer of Code'"
     >
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
       <p>GSoC 26</p>
     </div>
     <button
       class="navbar__menu__items Login_Logout"
+      type="button"
       (click)="toggleLoginOptions()"
     >
       <img
@@ -80,11 +136,11 @@
 
     @if (showLoginOptions && !isLoggedIn) {
       <div class="login-options">
-        <button (click)="loginWithGoogle()">
+        <button type="button" (click)="loginWithGoogle()">
           <img src="../../../assets/google.webp" alt="Google Icon" />
           <p>Login with Google</p>
         </button>
-        <button (click)="loginWithGitHub()">
+        <button type="button" (click)="loginWithGitHub()">
           <img src="../../../assets/community/github.png" alt="GitHub Icon" />
           <p>Login with GitHub</p>
         </button>
@@ -93,6 +149,7 @@
 
     <button
       class="sun-moon-toggle"
+      type="button"
       aria-label="Toggle color mode"
       title="Toggle color mode"
       (click)="toggleMode()"
@@ -108,15 +165,18 @@
   <div
     class="navigation__buttons"
     (click)="toggleMenu()"
-    (keyup.enter)="toggleMenu()"
+    (keydown.enter)="toggleMenu()"
+    (keydown.space)="toggleMenu(); $event.preventDefault()"
     tabindex="0"
+    role="button"
+    [attr.aria-label]="isMenuOpen ? 'Close menu' : 'Open menu'"
   >
     <div class="nav-btn">
       @if (!isMenuOpen) {
-        <img src="../../../assets/ham-menu.svg" alt="ham menu" />
+        <img src="../../../assets/ham-menu.svg" alt="Open menu" />
       }
       @if (isMenuOpen) {
-        <img src="../../../assets/cross.svg" alt="cross" />
+        <img src="../../../assets/cross.svg" alt="Close menu" />
       }
     </div>
   </div>

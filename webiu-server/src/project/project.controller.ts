@@ -11,7 +11,16 @@ export class ProjectController {
     @Query('page') page: string = '1',
     @Query('limit') limit: string = '10',
   ) {
+<<<<<<< feat-pagination-total-count
     return this.projectService.getAllProjects(+page, +limit);
+=======
+    const pageNum = Math.max(1, parseInt(page as any, 10) || 1);
+    const limitNum = Math.min(
+      100,
+      Math.max(1, parseInt(limit as any, 10) || 10),
+    );
+    return this.projectService.getAllProjects(pageNum, limitNum);
+>>>>>>> master
   }
 }
 

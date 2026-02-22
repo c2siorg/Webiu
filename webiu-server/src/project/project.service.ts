@@ -6,8 +6,6 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
-const CACHE_TTL = 300; // 5 minutes
-
 @Injectable()
 export class ProjectService {
   constructor(
@@ -15,18 +13,24 @@ export class ProjectService {
     private cacheService: CacheService,
   ) { }
 
+<<<<<<< feat-pagination-total-count
   async getAllProjects(page: number = 1, limit: number = 10) {
     const cacheKey = `all_projects_page_${page}_limit_${limit}`;
     const cached = this.cacheService.get(cacheKey);
+=======
+  async getAllProjects(page = 1, limit = 10) {
+    const cacheKey = `projects_p${page}_pp${limit}`;
+    const cached = this.cacheService.get<{ repositories: any[] }>(cacheKey);
+>>>>>>> master
     if (cached) return cached;
 
     try {
-      const repositories = await this.githubService.getOrgRepos();
+      // Use GitHub's native pagination instead of fetching everything
+      const repositories = await this.githubService.getOrgRepos(page, limit);
 
-      // Batch PR fetches (10 at a time) to avoid GitHub abuse detection
+      // Fetch PR counts in batches to avoid overwhelming the API
       const BATCH_SIZE = 10;
       const repositoriesWithPRs = [];
-
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
         const batch = repositories.slice(i, i + BATCH_SIZE);
         const batchResults = await Promise.all(
@@ -42,6 +46,7 @@ export class ProjectService {
         repositoriesWithPRs.push(...batchResults);
       }
 
+<<<<<<< feat-pagination-total-count
       // Capture total before applying the pagination slice
       const total = repositoriesWithPRs.length;
       const startIndex = (page - 1) * limit;
@@ -57,6 +62,10 @@ export class ProjectService {
         repositories: paginatedRepositories,
       };
       this.cacheService.set(cacheKey, result, CACHE_TTL);
+=======
+      const result = { repositories: repositoriesWithPRs };
+      this.cacheService.set(cacheKey, result);
+>>>>>>> master
       return result;
     } catch (error) {
       console.error(
@@ -83,7 +92,7 @@ export class ProjectService {
       const pullRequests = data.filter((item) => item.pull_request).length;
 
       const result = { issues, pullRequests };
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
       console.error(
