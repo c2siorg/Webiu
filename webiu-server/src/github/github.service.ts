@@ -148,7 +148,8 @@ export class GithubService {
   }
 
   async searchUserIssues(username: string): Promise<any[]> {
-    const cacheKey = `search_issues_${username}_${this.orgName}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `search_issues:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -160,7 +161,8 @@ export class GithubService {
   }
 
   async searchUserPullRequests(username: string): Promise<any[]> {
-    const cacheKey = `search_prs_${username}_${this.orgName}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `search_prs:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -260,7 +262,8 @@ export class GithubService {
     followers: number;
     following: number;
   }> {
-    const cacheKey = `user_social_${username}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `user_social:${normalizedUsername}`;
     const cached = this.cacheService.get<{
       followers: number;
       following: number;
