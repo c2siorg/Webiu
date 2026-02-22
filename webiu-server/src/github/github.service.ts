@@ -127,6 +127,24 @@ export class GithubService {
     return issues;
   }
 
+  /**
+   * Fetches the full language breakdown (bytes per language) for a specific repository.
+   * Results are cached to minimize GitHub API quota consumption.
+   */
+  async getRepoLanguages(repoName: string): Promise<Record<string, number>> {
+    const cacheKey = `languages_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<Record<string, number>>(cacheKey);
+    if (cached) return cached;
+
+    const response = await axios.get(
+      `${this.baseUrl}/repos/${this.orgName}/${repoName}/languages`,
+      { headers: this.headers },
+    );
+    const languages = response.data;
+    this.cacheService.set(cacheKey, languages);
+    return languages;
+  }
+
   async getRepoContributors(
     orgName: string,
     repoName: string,

@@ -100,4 +100,28 @@ export class ProjectService {
       throw new InternalServerErrorException('Failed to fetch issues and PRs');
     }
   }
+
+  /**
+   * Retrieves enriched metadata for a single project by name.
+   * Merges core repository data with a detailed language breakdown.
+   */
+  async getProjectByName(name: string) {
+    if (!name) {
+      throw new BadRequestException('Project name is required');
+    }
+
+    const result: any = await this.getAllProjects();
+    const project = result.repositories.find((p: any) => p.name === name);
+
+    if (!project) {
+      throw new BadRequestException(`Project ${name} not found`);
+    }
+
+    try {
+      const languages = await this.githubService.getRepoLanguages(name);
+      return { ...project, languages };
+    } catch {
+      return project;
+    }
+  }
 }
