@@ -63,6 +63,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'project/:id',
+    loadComponent: () =>
+      import('./page/project-details/project-details.component').then(
+        (m) => m.ProjectDetailsComponent,
+      ),
+  },
+  {
     path: 'search',
     loadComponent: () =>
       import('./page/contributor-search/contributor-search.component').then(
