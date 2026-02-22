@@ -3,7 +3,7 @@ import { ProjectService } from './project.service';
 
 @Controller('api/projects')
 export class ProjectController {
-  constructor(private projectService: ProjectService) { }
+  constructor(private projectService: ProjectService) {}
 
   @Get('projects')
   @Header('Cache-Control', 'public, max-age=300')
@@ -22,7 +22,7 @@ export class ProjectController {
 
 @Controller('api/issues')
 export class IssuesController {
-  constructor(private projectService: ProjectService) { }
+  constructor(private projectService: ProjectService) {}
 
   @Get('issuesAndPr')
   @Header('Cache-Control', 'public, max-age=300')
