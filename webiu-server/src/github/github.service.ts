@@ -11,6 +11,8 @@ import {
   GithubOAuthTokenResponse,
 } from './interfaces';
 
+const CACHE_TTL = 300; // 5 minutes
+
 @Injectable()
 export class GithubService {
   private readonly baseUrl = 'https://api.github.com';
@@ -80,7 +82,26 @@ export class GithubService {
     return results;
   }
 
-  async getOrgRepos(): Promise<GithubRepository[]> {
+  async getOrgRepos(): Promise<GithubRepository[]>;
+  async getOrgRepos(page: number, perPage: number): Promise<GithubRepository[]>;
+  async getOrgRepos(
+    page?: number,
+    perPage?: number,
+  ): Promise<GithubRepository[]> {
+    if (page !== undefined && perPage !== undefined) {
+      const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
+      const cached = this.cacheService.get<GithubRepository[]>(cacheKey);
+      if (cached) return cached;
+
+      const response = await axios.get(
+        `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
+        { headers: this.headers },
+      );
+      const repos = response.data;
+      this.cacheService.set(cacheKey, repos, CACHE_TTL);
+      return repos;
+    }
+
     const cacheKey = `org_repos_${this.orgName}`;
     const cached = this.cacheService.get<GithubRepository[]>(cacheKey);
     if (cached) return cached;
