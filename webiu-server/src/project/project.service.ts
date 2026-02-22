@@ -11,7 +11,7 @@ export class ProjectService {
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
-  ) { }
+  ) {}
 
   async getAllProjects(page: number = 1, limit: number = 10) {
     const cacheKey = 'all_projects';
@@ -45,7 +45,7 @@ export class ProjectService {
         }
 
         const result = { repositories: repositoriesWithPRs };
-        this.cacheService.set(cacheKey, result, CACHE_TTL);
+        this.cacheService.set(cacheKey, result);
         allRepositories = repositoriesWithPRs;
       } catch (error) {
         console.error(
@@ -54,16 +54,6 @@ export class ProjectService {
         );
         throw new InternalServerErrorException('Internal server error');
       }
-
-      const result = { repositories: repositoriesWithPRs };
-      this.cacheService.set(cacheKey, result);
-      return result;
-    } catch (error) {
-      console.error(
-        'Error fetching repositories or pull requests:',
-        error.response ? error.response.data : error.message,
-      );
-      throw new InternalServerErrorException('Internal server error');
     }
 
     const total = allRepositories.length;
