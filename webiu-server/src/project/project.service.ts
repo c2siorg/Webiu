@@ -13,45 +13,62 @@ export class ProjectService {
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
-  ) {}
+  ) { }
 
-  async getAllProjects() {
+  async getAllProjects(page: number = 1, limit: number = 10) {
     const cacheKey = 'all_projects';
     const cached = this.cacheService.get(cacheKey);
-    if (cached) return cached;
 
-    try {
-      const repositories = await this.githubService.getOrgRepos();
+    let allRepositories: any[];
 
-      // Batch PR fetches (10 at a time) to avoid GitHub abuse detection
-      const BATCH_SIZE = 10;
-      const repositoriesWithPRs = [];
+    if (cached) {
+      allRepositories = (cached as any).repositories;
+    } else {
+      try {
+        const repositories = await this.githubService.getOrgRepos();
 
-      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
-        const batch = repositories.slice(i, i + BATCH_SIZE);
-        const batchResults = await Promise.all(
-          batch.map(async (repo) => {
-            try {
-              const pulls = await this.githubService.getRepoPulls(repo.name);
-              return { ...repo, pull_requests: pulls.length };
-            } catch {
-              return { ...repo, pull_requests: 0 };
-            }
-          }),
+        // Batch PR fetches (10 at a time) to avoid GitHub abuse detection
+        const BATCH_SIZE = 10;
+        const repositoriesWithPRs = [];
+
+        for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
+          const batch = repositories.slice(i, i + BATCH_SIZE);
+          const batchResults = await Promise.all(
+            batch.map(async (repo) => {
+              try {
+                const pulls = await this.githubService.getRepoPulls(repo.name);
+                return { ...repo, pull_requests: pulls.length };
+              } catch {
+                return { ...repo, pull_requests: 0 };
+              }
+            }),
+          );
+          repositoriesWithPRs.push(...batchResults);
+        }
+
+        const result = { repositories: repositoriesWithPRs };
+        this.cacheService.set(cacheKey, result, CACHE_TTL);
+        allRepositories = repositoriesWithPRs;
+      } catch (error) {
+        console.error(
+          'Error fetching repositories or pull requests:',
+          error.response ? error.response.data : error.message,
         );
-        repositoriesWithPRs.push(...batchResults);
+        throw new InternalServerErrorException('Internal server error');
       }
-
-      const result = { repositories: repositoriesWithPRs };
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
-      return result;
-    } catch (error) {
-      console.error(
-        'Error fetching repositories or pull requests:',
-        error.response ? error.response.data : error.message,
-      );
-      throw new InternalServerErrorException('Internal server error');
     }
+
+    const total = allRepositories.length;
+    const start = (page - 1) * limit;
+    const data = allRepositories.slice(start, start + limit);
+
+    return {
+      data,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 
   async getIssuesAndPr(org: string, repo: string) {
