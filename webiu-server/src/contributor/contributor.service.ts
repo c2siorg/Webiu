@@ -6,8 +6,6 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
-const CACHE_TTL = 300; // 5 minutes
-
 @Injectable()
 export class ContributorService {
   constructor(
@@ -44,11 +42,11 @@ export class ContributorService {
               if (!contributors?.length) return;
 
               contributors.forEach((contributor) => {
-                const login = contributor.login;
+                const login = contributor.login.toLowerCase();
 
                 if (!contributorsMap.has(login)) {
                   contributorsMap.set(login, {
-                    login,
+                    login: contributor.login,
                     contributions: contributor.contributions,
                     repos: new Set([repo.name]),
                     avatar_url: contributor.avatar_url,
@@ -73,7 +71,7 @@ export class ContributorService {
         }),
       );
 
-      this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
+      this.cacheService.set(cacheKey, allContributors);
       return allContributors;
     } catch (error) {
       console.error('Error in getAllContributors:', error.message);

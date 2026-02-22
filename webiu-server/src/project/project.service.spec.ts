@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ProjectService } from './project.service';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
@@ -23,6 +24,7 @@ describe('ProjectService', () => {
         ProjectService,
         CacheService,
         { provide: GithubService, useValue: mockGithubService },
+        { provide: ConfigService, useValue: { get: jest.fn() } },
       ],
     }).compile();
 
