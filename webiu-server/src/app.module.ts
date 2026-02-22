@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { GqlThrottlerGuard } from './graphql/gql-throttler.guard';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { AppController } from './app.controller';
@@ -22,9 +23,15 @@ import { GraphqlModule } from './graphql/graphql.module';
         limit: 30,
       },
     ]),
-    GraphQLModule.forRoot<ApolloDriverConfig>({
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
       driver: ApolloDriver,
-      autoSchemaFile: true,
+      useFactory: (configService: ConfigService) => ({
+        autoSchemaFile: true,
+        playground: configService.get('NODE_ENV') !== 'production',
+        introspection: configService.get('NODE_ENV') !== 'production',
+        context: ({ req, res }: { req: any; res: any }) => ({ req, res }),
+      }),
+      inject: [ConfigService],
     }),
     GraphqlModule,
     CommonModule,
@@ -43,10 +50,10 @@ import { GraphqlModule } from './graphql/graphql.module';
   ],
   controllers: [AppController],
   providers: [
-    // Apply ThrottlerGuard globally to all routes
+    // Apply GqlThrottlerGuard globally — handles both HTTP and GraphQL contexts
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: GqlThrottlerGuard,
     },
   ],
 })

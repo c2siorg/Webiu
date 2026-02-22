@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ContributorResolver } from './contributor.resolver';
 import { ContributorService } from '../contributor/contributor.service';
+import { GqlThrottlerGuard } from './gql-throttler.guard';
 
 describe('ContributorResolver', () => {
   let resolver: ContributorResolver;
@@ -15,7 +16,10 @@ describe('ContributorResolver', () => {
         ContributorResolver,
         { provide: ContributorService, useValue: mockContributorService },
       ],
-    }).compile();
+    })
+      .overrideGuard(GqlThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     resolver = module.get<ContributorResolver>(ContributorResolver);
   });
@@ -51,9 +55,7 @@ describe('ContributorResolver', () => {
       const result = await resolver.contributors();
 
       expect(result).toEqual(mockContributors);
-      expect(mockContributorService.getAllContributors).toHaveBeenCalledTimes(
-        1,
-      );
+      expect(mockContributorService.getAllContributors).toHaveBeenCalledTimes(1);
     });
 
     it('should return empty array when no contributors exist', async () => {

@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectResolver } from './project.resolver';
 import { ProjectService } from '../project/project.service';
+import { GqlThrottlerGuard } from './gql-throttler.guard';
 
 describe('ProjectResolver', () => {
   let resolver: ProjectResolver;
@@ -15,7 +16,10 @@ describe('ProjectResolver', () => {
         ProjectResolver,
         { provide: ProjectService, useValue: mockProjectService },
       ],
-    }).compile();
+    })
+      .overrideGuard(GqlThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     resolver = module.get<ProjectResolver>(ProjectResolver);
   });
@@ -48,16 +52,16 @@ describe('ProjectResolver', () => {
         repositories: mockRepositories,
       });
 
-      const result = await resolver.repositories();
+      const result = await resolver.repositories(1, 10);
 
       expect(result).toEqual(mockRepositories);
-      expect(mockProjectService.getAllProjects).toHaveBeenCalledTimes(1);
+      expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(1, 10);
     });
 
     it('should return empty array when no repositories exist', async () => {
       mockProjectService.getAllProjects.mockResolvedValue({ repositories: [] });
 
-      const result = await resolver.repositories();
+      const result = await resolver.repositories(1, 10);
 
       expect(result).toEqual([]);
     });
