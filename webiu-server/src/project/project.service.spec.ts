@@ -16,6 +16,8 @@ describe('ProjectService', () => {
     getOrgRepos: jest.fn(),
     getRepoPulls: jest.fn(),
     getRepoIssues: jest.fn(),
+    getPublicUserProfile: jest.fn(),
+    org: 'c2siorg',
   };
 
   beforeEach(async () => {
@@ -54,18 +56,25 @@ describe('ProjectService', () => {
       mockGithubService.getRepoPulls
         .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
         .mockResolvedValueOnce([{ id: 3 }]);
+      mockGithubService.getPublicUserProfile.mockResolvedValue({
+        public_repos: 100,
+      });
 
       const result = await service.getAllProjects(1, 10);
 
       expect(result.repositories).toHaveLength(2);
       expect(result.repositories[0].pull_requests).toBe(2);
       expect(result.repositories[1].pull_requests).toBe(1);
+      expect(result.total).toBe(100);
       expect(mockGithubService.getOrgRepos).toHaveBeenCalledWith(1, 10);
     });
 
     it('should cache the response per page/limit', async () => {
       mockGithubService.getOrgRepos.mockResolvedValue([{ name: 'repo1' }]);
       mockGithubService.getRepoPulls.mockResolvedValue([]);
+      mockGithubService.getPublicUserProfile.mockResolvedValue({
+        public_repos: 50,
+      });
 
       await service.getAllProjects(1, 10);
       await service.getAllProjects(1, 10);
@@ -85,6 +94,9 @@ describe('ProjectService', () => {
       mockGithubService.getRepoPulls
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValueOnce([{ id: 1 }]);
+      mockGithubService.getPublicUserProfile.mockResolvedValue({
+        public_repos: 75,
+      });
 
       const result = await service.getAllProjects(1, 10);
 
