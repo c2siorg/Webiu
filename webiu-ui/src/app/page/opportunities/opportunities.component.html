@@ -1,0 +1,48 @@
+<div class="opp-page">
+  <div class="main-container">
+    
+    <!-- Hero Section -->
+    <div class="opp-hero">
+      <div class="opp-hero-text">
+        <h1>{{ data.hero.title }}</h1>
+        <p class="subtitle">{{ data.hero.subtitle }}</p>
+      </div>
+      <div class="opp-hero-image">
+        <img [src]="data.hero.image" alt="Opportunities Illustration" />
+      </div>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="opp-content">
+      @for (section of data.sections; track section.title) {
+        <section class="info-section">
+          <h2 class="main-heading">{{ section.title }}</h2>
+          <hr class="divider" />
+          <div class="details">
+            <h3>{{ section.subHeading }}</h3>
+            <p>{{ section.description }}</p>
+          </div>
+        </section>
+      }
+
+      <!-- Openings Section -->
+      <section class="info-section">
+        <h2 class="main-heading">{{ data.openings.title }}</h2>
+        <hr class="divider" />
+        
+        @for (opening of data.openings.list; track opening.id) {
+          <div class="opening-card">
+            <h3>{{ opening.id }}. {{ opening.title }}</h3>
+            <p class="org">{{ opening.organization }}</p>
+            <ul>
+              @for (req of opening.requirements; track req) {
+                <li>{{ req }}</li>
+              }
+            </ul>
+          </div>
+        }
+      </section>
+    </div>
+
+  </div>
+</div>

@@ -1,0 +1,138 @@
+.opp-page {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 60px 20px 100px;
+  font-family: 'Poppins', sans-serif;
+
+  .main-container {
+    max-width: 1100px; // Constraints the overall width
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  // Hero Section
+  .opp-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 80px;
+    gap: 40px;
+
+    .opp-hero-text {
+      flex: 1;
+      text-align: left;
+
+      h1 {
+        font-size: 58px;
+        font-weight: 700;
+        margin: 0 0 15px 0;
+        color: var(--primary-dark, #1a1a1a);
+        :host-context([data-theme="dark"]) & { color: #ffffff; }
+      }
+
+      .subtitle {
+        font-size: 19px;
+        color: #2f80ed; // The specific blue from your image
+        line-height: 1.5;
+        max-width: 480px; // Constraints subtitle width
+        margin: 0;
+      }
+    }
+
+    .opp-hero-image {
+      flex: 1;
+      display: flex;
+      justify-content: flex-end;
+      img {
+        max-width: 450px;
+        width: 100%;
+        height: auto;
+      }
+    }
+
+    @media (max-width: 900px) {
+      flex-direction: column;
+      text-align: center;
+      .opp-hero-text {
+        order: 2;
+        .subtitle { max-width: 100%; }
+      }
+      .opp-hero-image {
+        order: 1;
+        justify-content: center;
+      }
+    }
+  }
+
+  // Content Sections
+  .opp-content {
+    display: flex;
+    flex-direction: column;
+    gap: 70px;
+  }
+
+  .info-section {
+    width: 100%;
+
+    .main-heading {
+      font-size: 34px;
+      font-weight: 600;
+      color: var(--primary-dark, #24292e);
+      margin-bottom: 15px;
+      :host-context([data-theme="dark"]) & { color: #ffffff; }
+    }
+
+    .divider {
+      border: none;
+      border-top: 1px solid #ddd;
+      margin: 0 0 35px 0;
+      width: 60%; // Matching the reference image
+      :host-context([data-theme="dark"]) & { border-color: #333; }
+    }
+
+    .details {
+      h3 {
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 12px;
+        color: var(--primary-dark, #24292e);
+        :host-context([data-theme="dark"]) & { color: #e0e0e0; }
+      }
+      p {
+        font-size: 16px;
+        line-height: 1.7;
+        color: #586069; // Lighter gray as requested
+        max-width: 850px; // Prevents text from being too wide
+        margin: 0;
+        :host-context([data-theme="dark"]) & { color: #cbd5e0; }
+      }
+    }
+
+    .opening-card {
+      h3 {
+        font-size: 19px;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: var(--primary-dark);
+        :host-context([data-theme="dark"]) & { color: #fff; }
+      }
+      .org {
+        color: #586069;
+        font-size: 15px;
+        margin-bottom: 15px;
+      }
+      ul {
+        padding-left: 20px;
+        li {
+          font-size: 15px;
+          color: #586069;
+          margin-bottom: 8px;
+          list-style: disc;
+          :host-context([data-theme="dark"]) & { color: #cbd5e0; }
+        }
+      }
+    }
+  }
+}
