@@ -243,6 +243,75 @@ We welcome contributions! Please see **[CONTRIBUTING.md](docs/CONTRIBUTING.md)**
 | [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | Full API reference — all endpoints, request/response schemas, error codes |
 | [docs/webiu.postman_collection.json](docs/webiu.postman_collection.json) | Postman collection — import and test all endpoints instantly |
 
+
+## 🛠 Local Development Setup
+
+Run backend and frontend separately.
+
+### 1. Backend Setup
+
+```bash
+cd webiu-server
+cp .env.example .env
+```
+
+Create a GitHub Personal Access Token (fine-grained):
+
+* Go to GitHub → Settings → Developer Settings → Personal access tokens
+* Select **Public repositories (read-only)**
+
+Add to `.env`:
+
+```
+GITHUB_ACCESS_TOKEN=your_token_here
+```
+
+Then start backend:
+
+```bash
+npm install
+npm run start:dev
+```
+
+Backend runs at: http://localhost:5050
+
+---
+
+### 2. Frontend Setup
+
+Create `webiu-ui/proxy.conf.json`:
+
+```json
+{
+  "/api": {
+    "target": "http://localhost:5050",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}
+```
+
+Update `webiu-ui/package.json`:
+
+```
+"start": "ng serve --proxy-config proxy.conf.json"
+```
+
+Start frontend:
+
+```bash
+cd webiu-ui
+npm install
+npm start
+```
+
+Frontend runs at: http://localhost:4200
+
+
+
+
+
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
