@@ -42,11 +42,11 @@ export class ContributorService {
               if (!contributors?.length) return;
 
               contributors.forEach((contributor) => {
-                const login = contributor.login;
+                const login = contributor.login.toLowerCase();
 
                 if (!contributorsMap.has(login)) {
                   contributorsMap.set(login, {
-                    login,
+                    login: contributor.login,
                     contributions: contributor.contributions,
                     repos: new Set([repo.name]),
                     avatar_url: contributor.avatar_url,
