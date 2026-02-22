@@ -41,8 +41,14 @@ export class NavbarComponent implements OnInit {
       const queryParams = new URLSearchParams(window.location.search);
       const user = queryParams.get('user');
       if (user) {
-        this.user = JSON.parse(decodeURIComponent(user));
-        this.isLoggedIn = true;
+        try {
+          this.user = JSON.parse(decodeURIComponent(user));
+          this.isLoggedIn = true;
+        } catch (e) {
+          console.warn('Failed to parse user query param:', e);
+          this.user = null;
+          this.isLoggedIn = false;
+        }
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
