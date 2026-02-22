@@ -1,13 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { ContributorService } from './contributor.service';
 import { GithubService } from '../github/github.service';
-import { CacheService } from '../common/cache.service';
 
 describe('ContributorService', () => {
   let service: ContributorService;
-  let cacheService: CacheService;
+  let _cacheManager: Cache;
+  let fakeCache: Map<string, any>;
 
   const mockGithubService = {
     org: 'c2siorg',
@@ -18,22 +20,28 @@ describe('ContributorService', () => {
   };
 
   beforeEach(async () => {
+    fakeCache = new Map();
+    const mockCacheManager = {
+      get: jest.fn((key) => Promise.resolve(fakeCache.get(key))),
+      set: jest.fn((key, val) => Promise.resolve(fakeCache.set(key, val))),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ContributorService,
-        CacheService,
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
         { provide: GithubService, useValue: mockGithubService },
         { provide: ConfigService, useValue: { get: jest.fn() } },
       ],
     }).compile();
 
     service = module.get<ContributorService>(ContributorService);
-    cacheService = module.get<CacheService>(CacheService);
+    _cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
-    cacheService.clear();
+    jest.resetAllMocks();
+    fakeCache.clear();
   });
 
   afterAll(() => {

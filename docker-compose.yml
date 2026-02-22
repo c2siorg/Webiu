@@ -1,6 +1,11 @@
 version: "3.8"
 
 services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+
   webiu-server:
     build:
       context: ./webiu-server
@@ -12,6 +17,8 @@ services:
     volumes:
       - ./webiu-server:/usr/src/app
     command: ["npm", "start"]
+    depends_on:
+      - redis
 
   webiu-ui:
     build:

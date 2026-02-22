@@ -1,6 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { CacheService } from '../common/cache.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import axios from 'axios';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class GithubService {
 
   constructor(
     private configService: ConfigService,
-    private cacheService: CacheService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {
     this.accessToken = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
   }
@@ -74,37 +75,37 @@ export class GithubService {
 
   async getOrgRepos(): Promise<any[]> {
     const cacheKey = `org_repos_${this.orgName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cached = await this.cacheManager.get<any[]>(cacheKey);
     if (cached) return cached;
 
     const repos = await this.fetchAllPages(
       `${this.baseUrl}/orgs/${this.orgName}/repos`,
     );
-    this.cacheService.set(cacheKey, repos);
+    await this.cacheManager.set(cacheKey, repos);
     return repos;
   }
 
   async getRepoPulls(repoName: string): Promise<any[]> {
     const cacheKey = `pulls_${this.orgName}_${repoName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cached = await this.cacheManager.get<any[]>(cacheKey);
     if (cached) return cached;
 
     const pulls = await this.fetchAllPages(
       `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls`,
     );
-    this.cacheService.set(cacheKey, pulls);
+    await this.cacheManager.set(cacheKey, pulls);
     return pulls;
   }
 
   async getRepoIssues(org: string, repo: string): Promise<any[]> {
     const cacheKey = `issues_${org}_${repo}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cached = await this.cacheManager.get<any[]>(cacheKey);
     if (cached) return cached;
 
     const issues = await this.fetchAllPages(
       `${this.baseUrl}/repos/${org}/${repo}/issues`,
     );
-    this.cacheService.set(cacheKey, issues);
+    await this.cacheManager.set(cacheKey, issues);
     return issues;
   }
 
@@ -113,14 +114,14 @@ export class GithubService {
     repoName: string,
   ): Promise<any[] | null> {
     const cacheKey = `contributors_${orgName}_${repoName}`;
-    const cached = this.cacheService.get<any[] | null>(cacheKey);
-    if (cached !== null) return cached;
+    const cached = await this.cacheManager.get<any[] | null>(cacheKey);
+    if (cached !== undefined && cached !== null) return cached;
 
     try {
       const contributors = await this.fetchAllPages(
         `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
       );
-      this.cacheService.set(cacheKey, contributors);
+      await this.cacheManager.set(cacheKey, contributors);
       return contributors;
     } catch {
       return null;
@@ -130,20 +131,20 @@ export class GithubService {
   async searchUserIssues(username: string): Promise<any[]> {
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `search_issues:${normalizedUsername}:${this.orgName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cached = await this.cacheManager.get<any[]>(cacheKey);
     if (cached) return cached;
 
     const issues = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
     );
-    this.cacheService.set(cacheKey, issues);
+    await this.cacheManager.set(cacheKey, issues);
     return issues;
   }
 
   async searchUserPullRequests(username: string): Promise<any[]> {
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `search_prs:${normalizedUsername}:${this.orgName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cached = await this.cacheManager.get<any[]>(cacheKey);
     if (cached) return cached;
 
     const prs = await this.fetchAllSearchPages(
@@ -177,7 +178,7 @@ export class GithubService {
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
-    this.cacheService.set(cacheKey, enrichedPrs);
+    await this.cacheManager.set(cacheKey, enrichedPrs);
     return enrichedPrs;
   }
 
@@ -190,13 +191,13 @@ export class GithubService {
 
   async getPublicUserProfile(username: string): Promise<any> {
     const cacheKey = `user_profile_${username}`;
-    const cached = this.cacheService.get<any>(cacheKey);
+    const cached = await this.cacheManager.get<any>(cacheKey);
     if (cached) return cached;
 
     const response = await axios.get(`${this.baseUrl}/users/${username}`, {
       headers: this.headers,
     });
-    this.cacheService.set(cacheKey, response.data);
+    await this.cacheManager.set(cacheKey, response.data);
     return response.data;
   }
 
@@ -229,7 +230,7 @@ export class GithubService {
   }> {
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `user_social:${normalizedUsername}`;
-    const cached = this.cacheService.get<{
+    const cached = await this.cacheManager.get<{
       followers: number;
       following: number;
     }>(cacheKey);
@@ -250,7 +251,7 @@ export class GithubService {
         following: followingResponse.data.length || 0,
       };
 
-      this.cacheService.set(cacheKey, result);
+      await this.cacheManager.set(cacheKey, result);
       return result;
     } catch (error) {
       console.error(

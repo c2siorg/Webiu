@@ -4,13 +4,15 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { ProjectService } from './project.service';
 import { GithubService } from '../github/github.service';
-import { CacheService } from '../common/cache.service';
 
 describe('ProjectService', () => {
   let service: ProjectService;
-  let cacheService: CacheService;
+  let _cacheManager: Cache;
+  let fakeCache: Map<string, any>;
 
   const mockGithubService = {
     getOrgRepos: jest.fn(),
@@ -19,22 +21,28 @@ describe('ProjectService', () => {
   };
 
   beforeEach(async () => {
+    fakeCache = new Map();
+    const mockCacheManager = {
+      get: jest.fn((key) => Promise.resolve(fakeCache.get(key))),
+      set: jest.fn((key, val) => Promise.resolve(fakeCache.set(key, val))),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProjectService,
-        CacheService,
+        { provide: CACHE_MANAGER, useValue: mockCacheManager },
         { provide: GithubService, useValue: mockGithubService },
         { provide: ConfigService, useValue: { get: jest.fn() } },
       ],
     }).compile();
 
     service = module.get<ProjectService>(ProjectService);
-    cacheService = module.get<CacheService>(CacheService);
+    _cacheManager = module.get<Cache>(CACHE_MANAGER);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    cacheService.clear();
+    fakeCache.clear();
   });
 
   afterAll(() => {

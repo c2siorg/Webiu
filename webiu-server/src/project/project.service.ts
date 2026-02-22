@@ -1,21 +1,23 @@
 import {
   Injectable,
+  Inject,
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
 import { GithubService } from '../github/github.service';
-import { CacheService } from '../common/cache.service';
 
 @Injectable()
 export class ProjectService {
   constructor(
     private githubService: GithubService,
-    private cacheService: CacheService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
   async getAllProjects() {
     const cacheKey = 'all_projects';
-    const cached = this.cacheService.get(cacheKey);
+    const cached = await this.cacheManager.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -41,7 +43,7 @@ export class ProjectService {
       }
 
       const result = { repositories: repositoriesWithPRs };
-      this.cacheService.set(cacheKey, result);
+      await this.cacheManager.set(cacheKey, result);
       return result;
     } catch (error) {
       console.error(
@@ -58,7 +60,7 @@ export class ProjectService {
     }
 
     const cacheKey = `issues_pr_count_${org}_${repo}`;
-    const cached = this.cacheService.get(cacheKey);
+    const cached = await this.cacheManager.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -68,7 +70,7 @@ export class ProjectService {
       const pullRequests = data.filter((item) => item.pull_request).length;
 
       const result = { issues, pullRequests };
-      this.cacheService.set(cacheKey, result);
+      await this.cacheManager.set(cacheKey, result);
       return result;
     } catch (error) {
       console.error(
