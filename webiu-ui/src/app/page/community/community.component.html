@@ -4,8 +4,12 @@
       <h1>Join our community</h1>
       <div class="media-icons">
         @for (icon of icons; track $index) {
-        <a class="icon-link" href="{{ icon.link }}"><img class="icon" src="{{ icon.media_icon }}"
-            alt="Social Media Icon" /></a>
+          <a class="icon-link" href="{{ icon.link }}"
+            ><img
+              class="icon"
+              src="{{ icon.media_icon }}"
+              alt="Social Media Icon"
+          /></a>
         }
       </div>
     </div>
@@ -13,26 +17,52 @@
   </div>
 
   <div class="team-details">
-    <p class="team-caption">Meet the team</p>
+    <p class="team-caption">Top Contributors</p>
     <p class="team-description">
       Dedicated individuals who are pushing the boundaries of technology
     </p>
-    <div class="team">
-      <div class="team-align">
-        @for(user of users; track $index){
-        <div class="card">
-          <div class="card-data">
-            <p class="user-name">
-              {{ user.login }}
-            </p>
-            <p class="user-designation">C2SI Contributor</p>
-          </div>
-        </div>
-        }
+
+    @if (isLoading) {
+      <div class="loading-spinner">
+        <p>Loading contributors...</p>
       </div>
-    </div>
+    }
+
+    @if (!isLoading) {
+      <div class="team">
+        <div class="team-align">
+          @for (user of users; track $index) {
+            <div class="card">
+              <div class="card-data">
+                <a
+                  class="user-name"
+                  href="https://github.com/{{ user.login }}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style="text-decoration: none; display: block"
+                >
+                  {{ user.login }}
+                </a>
+                <p class="user-designation">{{ user.contributions }} commits</p>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div class="view-all-container">
+          <a routerLink="/contributors" class="view-all-link"
+            >View All Contributors &rarr;</a
+          >
+        </div>
+      </div>
+    }
   </div>
   <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
-    <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24">
+    <img
+      src="../../../assets/up-arrow.svg"
+      alt="Back to Top"
+      width="24"
+      height="24"
+    />
   </button>
 </div>

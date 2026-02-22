@@ -1,8 +1,10 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  BadRequestException,
+} from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
-
-const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class ContributorService {
@@ -40,11 +42,11 @@ export class ContributorService {
               if (!contributors?.length) return;
 
               contributors.forEach((contributor) => {
-                const login = contributor.login;
+                const login = contributor.login.toLowerCase();
 
                 if (!contributorsMap.has(login)) {
                   contributorsMap.set(login, {
-                    login,
+                    login: contributor.login,
                     contributions: contributor.contributions,
                     repos: new Set([repo.name]),
                     avatar_url: contributor.avatar_url,
@@ -69,7 +71,7 @@ export class ContributorService {
         }),
       );
 
-      this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
+      this.cacheService.set(cacheKey, allContributors);
       return allContributors;
     } catch (error) {
       console.error('Error in getAllContributors:', error);
@@ -81,6 +83,10 @@ export class ContributorService {
   }
 
   async getUserCreatedIssues(username: string) {
+    if (!username || username.trim().length === 0) {
+      throw new BadRequestException('Username is required');
+    }
+
     try {
       const issues = await this.githubService.searchUserIssues(username);
 
@@ -101,6 +107,10 @@ export class ContributorService {
   }
 
   async getUserCreatedPullRequests(username: string) {
+    if (!username || username.trim().length === 0) {
+      throw new BadRequestException('Username is required');
+    }
+
     try {
       const pullRequests =
         await this.githubService.searchUserPullRequests(username);
@@ -126,6 +136,10 @@ export class ContributorService {
    * Saves the frontend from making 2 separate requests.
    */
   async getUserStats(username: string) {
+    if (!username || username.trim().length === 0) {
+      throw new BadRequestException('Username is required');
+    }
+
     try {
       const [issues, pullRequests] = await Promise.all([
         this.githubService.searchUserIssues(username),
@@ -146,6 +160,10 @@ export class ContributorService {
   }
 
   async getUserFollowersAndFollowing(username: string) {
+    if (!username || username.trim().length === 0) {
+      throw new BadRequestException('Username is required');
+    }
+
     try {
       const result =
         await this.githubService.getUserFollowersAndFollowing(username);

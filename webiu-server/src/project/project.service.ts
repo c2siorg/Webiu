@@ -6,8 +6,6 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
-const CACHE_TTL = 300; // 5 minutes
-
 @Injectable()
 export class ProjectService {
   constructor(
@@ -56,6 +54,16 @@ export class ProjectService {
         );
         throw new InternalServerErrorException('Internal server error');
       }
+
+      const result = { repositories: repositoriesWithPRs };
+      this.cacheService.set(cacheKey, result);
+      return result;
+    } catch (error) {
+      console.error(
+        'Error fetching repositories or pull requests:',
+        error.response ? error.response.data : error.message,
+      );
+      throw new InternalServerErrorException('Internal server error');
     }
 
     const total = allRepositories.length;
@@ -87,7 +95,7 @@ export class ProjectService {
       const pullRequests = data.filter((item) => item.pull_request).length;
 
       const result = { issues, pullRequests };
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
       console.error(
