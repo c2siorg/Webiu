@@ -43,30 +43,30 @@
 
 ## Features
 
-| Feature                      | Description                                                                                    |
-| ---------------------------- | ---------------------------------------------------------------------------------------------- |
-| **Project Dashboard**        | Browse all C2SI/SCoRe Lab repositories with stars, forks, language, open issues, and PR counts |
-| **Contributor Leaderboards** | See aggregated contribution stats across every repository in the organization                  |
-| **Contributor Search**       | Search by GitHub username to view their issues and pull requests                               |
-| **Publications**             | Dedicated page for research publications                                                       |
-| **GSoC**                     | Google Summer of Code information and project ideas                                            |
-| **Community**                | Community information and resources                                                            |
-| **Dark Mode**                | System-wide light/dark theme toggle with localStorage persistence                              |
-| **OAuth Authentication**     | Sign in with Google or GitHub                                                                  |
-| **Responsive Design**        | Fully responsive layout for desktop, tablet, and mobile                                        |
+| Feature | Description |
+|---------|-------------|
+| **Project Dashboard** | Browse all C2SI/SCoRe Lab repositories with stars, forks, language, open issues, and PR counts |
+| **Contributor Leaderboards** | See aggregated contribution stats across every repository in the organization |
+| **Contributor Search** | Search by GitHub username to view their issues and pull requests |
+| **Publications** | Dedicated page for research publications |
+| **GSoC** | Google Summer of Code information and project ideas |
+| **Community** | Community information and resources |
+| **Dark Mode** | System-wide light/dark theme toggle with localStorage persistence |
+| **OAuth Authentication** | Sign in with Google or GitHub |
+| **Responsive Design** | Fully responsive layout for desktop, tablet, and mobile |
 
 ## Tech Stack
 
-| Layer                | Technology                                    |
-| -------------------- | --------------------------------------------- |
-| **Frontend**         | Angular 17+, TypeScript, SCSS, RxJS           |
-| **Backend**          | NestJS 10, TypeScript, Express                |
-| **API Integration**  | GitHub REST API via Axios                     |
-| **Authentication**   | JWT, Passport, Google OAuth 2.0, GitHub OAuth |
-| **Email**            | Nodemailer (Gmail)                            |
-| **Containerization** | Docker, Docker Compose                        |
-| **Code Quality**     | ESLint, Prettier, Husky (pre-commit hooks)    |
-| **Testing**          | Jest (backend), Karma + Jasmine (frontend)    |
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Angular 17+, TypeScript, SCSS, RxJS |
+| **Backend** | NestJS 10, TypeScript, Express |
+| **API Integration** | GitHub REST API via Axios |
+| **Authentication** | JWT, Passport, Google OAuth 2.0, GitHub OAuth |
+| **Email** | Nodemailer (Gmail) |
+| **Containerization** | Docker, Docker Compose |
+| **Code Quality** | ESLint, Prettier, Husky (pre-commit hooks) |
+| **Testing** | Jest (backend), Karma + Jasmine (frontend) |
 
 ## Prerequisites
 
@@ -126,13 +126,7 @@ GITHUB_ACCESS_TOKEN=your_github_personal_access_token
 FRONTEND_BASE_URL=http://localhost:4200
 ```
 
-**Required Environment Variables:**
-
-- `JWT_SECRET` — Secret key for JWT token signing
-- `GITHUB_ACCESS_TOKEN` — GitHub Personal Access Token (for API calls)
-- `FRONTEND_BASE_URL` — Frontend base URL (defaults to `http://localhost:4200`)
-
-> **Note:** At minimum, `JWT_SECRET` and `GITHUB_ACCESS_TOKEN` are required. Additional OAuth and email features require their respective variables — see `.env.example` for the full list.
+At minimum, `JWT_SECRET` and `GITHUB_ACCESS_TOKEN` are required. OAuth and email features need their respective variables — see `.env.example` for the full list.
 
 Start the backend:
 
@@ -150,10 +144,10 @@ From the repository root:
 docker-compose up --build
 ```
 
-| Service  | URL                   |
-| -------- | --------------------- |
+| Service | URL |
+|---------|-----|
 | Frontend | http://localhost:4200 |
-| Backend  | http://localhost:5050 |
+| Backend | http://localhost:5050 |
 
 ## Project Structure
 
@@ -191,19 +185,19 @@ For a deep dive into the architecture, module system, data flow, and caching str
 
 ## API Endpoints
 
-| Method | Endpoint                                   | Description                        |
-| ------ | ------------------------------------------ | ---------------------------------- |
-| `GET`  | `/api/projects/projects`                   | All repositories with PR counts    |
-| `GET`  | `/api/issues/issuesAndPr?org=...&repo=...` | Issue and PR counts for a repo     |
-| `GET`  | `/api/contributor/contributors`            | Aggregated contributor leaderboard |
-| `GET`  | `/api/contributor/issues/:username`        | Issues by a specific user          |
-| `GET`  | `/api/contributor/pull-requests/:username` | PRs by a specific user             |
-| `GET`  | `/api/contributor/stats/:username`         | Combined issues + PRs for a user   |
-| `POST` | `/api/v1/auth/register`                    | Register a new account             |
-| `POST` | `/api/v1/auth/login`                       | Log in                             |
-| `GET`  | `/api/v1/auth/verify-email?token=...`      | Verify email address               |
-| `GET`  | `/auth/google`                             | Google OAuth sign-in               |
-| `GET`  | `/auth/github`                             | GitHub OAuth sign-in               |
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/api/projects/projects` | All repositories with PR counts |
+| `GET` | `/api/issues/issuesAndPr?org=...&repo=...` | Issue and PR counts for a repo |
+| `GET` | `/api/contributor/contributors` | Aggregated contributor leaderboard |
+| `GET` | `/api/contributor/issues/:username` | Issues by a specific user |
+| `GET` | `/api/contributor/pull-requests/:username` | PRs by a specific user |
+| `GET` | `/api/contributor/stats/:username` | Combined issues + PRs for a user |
+| `POST` | `/api/v1/auth/register` | Register a new account |
+| `POST` | `/api/v1/auth/login` | Log in |
+| `GET` | `/api/v1/auth/verify-email?token=...` | Verify email address |
+| `GET` | `/auth/google` | Google OAuth sign-in |
+| `GET` | `/auth/github` | GitHub OAuth sign-in |
 
 Full API documentation (request/response schemas, validation, error codes) is in [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md).
 
@@ -241,13 +235,13 @@ We welcome contributions! Please see **[CONTRIBUTING.md](docs/CONTRIBUTING.md)**
 
 ## Documentation
 
-| Document                                                                 | Description                                                               |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------- |
-| [README.md](README.md)                                                   | Project overview, setup, and quick reference                              |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)                             | Code structure, module system, data flow, and caching                     |
-| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md)                             | How to contribute (branching, code style, PRs)                            |
-| [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md)                   | Full API reference — all endpoints, request/response schemas, error codes |
-| [docs/webiu.postman_collection.json](docs/webiu.postman_collection.json) | Postman collection — import and test all endpoints instantly              |
+| Document | Description |
+|----------|-------------|
+| [README.md](README.md) | Project overview, setup, and quick reference |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Code structure, module system, data flow, and caching |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | How to contribute (branching, code style, PRs) |
+| [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | Full API reference — all endpoints, request/response schemas, error codes |
+| [docs/webiu.postman_collection.json](docs/webiu.postman_collection.json) | Postman collection — import and test all endpoints instantly |
 
 ## License
 
