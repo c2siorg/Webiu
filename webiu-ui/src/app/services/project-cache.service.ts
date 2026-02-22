@@ -11,15 +11,10 @@ export class ProjectCacheService {
     private cache$: Observable<ProjectResponse> | null = null;
     private http = inject(HttpClient);
 
-    getProjects(): Observable<ProjectResponse> {
-        if (!this.cache$) {
-            this.cache$ = this.http
-                .get<ProjectResponse>(
-                    `${environment.serverUrl}/api/projects/projects`,
-                )
-                .pipe(shareReplay(1));
-        }
-        return this.cache$;
+    getProjects(page: number = 1, limit: number = 10): Observable<ProjectResponse> {
+      return this.http.get<ProjectResponse>(
+        `${environment.serverUrl}/api/projects/projects?page=${page}&limit=${limit}`
+      );
     }
 
     clearCache(): void {
