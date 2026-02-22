@@ -81,11 +81,9 @@
   // Hero Section
   .hero-section {
     padding: 120px 20px;
-    background: linear-gradient(
-      135deg,
-      var(--cards-container) 0%,
-      var(--card-container-2) 100%
-    );
+    background: linear-gradient(135deg,
+        var(--cards-container) 0%,
+        var(--card-container-2) 100%);
 
     .hero-content {
       max-width: 1200px;
@@ -133,12 +131,14 @@
       display: flex;
       justify-content: center;
       align-items: center;
+      aspect-ratio: 1 / 1;
 
       img {
-        max-width: 100%;
+        width: 100%;
         height: auto;
         border-radius: 12px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
+        object-fit: contain;
       }
     }
   }
@@ -502,11 +502,9 @@
 
   // Final CTA Section
   .final-cta-section {
-    background: linear-gradient(
-      135deg,
-      var(--cards-container) 0%,
-      var(--card-container-2) 100%
-    );
+    background: linear-gradient(135deg,
+        var(--cards-container) 0%,
+        var(--card-container-2) 100%);
     text-align: center;
 
     h2 {
@@ -641,7 +639,7 @@
       }
 
       .hero-image img {
-        max-width: 300px;
+        max-width: 80%;
       }
     }
 

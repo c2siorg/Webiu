@@ -7,23 +7,14 @@
         Computer Science Institute
       </p>
     </div>
-    <img src="../../../assets/publications-img.png" alt="publications" width="455" height="323" />
+    <img src="../../../assets/publications-img.png" alt="publications" fetchpriority="high" />
   </div>
   <div class="publications-cards-container">
     @for (publication of publicationsData; track $index) {
-    <app-publications-card
-      [heading]="publication.heading"
-      [link]="publication.link"
-      [issued_by]="publication.issued_by"
-      [description]="publication.description"
-    ></app-publications-card
-    >}
+    <app-publications-card [heading]="publication.heading" [link]="publication.link" [issued_by]="publication.issued_by"
+      [description]="publication.description"></app-publications-card>}
   </div>
-  <button 
-  class="back-to-top" 
-  (click)="scrollToTop()" 
-  [class.show]="showButton"
->
-  <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24"> 
-</button>
+  <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
+    <img src="../../../assets/up-arrow.svg" alt="Back to Top" width="24" height="24">
+  </button>
 </div>
