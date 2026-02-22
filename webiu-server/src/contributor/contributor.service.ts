@@ -74,7 +74,10 @@ export class ContributorService {
       this.cacheService.set(cacheKey, allContributors);
       return allContributors;
     } catch (error) {
-      console.error('Error in getAllContributors:', error.message);
+      console.error(
+        'Error in getAllContributors:',
+        error.response?.data ?? error.message,
+      );
       throw new InternalServerErrorException('Failed to fetch repositories');
     }
   }
@@ -95,7 +98,10 @@ export class ContributorService {
 
       return { issues };
     } catch (error) {
-      console.error('Error fetching user created issues:', error.message);
+      console.error(
+        'Error fetching user created issues:',
+        error.response?.data ?? error.message,
+      );
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -119,7 +125,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user created pull requests:',
-        error.message,
+        error.response?.data ?? error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -145,7 +151,10 @@ export class ContributorService {
         pullRequests: pullRequests || [],
       };
     } catch (error) {
-      console.error('Error fetching user stats:', error.message);
+      console.error(
+        'Error fetching user stats:',
+        error.response?.data ?? error.message,
+      );
       throw new InternalServerErrorException('Internal server error');
     }
   }
@@ -162,7 +171,7 @@ export class ContributorService {
     } catch (error) {
       console.error(
         'Error fetching user followers and following:',
-        error.message,
+        error.response?.data ?? error.message,
       );
       throw new InternalServerErrorException(
         'Failed to fetch followers and following data',

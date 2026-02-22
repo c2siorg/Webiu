@@ -255,7 +255,7 @@ export class GithubService {
     } catch (error) {
       console.error(
         `Error fetching GitHub social data for ${username}:`,
-        error.message,
+        error.response?.data ?? error.message,
       );
       throw error;
     }
