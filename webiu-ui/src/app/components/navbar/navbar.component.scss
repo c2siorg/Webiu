@@ -8,7 +8,7 @@
   box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
-  z-index: 1000;   
+  z-index: 1000;
 }
 
 .menu-overlay {
@@ -71,9 +71,9 @@
     user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   .navbar__menu__items img {
-    width: 24px; 
+    width: 24px;
     height: 24px;
     display: inline-block;
   }
@@ -83,12 +83,12 @@
     line-height: 1;
     color: var(--navbar-p);
   }
-  
+
   .navbar__menu__items.active {
-    background-color: var(--blue, #0066ff);
+    background-color: var(--blue, #3498db);
     color: #fff;
   }
-  
+
   .navbar__menu__items.active p {
     color: #fff;
   }
@@ -98,7 +98,7 @@
   }
 
   .navbar__menu__items:hover {
-    background: var(--blue, #2f80ed);
+    background: var(--blue, #2980b9);
     color: #fff;
     p {
       color: #fff;
@@ -142,14 +142,14 @@
     width: 100%;
 
     &:hover {
-      background: var(--blue, #2f80ed);
+      background: var(--blue, #2980b9);
       color: #fff;
       transform: translateY(-1px);
-      
+
       p {
         color: #fff;
       }
-      
+
       img {
         filter: brightness(0) invert(1);
       }
@@ -170,7 +170,7 @@
 
 .Login_Logout {
   font-size: 16px;
-  font-family: 'poppins', sans-serif;
+  font-family: "poppins", sans-serif;
 }
 
 .navigation__buttons {
@@ -180,15 +180,15 @@
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  
+
   &:focus {
     outline: none;
   }
-  
+
   &:focus-visible {
     outline: none;
   }
-  
+
   .nav-btn {
     display: flex;
     align-items: center;
@@ -198,15 +198,15 @@
     outline: none;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-    
+
     &:focus {
       outline: none;
     }
-    
+
     &:active {
       outline: none;
     }
-    
+
     img {
       pointer-events: none;
       user-select: none;
@@ -235,7 +235,9 @@
   pointer-events: none;
   opacity: 0;
   transform: scale(0.6) rotate(0deg);
-  transition: transform 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.2s ease-in 0.1s;
   background: radial-gradient(circle, rgba(0, 0, 0, 0) 50%, #fbbc05 50%);
 }
 
@@ -259,7 +261,9 @@
   pointer-events: auto;
   opacity: 1;
   transform: scale(1) rotate(180deg);
-  transition: transform 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.2s ease-in 0.1s;
 }
 
 .moon {
@@ -274,14 +278,18 @@
   box-shadow: 9px 3px 0px 0px #f0f0f0;
   opacity: 0;
   transform: scale(0.3) rotate(65deg);
-  transition: transform 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.2s ease-in 0.1s;
 }
 
 .moon.visible {
   pointer-events: auto;
   opacity: 1;
   transform: scale(1) rotate(0deg);
-  transition: transform 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.2s ease-in 0.1s;
 }
 
 .star {
