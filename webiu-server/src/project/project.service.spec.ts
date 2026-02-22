@@ -46,7 +46,7 @@ describe('ProjectService', () => {
   });
 
   describe('getAllProjects', () => {
-    it('should return repositories with pull request counts', async () => {
+    it('should return { repositories } with pull request counts using native pagination', async () => {
       mockGithubService.getOrgRepos.mockResolvedValue([
         { name: 'repo1' },
         { name: 'repo2' },
@@ -55,19 +55,20 @@ describe('ProjectService', () => {
         .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
         .mockResolvedValueOnce([{ id: 3 }]);
 
-      const result = (await service.getAllProjects()) as any;
+      const result = await service.getAllProjects(1, 10);
 
       expect(result.repositories).toHaveLength(2);
       expect(result.repositories[0].pull_requests).toBe(2);
       expect(result.repositories[1].pull_requests).toBe(1);
+      expect(mockGithubService.getOrgRepos).toHaveBeenCalledWith(1, 10);
     });
 
-    it('should cache the response', async () => {
+    it('should cache the response per page/limit', async () => {
       mockGithubService.getOrgRepos.mockResolvedValue([{ name: 'repo1' }]);
       mockGithubService.getRepoPulls.mockResolvedValue([]);
 
-      await service.getAllProjects();
-      await service.getAllProjects();
+      await service.getAllProjects(1, 10);
+      await service.getAllProjects(1, 10);
 
       // Only called once due to cache
       expect(mockGithubService.getOrgRepos).toHaveBeenCalledTimes(1);
@@ -85,7 +86,7 @@ describe('ProjectService', () => {
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValueOnce([{ id: 1 }]);
 
-      const result = (await service.getAllProjects()) as any;
+      const result = await service.getAllProjects(1, 10);
 
       expect(result.repositories[0].pull_requests).toBe(0);
       expect(result.repositories[1].pull_requests).toBe(1);
@@ -98,7 +99,7 @@ describe('ProjectService', () => {
         .mockImplementation(() => {});
       mockGithubService.getOrgRepos.mockRejectedValue(new Error('API error'));
 
-      await expect(service.getAllProjects()).rejects.toThrow(
+      await expect(service.getAllProjects(1, 10)).rejects.toThrow(
         InternalServerErrorException,
       );
       consoleSpy.mockRestore();

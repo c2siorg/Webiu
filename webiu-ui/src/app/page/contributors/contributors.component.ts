@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor } from '../../common/data/contributor';
 
@@ -79,7 +80,9 @@ export class ContributorsComponent implements OnInit {
     });
 
     this.getProfiles();
-    this.searchText.valueChanges.subscribe(() => {
+    this.searchText.valueChanges.pipe(
+      debounceTime(300)
+    ).subscribe(() => {
       this.currentPage = 1;
       this.filterProfiles();
     });
