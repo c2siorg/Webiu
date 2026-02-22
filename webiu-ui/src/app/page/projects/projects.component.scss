@@ -13,6 +13,14 @@
     align-items: center;
     justify-content: center;
 
+    img {
+      width: 100%;
+      max-width: 517px;
+      height: auto;
+      aspect-ratio: 517 / 323;
+      object-fit: contain;
+    }
+
     .projects-hero-content {
       h1 {
         color: var(--primary-dark, #0a0a15);
@@ -234,7 +242,7 @@
   .projects {
     .projects-hero {
       img {
-        width: 400px;
+        max-width: 100%;
       }
     }
 
@@ -267,7 +275,7 @@
       }
 
       img {
-        width: 300px;
+        max-width: 80%;
       }
     }
   }
