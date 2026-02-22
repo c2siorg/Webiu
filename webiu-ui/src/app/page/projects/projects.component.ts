@@ -1,4 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, HostListener, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Title, Meta } from '@angular/platform-browser';
 
 import { HttpClientModule } from '@angular/common/http';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -34,10 +36,18 @@ export class ProjectsComponent implements OnInit {
   currentPage = 1;
   projectsPerPage = 9;
   totalPages = 1;
+  private platformId = inject(PLATFORM_ID);
+  private titleService = inject(Title);
+  private metaService = inject(Meta);
 
   private projectCacheService = inject(ProjectCacheService);
 
   ngOnInit(): void {
+    this.titleService.setTitle('Projects | Webiu 2.0');
+    this.metaService.updateTag({ name: 'description', content: 'Explore the open-source projects hosted by C2SI and SCoRe Lab.' });
+    this.metaService.updateTag({ property: 'og:title', content: 'Projects | Webiu 2.0' });
+    this.metaService.updateTag({ property: 'og:description', content: 'Explore the open-source projects hosted by C2SI and SCoRe Lab.' });
+
     this.fetchProjects();
   }
 
@@ -120,5 +130,18 @@ export class ProjectsComponent implements OnInit {
     this.projectsPerPage = parseInt(selectElement.value, 10);
     this.currentPage = 1;
     this.updateDisplayProjects();
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.showButton = window.scrollY > 100;
+    }
+  }
+
+  scrollToTop() {
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }

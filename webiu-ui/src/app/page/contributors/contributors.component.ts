@@ -1,4 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, HostListener, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -41,6 +43,8 @@ export class ContributorsComponent implements OnInit {
   selectedSort = '';
   allRepos: string[] = [];
   isLoading = true;
+  showButton = false;
+  private platformId = inject(PLATFORM_ID);
   contributors: Contributor[] = [];
 
   contributionRanges: ContributionRange[] = [
@@ -59,8 +63,15 @@ export class ContributorsComponent implements OnInit {
   private http = inject(HttpClient);
   private commonUtil = inject(CommmonUtilService);
   private router = inject(Router);
+  private titleService = inject(Title);
+  private metaService = inject(Meta);
 
   ngOnInit() {
+    this.titleService.setTitle('Contributors | Webiu 2.0');
+    this.metaService.updateTag({ name: 'description', content: 'Meet the contributors powering C2SI and SCoRe Lab projects.' });
+    this.metaService.updateTag({ property: 'og:title', content: 'Contributors | Webiu 2.0' });
+    this.metaService.updateTag({ property: 'og:description', content: 'Meet the contributors powering C2SI and SCoRe Lab projects.' });
+
     this.getProfiles();
     this.searchText.valueChanges.subscribe(() => {
       this.currentPage = 1;
@@ -268,5 +279,18 @@ export class ContributorsComponent implements OnInit {
 
   trackByFn(_: number, profile: Contributor): string {
     return profile.login;
+  }
+
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    if (isPlatformBrowser(this.platformId)) {
+      this.showButton = window.scrollY > 100;
+    }
+  }
+
+  scrollToTop() {
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }
