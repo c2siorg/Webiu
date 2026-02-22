@@ -2,10 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../environments/environment';
-
-export interface ProjectResponse {
-    repositories: any[];
-}
+import { ProjectResponse } from '../page/projects/project.model';
 
 @Injectable({
     providedIn: 'root',

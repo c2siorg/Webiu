@@ -114,5 +114,8 @@ export interface Project {
 }
 
 export interface ProjectResponse {
+  total: number;
+  page: number;
+  limit: number;
   repositories: Project[];
 }
