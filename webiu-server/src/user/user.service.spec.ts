@@ -24,4 +24,16 @@ describe('UserService', () => {
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
+
+  it('should call getUserFollowersAndFollowing with the correct username', async () => {
+    const mockData = { followers: 10, following: 5 };
+    mockGithubService.getUserFollowersAndFollowing.mockResolvedValue(mockData);
+
+    const result = await service.getFollowersAndFollowing('testuser');
+
+    expect(mockGithubService.getUserFollowersAndFollowing).toHaveBeenCalledWith(
+      'testuser',
+    );
+    expect(result).toEqual(mockData);
+  });
 });
