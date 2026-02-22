@@ -8,16 +8,12 @@ import { ProjectResponse } from '../page/projects/project.model';
     providedIn: 'root',
 })
 export class ProjectCacheService {
-    private cache$: Observable<ProjectResponse> | null = null;
+  
     private http = inject(HttpClient);
 
     getProjects(page = 1, limit = 10): Observable<ProjectResponse> {
       return this.http.get<ProjectResponse>(
         `${environment.serverUrl}/api/projects/projects?page=${page}&limit=${limit}`
       );
-    }
-
-    clearCache(): void {
-        this.cache$ = null;
     }
 }

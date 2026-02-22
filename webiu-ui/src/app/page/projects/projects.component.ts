@@ -38,6 +38,7 @@ export class ProjectsComponent implements OnInit {
   currentPage = 1;
   projectsPerPage = 9;
   totalPages = 1;
+  serverTotal = 0;
   private platformId = inject(PLATFORM_ID);
   private titleService = inject(Title);
   private metaService = inject(Meta);
@@ -70,25 +71,39 @@ export class ProjectsComponent implements OnInit {
   }
 
   performSearch(searchTerm: string): void {
+    this.currentPage = 1;
+    if (!searchTerm) {
+      // Search cleared — re-fetch the first server page
+      this.fetchProjects();
+      return;
+    }
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     this.filteredProjects = this.sortProjects(
       this.projectsData.filter((project) =>
         project.name.toLowerCase().includes(lowerCaseSearchTerm),
       ),
     );
-    this.currentPage = 1;
     this.updateDisplayProjects();
   }
 
   fetchProjects(): void {
-    this.projectCacheService.getProjects().subscribe({
+    this.isLoading = true;
+    this.projectCacheService.getProjects(this.currentPage, this.projectsPerPage).subscribe({
       next: (response) => {
+        this.serverTotal = response.total;
         this.projectsData = this.sortProjects(response.repositories);
-        this.filteredProjects = [...this.projectsData];
+        this.filteredProjects = this.searchTerm
+          ? this.sortProjects(
+              this.projectsData.filter((p) =>
+                p.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
+              ),
+            )
+          : [...this.projectsData];
         this.updateDisplayProjects();
         this.isLoading = false;
       },
       error: () => {
+        this.serverTotal = projectsData.total;
         this.projectsData = this.sortProjects(projectsData.repositories);
         this.filteredProjects = [...this.projectsData];
         this.updateDisplayProjects();
@@ -113,46 +128,56 @@ export class ProjectsComponent implements OnInit {
   }
 
   updateDisplayProjects(): void {
-    this.totalPages = Math.max(
-      1,
-      Math.ceil(this.filteredProjects.length / this.projectsPerPage),
-    );
-    const startIndex = (this.currentPage - 1) * this.projectsPerPage;
-    this.displayProjects = this.filteredProjects.slice(
-      startIndex,
-      startIndex + this.projectsPerPage,
-    );
+    if (this.searchTerm) {
+      // Local pagination over filtered results on the current server page
+      this.totalPages = Math.max(
+        1,
+        Math.ceil(this.filteredProjects.length / this.projectsPerPage),
+      );
+      const startIndex = (this.currentPage - 1) * this.projectsPerPage;
+      this.displayProjects = this.filteredProjects.slice(
+        startIndex,
+        startIndex + this.projectsPerPage,
+      );
+    } else {
+      // Server already paginated; use total from API for page count
+      this.totalPages = Math.max(
+        1,
+        Math.ceil(this.serverTotal / this.projectsPerPage),
+      );
+      this.displayProjects = [...this.filteredProjects];
+    }
   }
 
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.updateDisplayProjects();
+      if (this.searchTerm) { this.updateDisplayProjects(); } else { this.fetchProjects(); }
     }
   }
 
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.updateDisplayProjects();
+      if (this.searchTerm) { this.updateDisplayProjects(); } else { this.fetchProjects(); }
     }
   }
 
   goToFirstPage(): void {
     this.currentPage = 1;
-    this.updateDisplayProjects();
+    if (this.searchTerm) { this.updateDisplayProjects(); } else { this.fetchProjects(); }
   }
 
   goToLastPage(): void {
     this.currentPage = this.totalPages;
-    this.updateDisplayProjects();
+    if (this.searchTerm) { this.updateDisplayProjects(); } else { this.fetchProjects(); }
   }
 
   onItemsPerPageChange(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     this.projectsPerPage = parseInt(selectElement.value, 10);
     this.currentPage = 1;
-    this.updateDisplayProjects();
+    if (this.searchTerm) { this.updateDisplayProjects(); } else { this.fetchProjects(); }
   }
 
   @HostListener('window:scroll')
