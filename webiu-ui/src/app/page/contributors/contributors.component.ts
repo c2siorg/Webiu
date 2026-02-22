@@ -1,4 +1,6 @@
-import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { Component, OnInit, HostListener, inject, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { debounceTime } from 'rxjs/operators';
@@ -41,6 +43,7 @@ export class ContributorsComponent implements OnInit {
   allRepos: string[] = [];
   isLoading = true;
   showButton = false;
+  private platformId = inject(PLATFORM_ID);
   contributors: Contributor[] = [];
 
   contributionRanges: ContributionRange[] = [
@@ -59,8 +62,15 @@ export class ContributorsComponent implements OnInit {
   private http = inject(HttpClient);
   private commonUtil = inject(CommmonUtilService);
   private router = inject(Router);
+  private titleService = inject(Title);
+  private metaService = inject(Meta);
 
   ngOnInit() {
+    this.titleService.setTitle('Contributors | Webiu 2.0');
+    this.metaService.updateTag({ name: 'description', content: 'Meet the contributors powering C2SI and SCoRe Lab projects.' });
+    this.metaService.updateTag({ property: 'og:title', content: 'Contributors | Webiu 2.0' });
+    this.metaService.updateTag({ property: 'og:description', content: 'Meet the contributors powering C2SI and SCoRe Lab projects.' });
+
     this.getProfiles();
     this.searchText.valueChanges.pipe(
       debounceTime(300)
@@ -275,10 +285,14 @@ export class ContributorsComponent implements OnInit {
 
   @HostListener('window:scroll')
   onWindowScroll() {
-    this.showButton = window.scrollY > 100;
+    if (isPlatformBrowser(this.platformId)) {
+      this.showButton = window.scrollY > 100;
+    }
   }
 
   scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }
