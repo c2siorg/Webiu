@@ -6,6 +6,8 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
+const CACHE_TTL = 300; // 5 minutes
+
 @Injectable()
 export class ProjectService {
   constructor(
@@ -13,15 +15,9 @@ export class ProjectService {
     private cacheService: CacheService,
   ) { }
 
-<<<<<<< feat-pagination-total-count
-  async getAllProjects(page: number = 1, limit: number = 10) {
-    const cacheKey = `all_projects_page_${page}_limit_${limit}`;
-    const cached = this.cacheService.get(cacheKey);
-=======
   async getAllProjects(page = 1, limit = 10) {
     const cacheKey = `projects_p${page}_pp${limit}`;
-    const cached = this.cacheService.get<{ repositories: any[] }>(cacheKey);
->>>>>>> master
+    const cached = this.cacheService.get<{ total: number; page: number; limit: number; repositories: any[] }>(cacheKey);
     if (cached) return cached;
 
     try {
@@ -46,26 +42,18 @@ export class ProjectService {
         repositoriesWithPRs.push(...batchResults);
       }
 
-<<<<<<< feat-pagination-total-count
-      // Capture total before applying the pagination slice
-      const total = repositoriesWithPRs.length;
-      const startIndex = (page - 1) * limit;
-      const paginatedRepositories = repositoriesWithPRs.slice(
-        startIndex,
-        startIndex + limit,
-      );
+      // Get the true total number of public repositories to pass to frontend pagination
+      const orgInfo = await this.githubService.getPublicUserProfile(this.githubService.org);
+      const total = orgInfo.public_repos || 0;
 
       const result = {
         total,
         page,
         limit,
-        repositories: paginatedRepositories,
+        repositories: repositoriesWithPRs,
       };
+      
       this.cacheService.set(cacheKey, result, CACHE_TTL);
-=======
-      const result = { repositories: repositoriesWithPRs };
-      this.cacheService.set(cacheKey, result);
->>>>>>> master
       return result;
     } catch (error) {
       console.error(
