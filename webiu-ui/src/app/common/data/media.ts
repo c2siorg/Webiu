@@ -10,11 +10,7 @@ export const socialMedia: Media[] = [
   },
   {
     media_icon: '../../../assets/community/slack.png',
-    link: 'https://app.slack.com/client/T06C3R6HVNG/C06E698JDNY',
-  },
-  {
-    media_icon: '../../../assets/community/discord.png',
-    link: 'https://discord.com/',
+    link: 'https://join.slack.com/t/c2si-org/shared_invite/zt-3qja11cmu-m4tbWB9E8M18_s6srLlHbg',
   },
   {
     media_icon: '../../../assets/community/github.png',
