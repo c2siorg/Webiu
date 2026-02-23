@@ -9,7 +9,7 @@ export class ContributorService {
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
-  ) {}
+  ) { }
 
   async getAllContributors() {
     const cacheKey = 'all_contributors';
@@ -81,44 +81,49 @@ export class ContributorService {
   }
 
   async getUserCreatedIssues(username: string) {
+    let issues: any;
     try {
-      const issues = await this.githubService.searchUserIssues(username);
-
-      if (!issues) {
-        throw new InternalServerErrorException(
-          'Failed to fetch user-created issues',
-        );
-      }
-
-      return { issues };
+      issues = await this.githubService.searchUserIssues(username);
     } catch (error) {
       console.error(
         'Error fetching user created issues:',
         error.response ? error.response.data : error.message,
       );
-      throw new InternalServerErrorException('Internal server error');
+      throw new InternalServerErrorException(
+        'Failed to fetch user-created issues',
+      );
     }
+
+    if (!issues) {
+      throw new InternalServerErrorException(
+        'Failed to fetch user-created issues',
+      );
+    }
+
+    return { issues };
   }
 
   async getUserCreatedPullRequests(username: string) {
+    let pullRequests: any;
     try {
-      const pullRequests =
-        await this.githubService.searchUserPullRequests(username);
-
-      if (!pullRequests) {
-        throw new InternalServerErrorException(
-          'Failed to fetch user-created pull requests',
-        );
-      }
-
-      return { pullRequests };
+      pullRequests = await this.githubService.searchUserPullRequests(username);
     } catch (error) {
       console.error(
         'Error fetching user created pull requests:',
         error.response ? error.response.data : error.message,
       );
-      throw new InternalServerErrorException('Internal server error');
+      throw new InternalServerErrorException(
+        'Failed to fetch user-created pull requests',
+      );
     }
+
+    if (!pullRequests) {
+      throw new InternalServerErrorException(
+        'Failed to fetch user-created pull requests',
+      );
+    }
+
+    return { pullRequests };
   }
 
   /**
