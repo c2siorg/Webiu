@@ -97,7 +97,6 @@ export class ContributorsComponent implements OnInit {
         next: (res) => {
           this.contributors = res || [];
           this.fetchFollowerData();
-          console.log('fetched contributors');
         },
         error: () => {
           console.error('Error fetching contributors');
