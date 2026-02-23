@@ -55,7 +55,9 @@ describe('ContributorResolver', () => {
       const result = await resolver.contributors();
 
       expect(result).toEqual(mockContributors);
-      expect(mockContributorService.getAllContributors).toHaveBeenCalledTimes(1);
+      expect(mockContributorService.getAllContributors).toHaveBeenCalledTimes(
+        1,
+      );
     });
 
     it('should return empty array when no contributors exist', async () => {
