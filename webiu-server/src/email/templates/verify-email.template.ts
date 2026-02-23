@@ -12,7 +12,7 @@ export const getVerifyEmailTemplate = (
     </p>
     <a 
       href="${frontendBaseUrl}/api/v1/auth/verify-email?token=${verificationToken}" 
-      style="display: inline-block; padding: 10px 20px; color: #fff; background-color: #007BFF; text-decoration: none; border-radius: 5px; font-weight: bold;"
+      style="display: inline-block; padding: 10px 20px; color: #fff; background-color: #3498db; text-decoration: none; border-radius: 5px; font-weight: bold;"
     >
       Verify Email
     </a>
