@@ -3,6 +3,8 @@ import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
 
+const CACHE_TTL = 300; // 5 minutes
+
 @Injectable()
 export class GithubService {
   private readonly baseUrl = 'https://api.github.com';
@@ -72,7 +74,23 @@ export class GithubService {
     return results;
   }
 
-  async getOrgRepos(): Promise<any[]> {
+  async getOrgRepos(): Promise<any[]>;
+  async getOrgRepos(page: number, perPage: number): Promise<any[]>;
+  async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {
+    if (page !== undefined && perPage !== undefined) {
+      const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
+      const cached = this.cacheService.get<any[]>(cacheKey);
+      if (cached) return cached;
+
+      const response = await axios.get(
+        `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
+        { headers: this.headers },
+      );
+      const repos = response.data;
+      this.cacheService.set(cacheKey, repos, CACHE_TTL);
+      return repos;
+    }
+
     const cacheKey = `org_repos_${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;

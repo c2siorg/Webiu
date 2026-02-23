@@ -31,31 +31,29 @@ describe('ProjectController', () => {
   describe('getAllProjects', () => {
     it('should return paginated projects from the service', async () => {
       const mockResult = {
-        data: [
+        total: 20,
+        page: 2,
+        limit: 5,
+        repositories: [
           { name: 'repo1', pull_requests: 3 },
           { name: 'repo2', pull_requests: 1 },
         ],
-        total: 2,
-        page: 1,
-        limit: 10,
-        totalPages: 1,
       };
       mockProjectService.getAllProjects.mockResolvedValue(mockResult);
 
-      const query: PaginationQueryDto = { page: 1, limit: 10 };
+      const query: PaginationQueryDto = { page: 2, limit: 5 };
       const result = await controller.getAllProjects(query);
 
       expect(result).toEqual(mockResult);
-      expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(1, 10);
+      expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(2, 5);
     });
 
     it('should use default page=1 and limit=10 when query params are omitted', async () => {
       const mockResult = {
-        data: [],
         total: 0,
         page: 1,
         limit: 10,
-        totalPages: 0,
+        repositories: [],
       };
       mockProjectService.getAllProjects.mockResolvedValue(mockResult);
 
