@@ -1,6 +1,7 @@
 import { Component, HostListener, OnInit, inject, PLATFORM_ID } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { ThemeService } from '../../services/theme.service';
 import { filter } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
@@ -8,7 +9,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, HttpClient],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.scss'],
 })
@@ -16,6 +17,7 @@ export class NavbarComponent implements OnInit {
   private router = inject(Router);
   private themeService = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
+  private http = inject(HttpClient);
 
   isMenuOpen = false;
   isSunVisible = true;
@@ -38,20 +40,24 @@ export class NavbarComponent implements OnInit {
       });
 
     if (isPlatformBrowser(this.platformId)) {
-      const queryParams = new URLSearchParams(window.location.search);
-      const user = queryParams.get('user');
-      if (user) {
-        try {
-          this.user = JSON.parse(decodeURIComponent(user));
-          this.isLoggedIn = true;
-        } catch (e) {
-          console.warn('Failed to parse user query param:', e);
-          this.user = null;
-          this.isLoggedIn = false;
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
+      this.checkAuthStatus();
     }
+  }
+
+  private checkAuthStatus(): void {
+    this.http.get<any>(`${environment.serverUrl}/auth/me`).subscribe({
+      next: (user) => {
+        this.user = user;
+        this.isLoggedIn = true;
+        if (window.location.search.includes('user=')) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      },
+      error: () => {
+        this.user = null;
+        this.isLoggedIn = false;
+      },
+    });
   }
 
   toggleLoginOptions(): void {
@@ -80,8 +86,16 @@ export class NavbarComponent implements OnInit {
   }
 
   logout(): void {
-    this.isLoggedIn = false;
-    this.user = null;
+    this.http.get(`${environment.serverUrl}/auth/logout`).subscribe({
+      next: () => {
+        this.isLoggedIn = false;
+        this.user = null;
+      },
+      error: () => {
+        this.isLoggedIn = false;
+        this.user = null;
+      },
+    });
   }
 
   loginWithGoogle(): void {

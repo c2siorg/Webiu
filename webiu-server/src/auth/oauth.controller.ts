@@ -5,11 +5,14 @@ import {
   Res,
   BadRequestException,
   InternalServerErrorException,
+  Req,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import axios from 'axios';
 import { OAuth2Client } from 'google-auth-library';
+import { JwtService } from '@nestjs/jwt';
 import { GithubService } from '../github/github.service';
 
 @Controller('auth')
@@ -19,11 +22,30 @@ export class OAuthController {
   constructor(
     private configService: ConfigService,
     private githubService: GithubService,
+    private jwtService: JwtService,
   ) {
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
       this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
     );
+  }
+
+  private setAuthCookie(res: Response, user: any) {
+    const token = this.jwtService.sign({ user });
+    const frontendUrl = this.configService.get<string>(
+      'FRONTEND_BASE_URL',
+      'http://localhost:4200',
+    );
+    const isProduction = process.env.NODE_ENV === 'production';
+
+    res.cookie('auth_token', token, {
+      httpOnly: true,
+      secure: isProduction,
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+
+    res.redirect(frontendUrl);
   }
 
   // ─── Google OAuth ───
@@ -73,12 +95,7 @@ export class OAuthController {
       });
 
       const user = userResponse.data;
-      const frontendUrl = this.configService.get<string>(
-        'FRONTEND_BASE_URL',
-        'http://localhost:4200',
-      );
-      const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(JSON.stringify(user))}`;
-      res.redirect(redirectUrl);
+      this.setAuthCookie(res, user);
     } catch (error) {
       console.error('Error during Google OAuth:', error);
       throw new InternalServerErrorException({
@@ -117,13 +134,7 @@ export class OAuthController {
       }
 
       const user = await this.githubService.getUserInfo(tokenData.access_token);
-
-      const frontendUrl = this.configService.get<string>(
-        'FRONTEND_BASE_URL',
-        'http://localhost:4200',
-      );
-      const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(JSON.stringify(user))}`;
-      res.redirect(redirectUrl);
+      this.setAuthCookie(res, user);
     } catch (error) {
       console.error('Error during GitHub OAuth:', error);
       throw new InternalServerErrorException({
@@ -131,5 +142,29 @@ export class OAuthController {
         error: error.response?.data || error.message,
       });
     }
+  }
+
+  @Get('me')
+  getCurrentUser(@Req() req: Request) {
+    const token = req.cookies?.auth_token;
+    if (!token) {
+      throw new UnauthorizedException('Not authenticated');
+    }
+    try {
+      const payload = this.jwtService.verify(token);
+      return payload.user;
+    } catch {
+      throw new UnauthorizedException('Invalid or expired token');
+    }
+  }
+
+  @Get('logout')
+  logout(@Res() res: Response) {
+    const frontendUrl = this.configService.get<string>(
+      'FRONTEND_BASE_URL',
+      'http://localhost:4200',
+    );
+    res.clearCookie('auth_token');
+    res.redirect(frontendUrl);
   }
 }
