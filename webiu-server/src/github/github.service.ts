@@ -1,10 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
 
+const CACHE_TTL = 300; // 5 minutes
+
 @Injectable()
 export class GithubService {
+  private readonly logger = new Logger(GithubService.name);
   private readonly baseUrl = 'https://api.github.com';
   private readonly accessToken: string;
   private readonly orgName = 'c2siorg';
@@ -72,7 +75,23 @@ export class GithubService {
     return results;
   }
 
-  async getOrgRepos(): Promise<any[]> {
+  async getOrgRepos(): Promise<any[]>;
+  async getOrgRepos(page: number, perPage: number): Promise<any[]>;
+  async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {
+    if (page !== undefined && perPage !== undefined) {
+      const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
+      const cached = this.cacheService.get<any[]>(cacheKey);
+      if (cached) return cached;
+
+      const response = await axios.get(
+        `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
+        { headers: this.headers },
+      );
+      const repos = response.data;
+      this.cacheService.set(cacheKey, repos, CACHE_TTL);
+      return repos;
+    }
+
     const cacheKey = `org_repos_${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
@@ -128,7 +147,8 @@ export class GithubService {
   }
 
   async searchUserIssues(username: string): Promise<any[]> {
-    const cacheKey = `search_issues_${username}_${this.orgName}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `search_issues:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -140,7 +160,8 @@ export class GithubService {
   }
 
   async searchUserPullRequests(username: string): Promise<any[]> {
-    const cacheKey = `search_prs_${username}_${this.orgName}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `search_prs:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
@@ -225,7 +246,8 @@ export class GithubService {
     followers: number;
     following: number;
   }> {
-    const cacheKey = `user_social_${username}`;
+    const normalizedUsername = username.toLowerCase();
+    const cacheKey = `user_social:${normalizedUsername}`;
     const cached = this.cacheService.get<{
       followers: number;
       following: number;
@@ -250,7 +272,7 @@ export class GithubService {
       this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
-      console.error(
+      this.logger.error(
         `Error fetching GitHub social data for ${username}:`,
         error.message,
       );
