@@ -104,7 +104,7 @@
 .hero-error {
   margin-top: 20px;
   font-size: 0.9rem;
-  color: #e74c3c;
+  color: var(--error-color, #e74c3c);
   display: flex;
   align-items: center;
   gap: 8px;

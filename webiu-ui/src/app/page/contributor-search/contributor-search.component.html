@@ -36,14 +36,6 @@
     </div>
   }
 
-  <!-- Error Message (shown only after a profile was loaded previously) -->
-  @if (errorMessage && !loading && userProfile) {
-    <div class="error-container">
-      <i class="fas fa-exclamation-triangle error-icon"></i>
-      <p class="error-text">{{ errorMessage }}</p>
-    </div>
-  }
-
   <!-- Main Content -->
   @if (!loading && !errorMessage && userProfile) {
     <div class="content-wrapper">
