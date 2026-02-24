@@ -1,6 +1,7 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ProjectCacheService } from '../../services/project-cache.service';
 import { Project } from '../projects/project.model';
@@ -16,33 +17,35 @@ import { ProjectBasicInfoComponent } from '../../components/project-basic-info/p
 export class ProjectDetailsComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private projectService = inject(ProjectCacheService);
+  private destroyRef = inject(DestroyRef);
 
-  projectId: string | null = null;
+  projectName: string | null = null;
   project: Project | null = null;
   loading = true;
   error: string | null = null;
 
   ngOnInit(): void {
-    this.projectId = this.route.snapshot.paramMap.get('id');
-    if (this.projectId) {
-      this.fetchProjectDetails(this.projectId);
+    this.projectName = this.route.snapshot.paramMap.get('id');
+    if (this.projectName) {
+      this.fetchProjectDetails(this.projectName);
     }
   }
 
-  /**
-   * Orchestrates the fetching of project metadata and manages view states.
-   */
   fetchProjectDetails(name: string): void {
     this.loading = true;
-    this.projectService.getProjectByName(name).subscribe({
-      next: (project: Project) => {
-        this.project = project;
-        this.loading = false;
-      },
-      error: () => {
-        this.error = 'Failed to load project details.';
-        this.loading = false;
-      },
-    });
+    this.error = null;
+    this.projectService
+      .getProjectByName(name)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (project: Project) => {
+          this.project = project;
+          this.loading = false;
+        },
+        error: () => {
+          this.error = 'Failed to load project details.';
+          this.loading = false;
+        },
+      });
   }
 }

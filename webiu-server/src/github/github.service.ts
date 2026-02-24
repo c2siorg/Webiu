@@ -1,7 +1,23 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
+
+export interface GithubRepo {
+  name: string;
+  full_name: string;
+  html_url: string;
+  description: string | null;
+  homepage: string | null;
+  language: string | null;
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  topics: string[];
+  archived: boolean;
+  fork: boolean;
+  [key: string]: unknown;
+}
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -105,19 +121,27 @@ export class GithubService {
 
   /**
    * Fetches metadata for a single repository.
+   * Returns null if the repository is not found (404).
    */
-  async getRepo(repoName: string): Promise<any> {
+  async getRepo(repoName: string): Promise<GithubRepo | null> {
     const cacheKey = `repo_${this.orgName}_${repoName}`;
-    const cached = this.cacheService.get<any>(cacheKey);
+    const cached = this.cacheService.get<GithubRepo>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(
-      `${this.baseUrl}/repos/${this.orgName}/${repoName}`,
-      { headers: this.headers },
-    );
-    const repo = response.data;
-    this.cacheService.set(cacheKey, repo, CACHE_TTL);
-    return repo;
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}`,
+        { headers: this.headers },
+      );
+      const repo = response.data;
+      this.cacheService.set(cacheKey, repo, CACHE_TTL);
+      return repo;
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
   }
 
   async getRepoPulls(repoName: string): Promise<any[]> {
@@ -161,10 +185,11 @@ export class GithubService {
       const languages = response.data;
       this.cacheService.set(cacheKey, languages, CACHE_TTL);
       return languages;
-    } catch (error) {
+    } catch (error: unknown) {
+      const axiosErr = error instanceof AxiosError ? error : null;
       this.logger.error(
         `Failed to fetch languages for ${repoName}:`,
-        error.response?.data || error.message,
+        axiosErr?.response?.data || (error as Error).message,
       );
       return {};
     }

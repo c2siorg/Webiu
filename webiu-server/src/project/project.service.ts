@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
+import { AxiosError } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -17,7 +18,7 @@ export class ProjectService {
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
-  ) {}
+  ) { }
 
   async getAllProjects(page = 1, limit = 10) {
     const cacheKey = `projects_p${page}_pp${limit}`;
@@ -138,16 +139,16 @@ export class ProjectService {
 
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof NotFoundException) throw error;
 
-      if (error.response?.status === 404) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
         throw new NotFoundException(`Project ${name} not found on GitHub`);
       }
 
       this.logger.error(
         `Error fetching project details for ${name}:`,
-        error.message,
+        (error as Error).message,
       );
       throw new InternalServerErrorException('Failed to fetch project details');
     }

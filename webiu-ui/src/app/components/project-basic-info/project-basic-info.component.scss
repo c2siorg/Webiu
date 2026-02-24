@@ -13,6 +13,7 @@
   --tag-bg: rgba(59, 130, 246, 0.05);
   --tag-text: #2563eb;
   --card-bg: rgba(0, 0, 0, 0.02);
+  --accent-color: #3b82f6;
 
   background: var(--card-bg);
   backdrop-filter: blur(10px);
@@ -95,6 +96,7 @@
             .lang-segment {
               height: 100%;
               transition: transform 0.3s ease;
+
               &:hover {
                 filter: brightness(1.2);
               }
@@ -159,7 +161,7 @@
 
           i {
             font-size: 1rem;
-            color: #3b82f6;
+            color: var(--accent-color);
           }
 
           &:hover {
@@ -181,7 +183,7 @@
         }
 
         a {
-          color: #3b82f6;
+          color: var(--accent-color);
           text-decoration: none;
           font-weight: 600;
           font-size: 1.1rem;
@@ -249,6 +251,7 @@
   --tag-bg: rgba(59, 130, 246, 0.1);
   --tag-text: #60a5fa;
   --card-bg: rgba(255, 255, 255, 0.03);
+  --accent-color: #60a5fa;
 
   background: var(--card-bg);
   border: 1px solid var(--card-border);
@@ -267,9 +270,11 @@
       .title-row {
         flex-direction: column;
         align-items: flex-start;
+
         h2 {
           font-size: 2.2rem;
         }
+
         .github-link {
           width: 100%;
           justify-content: center;

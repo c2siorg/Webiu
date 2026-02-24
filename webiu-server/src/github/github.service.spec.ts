@@ -2,10 +2,22 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
 import { GithubService } from './github.service';
 import { CacheService } from '../common/cache.service';
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
+
+function createAxiosError(
+  message: string,
+  status: number,
+): AxiosError {
+  const err = Object.create(AxiosError.prototype) as AxiosError;
+  err.message = message;
+  err.name = 'AxiosError';
+  err.response = { status, data: {}, statusText: '', headers: {}, config: {} } as any;
+  err.isAxiosError = true;
+  return err;
+}
 
 describe('GithubService', () => {
   let service: GithubService;
@@ -126,6 +138,68 @@ describe('GithubService', () => {
       mockedAxios.get.mockRejectedValue(new Error('API error'));
       const result = await service.getRepoContributors('c2siorg', 'repo1');
       expect(result).toBeNull();
+    });
+  });
+
+  describe('getRepo', () => {
+    it('should fetch and cache a single repository', async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: { name: 'Webiu', full_name: 'c2siorg/Webiu' },
+      });
+
+      const result = await service.getRepo('Webiu');
+      expect(result).toEqual({ name: 'Webiu', full_name: 'c2siorg/Webiu' });
+
+      const result2 = await service.getRepo('Webiu');
+      expect(result2).toEqual({ name: 'Webiu', full_name: 'c2siorg/Webiu' });
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return null when repository is not found (404)', async () => {
+      mockedAxios.get.mockRejectedValueOnce(createAxiosError('Not Found', 404));
+
+      const result = await service.getRepo('nonexistent');
+      expect(result).toBeNull();
+    });
+
+    it('should rethrow non-404 errors', async () => {
+      mockedAxios.get.mockRejectedValueOnce(
+        createAxiosError('Server Error', 500),
+      );
+
+      await expect(service.getRepo('Webiu')).rejects.toMatchObject({
+        message: 'Server Error',
+      });
+    });
+  });
+
+  describe('getRepoLanguages', () => {
+    it('should fetch and cache language breakdown', async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: { TypeScript: 50000, JavaScript: 30000, HTML: 20000 },
+      });
+
+      const result = await service.getRepoLanguages('Webiu');
+      expect(result).toEqual({
+        TypeScript: 50000,
+        JavaScript: 30000,
+        HTML: 20000,
+      });
+
+      const result2 = await service.getRepoLanguages('Webiu');
+      expect(result2).toEqual({
+        TypeScript: 50000,
+        JavaScript: 30000,
+        HTML: 20000,
+      });
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should return empty object on error', async () => {
+      mockedAxios.get.mockRejectedValueOnce(new Error('API error'));
+
+      const result = await service.getRepoLanguages('Webiu');
+      expect(result).toEqual({});
     });
   });
 
