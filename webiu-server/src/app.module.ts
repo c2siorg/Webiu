@@ -1,13 +1,17 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
-import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
+import { ThrottlerModule } from '@nestjs/throttler';
+import { GqlThrottlerGuard } from './graphql/gql-throttler.guard';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { AppController } from './app.controller';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { ProjectModule } from './project/project.module';
 import { ContributorModule } from './contributor/contributor.module';
 import { UserModule } from './user/user.module';
+import { GraphqlModule } from './graphql/graphql.module';
 
 @Module({
   imports: [
@@ -19,6 +23,17 @@ import { UserModule } from './user/user.module';
         limit: 30,
       },
     ]),
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      useFactory: (configService: ConfigService) => ({
+        autoSchemaFile: true,
+        playground: configService.get('NODE_ENV') !== 'production',
+        introspection: configService.get('NODE_ENV') !== 'production',
+        context: ({ req, res }: { req: any; res: any }) => ({ req, res }),
+      }),
+      inject: [ConfigService],
+    }),
+    GraphqlModule,
     CommonModule,
     // MongooseModule can be re-enabled when MongoDB is needed:
     // MongooseModule.forRootAsync({
@@ -35,10 +50,10 @@ import { UserModule } from './user/user.module';
   ],
   controllers: [AppController],
   providers: [
-    // Apply ThrottlerGuard globally to all routes
+    // Apply GqlThrottlerGuard globally — handles both HTTP and GraphQL contexts
     {
       provide: APP_GUARD,
-      useClass: ThrottlerGuard,
+      useClass: GqlThrottlerGuard,
     },
   ],
 })
