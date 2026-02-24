@@ -1,6 +1,8 @@
-import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { debounceTime } from 'rxjs/operators';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor } from '../../common/data/contributor';
 
@@ -9,6 +11,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 
 interface ContributionRange {
   label: string;
@@ -25,6 +28,7 @@ interface ContributionRange {
     ReactiveFormsModule,
     ProfileCardComponent,
     LoadingSpinnerComponent,
+    BackToTopComponent,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
@@ -39,7 +43,6 @@ export class ContributorsComponent implements OnInit {
   selectedSort = '';
   allRepos: string[] = [];
   isLoading = true;
-  showButton = false;
   contributors: Contributor[] = [];
 
   contributionRanges: ContributionRange[] = [
@@ -58,10 +61,28 @@ export class ContributorsComponent implements OnInit {
   private http = inject(HttpClient);
   private commonUtil = inject(CommmonUtilService);
   private router = inject(Router);
+  private titleService = inject(Title);
+  private metaService = inject(Meta);
 
   ngOnInit() {
+    this.titleService.setTitle('Contributors | Webiu 2.0');
+    this.metaService.updateTag({
+      name: 'description',
+      content: 'Meet the contributors powering C2SI and SCoRe Lab projects.',
+    });
+    this.metaService.updateTag({
+      property: 'og:title',
+      content: 'Contributors | Webiu 2.0',
+    });
+    this.metaService.updateTag({
+      property: 'og:description',
+      content: 'Meet the contributors powering C2SI and SCoRe Lab projects.',
+    });
+
     this.getProfiles();
-    this.searchText.valueChanges.subscribe(() => {
+    this.searchText.valueChanges.pipe(
+      debounceTime(300)
+    ).subscribe(() => {
       this.currentPage = 1;
       this.filterProfiles();
     });
@@ -76,10 +97,8 @@ export class ContributorsComponent implements OnInit {
         next: (res) => {
           this.contributors = res || [];
           this.fetchFollowerData();
-          console.log('fetched contributors');
         },
         error: () => {
-          console.error('Error fetching contributors');
           this.handleProfileResponse([]);
         },
       });
@@ -94,10 +113,9 @@ export class ContributorsComponent implements OnInit {
     const usernames = this.contributors.map((c) => c.login);
 
     this.http
-      .post<Record<string, { followers: number; following: number }>>(
-        `${environment.serverUrl}/api/user/batch-social`,
-        { usernames },
-      )
+      .post<
+        Record<string, { followers: number; following: number }>
+      >(`${environment.serverUrl}/api/user/batch-social`, { usernames })
       .subscribe({
         next: (data) => {
           this.contributors.forEach((contributor) => {
@@ -268,14 +286,5 @@ export class ContributorsComponent implements OnInit {
 
   trackByFn(_: number, profile: Contributor): string {
     return profile.login;
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    this.showButton = window.scrollY > 100;
-  }
-
-  scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

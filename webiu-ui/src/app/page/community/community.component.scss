@@ -38,6 +38,7 @@
           height: 45px;
           width: 45px;
           transition: transform 0.2s ease;
+
           &:hover {
             transform: scale(1.1);
           }
@@ -162,7 +163,7 @@
         .view-all-link {
           display: inline-block;
           padding: 10px 24px;
-          background: var(--primary-blue, #007bff);
+          background: var(--primary-blue, #3498db);
           color: white;
           text-decoration: none;
           border-radius: 8px;
@@ -189,9 +190,11 @@
 
     .community-hero-content {
       align-items: center;
+
       h1 {
         font-size: 36px;
       }
+
       .media-icons {
         justify-content: center;
       }
@@ -211,45 +214,5 @@
     .team-caption {
       font-size: 32px;
     }
-  }
-}
-
-// ==============================
-// Back to Top Button
-// ==============================
-.back-to-top {
-  position: fixed;
-  bottom: 25px;
-  right: 25px;
-  width: 50px;
-  height: 50px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 50%;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.3s,
-    visibility 0.3s;
-  z-index: 1000;
-
-  &.show {
-    opacity: 1;
-    visibility: visible;
-  }
-
-  &:hover {
-    background-color: #0056b3;
-    transform: scale(1.1);
-  }
-
-  img {
-    filter: brightness(0) invert(1); // Makes black arrow white
   }
 }
