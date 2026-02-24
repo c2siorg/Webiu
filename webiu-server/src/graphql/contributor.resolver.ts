@@ -4,7 +4,7 @@ import { Contributor } from './models/contributor.model';
 
 @Resolver(() => Contributor)
 export class ContributorResolver {
-  constructor(private contributorService: ContributorService) { }
+  constructor(private contributorService: ContributorService) {}
 
   @Query(() => [Contributor])
   async contributors(
