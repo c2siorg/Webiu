@@ -3,6 +3,7 @@ import {
   Logger,
   InternalServerErrorException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
@@ -103,25 +104,52 @@ export class ProjectService {
 
   /**
    * Retrieves enriched metadata for a single project by name.
-   * Merges core repository data with a detailed language breakdown.
+   * Directly fetches the individual repository to optimize performance.
    */
   async getProjectByName(name: string) {
-    if (!name) {
-      throw new BadRequestException('Project name is required');
+    // Validate repository name format (alphanumeric, hyphens, underscores)
+    if (!name || !/^[a-zA-Z0-9-_\.]+$/.test(name)) {
+      throw new BadRequestException('Invalid project name provided');
     }
 
-    const result: any = await this.getAllProjects();
-    const project = result.repositories.find((p: any) => p.name === name);
-
-    if (!project) {
-      throw new BadRequestException(`Project ${name} not found`);
-    }
+    const cacheKey = `project_details_${name}`;
+    const cached = this.cacheService.get(cacheKey);
+    if (cached) return cached;
 
     try {
-      const languages = await this.githubService.getRepoLanguages(name);
-      return { ...project, languages };
-    } catch {
-      return project;
+      // Direct fetch of a single repo as requested by maintainers
+      const project = await this.githubService.getRepo(name);
+
+      if (!project) {
+        throw new NotFoundException(`Project ${name} not found`);
+      }
+
+      // Fetch languages and PR counts
+      const [languages, pulls] = await Promise.all([
+        this.githubService.getRepoLanguages(name),
+        this.githubService.getRepoPulls(name).catch(() => []),
+      ]);
+
+      const result = {
+        ...project,
+        languages,
+        pull_requests: pulls.length,
+      };
+
+      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) throw error;
+
+      if (error.response?.status === 404) {
+        throw new NotFoundException(`Project ${name} not found on GitHub`);
+      }
+
+      this.logger.error(
+        `Error fetching project details for ${name}:`,
+        error.message,
+      );
+      throw new InternalServerErrorException('Failed to fetch project details');
     }
   }
 }

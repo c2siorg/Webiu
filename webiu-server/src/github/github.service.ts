@@ -103,6 +103,23 @@ export class GithubService {
     return repos;
   }
 
+  /**
+   * Fetches metadata for a single repository.
+   */
+  async getRepo(repoName: string): Promise<any> {
+    const cacheKey = `repo_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<any>(cacheKey);
+    if (cached) return cached;
+
+    const response = await axios.get(
+      `${this.baseUrl}/repos/${this.orgName}/${repoName}`,
+      { headers: this.headers },
+    );
+    const repo = response.data;
+    this.cacheService.set(cacheKey, repo, CACHE_TTL);
+    return repo;
+  }
+
   async getRepoPulls(repoName: string): Promise<any[]> {
     const cacheKey = `pulls_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
@@ -136,13 +153,21 @@ export class GithubService {
     const cached = this.cacheService.get<Record<string, number>>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(
-      `${this.baseUrl}/repos/${this.orgName}/${repoName}/languages`,
-      { headers: this.headers },
-    );
-    const languages = response.data;
-    this.cacheService.set(cacheKey, languages);
-    return languages;
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}/languages`,
+        { headers: this.headers },
+      );
+      const languages = response.data;
+      this.cacheService.set(cacheKey, languages, CACHE_TTL);
+      return languages;
+    } catch (error) {
+      this.logger.error(
+        `Failed to fetch languages for ${repoName}:`,
+        error.response?.data || error.message,
+      );
+      return {};
+    }
   }
 
   async getRepoContributors(

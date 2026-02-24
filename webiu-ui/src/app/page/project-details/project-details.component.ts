@@ -39,10 +39,9 @@ export class ProjectDetailsComponent implements OnInit {
         this.project = project;
         this.loading = false;
       },
-      error: (err: any) => {
+      error: () => {
         this.error = 'Failed to load project details.';
         this.loading = false;
-        console.error(err);
       },
     });
   }
