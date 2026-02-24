@@ -1,18 +1,49 @@
 <div class="project-details-container">
-  <div class="glass-card">
-    <header class="project-header">
-      <h1>Project Details: {{ projectId }}</h1>
-      <p class="subtitle">Insights and repository metrics coming soon...</p>
-    </header>
-
-    <div class="placeholder-section">
-      <div class="skeleton-line large"></div>
-      <div class="skeleton-line medium"></div>
-      <div class="skeleton-line small"></div>
-    </div>
-
-    <footer class="actions">
-      <a routerLink="/projects" class="back-link">&larr; Back to Projects</a>
-    </footer>
+  <div class="back-navigation">
+    <a routerLink="/projects" class="back-link">
+      <i class="fas fa-arrow-left"></i>
+      Back to Projects
+    </a>
   </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="glass-card skeleton-card">
+        <div class="skeleton-line title"></div>
+        <div class="skeleton-line description"></div>
+        <div class="skeleton-grid">
+          <div class="skeleton-box"></div>
+          <div class="skeleton-box"></div>
+          <div class="skeleton-box"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error-state glass-card">
+      <p>{{ error }}</p>
+      <button
+        [disabled]="!projectName"
+        (click)="fetchProjectDetails(projectName!)"
+      >
+        Retry
+      </button>
+    </div>
+  }
+
+  @if (!loading && !error && project) {
+    <app-project-basic-info [project]="project"></app-project-basic-info>
+
+    <!-- Future sections will go here -->
+    <div class="glass-card future-section-placeholder">
+      <header>
+        <h3>Upcoming Insights</h3>
+      </header>
+      <p>
+        Contributors, activity signals, and derived metrics are coming soon to
+        this view.
+      </p>
+    </div>
+  }
 </div>

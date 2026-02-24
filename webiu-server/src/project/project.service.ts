@@ -3,9 +3,11 @@ import {
   Logger,
   InternalServerErrorException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
+import { AxiosError } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -16,7 +18,7 @@ export class ProjectService {
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
-  ) {}
+  ) { }
 
   async getAllProjects(page = 1, limit = 10) {
     const cacheKey = `projects_p${page}_pp${limit}`;
@@ -98,6 +100,57 @@ export class ProjectService {
         error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Failed to fetch issues and PRs');
+    }
+  }
+
+  /**
+   * Retrieves enriched metadata for a single project by name.
+   * Directly fetches the individual repository to optimize performance.
+   */
+  async getProjectByName(name: string) {
+    // Validate repository name format (alphanumeric, hyphens, underscores)
+    if (!name || !/^[a-zA-Z0-9-_\.]+$/.test(name)) {
+      throw new BadRequestException('Invalid project name provided');
+    }
+
+    const cacheKey = `project_details_${name}`;
+    const cached = this.cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      // Direct fetch of a single repo as requested by maintainers
+      const project = await this.githubService.getRepo(name);
+
+      if (!project) {
+        throw new NotFoundException(`Project ${name} not found`);
+      }
+
+      // Fetch languages and PR counts
+      const [languages, pulls] = await Promise.all([
+        this.githubService.getRepoLanguages(name),
+        this.githubService.getRepoPulls(name).catch(() => []),
+      ]);
+
+      const result = {
+        ...project,
+        languages,
+        pull_requests: pulls.length,
+      };
+
+      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      return result;
+    } catch (error: unknown) {
+      if (error instanceof NotFoundException) throw error;
+
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        throw new NotFoundException(`Project ${name} not found on GitHub`);
+      }
+
+      this.logger.error(
+        `Error fetching project details for ${name}:`,
+        (error as Error).message,
+      );
+      throw new InternalServerErrorException('Failed to fetch project details');
     }
   }
 }

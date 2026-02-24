@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Header } from '@nestjs/common';
+import { Controller, Get, Query, Header, Param } from '@nestjs/common';
 import { ProjectService } from './project.service';
 
 @Controller('api/projects')
@@ -17,6 +17,16 @@ export class ProjectController {
       Math.max(1, parseInt(limit as any, 10) || 10),
     );
     return this.projectService.getAllProjects(pageNum, limitNum);
+  }
+
+  /**
+   * GET /api/projects/:name
+   * Returns metadata and tech stack for a specific project.
+   */
+  @Get(':name')
+  @Header('Cache-Control', 'public, max-age=300')
+  async getProjectByName(@Param('name') name: string) {
+    return this.projectService.getProjectByName(name);
   }
 }
 
