@@ -107,6 +107,23 @@
       filter: invert(1);
     }
   }
+
+  .search-item {
+    .search-hero-icon {
+      i {
+        color: var(--navbar-p);
+        font-size: 18px;
+      }
+    }
+
+    &:hover .search-hero-icon i {
+      color: #fff;
+    }
+
+    &.active .search-hero-icon i {
+      color: #fff;
+    }
+  }
 }
 
 .login-options {
