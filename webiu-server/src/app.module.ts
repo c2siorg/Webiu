@@ -5,7 +5,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { GqlThrottlerGuard } from './graphql/gql-throttler.guard';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import depthLimit from 'graphql-depth-limit';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const depthLimit = require('graphql-depth-limit');
 import { Request, Response } from 'express';
 import { AppController } from './app.controller';
 import { CommonModule } from './common/common.module';
