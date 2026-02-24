@@ -8,4 +8,4 @@ import { ContributorResolver } from './contributor.resolver';
   imports: [ProjectModule, ContributorModule],
   providers: [ProjectResolver, ContributorResolver],
 })
-export class GraphqlModule {}
+export class GraphqlResolversModule {}

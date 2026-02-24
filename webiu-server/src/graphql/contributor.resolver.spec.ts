@@ -33,26 +33,33 @@ describe('ContributorResolver', () => {
   });
 
   describe('contributors', () => {
-    it('should return list of contributors from the service', async () => {
-      const mockContributors = [
-        {
-          login: 'user1',
-          contributions: 50,
-          avatar_url: 'url1',
-          repos: ['repo1', 'repo2'],
-        },
-        {
-          login: 'user2',
-          contributions: 20,
-          avatar_url: 'url2',
-          repos: ['repo1'],
-        },
-      ];
+    const mockContributors = [
+      {
+        login: 'user1',
+        contributions: 50,
+        avatar_url: 'url1',
+        repos: ['repo1', 'repo2'],
+      },
+      {
+        login: 'user2',
+        contributions: 20,
+        avatar_url: 'url2',
+        repos: ['repo1'],
+      },
+      {
+        login: 'user3',
+        contributions: 10,
+        avatar_url: 'url3',
+        repos: ['repo3'],
+      },
+    ];
+
+    it('should return paginated contributors from the service', async () => {
       mockContributorService.getAllContributors.mockResolvedValue(
         mockContributors,
       );
 
-      const result = await resolver.contributors();
+      const result = await resolver.contributors(1, 30);
 
       expect(result).toEqual(mockContributors);
       expect(mockContributorService.getAllContributors).toHaveBeenCalledTimes(
@@ -63,7 +70,27 @@ describe('ContributorResolver', () => {
     it('should return empty array when no contributors exist', async () => {
       mockContributorService.getAllContributors.mockResolvedValue([]);
 
-      const result = await resolver.contributors();
+      const result = await resolver.contributors(1, 30);
+
+      expect(result).toEqual([]);
+    });
+
+    it('should respect page and limit for pagination', async () => {
+      mockContributorService.getAllContributors.mockResolvedValue(
+        mockContributors,
+      );
+
+      const result = await resolver.contributors(2, 2);
+
+      expect(result).toEqual([mockContributors[2]]);
+    });
+
+    it('should return empty array when page exceeds data', async () => {
+      mockContributorService.getAllContributors.mockResolvedValue(
+        mockContributors,
+      );
+
+      const result = await resolver.contributors(10, 30);
 
       expect(result).toEqual([]);
     });
