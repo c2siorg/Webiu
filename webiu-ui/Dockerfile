@@ -4,7 +4,7 @@ WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm ci
+RUN npm install
 
 COPY . .
 
@@ -16,7 +16,7 @@ WORKDIR /usr/src/app
 
 COPY --chown=node:node --from=build /usr/src/app/package*.json ./
 
-RUN npm ci --omit=dev && chown -R node:node node_modules
+RUN npm install --omit=dev && chown -R node:node node_modules
 
 COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 
