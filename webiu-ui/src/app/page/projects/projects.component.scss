@@ -13,6 +13,14 @@
     align-items: center;
     justify-content: center;
 
+    img {
+      width: 100%;
+      max-width: 517px;
+      height: auto;
+      aspect-ratio: 517 / 323;
+      object-fit: contain;
+    }
+
     .projects-hero-content {
       h1 {
         color: var(--primary-dark, #0a0a15);
@@ -184,30 +192,6 @@
   }
 }
 
-.back-to-top {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transition:
-    opacity 0.3s,
-    visibility 0.3s;
-  z-index: 1000;
-}
-
-.back-to-top.show {
-  opacity: 1;
-  visibility: visible;
-}
-
 @media screen and (max-width: 1100px) {
   .projects {
     .projects-hero {
@@ -234,7 +218,7 @@
   .projects {
     .projects-hero {
       img {
-        width: 400px;
+        max-width: 100%;
       }
     }
 
@@ -267,7 +251,7 @@
       }
 
       img {
-        width: 300px;
+        max-width: 80%;
       }
     }
   }
