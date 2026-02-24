@@ -1,0 +1,30 @@
+version: "3.8"
+
+services:
+  webiu-server:
+    image: node:18-alpine
+    container_name: webiu-server-dev
+    working_dir: /usr/src/app
+    ports:
+      - 5050:5050
+    env_file:
+      - ./webiu-server/.env
+    environment:
+      - NODE_ENV=development
+    volumes:
+      - ./webiu-server:/usr/src/app
+      - /usr/src/app/node_modules
+    command: ["sh", "-c", "npm ci && npm run start:dev"]
+
+  webiu-ui:
+    image: node:18-alpine
+    container_name: webiu-ui-dev
+    working_dir: /usr/src/app
+    volumes:
+      - ./webiu-ui:/usr/src/app
+      - /usr/src/app/node_modules
+    ports:
+      - 4200:4200
+    command: ["sh", "-c", "npm ci && npx ng serve --host 0.0.0.0"]
+    depends_on:
+      - webiu-server
