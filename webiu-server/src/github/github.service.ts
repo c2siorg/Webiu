@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
@@ -7,6 +7,7 @@ const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class GithubService {
+  private readonly logger = new Logger(GithubService.name);
   private readonly baseUrl = 'https://api.github.com';
   private readonly accessToken: string;
   private readonly orgName = 'c2siorg';
@@ -271,7 +272,7 @@ export class GithubService {
       this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
-      console.error(
+      this.logger.error(
         `Error fetching GitHub social data for ${username}:`,
         error.message,
       );
