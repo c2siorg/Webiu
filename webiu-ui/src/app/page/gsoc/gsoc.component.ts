@@ -1,19 +1,18 @@
-import { Component, HostListener, PLATFORM_ID, inject } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { gsocData } from '../../common/data/gsoc';
-import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { CommonModule } from '@angular/common';
+import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 
 @Component({
   selector: 'app-gsoc',
   standalone: true,
-  imports: [NavbarComponent, CommonModule],
+  imports: [NavbarComponent, CommonModule, BackToTopComponent],
   templateUrl: './gsoc.component.html',
   styleUrl: './gsoc.component.scss',
 })
 export class GsocComponent {
-  private platformId = inject(PLATFORM_ID);
   gsocData = gsocData;
-  showButton = false;
   activeProjectIndex: number | null = null;
 
   toggleAccordion(index: number): void {
@@ -21,19 +20,6 @@ export class GsocComponent {
       this.activeProjectIndex = null;
     } else {
       this.activeProjectIndex = index;
-    }
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    if (isPlatformBrowser(this.platformId)) {
-      this.showButton = window.scrollY > 100;
-    }
-  }
-
-  scrollToTop() {
-    if (isPlatformBrowser(this.platformId)) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 }

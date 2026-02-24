@@ -39,11 +39,25 @@
       padding-right: 50px;
       flex: 1;
 
-      h3 {
-        color: var(--primary-dark, var(--primary-dark, #0a0a15));
-        font-size: 16px;
-        font-weight: 600;
-        line-height: 150%;
+      .project-link {
+        text-decoration: none;
+        transition: all 0.3s ease;
+        display: inline-block;
+
+        h3 {
+          color: var(--primary-dark, #0a0a15);
+          font-size: 16px;
+          font-weight: 600;
+          line-height: 150%;
+          transition: color 0.3s ease;
+        }
+
+        &:hover {
+          h3 {
+            color: #a30000;
+          }
+          transform: translateY(-1px);
+        }
       }
 
       p {

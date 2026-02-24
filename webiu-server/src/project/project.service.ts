@@ -1,30 +1,40 @@
 import {
   Injectable,
+  Logger,
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
+const CACHE_TTL = 300; // 5 minutes
+
 @Injectable()
 export class ProjectService {
+  private readonly logger = new Logger(ProjectService.name);
+
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
   ) {}
 
-  async getAllProjects() {
-    const cacheKey = 'all_projects';
-    const cached = this.cacheService.get(cacheKey);
+  async getAllProjects(page = 1, limit = 10) {
+    const cacheKey = `projects_p${page}_pp${limit}`;
+    const cached = this.cacheService.get<{
+      total: number;
+      page: number;
+      limit: number;
+      repositories: any[];
+    }>(cacheKey);
     if (cached) return cached;
 
     try {
-      const repositories = await this.githubService.getOrgRepos();
+      // Use GitHub's native pagination instead of fetching everything
+      const repositories = await this.githubService.getOrgRepos(page, limit);
 
-      // Batch PR fetches (10 at a time) to avoid GitHub abuse detection
+      // Fetch PR counts in batches to avoid overwhelming the API
       const BATCH_SIZE = 10;
       const repositoriesWithPRs = [];
-
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
         const batch = repositories.slice(i, i + BATCH_SIZE);
         const batchResults = await Promise.all(
@@ -40,11 +50,23 @@ export class ProjectService {
         repositoriesWithPRs.push(...batchResults);
       }
 
-      const result = { repositories: repositoriesWithPRs };
-      this.cacheService.set(cacheKey, result);
+      // Get the true total number of public repositories to pass to frontend pagination
+      const orgInfo = await this.githubService.getPublicUserProfile(
+        this.githubService.org,
+      );
+      const total = orgInfo.public_repos || 0;
+
+      const result = {
+        total,
+        page,
+        limit,
+        repositories: repositoriesWithPRs,
+      };
+
+      this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
-      console.error(
+      this.logger.error(
         'Error fetching repositories or pull requests:',
         error.response ? error.response.data : error.message,
       );
@@ -71,7 +93,7 @@ export class ProjectService {
       this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
-      console.error(
+      this.logger.error(
         'Error fetching issues and PRs:',
         error.response?.data || error.message,
       );
