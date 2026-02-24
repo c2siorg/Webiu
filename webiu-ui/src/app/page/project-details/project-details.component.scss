@@ -1,14 +1,15 @@
 .project-details-container {
-  min-height: 100vh;
-  padding: 120px 20px 60px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 4rem 2rem;
   background: linear-gradient(
     135deg,
     var(--cards-container) 0%,
     var(--card-container-2) 100%
   );
   display: flex;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;
+  gap: 1.5rem; /* Reduced gap between cards */
   font-family: inherit;
 }
 

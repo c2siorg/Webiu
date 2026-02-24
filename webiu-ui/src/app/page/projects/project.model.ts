@@ -111,6 +111,7 @@ export interface Project {
     pull: boolean;
   };
   pull_requests: number;
+  languages?: Record<string, number>;
 }
 
 export interface ProjectResponse {
