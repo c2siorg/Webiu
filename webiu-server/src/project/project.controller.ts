@@ -28,6 +28,16 @@ export class ProjectController {
   async getProjectByName(@Param('name') name: string) {
     return this.projectService.getProjectByName(name);
   }
+
+  /**
+   * GET /api/projects/:name/insights
+   * Returns analytical insights, badges, and commit activity for a project.
+   */
+  @Get(':name/insights')
+  @Header('Cache-Control', 'no-store, no-cache, must-revalidate')
+  async getProjectInsights(@Param('name') name: string) {
+    return this.projectService.getProjectInsights(name);
+  }
 }
 
 @Controller('api/issues')

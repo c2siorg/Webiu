@@ -28,4 +28,13 @@ export class ProjectCacheService {
       `${environment.serverUrl}/api/projects/${name}`,
     );
   }
+
+  /**
+   * Fetches analytical insights, badges, and commit activity for a project.
+   */
+  getProjectInsights(name: string): Observable<any> {
+    return this.http.get<any>(
+      `${environment.serverUrl}/api/projects/${name}/insights`,
+    );
+  }
 }

@@ -35,15 +35,6 @@
   @if (!loading && !error && project) {
     <app-project-basic-info [project]="project"></app-project-basic-info>
 
-    <!-- Future sections will go here -->
-    <div class="glass-card future-section-placeholder">
-      <header>
-        <h3>Upcoming Insights</h3>
-      </header>
-      <p>
-        Contributors, activity signals, and derived metrics are coming soon to
-        this view.
-      </p>
-    </div>
+    <app-project-insights [projectName]="projectName!"></app-project-insights>
   }
 </div>

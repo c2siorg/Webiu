@@ -7,14 +7,17 @@ import axios, { AxiosError } from 'axios';
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
-function createAxiosError(
-  message: string,
-  status: number,
-): AxiosError {
+function createAxiosError(message: string, status: number): AxiosError {
   const err = Object.create(AxiosError.prototype) as AxiosError;
   err.message = message;
   err.name = 'AxiosError';
-  err.response = { status, data: {}, statusText: '', headers: {}, config: {} } as any;
+  err.response = {
+    status,
+    data: {},
+    statusText: '',
+    headers: {},
+    config: {},
+  } as any;
   err.isAxiosError = true;
   return err;
 }
