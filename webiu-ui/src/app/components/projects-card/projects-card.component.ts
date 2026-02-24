@@ -1,14 +1,14 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
 
-
 @Component({
   selector: 'app-projects-card',
   standalone: true,
-  imports: [HttpClientModule, CommonModule],
+  imports: [HttpClientModule, CommonModule, RouterModule],
   templateUrl: './projects-card.component.html',
   styleUrls: ['./projects-card.component.scss'],
 })
@@ -31,7 +31,6 @@ export class ProjectsCardComponent implements OnInit {
 
   private http = inject(HttpClient);
 
-
   ngOnInit(): void {
     if (!this.initialized) {
       this.fetchIssuesAndPRs();
@@ -40,16 +39,19 @@ export class ProjectsCardComponent implements OnInit {
 
   fetchIssuesAndPRs(): void {
     const apiUrl = `${environment.serverUrl}/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
-    this.http.get<{ issues: number; pullRequests: number }>(apiUrl).subscribe(
-      (data) => {
-        this.issueCount = data.issues;
-        this.pullRequestCount = data.pullRequests;
-        this.initialized = true;
-      },
-      (error) => {
-        console.error('Failed to fetch issues and PRs:', error);
-      }
-    );
+    this.http
+      .get<{ issues: number; pullRequests: number }>(apiUrl)
+      .subscribe({
+        next: (data) => {
+          this.issueCount = data.issues;
+          this.pullRequestCount = data.pullRequests;
+          this.initialized = true;
+        },
+        error: (error) => {
+          console.error(`Error fetching issues and PRs for ${this.repo}: `, error);
+          this.initialized = true;
+        }
+      });
   }
 
   public detailsVisible = false;
