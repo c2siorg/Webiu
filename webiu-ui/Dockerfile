@@ -8,13 +8,20 @@ RUN npm ci
 
 COPY . .
 
-RUN npx ng build --configuration production
+RUN npm run build
 
-FROM nginx:alpine
+FROM node:18-alpine
 
-COPY --from=build /usr/src/app/dist/webiu/browser /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /usr/src/app
 
-EXPOSE 80
+COPY --chown=node:node --from=build /usr/src/app/package*.json ./
 
-CMD ["nginx", "-g", "daemon off;"]
+RUN npm ci --omit=dev && chown -R node:node node_modules
+
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+
+USER node
+
+EXPOSE 4000
+
+CMD ["node", "dist/webiu/server/server.mjs"]

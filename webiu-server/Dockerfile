@@ -14,11 +14,11 @@ FROM node:18-alpine
 
 WORKDIR /usr/src/app
 
-COPY --from=build /usr/src/app/package*.json ./
+COPY --chown=node:node --from=build /usr/src/app/package*.json ./
 
-RUN npm ci --omit=dev
+RUN npm ci --omit=dev && chown -R node:node node_modules
 
-COPY --from=build /usr/src/app/dist ./dist
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
 
 USER node
 
