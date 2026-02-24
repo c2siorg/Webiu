@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -44,29 +44,40 @@ export class ContributorSearchComponent implements OnInit {
   private userUrl = `${environment.serverUrl}/api/user`;
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private http = inject(HttpClient);
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
-      if (params['username']) {
-        this.username = params['username'];
-        this.onSearch();
+      const param = params['username']?.trim();
+      if (param && param !== this.username) {
+        this.username = param;
+        this.fetchUserData();
       }
     });
   }
 
-  async onSearch() {
+  onSearch() {
+    this.username = this.username.trim();
     if (!this.username) {
       this.errorMessage = 'Please enter a username';
       return;
     }
 
+    this.router.navigate([], {
+      queryParams: { username: this.username },
+      queryParamsHandling: 'merge',
+    });
+
+    this.fetchUserData();
+  }
+
+  private async fetchUserData() {
     this.loading = true;
     this.errorMessage = '';
     this.userProfile = null;
 
     try {
-      // Fetch stats (issues + PRs) and user profile in parallel
       const [statsResponse, userProfileResponse] = await Promise.all([
         firstValueFrom(this.http.get<any>(`${this.apiUrl}/stats/${this.username}`)),
         firstValueFrom(this.http.get<any>(`${this.userUrl}/profile/${this.username}`)),

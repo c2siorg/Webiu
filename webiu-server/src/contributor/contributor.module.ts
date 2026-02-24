@@ -7,5 +7,6 @@ import { GithubModule } from '../github/github.module';
   imports: [GithubModule],
   controllers: [ContributorController],
   providers: [ContributorService],
+  exports: [ContributorService],
 })
 export class ContributorModule {}
