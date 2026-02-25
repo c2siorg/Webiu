@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor } from '../../common/data/contributor';
-import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
@@ -25,7 +24,6 @@ import { BackToTopComponent } from '../../components/back-to-top/back-to-top.com
   styleUrls: ['./community.component.scss'],
 })
 export class CommunityComponent implements OnInit {
-  private commonUtil = inject(CommmonUtilService);
   private http = inject(HttpClient);
   icons: Media[] = socialMedia;
   users: Contributor[] = [];
@@ -37,12 +35,9 @@ export class CommunityComponent implements OnInit {
 
   getTopContributors() {
     this.http
-      .get<
-        Contributor[]
-      >(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
       .subscribe({
         next: (res) => {
-          // Sort by contributions in descending order, take top 9
           const sorted = (res || []).sort(
             (a, b) => b.contributions - a.contributions,
           );
@@ -50,7 +45,6 @@ export class CommunityComponent implements OnInit {
           this.fetchFollowerData();
         },
         error: () => {
-          console.error('Error fetching contributors');
           this.users = [];
           this.isLoading = false;
         },
@@ -58,31 +52,31 @@ export class CommunityComponent implements OnInit {
   }
 
   fetchFollowerData() {
-    let requestsCompleted = 0;
     if (this.users.length === 0) {
       this.isLoading = false;
       return;
     }
 
-    const checkCompletion = () => {
-      requestsCompleted++;
-      if (requestsCompleted === this.users.length) {
-        this.isLoading = false;
-      }
-    };
+    const usernames = this.users.map((u) => u.login);
 
-    this.users.forEach((profile) => {
-      this.http.get(`https://api.github.com/users/${profile.login}`).subscribe({
-        next: (data: any) => {
-          profile.followers = data.followers;
-          profile.following = data.following;
-          checkCompletion();
+    this.http
+      .post<Record<string, { followers: number; following: number }>>(
+        `${environment.serverUrl}/api/user/batch-social`,
+        { usernames },
+      )
+      .subscribe({
+        next: (data) => {
+          this.users.forEach((user) => {
+            const social = data[user.login];
+            user.followers = social?.followers ?? 0;
+            user.following = social?.following ?? 0;
+          });
+          this.isLoading = false;
         },
         error: () => {
-          console.error(`Error fetching followers for ${profile.login}`);
-          checkCompletion();
+          // Show contributors without social counts rather than failing entirely
+          this.isLoading = false;
         },
       });
-    });
   }
 }
