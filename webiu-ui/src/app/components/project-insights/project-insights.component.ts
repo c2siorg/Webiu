@@ -4,6 +4,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ProjectCacheService } from '../../services/project-cache.service';
 import { CommitGraphComponent } from '../commit-graph/commit-graph.component';
+import { ProjectInsights } from '../../page/projects/project.model';
 
 @Component({
   selector: 'app-project-insights',
@@ -18,7 +19,7 @@ export class ProjectInsightsComponent implements OnInit {
   private projectService = inject(ProjectCacheService);
   private destroyRef = inject(DestroyRef);
 
-  insights: any = null;
+  insights: ProjectInsights | null = null;
   loading = true;
   error: string | null = null;
 

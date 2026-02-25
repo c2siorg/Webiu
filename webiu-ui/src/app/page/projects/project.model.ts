@@ -120,3 +120,39 @@ export interface ProjectResponse {
   limit: number;
   repositories: Project[];
 }
+
+export interface InsightBadge {
+  label: string;
+  description: string;
+}
+
+export interface InsightBadges {
+  maturity: InsightBadge;
+  maintenance: InsightBadge;
+  complexity: InsightBadge;
+  activity_level: InsightBadge;
+}
+
+export interface InsightStats {
+  age_years: number;
+  recent_commits: number;
+  total_languages: number;
+  open_issues: number;
+  health: string;
+  size_mb: number;
+  size_label: string;
+  release_recency: string;
+}
+
+export interface CommitWeek {
+  total: number;
+  week?: number;
+  days?: number[];
+}
+
+export interface ProjectInsights {
+  commit_activity: CommitWeek[];
+  latest_release: Record<string, unknown> | null;
+  badges: InsightBadges;
+  stats: InsightStats;
+}

@@ -34,7 +34,7 @@ export class ProjectController {
    * Returns analytical insights, badges, and commit activity for a project.
    */
   @Get(':name/insights')
-  @Header('Cache-Control', 'no-store, no-cache, must-revalidate')
+  @Header('Cache-Control', 'public, max-age=300')
   async getProjectInsights(@Param('name') name: string) {
     return this.projectService.getProjectInsights(name);
   }

@@ -2,7 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { Project, ProjectResponse } from '../page/projects/project.model';
+import {
+  Project,
+  ProjectInsights,
+  ProjectResponse,
+} from '../page/projects/project.model';
 
 @Injectable({
   providedIn: 'root',
@@ -32,8 +36,8 @@ export class ProjectCacheService {
   /**
    * Fetches analytical insights, badges, and commit activity for a project.
    */
-  getProjectInsights(name: string): Observable<any> {
-    return this.http.get<any>(
+  getProjectInsights(name: string): Observable<ProjectInsights> {
+    return this.http.get<ProjectInsights>(
       `${environment.serverUrl}/api/projects/${name}/insights`,
     );
   }

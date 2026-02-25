@@ -6,61 +6,30 @@
         @if (insights.badges) {
           <span
             class="insight-badge"
-            [class]="
-              (
-                insights.badges.maturity?.label ||
-                insights.badges.maturity ||
-                ''
-              ).toLowerCase()
-            "
-            [attr.title]="insights.badges.maturity?.description"
+            [ngClass]="insights.badges.maturity.label.toLowerCase()"
+            [attr.title]="insights.badges.maturity.description"
           >
-            {{ insights.badges.maturity?.label || insights.badges.maturity }}
+            {{ insights.badges.maturity.label }}
           </span>
           <span
             class="insight-badge"
-            [class]="
-              (
-                insights.badges.maintenance?.label ||
-                insights.badges.maintenance ||
-                ''
-              ).toLowerCase()
-            "
-            [attr.title]="insights.badges.maintenance?.description"
+            [ngClass]="insights.badges.maintenance.label.toLowerCase()"
+            [attr.title]="insights.badges.maintenance.description"
           >
-            {{
-              insights.badges.maintenance?.label || insights.badges.maintenance
-            }}
+            {{ insights.badges.maintenance.label }}
           </span>
           <span
             class="insight-badge complexity"
-            [attr.title]="insights.badges.complexity?.description"
+            [attr.title]="insights.badges.complexity.description"
           >
-            {{
-              insights.badges.complexity?.label || insights.badges.complexity
-            }}
+            {{ insights.badges.complexity.label }}
           </span>
           <span
             class="insight-badge activity"
-            [class]="
-              (
-                insights.badges.activity_level?.label ||
-                insights.badges.activity_level ||
-                ''
-              ).toLowerCase()
-            "
-            [attr.title]="insights.badges.activity_level?.description"
+            [ngClass]="insights.badges.activity_level.label.toLowerCase()"
+            [attr.title]="insights.badges.activity_level.description"
           >
-            @if (
-              insights.badges.activity_level?.label ||
-              insights.badges.activity_level
-            ) {
-              {{
-                insights.badges.activity_level?.label ||
-                  insights.badges.activity_level
-              }}
-              Activity
-            }
+            {{ insights.badges.activity_level.label }} Activity
           </span>
         }
       </div>
@@ -68,21 +37,22 @@
   </header>
 
   <div class="insights-grid">
-    <!-- Hero Row: Commit Activity Graph -->
     <div class="glass-card graph-card">
-      @if (insights) {
-        <app-commit-graph
-          [activity]="insights.commit_activity"
-        ></app-commit-graph>
-      }
       @if (loading) {
         <div class="loading-overlay">
           <div class="skeleton-line graph"></div>
         </div>
+      } @else if (error) {
+        <div class="error-state">
+          <span>{{ error }}</span>
+        </div>
+      } @else if (insights) {
+        <app-commit-graph
+          [activity]="insights.commit_activity"
+        ></app-commit-graph>
       }
     </div>
 
-    <!-- Micro-Insight Cards Row -->
     @if (insights) {
       <div class="stats-row">
         <div class="stat-item glass-card">
@@ -99,15 +69,15 @@
         </div>
         <div
           class="stat-item glass-card"
-          [class]="(insights.stats?.health || '').toLowerCase()"
+          [ngClass]="insights.stats.health.toLowerCase()"
         >
           <span class="label">Repository Health</span>
-          <span class="value">{{ insights.stats?.health }}</span>
+          <span class="value">{{ insights.stats.health }}</span>
         </div>
         <div class="stat-item glass-card">
-          <span class="label">Vibe & Size</span>
+          <span class="label">Size</span>
           <span class="value"
-            >{{ insights.stats.vibe }} • {{ insights.stats.size_mb }} MB</span
+            >{{ insights.stats.size_label }} &bull; {{ insights.stats.size_mb }} MB</span
           >
         </div>
       </div>

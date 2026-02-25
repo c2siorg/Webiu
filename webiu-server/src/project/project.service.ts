@@ -10,6 +10,17 @@ import { CacheService } from '../common/cache.service';
 import { AxiosError } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
+const INSIGHTS_CACHE_TTL = 3600; // 1 hour
+
+// Badge thresholds for project insights
+const MATURITY_MIN_STARS = 50;
+const MATURITY_MIN_AGE_YEARS = 1;
+const MAINTENANCE_STALE_DAYS = 90;
+const POLYGLOT_MIN_LANGUAGES = 3;
+const ACTIVITY_HIGH_COMMITS = 10;
+const HEALTH_HEALTHY_ISSUES_PER_YEAR = 5;
+const HEALTH_MODERATE_ISSUES_PER_YEAR = 20;
+const SIZE_LARGE_THRESHOLD_MB = 50;
 
 @Injectable()
 export class ProjectService {
@@ -169,17 +180,12 @@ export class ProjectService {
     if (cached) return cached;
 
     try {
-      // Fetch everything in parallel
-      const [project, activity, release, languages, _issues] =
-        await Promise.all([
-          this.githubService.getRepo(name),
-          this.githubService.getCommitActivity(name),
-          this.githubService.getLatestRelease(name),
-          this.githubService.getRepoLanguages(name),
-          this.githubService
-            .getRepoIssues(this.githubService.org, name)
-            .catch(() => []),
-        ]);
+      const [project, activity, release, languages] = await Promise.all([
+        this.githubService.getRepo(name),
+        this.githubService.getCommitActivity(name),
+        this.githubService.getLatestRelease(name),
+        this.githubService.getRepoLanguages(name),
+      ]);
 
       if (!project) {
         throw new NotFoundException(`Project ${name} not found`);
@@ -190,22 +196,20 @@ export class ProjectService {
       const createdAt = new Date(project.created_at).getTime();
       const pushedAt = new Date(project.pushed_at).getTime();
 
-      // 1. Maturity Badge
       const ageInYears = (now - createdAt) / (365 * 24 * 3600 * 1000);
       const maturity =
-        project.stargazers_count > 50 && ageInYears > 1
+        project.stargazers_count > MATURITY_MIN_STARS &&
+        ageInYears > MATURITY_MIN_AGE_YEARS
           ? 'Mature'
           : 'Incubating';
 
-      // 2. Maintenance Badge
       const daysSincePush = (now - pushedAt) / (24 * 3600 * 1000);
-      const maintenance = daysSincePush < 90 ? 'Active' : 'Stale';
+      const maintenance =
+        daysSincePush < MAINTENANCE_STALE_DAYS ? 'Active' : 'Stale';
 
-      // 3. Complexity Badge
       const languageCount = Object.keys(languages || {}).length;
-      const isPolyglot = languageCount > 3;
+      const isPolyglot = languageCount > POLYGLOT_MIN_LANGUAGES;
 
-      // 4. Activity Level
       const last4Weeks =
         activity && Array.isArray(activity) ? activity.slice(-4) : [];
       const recentCommits = last4Weeks.reduce(
@@ -213,26 +217,21 @@ export class ProjectService {
         0,
       );
       let activityLevel = 'Low';
-      if (recentCommits > 10) activityLevel = 'High';
+      if (recentCommits > ACTIVITY_HIGH_COMMITS) activityLevel = 'High';
       else if (recentCommits > 0) activityLevel = 'Medium';
 
-      // 5. Repository Health (Issues Ratio)
       const openIssues = project.open_issues_count || 0;
-      // Note: GitHub API 'issues' endpoint returns only open by default,
-      // but we use simplified logic here using repo object + fetched list if needed.
-      // For a better "Health" ratio, we'd need total historical issues.
-      // We'll use a descriptive vibe based on open issues relative to repo age.
       const issuesPerYear = openIssues / Math.max(ageInYears, 1);
       const healthStatus =
-        issuesPerYear < 5
+        issuesPerYear < HEALTH_HEALTHY_ISSUES_PER_YEAR
           ? 'Healthy'
-          : issuesPerYear < 20
+          : issuesPerYear < HEALTH_MODERATE_ISSUES_PER_YEAR
             ? 'Moderate'
             : 'Busy';
 
-      // 6. Repository Size Vibe
       const sizeInMB = ((project.size as number) || 0) / 1024;
-      const vibe = sizeInMB > 50 ? 'Monolith' : 'Lightweight';
+      const sizeLabel =
+        sizeInMB > SIZE_LARGE_THRESHOLD_MB ? 'Large' : 'Compact';
 
       // 7. Latest Release Formatting
       let releaseRecency = 'Rolling';
@@ -257,8 +256,8 @@ export class ProjectService {
             label: maintenance,
             description:
               maintenance === 'Active'
-                ? 'Actively maintained with recent pushes within the last 90 days.'
-                : 'No recent pushes detected in the last 90 days.',
+                ? `Actively maintained with recent pushes within the last ${MAINTENANCE_STALE_DAYS} days.`
+                : `No recent pushes detected in the last ${MAINTENANCE_STALE_DAYS} days.`,
           },
           complexity: {
             label: isPolyglot ? 'Polyglot' : 'Focused',
@@ -278,12 +277,12 @@ export class ProjectService {
           open_issues: openIssues,
           health: healthStatus,
           size_mb: parseFloat(sizeInMB.toFixed(1)),
-          vibe: vibe,
+          size_label: sizeLabel,
           release_recency: releaseRecency,
         },
       };
 
-      this.cacheService.set(cacheKey, result, 3600); // 1 hour internal cache
+      this.cacheService.set(cacheKey, result, INSIGHTS_CACHE_TTL);
       return result;
     } catch (error: unknown) {
       if (error instanceof NotFoundException) throw error;
