@@ -93,6 +93,7 @@ export class ProjectsComponent implements OnInit {
     this.isLoading = true;
     this.projectCacheService
       .getProjects(this.currentPage, this.projectsPerPage)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (response) => {
           this.serverTotal = response.total;

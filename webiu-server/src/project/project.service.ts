@@ -81,7 +81,7 @@ export class ProjectService {
     } catch (error) {
       this.logger.error(
         'Error fetching repositories or pull requests:',
-        error.response ? error.response.data : error.message,
+        error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
