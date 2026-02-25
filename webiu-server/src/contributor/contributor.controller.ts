@@ -12,7 +12,7 @@ export class ContributorController {
   // Most expensive endpoint: fetches contributors for every repo in the org.
   // Keep a conservative limit, but not so low that normal page refreshes hit 429.
   @Get('contributors')
-  @Throttle({ default: { ttl: 60_000, limit: 120 } })
+  @Throttle({ default: { ttl: 60_000, limit: 60 } })
   @Header('Cache-Control', 'public, max-age=300')
   async getAllContributors() {
     return this.contributorService.getAllContributors();
