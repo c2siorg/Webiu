@@ -9,6 +9,8 @@
     padding: 0 20px;
   }
 
+
+
   section {
     padding: 80px 20px;
   }
@@ -72,6 +74,7 @@
       &:hover {
         background: var(--primary-dark);
         color: var(--navbar-bg, #11111e);
+
         :host-context([data-theme="dark"]) & {
           color: #11111e !important; // Forces text to be dark on hover
         }
@@ -83,14 +86,13 @@
       font-size: 18px;
     }
   }
+
   // Hero Section
   .hero-section {
     padding: 120px 20px;
-    background: linear-gradient(
-      135deg,
-      var(--cards-container) 0%,
-      var(--card-container-2) 100%
-    );
+    background: linear-gradient(135deg,
+        var(--cards-container) 0%,
+        var(--card-container-2) 100%);
 
     .hero-content {
       max-width: 1200px;
@@ -509,11 +511,9 @@
 
   // Final CTA Section
   .final-cta-section {
-    background: linear-gradient(
-      135deg,
-      var(--cards-container) 0%,
-      var(--card-container-2) 100%
-    );
+    background: linear-gradient(135deg,
+        var(--cards-container) 0%,
+        var(--card-container-2) 100%);
     text-align: center;
 
     h2 {

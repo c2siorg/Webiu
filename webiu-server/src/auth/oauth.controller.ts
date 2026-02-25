@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Logger,
   Query,
   Res,
   BadRequestException,
@@ -14,6 +15,7 @@ import { GithubService } from '../github/github.service';
 
 @Controller('auth')
 export class OAuthController {
+  private readonly logger = new Logger(OAuthController.name);
   private googleClient: OAuth2Client;
 
   constructor(
@@ -80,7 +82,7 @@ export class OAuthController {
       const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(JSON.stringify(user))}`;
       res.redirect(redirectUrl);
     } catch (error) {
-      console.error('Error during Google OAuth:', error);
+      this.logger.error('Error during Google OAuth:', error);
       throw new InternalServerErrorException({
         message: 'Error authenticating with Google',
         error: error.response?.data || error.message,
@@ -125,7 +127,7 @@ export class OAuthController {
       const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(JSON.stringify(user))}`;
       res.redirect(redirectUrl);
     } catch (error) {
-      console.error('Error during GitHub OAuth:', error);
+      this.logger.error('Error during GitHub OAuth:', error);
       throw new InternalServerErrorException({
         message: 'Error authenticating with GitHub',
         error: error.response?.data || error.message,

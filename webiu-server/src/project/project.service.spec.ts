@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   InternalServerErrorException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ProjectService } from './project.service';
@@ -18,6 +19,8 @@ describe('ProjectService', () => {
     getRepoPulls: jest.fn(),
     getRepoIssues: jest.fn(),
     getPublicUserProfile: jest.fn(),
+    getRepo: jest.fn(),
+    getRepoLanguages: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -56,7 +59,9 @@ describe('ProjectService', () => {
       mockGithubService.getRepoPulls
         .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
         .mockResolvedValueOnce([{ id: 3 }]);
-      mockGithubService.getPublicUserProfile.mockResolvedValue({ public_repos: 20 });
+      mockGithubService.getPublicUserProfile.mockResolvedValue({
+        public_repos: 20,
+      });
 
       const result = await service.getAllProjects(1, 10);
 
@@ -65,13 +70,17 @@ describe('ProjectService', () => {
       expect(result.repositories[0].pull_requests).toBe(2);
       expect(result.repositories[1].pull_requests).toBe(1);
       expect(mockGithubService.getOrgRepos).toHaveBeenCalledWith(1, 10);
-      expect(mockGithubService.getPublicUserProfile).toHaveBeenCalledWith('c2siorg');
+      expect(mockGithubService.getPublicUserProfile).toHaveBeenCalledWith(
+        'c2siorg',
+      );
     });
 
     it('should cache the response per page/limit', async () => {
       mockGithubService.getOrgRepos.mockResolvedValue([{ name: 'repo1' }]);
       mockGithubService.getRepoPulls.mockResolvedValue([]);
-      mockGithubService.getPublicUserProfile.mockResolvedValue({ public_repos: 5 });
+      mockGithubService.getPublicUserProfile.mockResolvedValue({
+        public_repos: 5,
+      });
 
       await service.getAllProjects(1, 10);
       await service.getAllProjects(1, 10);
@@ -82,9 +91,6 @@ describe('ProjectService', () => {
     });
 
     it('should handle PR fetch errors gracefully per repo', async () => {
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       mockGithubService.getOrgRepos.mockResolvedValue([
         { name: 'repo1' },
         { name: 'repo2' },
@@ -92,25 +98,22 @@ describe('ProjectService', () => {
       mockGithubService.getRepoPulls
         .mockRejectedValueOnce(new Error('fail'))
         .mockResolvedValueOnce([{ id: 1 }]);
-      mockGithubService.getPublicUserProfile.mockResolvedValue({ public_repos: 10 });
+      mockGithubService.getPublicUserProfile.mockResolvedValue({
+        public_repos: 10,
+      });
 
       const result = await service.getAllProjects(1, 10);
 
       expect(result.repositories[0].pull_requests).toBe(0);
       expect(result.repositories[1].pull_requests).toBe(1);
-      consoleSpy.mockRestore();
     });
 
     it('should throw InternalServerErrorException on total failure', async () => {
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       mockGithubService.getOrgRepos.mockRejectedValue(new Error('API error'));
 
       await expect(service.getAllProjects(1, 10)).rejects.toThrow(
         InternalServerErrorException,
       );
-      consoleSpy.mockRestore();
     });
   });
 
@@ -148,14 +151,81 @@ describe('ProjectService', () => {
     });
 
     it('should throw InternalServerErrorException on API error', async () => {
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       mockGithubService.getRepoIssues.mockRejectedValue(new Error('fail'));
       await expect(service.getIssuesAndPr('c2siorg', 'repo1')).rejects.toThrow(
         InternalServerErrorException,
       );
-      consoleSpy.mockRestore();
+    });
+  });
+
+  describe('getProjectByName', () => {
+    it('should return enriched project metadata', async () => {
+      mockGithubService.getRepo.mockResolvedValue({
+        name: 'Webiu',
+        stargazers_count: 100,
+      });
+      mockGithubService.getRepoLanguages.mockResolvedValue({
+        TypeScript: 50000,
+        HTML: 20000,
+      });
+      mockGithubService.getRepoPulls.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+
+      const result = await service.getProjectByName('Webiu');
+
+      expect(result).toEqual({
+        name: 'Webiu',
+        stargazers_count: 100,
+        languages: { TypeScript: 50000, HTML: 20000 },
+        pull_requests: 2,
+      });
+    });
+
+    it('should cache the enriched result', async () => {
+      mockGithubService.getRepo.mockResolvedValue({ name: 'Webiu' });
+      mockGithubService.getRepoLanguages.mockResolvedValue({});
+      mockGithubService.getRepoPulls.mockResolvedValue([]);
+
+      await service.getProjectByName('Webiu');
+      await service.getProjectByName('Webiu');
+
+      expect(mockGithubService.getRepo).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw BadRequestException for invalid names', async () => {
+      await expect(service.getProjectByName('')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.getProjectByName('repo name!')).rejects.toThrow(
+        BadRequestException,
+      );
+      await expect(service.getProjectByName('../etc')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw NotFoundException when repo is null', async () => {
+      mockGithubService.getRepo.mockResolvedValue(null);
+
+      await expect(service.getProjectByName('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should handle PR fetch failure gracefully', async () => {
+      mockGithubService.getRepo.mockResolvedValue({ name: 'Webiu' });
+      mockGithubService.getRepoLanguages.mockResolvedValue({});
+      mockGithubService.getRepoPulls.mockRejectedValue(new Error('fail'));
+
+      const result = (await service.getProjectByName('Webiu')) as any;
+      expect(result.pull_requests).toBe(0);
+    });
+
+    it('should throw InternalServerErrorException on unexpected errors', async () => {
+      mockGithubService.getRepo.mockRejectedValue(new Error('Server error'));
+
+      await expect(service.getProjectByName('Webiu')).rejects.toThrow(
+        InternalServerErrorException,
+      );
     });
   });
 });

@@ -1,0 +1,40 @@
+<div class="project-details-container">
+  <div class="back-navigation">
+    <a routerLink="/projects" class="back-link">
+      <i class="fas fa-arrow-left"></i>
+      Back to Projects
+    </a>
+  </div>
+
+  @if (loading) {
+    <div class="loading-state">
+      <div class="glass-card skeleton-card">
+        <div class="skeleton-line title"></div>
+        <div class="skeleton-line description"></div>
+        <div class="skeleton-grid">
+          <div class="skeleton-box"></div>
+          <div class="skeleton-box"></div>
+          <div class="skeleton-box"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  @if (error) {
+    <div class="error-state glass-card">
+      <p>{{ error }}</p>
+      <button
+        [disabled]="!projectName"
+        (click)="fetchProjectDetails(projectName!)"
+      >
+        Retry
+      </button>
+    </div>
+  }
+
+  @if (!loading && !error && project) {
+    <app-project-basic-info [project]="project"></app-project-basic-info>
+
+    <app-project-insights [projectName]="projectName!"></app-project-insights>
+  }
+</div>

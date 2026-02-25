@@ -38,6 +38,7 @@
           height: 45px;
           width: 45px;
           transition: transform 0.2s ease;
+
           &:hover {
             transform: scale(1.1);
           }
@@ -162,7 +163,7 @@
         .view-all-link {
           display: inline-block;
           padding: 10px 24px;
-          background: var(--primary-blue, #007bff);
+          background: var(--primary-blue, #3498db);
           color: white;
           text-decoration: none;
           border-radius: 8px;
@@ -189,9 +190,11 @@
 
     .community-hero-content {
       align-items: center;
+
       h1 {
         font-size: 36px;
       }
+
       .media-icons {
         justify-content: center;
       }

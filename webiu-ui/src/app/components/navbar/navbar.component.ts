@@ -134,6 +134,9 @@ export class NavbarComponent implements OnInit {
   }
 
   isRouteActive(route: string): boolean {
+    if (route === '/projects' && this.currentRoute.startsWith('/project')) {
+      return true;
+    }
     return this.currentRoute === route;
   }
 

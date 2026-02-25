@@ -8,7 +8,7 @@
   box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.15);
   position: sticky;
   top: 0;
-  z-index: 1000;   
+  z-index: 1000;
 }
 
 .menu-overlay {
@@ -17,9 +17,10 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.4);
   z-index: 999;
   cursor: pointer;
+  backdrop-filter: blur(2px);
 }
 
 .logo {
@@ -28,32 +29,27 @@
   flex-shrink: 0;
 }
 
+/* ────────────────────────────────────────────────────────
+   Right-side actions (theme toggle + hamburger)
+   ──────────────────────────────────────────────────────── */
+.navbar__right-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ────────────────────────────────────────────────────────
+   Desktop horizontal menu
+   ──────────────────────────────────────────────────────── */
 .navbar__menu {
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 5px;
 
-  &.open {
-    display: flex !important;
-    flex-direction: column;
-    position: absolute;
-    top: 60px;
-    right: 20px;
-    align-items: flex-start;
-    width: auto;
-    background: var(--navbar-bg);
-    box-shadow: 0px 4px 20px 0px rgba(0, 0, 0, 0.15);
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-    box-shadow: 0px 4px 24px 0px rgba(0, 0, 0, 0.15);
-    z-index: 1001;
-
-    .navbar__menu__items {
-      width: 100%;
-      justify-content: flex-start;
-    }
+  /* hide sidebar header on desktop */
+  .sidebar-header {
+    display: none;
   }
 
   .navbar__menu__items {
@@ -71,9 +67,9 @@
     user-select: none;
     -webkit-tap-highlight-color: transparent;
   }
-  
+
   .navbar__menu__items img {
-    width: 24px; 
+    width: 24px;
     height: 24px;
     display: inline-block;
   }
@@ -83,12 +79,12 @@
     line-height: 1;
     color: var(--navbar-p);
   }
-  
+
   .navbar__menu__items.active {
-    background-color: var(--blue, #0066ff);
+    background-color: var(--blue, #3498db);
     color: #fff;
   }
-  
+
   .navbar__menu__items.active p {
     color: #fff;
   }
@@ -98,17 +94,215 @@
   }
 
   .navbar__menu__items:hover {
-    background: var(--blue, #2f80ed);
+    background: var(--blue, #2980b9);
     color: #fff;
+
     p {
       color: #fff;
     }
+
     img {
       filter: invert(1);
     }
   }
 }
 
+/* ────────────────────────────────────────────────────────
+   Mobile sidebar (full-screen overlay panel)
+   ──────────────────────────────────────────────────────── */
+.navbar__menu.open {
+  display: flex !important;
+  flex-direction: column;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  background: var(--navbar-bg);
+  z-index: 1003;
+  padding: 0;
+  border-radius: 0;
+  border: none;
+  box-shadow: none;
+  align-items: stretch;
+  justify-content: flex-start;
+  overflow-y: auto;
+  animation: slideInFromRight 0.25s ease-out;
+
+  /* Sidebar header — logo + close */
+  .sidebar-header {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--sidebar-border, #e6e6e6);
+    flex-shrink: 0;
+
+    .logo {
+      width: 100px;
+      height: 50px;
+    }
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: background 0.15s ease;
+
+    img {
+      width: 20px;
+      height: 20px;
+      opacity: 0.6;
+      transition: opacity 0.15s ease;
+    }
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+
+      img {
+        opacity: 1;
+      }
+    }
+  }
+
+  /* Hide icons inside sidebar items — text only, like AsyncAPI */
+  .navbar__menu__items .menu-icon {
+    display: none !important;
+  }
+
+  /* Menu items — clean full-width rows */
+  .navbar__menu__items {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 16px 24px;
+    border-radius: 0;
+    background: transparent;
+    border-bottom: 1px solid var(--sidebar-border, #e6e6e6);
+    gap: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+
+    p {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 500;
+      color: var(--navbar-p);
+      letter-spacing: 0.01em;
+    }
+
+    &:hover {
+      background: var(--sidebar-hover, #f5f7fa);
+      border-radius: 0;
+
+      p {
+        color: var(--blue, #0066ff);
+      }
+
+      img {
+        filter: none;
+      }
+    }
+
+    &.active {
+      background: transparent;
+      border-left: 3px solid var(--blue, #0066ff);
+      padding-left: 21px;
+
+      p {
+        color: var(--blue, #0066ff);
+        font-weight: 600;
+      }
+
+      img {
+        filter: none;
+      }
+    }
+  }
+
+  /* Login/Logout button in sidebar */
+  .Login_Logout {
+    border-bottom: 1px solid var(--sidebar-border, #e6e6e6);
+
+    .login-logout-icon {
+      display: none !important;
+    }
+  }
+
+  /* Welcome text */
+  .welcome-text {
+    padding: 12px 24px;
+    font-size: 14px;
+    color: var(--font-light);
+    border-bottom: 1px solid var(--sidebar-border, #e6e6e6);
+  }
+
+  /* Login options inside sidebar */
+  .login-options {
+    position: static;
+    width: 100%;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 8px 24px 16px;
+    background: transparent;
+
+    button {
+      justify-content: flex-start;
+      background: var(--navbar-bg);
+      border: 1px solid var(--sidebar-border, #e6e6e6);
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 14px;
+
+      &:hover {
+        background: var(--blue, #2f80ed);
+        color: #fff;
+        border-color: var(--blue, #2f80ed);
+
+        p {
+          color: #fff;
+        }
+
+        img {
+          filter: brightness(0) invert(1);
+        }
+      }
+
+      img {
+        width: 20px;
+        height: 20px;
+      }
+
+      p {
+        margin: 0;
+        color: var(--navbar-p);
+        font-size: 14px;
+      }
+    }
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* ────────────────────────────────────────────────────────
+   Login options (desktop dropdown — outside .open)
+   ──────────────────────────────────────────────────────── */
 .login-options {
   position: absolute;
   top: 100%;
@@ -142,14 +336,14 @@
     width: 100%;
 
     &:hover {
-      background: var(--blue, #2f80ed);
+      background: var(--blue, #2980b9);
       color: #fff;
       transform: translateY(-1px);
-      
+
       p {
         color: #fff;
       }
-      
+
       img {
         filter: brightness(0) invert(1);
       }
@@ -170,9 +364,12 @@
 
 .Login_Logout {
   font-size: 16px;
-  font-family: 'poppins', sans-serif;
+  font-family: "poppins", sans-serif;
 }
 
+/* ────────────────────────────────────────────────────────
+   Hamburger / navigation button
+   ──────────────────────────────────────────────────────── */
 .navigation__buttons {
   display: none;
   position: relative;
@@ -180,15 +377,15 @@
   cursor: pointer;
   outline: none;
   -webkit-tap-highlight-color: transparent;
-  
+
   &:focus {
     outline: none;
   }
-  
+
   &:focus-visible {
     outline: none;
   }
-  
+
   .nav-btn {
     display: flex;
     align-items: center;
@@ -198,15 +395,15 @@
     outline: none;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-    
+
     &:focus {
       outline: none;
     }
-    
+
     &:active {
       outline: none;
     }
-    
+
     img {
       pointer-events: none;
       user-select: none;
@@ -214,6 +411,9 @@
   }
 }
 
+/* ────────────────────────────────────────────────────────
+   Sun/Moon toggle
+   ──────────────────────────────────────────────────────── */
 .sun-moon-toggle {
   width: 46px;
   height: 46px;
@@ -235,7 +435,9 @@
   pointer-events: none;
   opacity: 0;
   transform: scale(0.6) rotate(0deg);
-  transition: transform 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.2s ease-in 0.1s;
   background: radial-gradient(circle, rgba(0, 0, 0, 0) 50%, #fbbc05 50%);
 }
 
@@ -245,13 +447,11 @@
   display: block;
   width: 100%;
   height: 100%;
-  background: radial-gradient(
-    circle,
-    #fbbc05 30%,
-    rgba(0, 0, 0, 0) 31%,
-    rgba(0, 0, 0, 0) 50%,
-    #fbbc05 51%
-  );
+  background: radial-gradient(circle,
+      #fbbc05 30%,
+      rgba(0, 0, 0, 0) 31%,
+      rgba(0, 0, 0, 0) 50%,
+      #fbbc05 51%);
   transform: rotate(45deg);
 }
 
@@ -259,7 +459,9 @@
   pointer-events: auto;
   opacity: 1;
   transform: scale(1) rotate(180deg);
-  transition: transform 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.2s ease-in 0.1s;
 }
 
 .moon {
@@ -274,14 +476,18 @@
   box-shadow: 9px 3px 0px 0px #f0f0f0;
   opacity: 0;
   transform: scale(0.3) rotate(65deg);
-  transition: transform 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.2s ease-in 0.1s;
 }
 
 .moon.visible {
   pointer-events: auto;
   opacity: 1;
   transform: scale(1) rotate(0deg);
-  transition: transform 0.3s ease-in, opacity 0.2s ease-in 0.1s;
+  transition:
+    transform 0.3s ease-in,
+    opacity 0.2s ease-in 0.1s;
 }
 
 .star {
@@ -346,6 +552,9 @@
   transform: scale(0.45) rotate(35deg);
 }
 
+/* ────────────────────────────────────────────────────────
+   Responsive — switch to sidebar at ≤ 1100px
+   ──────────────────────────────────────────────────────── */
 @media (max-width: 1100px) {
   .navbar__menu {
     display: none !important;
@@ -357,5 +566,25 @@
 
   .navigation__buttons {
     display: block !important;
+  }
+}
+
+/* ────────────────────────────────────────────────────────
+   Dark mode overrides for sidebar
+   ──────────────────────────────────────────────────────── */
+:host-context([data-theme="dark"]) {
+  .sidebar-close-btn:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .navbar__menu.open .navbar__menu__items:hover {
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .navbar__menu.open .navbar__menu__items,
+  .navbar__menu.open .Login_Logout,
+  .navbar__menu.open .welcome-text,
+  .navbar__menu.open .sidebar-header {
+    border-color: var(--border-color, #282a3b);
   }
 }
