@@ -21,6 +21,7 @@ export class NavbarComponent implements OnInit {
   isSunVisible = true;
   isLoggedIn = false;
   showLoginOptions = false;
+  isCommunityDropdownOpen = false;
   user: any;
   currentRoute = '/';
 
@@ -35,6 +36,7 @@ export class NavbarComponent implements OnInit {
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
         this.isMenuOpen = false;
+        this.isCommunityDropdownOpen = false;
       });
 
     if (isPlatformBrowser(this.platformId)) {
@@ -59,15 +61,33 @@ export class NavbarComponent implements OnInit {
       this.logout();
     } else {
       this.showLoginOptions = !this.showLoginOptions;
+      if (this.showLoginOptions) {
+        this.isCommunityDropdownOpen = false;
+      }
     }
+  }
+
+  toggleCommunityDropdown(): void {
+    this.isCommunityDropdownOpen = !this.isCommunityDropdownOpen;
+    if (this.isCommunityDropdownOpen) {
+      this.showLoginOptions = false;
+    }
+  }
+
+  closeCommunityDropdown(): void {
+    this.isCommunityDropdownOpen = false;
   }
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
+    if (!this.isMenuOpen) {
+      this.isCommunityDropdownOpen = false;
+    }
   }
 
   closeMenu(): void {
     this.isMenuOpen = false;
+    this.isCommunityDropdownOpen = false;
   }
 
   toggleTheme(): void {
@@ -112,6 +132,8 @@ export class NavbarComponent implements OnInit {
     const loginButton = document.querySelector('.Login_Logout');
     const navbarMenu = document.querySelector('#navbarMenu');
     const navigationButtons = document.querySelector('.navigation__buttons');
+    const communityDropdown = document.querySelector('.community-dropdown');
+    const communityButton = document.querySelector('.community-toggle');
 
     // Handle login options closing
     if (
@@ -120,6 +142,15 @@ export class NavbarComponent implements OnInit {
       !loginButton?.contains(event.target as Node)
     ) {
       this.showLoginOptions = false;
+    }
+
+    // Handle community dropdown closing
+    if (
+      this.isCommunityDropdownOpen &&
+      !communityDropdown?.contains(event.target as Node) &&
+      !communityButton?.contains(event.target as Node)
+    ) {
+      this.isCommunityDropdownOpen = false;
     }
 
     // Handle menu closing when clicking outside (but not on the toggle button)
@@ -135,6 +166,9 @@ export class NavbarComponent implements OnInit {
 
   isRouteActive(route: string): boolean {
     if (route === '/projects' && this.currentRoute.startsWith('/project')) {
+      return true;
+    }
+    if (route === '/community' && (this.currentRoute === '/community' || this.currentRoute === '/opportunities')) {
       return true;
     }
     return this.currentRoute === route;
