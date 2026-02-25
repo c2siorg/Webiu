@@ -29,10 +29,8 @@ export class ProjectService {
     if (cached) return cached;
 
     try {
-      
       const repositories = await this.githubService.getOrgRepos(page, limit);
 
-      
       const BATCH_SIZE = 10;
       const repositoriesWithPRs = [];
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
@@ -50,7 +48,6 @@ export class ProjectService {
         repositoriesWithPRs.push(...batchResults);
       }
 
-      
       const orgInfo = await this.githubService.getPublicUserProfile(
         this.githubService.org,
       );
@@ -113,7 +110,6 @@ export class ProjectService {
     try {
       const repositories = await this.githubService.searchOrgRepos(query);
 
-      
       const repositoriesWithPRs = await Promise.all(
         repositories.map(async (repo) => {
           try {

@@ -5,7 +5,6 @@ import { ProjectService } from './project.service';
 export class ProjectController {
   constructor(private projectService: ProjectService) {}
 
-  
   @Get('projects')
   @Header('Cache-Control', 'public, max-age=300')
   async getAllProjects(
@@ -21,7 +20,6 @@ export class ProjectController {
     return this.projectService.getAllProjects(pageNum, limitNum);
   }
 
-  
   @Get('search')
   @Header('Cache-Control', 'public, max-age=300')
   async searchProjects(@Query('q') query: string) {
