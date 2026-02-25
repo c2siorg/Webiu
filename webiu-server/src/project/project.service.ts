@@ -1,9 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  InternalServerErrorException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, Logger, BadRequestException } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
@@ -28,50 +23,42 @@ export class ProjectService {
     }>(cacheKey);
     if (cached) return cached;
 
-    try {
-      // Use GitHub's native pagination instead of fetching everything
-      const repositories = await this.githubService.getOrgRepos(page, limit);
+    // Use GitHub's native pagination instead of fetching everything
+    const repositories = await this.githubService.getOrgRepos(page, limit);
 
-      // Fetch PR counts in batches to avoid overwhelming the API
-      const BATCH_SIZE = 10;
-      const repositoriesWithPRs = [];
-      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
-        const batch = repositories.slice(i, i + BATCH_SIZE);
-        const batchResults = await Promise.all(
-          batch.map(async (repo) => {
-            try {
-              const pulls = await this.githubService.getRepoPulls(repo.name);
-              return { ...repo, pull_requests: pulls.length };
-            } catch {
-              return { ...repo, pull_requests: 0 };
-            }
-          }),
-        );
-        repositoriesWithPRs.push(...batchResults);
-      }
-
-      // Get the true total number of public repositories to pass to frontend pagination
-      const orgInfo = await this.githubService.getPublicUserProfile(
-        this.githubService.org,
+    // Fetch PR counts in batches to avoid overwhelming the API
+    const BATCH_SIZE = 10;
+    const repositoriesWithPRs = [];
+    for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
+      const batch = repositories.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(async (repo) => {
+          try {
+            const pulls = await this.githubService.getRepoPulls(repo.name);
+            return { ...repo, pull_requests: pulls.length };
+          } catch {
+            return { ...repo, pull_requests: 0 };
+          }
+        }),
       );
-      const total = orgInfo.public_repos || 0;
-
-      const result = {
-        total,
-        page,
-        limit,
-        repositories: repositoriesWithPRs,
-      };
-
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
-      return result;
-    } catch (error) {
-      this.logger.error(
-        'Error fetching repositories or pull requests:',
-        error.response ? error.response.data : error.message,
-      );
-      throw new InternalServerErrorException('Internal server error');
+      repositoriesWithPRs.push(...batchResults);
     }
+
+    // Get the true total number of public repositories to pass to frontend pagination
+    const orgInfo = await this.githubService.getPublicUserProfile(
+      this.githubService.org,
+    );
+    const total = orgInfo.public_repos || 0;
+
+    const result = {
+      total,
+      page,
+      limit,
+      repositories: repositoriesWithPRs,
+    };
+
+    this.cacheService.set(cacheKey, result, CACHE_TTL);
+    return result;
   }
 
   async getIssuesAndPr(org: string, repo: string) {
@@ -83,21 +70,13 @@ export class ProjectService {
     const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
-    try {
-      const data = await this.githubService.getRepoIssues(org, repo);
+    const data = await this.githubService.getRepoIssues(org, repo);
 
-      const issues = data.filter((item) => !item.pull_request).length;
-      const pullRequests = data.filter((item) => item.pull_request).length;
+    const issues = data.filter((item) => !item.pull_request).length;
+    const pullRequests = data.filter((item) => item.pull_request).length;
 
-      const result = { issues, pullRequests };
-      this.cacheService.set(cacheKey, result);
-      return result;
-    } catch (error) {
-      this.logger.error(
-        'Error fetching issues and PRs:',
-        error.response?.data || error.message,
-      );
-      throw new InternalServerErrorException('Failed to fetch issues and PRs');
-    }
+    const result = { issues, pullRequests };
+    this.cacheService.set(cacheKey, result);
+    return result;
   }
 }
