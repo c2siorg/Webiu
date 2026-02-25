@@ -5,14 +5,14 @@ import { UsernameDto } from './dto/username.dto';
 
 @Controller('api/contributor')
 // All contributor endpoints: stricter limit — each call fans out to GitHub API
-@Throttle({ default: { ttl: 60_000, limit: 10 } })
+@Throttle({ default: { ttl: 60_000, limit: 60 } })
 export class ContributorController {
   constructor(private contributorService: ContributorService) {}
 
   // Most expensive endpoint: fetches contributors for every repo in the org.
-  // Tightest limit: 5 requests per IP per minute.
+  // Keep a conservative limit, but not so low that normal page refreshes hit 429.
   @Get('contributors')
-  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @Throttle({ default: { ttl: 60_000, limit: 120 } })
   @Header('Cache-Control', 'public, max-age=300')
   async getAllContributors() {
     return this.contributorService.getAllContributors();
