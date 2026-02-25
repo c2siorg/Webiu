@@ -1,46 +1,47 @@
 import { HttpErrorResponse, HttpInterceptorFn } from '@angular/common/http';
-import { inject } from '@angular/core';
-import { ToastrService } from 'ngx-toastr';
 import { catchError, throwError } from 'rxjs';
 
+function getUserMessage(error: HttpErrorResponse): string {
+  if (error.status === 0) {
+    return 'Network error — please check your connection and try again.';
+  }
+
+  switch (error.status) {
+    case 400:
+      return 'Bad request. Please check your input and try again.';
+    case 401:
+      return 'Unauthorized. Please log in and try again.';
+    case 403:
+      return 'Access denied.';
+    case 404:
+      return 'The requested resource was not found.';
+    case 429:
+      return 'Too many requests — please wait a moment and try again.';
+    case 500:
+      return 'Internal server error. Please try again later.';
+    case 502:
+      return 'Bad gateway. The server is temporarily unavailable.';
+    case 503:
+      return 'Service unavailable. Please try again later.';
+    default:
+      return error.status >= 500
+        ? 'A server error occurred. Please try again later.'
+        : 'An unexpected error occurred. Please try again.';
+  }
+}
+
 export const globalErrorInterceptor: HttpInterceptorFn = (req, next) => {
-    const toastr = inject(ToastrService);
+  return next(req).pipe(
+    catchError((error: HttpErrorResponse) => {
+      const userMessage = getUserMessage(error);
 
-    return next(req).pipe(
-        catchError((error: HttpErrorResponse) => {
-            let errorMessage = 'An unknown error occurred!';
+      console.error(
+        `[HTTP ${error.status}] ${req.method} ${req.urlWithParams} - ${userMessage}`,
+      );
 
-            if (error.error instanceof ErrorEvent) {
-                // Client-side error
-                errorMessage = `Error: ${error.error.message}`;
-            } else {
-                // Server-side error
-                switch (error.status) {
-                    case 400:
-                        errorMessage = error.error?.message || 'Bad Request (Validation Error)';
-                        break;
-                    case 401:
-                        errorMessage = 'Unauthorized. Please login again.';
-                        break;
-                    case 403:
-                        errorMessage = 'Forbidden. You do not have permission.';
-                        break;
-                    case 404:
-                        errorMessage = 'Resource not found.';
-                        break;
-                    case 429:
-                        errorMessage = 'Too many requests. Please try again later.';
-                        break;
-                    case 500:
-                        errorMessage = 'Internal Server Error. Please try again later.';
-                        break;
-                    default:
-                        errorMessage = `Error Code: ${error.status}\nMessage: ${error.message}`;
-                }
-            }
-
-            toastr.error(errorMessage, 'API Error');
-            return throwError(() => error);
-        })
-    );
+      return throwError(() => Object.assign(error, { userMessage }));
+    }),
+  );
 };
+
+export const errorInterceptor = globalErrorInterceptor;
