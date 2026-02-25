@@ -303,10 +303,17 @@
 /* ────────────────────────────────────────────────────────
    Login options (desktop dropdown — outside .open)
    ──────────────────────────────────────────────────────── */
+.login-wrapper {
+  position: relative;   
+  display: inline-flex;
+  flex-shrink: 0;
+}
+
+
 .login-options {
   position: absolute;
-  top: 100%;
-  right: 20px;
+  top: 164%;
+  right: 0;  
   background: var(--navbar-bg);
   border: 1px solid var(--border-color);
   border-radius: 8px;
