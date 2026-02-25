@@ -5,6 +5,7 @@ import { isPlatformServer } from '@angular/common';
 import { routes } from './app.routes';
 import { provideClientHydration } from '@angular/platform-browser';
 import { provideServiceWorker } from '@angular/service-worker';
+import { errorInterceptor } from './common/interceptors/error.interceptor';
 
 const serverInterceptor: HttpInterceptorFn = (req, next) => {
   const platformId = inject(PLATFORM_ID);
@@ -23,7 +24,7 @@ export const appConfig: ApplicationConfig = {
       routes,
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
     ),
-    provideHttpClient(withFetch(), withInterceptors([serverInterceptor])),
+    provideHttpClient(withFetch(), withInterceptors([serverInterceptor, errorInterceptor])),
     provideClientHydration(),
     provideServiceWorker('ngsw-worker.js', {
       enabled: !isDevMode(),
