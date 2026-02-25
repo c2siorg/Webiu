@@ -6,11 +6,17 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProjectCacheService } from '../../services/project-cache.service';
 import { Project } from '../projects/project.model';
 import { ProjectBasicInfoComponent } from '../../components/project-basic-info/project-basic-info.component';
+import { ProjectInsightsComponent } from '../../components/project-insights/project-insights.component';
 
 @Component({
   selector: 'app-project-details',
   standalone: true,
-  imports: [CommonModule, RouterModule, ProjectBasicInfoComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ProjectBasicInfoComponent,
+    ProjectInsightsComponent,
+  ],
   templateUrl: './project-details.component.html',
   styleUrls: ['./project-details.component.scss'],
 })
