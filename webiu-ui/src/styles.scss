@@ -76,6 +76,8 @@ body {
   --line-height-lg: 1.8;
   --spacing: 16px;
   --profile-username-color: blue;
+  --sidebar-border: #e6e6e6;
+  --sidebar-hover: #f5f7fa;
 }
 [data-theme="dark"] {
   background-color: #0a0a15;
@@ -123,6 +125,8 @@ body {
   --navbar-bg: #11111e;
   --navbar-p: var(--font-color-light);
   --publications-card-box-shadow: none;
+  --sidebar-border: #282a3b;
+  --sidebar-hover: rgba(255, 255, 255, 0.05);
 }
 [data-theme="dark"] .navbar__menu__items img {
   filter: invert(1);
@@ -131,6 +135,9 @@ body {
   filter: invert(1);
 }
 [data-theme="dark"] .nav-btn {
+  filter: invert(1);
+}
+[data-theme="dark"] .sidebar-close-btn img {
   filter: invert(1);
 }
 h1,
