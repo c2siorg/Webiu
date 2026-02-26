@@ -45,6 +45,10 @@ describe('GithubService', () => {
 
     service = module.get<GithubService>(GithubService);
     cacheService = module.get<CacheService>(CacheService);
+
+    // Reset axios mock and set isAxiosError to return false by default
+    jest.clearAllMocks();
+    (mockedAxios.isAxiosError as unknown as jest.Mock).mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -137,10 +141,11 @@ describe('GithubService', () => {
       expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null on error', async () => {
+    it('should propagate error on API failure', async () => {
       mockedAxios.get.mockRejectedValue(new Error('API error'));
-      const result = await service.getRepoContributors('c2siorg', 'repo1');
-      expect(result).toBeNull();
+      await expect(
+        service.getRepoContributors('c2siorg', 'repo1'),
+      ).rejects.toThrow('API error');
     });
   });
 
@@ -250,7 +255,10 @@ describe('GithubService', () => {
       expect(result).toEqual({ login: 'testuser' });
       expect(mockedAxios.get).toHaveBeenCalledWith(
         'https://api.github.com/user',
-        { headers: { Authorization: 'Bearer user-access-token' } },
+        {
+          headers: { Authorization: 'Bearer user-access-token' },
+          timeout: 35000,
+        },
       );
     });
   });
@@ -268,6 +276,145 @@ describe('GithubService', () => {
         'http://redirect',
       );
       expect(result).toEqual({ access_token: 'gh-token' });
+    });
+  });
+
+  describe('getPublicUserProfile', () => {
+    it('should fetch and cache public user profile', async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: {
+          login: 'testuser',
+          avatar_url: 'https://...',
+          name: 'Test User',
+          bio: 'Test bio',
+        },
+      });
+
+      const result = await service.getPublicUserProfile('testuser');
+      expect(result.login).toBe('testuser');
+      expect(result.name).toBe('Test User');
+
+      // Cached on second call
+      await service.getPublicUserProfile('testuser');
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should include timeout in axios request', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: { login: 'testuser' } });
+
+      await service.getPublicUserProfile('testuser');
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://api.github.com/users/testuser',
+        expect.objectContaining({
+          timeout: 35000,
+          headers: expect.any(Object),
+        }),
+      );
+    });
+
+    it('should propagate error on API failure', async () => {
+      mockedAxios.get.mockRejectedValue(new Error('API error'));
+      await expect(service.getPublicUserProfile('testuser')).rejects.toThrow(
+        'API error',
+      );
+    });
+  });
+
+  describe('handleGitHubError - Rate Limit', () => {
+    it('should throw a rate-limit error on 429 status', async () => {
+      (mockedAxios.isAxiosError as unknown as jest.Mock).mockReturnValueOnce(
+        true,
+      );
+      const axiosError = new Error('Too Many Requests');
+      (axiosError as any).isAxiosError = true;
+      (axiosError as any).response = {
+        status: 429,
+        headers: {
+          'x-ratelimit-remaining': '0',
+          'x-ratelimit-reset': '1700000000',
+        },
+      };
+      mockedAxios.get.mockRejectedValue(axiosError);
+
+      await expect(service.getOrgRepos()).rejects.toThrow(
+        'GitHub API rate limit exceeded',
+      );
+    });
+
+    it('should include reset time in rate-limit error message', async () => {
+      (mockedAxios.isAxiosError as unknown as jest.Mock).mockReturnValueOnce(
+        true,
+      );
+      const resetTimestamp = Math.floor(Date.now() / 1000) + 3600; // 1 hour from now
+      const axiosError = new Error('Too Many Requests');
+      (axiosError as any).isAxiosError = true;
+      (axiosError as any).response = {
+        status: 429,
+        headers: {
+          'x-ratelimit-remaining': '0',
+          'x-ratelimit-reset': resetTimestamp.toString(),
+        },
+      };
+      mockedAxios.get.mockRejectedValue(axiosError);
+
+      try {
+        await service.getOrgRepos();
+        fail('Should have thrown');
+      } catch (error: any) {
+        expect(error.message).toContain('GitHub API rate limit exceeded');
+        expect(error.message).toContain('Reset at:');
+        expect(error.message).toContain('Remaining: 0');
+      }
+    });
+  });
+
+  describe('handleGitHubError - Timeout', () => {
+    it('should throw a timeout error on ECONNABORTED', async () => {
+      (mockedAxios.isAxiosError as unknown as jest.Mock).mockReturnValueOnce(
+        true,
+      );
+      const axiosError = new Error('timeout');
+      (axiosError as any).isAxiosError = true;
+      (axiosError as any).code = 'ECONNABORTED';
+      mockedAxios.get.mockRejectedValue(axiosError);
+
+      await expect(service.getOrgRepos()).rejects.toThrow(
+        'GitHub API request timeout after 35000ms',
+      );
+    });
+  });
+
+  describe('handleGitHubError - Generic Errors', () => {
+    it('should throw with status text for http errors', async () => {
+      const axiosError = new Error('Internal Server Error');
+      (axiosError as any).isAxiosError = true;
+      (axiosError as any).response = {
+        status: 500,
+        statusText: 'Internal Server Error',
+      };
+      mockedAxios.get.mockRejectedValue(axiosError);
+
+      await expect(service.getOrgRepos()).rejects.toThrow(
+        'GitHub API error: Internal Server Error',
+      );
+    });
+
+    it('should throw with message for generic axios errors', async () => {
+      const axiosError = new Error('Network error');
+      (axiosError as any).isAxiosError = true;
+      mockedAxios.get.mockRejectedValue(axiosError);
+
+      await expect(service.getOrgRepos()).rejects.toThrow(
+        'GitHub API error: Network error',
+      );
+    });
+
+    it('should throw with generic message for unknown errors', async () => {
+      mockedAxios.get.mockRejectedValue(new Error('Unknown error'));
+
+      await expect(service.getOrgRepos()).rejects.toThrow(
+        'GitHub API error: Unknown error',
+      );
     });
   });
 });

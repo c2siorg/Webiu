@@ -21,6 +21,8 @@ export interface GithubRepo {
   [key: string]: unknown;
 }
 
+const AXIOS_TIMEOUT = 35000; // 35 seconds
+
 const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
@@ -47,24 +49,40 @@ export class GithubService {
     return this.orgName;
   }
 
+  /**
+   * Fetch all paginated results from a GitHub API endpoint.
+   *
+   * @param url The API endpoint URL to fetch from
+   * @returns All accumulated results from all pages
+   * @throws Error with details if any page request fails (all-or-nothing behavior)
+   *
+   * Note: This method uses all-or-nothing semantics. If any page fails to fetch,
+   * all accumulated results are discarded and an error is thrown. This ensures
+   * callers work with complete datasets. If partial results are acceptable,
+   * implement a separate method with partial-fetch semantics.
+   */
   private async fetchAllPages(url: string): Promise<any[]> {
     const results: any[] = [];
     let page = 1;
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
-        `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
-      );
+      try {
+        const response = await axios.get(
+          `${url}${separator}per_page=100&page=${page}`,
+          { headers: this.headers, timeout: AXIOS_TIMEOUT },
+        );
 
-      const data = response.data;
-      if (!Array.isArray(data) || data.length === 0) break;
+        const data = response.data;
+        if (!Array.isArray(data) || data.length === 0) break;
 
-      results.push(...data);
+        results.push(...data);
 
-      if (data.length < 100) break;
-      page++;
+        if (data.length < 100) break;
+        page++;
+      } catch (error) {
+        this.handleGitHubError(error);
+      }
     }
 
     return results;
@@ -76,18 +94,22 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
-        `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
-      );
+      try {
+        const response = await axios.get(
+          `${url}${separator}per_page=100&page=${page}`,
+          { headers: this.headers, timeout: AXIOS_TIMEOUT },
+        );
 
-      const items = response.data.items || [];
-      if (items.length === 0) break;
+        const items = response.data.items || [];
+        if (items.length === 0) break;
 
-      results.push(...items);
+        results.push(...items);
 
-      if (items.length < 100) break;
-      page++;
+        if (items.length < 100) break;
+        page++;
+      } catch (error) {
+        this.handleGitHubError(error);
+      }
     }
 
     return results;
@@ -304,15 +326,11 @@ export class GithubService {
     const cached = this.cacheService.get<any[] | null>(cacheKey);
     if (cached !== null) return cached;
 
-    try {
-      const contributors = await this.fetchAllPages(
-        `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
-      );
-      this.cacheService.set(cacheKey, contributors);
-      return contributors;
-    } catch {
-      return null;
-    }
+    const contributors = await this.fetchAllPages(
+      `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
+    );
+    this.cacheService.set(cacheKey, contributors, CACHE_TTL);
+    return contributors;
   }
 
   async searchUserIssues(username: string): Promise<any[]> {
@@ -347,6 +365,7 @@ export class GithubService {
           try {
             const response = await axios.get(pr.pull_request.url, {
               headers: this.headers,
+              timeout: AXIOS_TIMEOUT,
             });
             if (response.data.merged_at) {
               pr.merged_at = response.data.merged_at;
@@ -370,22 +389,31 @@ export class GithubService {
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
-    const response = await axios.get(`${this.baseUrl}/user`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    return response.data;
+    try {
+      const response = await axios.get(`${this.baseUrl}/user`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        timeout: AXIOS_TIMEOUT,
+      });
+      return response.data;
+    } catch (error) {
+      this.handleGitHubError(error);
+    }
   }
 
   async getPublicUserProfile(username: string): Promise<any> {
-    const cacheKey = `user_profile_${username}`;
+    const cacheKey = `public_profile_${username}`;
     const cached = this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
-
-    const response = await axios.get(`${this.baseUrl}/users/${username}`, {
-      headers: this.headers,
-    });
-    this.cacheService.set(cacheKey, response.data);
-    return response.data;
+    try {
+      const response = await axios.get(`${this.baseUrl}/users/${username}`, {
+        headers: this.headers,
+        timeout: AXIOS_TIMEOUT,
+      });
+      this.cacheService.set(cacheKey, response.data, CACHE_TTL);
+      return response.data;
+    } catch (error) {
+      this.handleGitHubError(error);
+    }
   }
 
   async exchangeGithubCode(
@@ -394,21 +422,26 @@ export class GithubService {
     code: string,
     redirectUri: string,
   ): Promise<any> {
-    const response = await axios.post(
-      'https://github.com/login/oauth/access_token',
-      new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-        redirect_uri: redirectUri,
-      }).toString(),
-      {
-        headers: {
-          Accept: 'application/json',
+    try {
+      const response = await axios.post(
+        'https://github.com/login/oauth/access_token',
+        new URLSearchParams({
+          client_id: clientId,
+          client_secret: clientSecret,
+          code,
+          redirect_uri: redirectUri,
+        }).toString(),
+        {
+          headers: {
+            Accept: 'application/json',
+          },
+          timeout: AXIOS_TIMEOUT,
         },
-      },
-    );
-    return response.data;
+      );
+      return response.data;
+    } catch (error) {
+      this.handleGitHubError(error);
+    }
   }
 
   async getUserFollowersAndFollowing(username: string): Promise<{
@@ -427,9 +460,11 @@ export class GithubService {
       const [followersResponse, followingResponse] = await Promise.all([
         axios.get(`${this.baseUrl}/users/${username}/followers`, {
           headers: this.headers,
+          timeout: AXIOS_TIMEOUT,
         }),
         axios.get(`${this.baseUrl}/users/${username}/following`, {
           headers: this.headers,
+          timeout: AXIOS_TIMEOUT,
         }),
       ]);
 
@@ -441,11 +476,54 @@ export class GithubService {
       this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
-      this.logger.error(
-        `Error fetching GitHub social data for ${username}:`,
-        error.message,
-      );
-      throw error;
+      this.handleGitHubError(error);
     }
+  }
+
+  private handleGitHubError(error: unknown): never {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+
+      // Handle rate limit exceeded
+      if (axiosError.response?.status === 429) {
+        const remaining = axiosError.response.headers['x-ratelimit-remaining'];
+        const resetTime = axiosError.response.headers['x-ratelimit-reset'];
+        const reset = parseInt(resetTime, 10);
+        const resetStr = !isNaN(reset)
+          ? new Date(reset * 1000).toISOString()
+          : resetTime;
+        const message = `GitHub API rate limit exceeded.${remaining ? ` Remaining: ${remaining}.` : ''}${resetTime ? ` Reset at: ${resetStr}` : ''}`;
+        this.logger.error(message);
+        throw new Error(message);
+      }
+
+      // Handle timeout
+      if (error.code === 'ECONNABORTED') {
+        const message = `GitHub API request timeout after ${AXIOS_TIMEOUT}ms`;
+        this.logger.error(message);
+        throw new Error(message);
+      }
+
+      // Log rate limit info on any successful response
+      if (axiosError.response) {
+        const remaining = axiosError.response.headers['x-ratelimit-remaining'];
+        if (remaining) {
+          this.logger.warn(`GitHub API calls remaining: ${remaining}`);
+        }
+      }
+
+      // Handle other Axios errors
+      const message =
+        axiosError.response?.statusText ||
+        axiosError.message ||
+        'Unknown GitHub API error';
+      this.logger.error(`GitHub API error: ${message}`);
+      throw new Error(`GitHub API error: ${message}`);
+    }
+
+    // Handle generic errors
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    this.logger.error(`GitHub API error: ${message}`);
+    throw new Error(`GitHub API error: ${message}`);
   }
 }
