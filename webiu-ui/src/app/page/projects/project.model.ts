@@ -156,3 +156,10 @@ export interface ProjectInsights {
   badges: InsightBadges;
   stats: InsightStats;
 }
+
+export interface Contributor {
+  login: string;
+  contributions: number;
+  avatar_url: string;
+  html_url: string;
+}

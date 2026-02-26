@@ -6,6 +6,7 @@ import {
   Project,
   ProjectInsights,
   ProjectResponse,
+  Contributor,
 } from '../page/projects/project.model';
 
 @Injectable({
@@ -39,6 +40,15 @@ export class ProjectCacheService {
   getProjectInsights(name: string): Observable<ProjectInsights> {
     return this.http.get<ProjectInsights>(
       `${environment.serverUrl}/api/projects/${name}/insights`,
+    );
+  }
+
+  /**
+   * Fetches the list of contributors for a project.
+   */
+  getProjectContributors(name: string): Observable<Contributor[]> {
+    return this.http.get<Contributor[]>(
+      `${environment.serverUrl}/api/projects/${name}/contributors`,
     );
   }
 }

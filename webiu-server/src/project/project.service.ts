@@ -293,4 +293,38 @@ export class ProjectService {
       throw new InternalServerErrorException('Failed to generate insights');
     }
   }
+
+  /**
+   * Fetches the list of contributors for a specific repository.
+   * Results are cached to optimize performance.
+   */
+  async getProjectContributors(name: string) {
+    if (!name || !/^[a-zA-Z0-9-_\.]+$/.test(name)) {
+      throw new BadRequestException('Invalid project name provided');
+    }
+
+    const cacheKey = `project_contributors_${name}`;
+    const cached = this.cacheService.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const contributors = await this.githubService.getRepoContributors(
+        this.githubService.org,
+        name,
+      );
+
+      if (!contributors) {
+        return [];
+      }
+
+      this.cacheService.set(cacheKey, contributors, CACHE_TTL);
+      return contributors;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching contributors for ${name}:`,
+        (error as Error).message,
+      );
+      throw new InternalServerErrorException('Failed to fetch contributors');
+    }
+  }
 }
