@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -46,15 +47,18 @@ export class ContributorSearchComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
-      const param = params['username']?.trim();
-      if (param && param !== this.username) {
-        this.username = param;
-        this.fetchUserData();
-      }
-    });
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const param = params['username']?.trim();
+        if (param && param !== this.username) {
+          this.username = param;
+          this.fetchUserData();
+        }
+      });
   }
 
   onSearch() {
