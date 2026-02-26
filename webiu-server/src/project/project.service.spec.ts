@@ -48,7 +48,7 @@ describe('ProjectService', () => {
   });
 
   describe('getAllProjects', () => {
-    it('should return { repositories } with pull request counts using native pagination', async () => {
+    it('should return paginated repositories with pull request counts using native pagination', async () => {
       mockGithubService.getOrgRepos.mockResolvedValue([
         { name: 'repo1' },
         { name: 'repo2' },
@@ -63,6 +63,8 @@ describe('ProjectService', () => {
       const result = await service.getAllProjects(1, 10);
 
       expect(result.total).toBe(20);
+      expect(result.page).toBe(1);
+      expect(result.limit).toBe(10);
       expect(result.repositories).toHaveLength(2);
       expect(result.repositories[0].pull_requests).toBe(2);
       expect(result.repositories[1].pull_requests).toBe(1);

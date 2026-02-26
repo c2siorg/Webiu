@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ProjectController, IssuesController } from './project.controller';
 import { ProjectService } from './project.service';
+import { PaginationQueryDto } from './dto/pagination-query.dto';
 
 describe('ProjectController', () => {
   let controller: ProjectController;
@@ -28,21 +29,36 @@ describe('ProjectController', () => {
   });
 
   describe('getAllProjects', () => {
-    it('should pass parsed page/limit to service and return its value', async () => {
-      const mockResult = { repositories: [{ name: 'repo1' }] };
+    it('should return paginated projects from the service', async () => {
+      const mockResult = {
+        total: 20,
+        page: 2,
+        limit: 5,
+        repositories: [
+          { name: 'repo1', pull_requests: 3 },
+          { name: 'repo2', pull_requests: 1 },
+        ],
+      };
       mockProjectService.getAllProjects.mockResolvedValue(mockResult);
 
-      const result = await controller.getAllProjects('2', '5');
+      const query: PaginationQueryDto = { page: 2, limit: 5 };
+      const result = await controller.getAllProjects(query);
 
       expect(result).toEqual(mockResult);
       expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(2, 5);
     });
 
-    it('should default page/limit when none provided', async () => {
-      const mockResult = { repositories: [] };
+    it('should use default page=1 and limit=10 when query params are omitted', async () => {
+      const mockResult = {
+        total: 0,
+        page: 1,
+        limit: 10,
+        repositories: [],
+      };
       mockProjectService.getAllProjects.mockResolvedValue(mockResult);
 
-      const result = await controller.getAllProjects();
+      const query: PaginationQueryDto = {};
+      const result = await controller.getAllProjects(query);
 
       expect(result).toEqual(mockResult);
       expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(1, 10);

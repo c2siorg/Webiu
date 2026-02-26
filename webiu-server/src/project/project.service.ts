@@ -18,7 +18,7 @@ export class ProjectService {
     private cacheService: CacheService,
   ) {}
 
-  async getAllProjects(page = 1, limit = 10) {
+  async getAllProjects(page: number = 1, limit: number = 10) {
     const cacheKey = `projects_p${page}_pp${limit}`;
     const cached = this.cacheService.get<{
       total: number;

@@ -1,5 +1,6 @@
 import { Controller, Get, Query, Header } from '@nestjs/common';
 import { ProjectService } from './project.service';
+import { PaginationQueryDto } from './dto/pagination-query.dto';
 
 @Controller('api/projects')
 export class ProjectController {
@@ -7,16 +8,10 @@ export class ProjectController {
 
   @Get('projects')
   @Header('Cache-Control', 'public, max-age=300')
-  async getAllProjects(
-    @Query('page') page: string = '1',
-    @Query('limit') limit: string = '10',
-  ) {
-    const pageNum = Math.max(1, parseInt(page as any, 10) || 1);
-    const limitNum = Math.min(
-      100,
-      Math.max(1, parseInt(limit as any, 10) || 10),
-    );
-    return this.projectService.getAllProjects(pageNum, limitNum);
+  async getAllProjects(@Query() query: PaginationQueryDto) {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    return this.projectService.getAllProjects(page, limit);
   }
 }
 
