@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { AllExceptionsFilter } from './common/filters/http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -11,7 +12,7 @@ async function bootstrap() {
 
   app.use(helmet());
   app.use(compression());
-
+  app.useGlobalFilters(new AllExceptionsFilter());
   const frontendUrl = configService.get<string>(
     'FRONTEND_BASE_URL',
     'http://localhost:4200',
