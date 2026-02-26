@@ -1,8 +1,9 @@
-import { Component, HostListener, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { Component, HostListener, OnInit, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { filter } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -16,6 +17,7 @@ export class NavbarComponent implements OnInit {
   private router = inject(Router);
   private themeService = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
+  private destroyRef = inject(DestroyRef);
 
   isMenuOpen = false;
   isSunVisible = true;
@@ -31,6 +33,7 @@ export class NavbarComponent implements OnInit {
         filter(
           (event): event is NavigationEnd => event instanceof NavigationEnd,
         ),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;

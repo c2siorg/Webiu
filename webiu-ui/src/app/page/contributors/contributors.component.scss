@@ -363,11 +363,26 @@
     .search-section {
       .search-container {
         .search-wrapper {
-          flex-direction: column;
+          gap: 8px;
+
+          .input-container {
+            flex: 1;
+            min-width: 0;
+          }
 
           .search-button {
-            width: 100%;
-            justify-content: center;
+            flex-shrink: 0;
+            padding: 14px 18px;
+            width: auto;
+
+            span {
+              display: none;
+            }
+
+            img {
+              width: 18px;
+              height: 18px;
+            }
           }
         }
       }

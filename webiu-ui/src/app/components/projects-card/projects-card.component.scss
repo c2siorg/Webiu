@@ -21,6 +21,7 @@
     padding: 40px;
     box-shadow: none;
     border: 2px dashed var(--border-color, #ccc);
+
     p {
       font-size: 16px;
       color: var(--primary-dark);
@@ -56,6 +57,7 @@
           h3 {
             color: #a30000;
           }
+
           transform: translateY(-1px);
         }
       }
@@ -98,7 +100,7 @@
       .projects__card__details__info {
         display: flex;
         flex-direction: row;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 10px;
 
         .pr-btn {
@@ -116,7 +118,6 @@
 
           p {
             color: var(--card-color-p);
-            width: 100px;
             font-size: 14px;
             font-weight: 500;
             line-height: 150%;
@@ -131,9 +132,11 @@
             padding: 6px;
             flex-shrink: 0;
           }
+
           svg {
             flex-shrink: 0;
           }
+
           svg path {
             fill: var(--card-color-p);
           }
@@ -168,9 +171,11 @@
             font-weight: 500;
             line-height: 150%;
           }
+
           svg {
             flex-shrink: 0;
           }
+
           svg path {
             fill: var(--card-color-p);
           }
@@ -431,6 +436,7 @@
     .projects__card__hidden {
       .projects__card__hidden__tags {
         max-width: 100%;
+
         .projects__card__tag {
           font-size: 10px;
           padding: 3px 5px;
@@ -439,6 +445,7 @@
 
       .projects__card__details {
         align-items: flex-start;
+
         p {
           font-size: 12px;
         }
@@ -448,9 +455,11 @@
 
   .projects__card.no-projects {
     padding: 20px;
+
     h3 {
       font-size: 16px;
     }
+
     p {
       font-size: 12px;
     }
