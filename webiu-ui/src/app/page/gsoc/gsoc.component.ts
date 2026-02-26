@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { gsocData } from '../../common/data/gsoc';
 import { CommonModule } from '@angular/common';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
+
 
 @Component({
   selector: 'app-gsoc',

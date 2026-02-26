@@ -22,7 +22,7 @@ export class BackToTopComponent implements OnInit, OnDestroy {
     this.isBrowser = isPlatformBrowser(this.platformId);
 
     if (this.isBrowser) {
-      window.addEventListener('scroll', this.onWindowScroll, true); // true captures scroll events from any scrollable child if needed
+      window.addEventListener('scroll', this.onWindowScroll);
 
       this.routerSub = this.router.events.pipe(
         filter(event => event instanceof NavigationEnd)
@@ -30,14 +30,14 @@ export class BackToTopComponent implements OnInit, OnDestroy {
         // Hide button and reset scroll on route change
         this.showButton = false;
         this.cdr.detectChanges();
-        window.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior }); // Reset to top
+        window.scrollTo({ top: 0, behavior: 'auto' }); // Reset to top
       });
     }
   }
 
   ngOnDestroy() {
     if (this.isBrowser) {
-      window.removeEventListener('scroll', this.onWindowScroll, true);
+      window.removeEventListener('scroll', this.onWindowScroll);
     }
     if (this.routerSub) {
       this.routerSub.unsubscribe();

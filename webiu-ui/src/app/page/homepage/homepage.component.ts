@@ -2,7 +2,6 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 import { HomepageDetails } from '../../common/data/homepage';
 
 @Component({

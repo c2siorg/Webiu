@@ -10,7 +10,6 @@ import { projectsData } from './projects-data';
 import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 

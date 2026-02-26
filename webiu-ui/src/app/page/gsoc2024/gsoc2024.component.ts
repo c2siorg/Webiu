@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { gsocData } from '../../common/data/gsoc2024';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 import { CommonModule } from '@angular/common';
 
 @Component({
