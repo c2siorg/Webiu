@@ -13,59 +13,62 @@
   <div class="projects-cards-container">
     <div class="projects-search">
       <div class="search-box-container">
-        <span class="search-icon">🔍</span>
-        <input type="text" class="search-box" placeholder="Search projects by name..." [(ngModel)]="searchTerm"
-          (input)="filterProjects()" />
+        <div class="input-wrapper">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-box" placeholder="Search projects by name..." [value]="searchTerm"
+            #searchInput (keydown.enter)="onSearch(searchInput.value)" />
+        </div>
+        <button class="search-btn" (click)="onSearch(searchInput.value)">Search</button>
       </div>
     </div>
 
     @if (isLoading) {
-      <app-loading-spinner message="Loading projects..."></app-loading-spinner>
+    <app-loading-spinner message="Loading projects..."></app-loading-spinner>
     }
     @if (!isLoading) {
-      @if (displayProjects.length > 0) {
-        @for (
-          project of displayProjects;
-          track trackByProjectName($index, project)
-        ) {
-          <app-projects-card [name]="project.name" [org]="org" [repo]="project.name" [description]="project.description || ''"
-            [issue]="project.open_issues_count" [link]="project.html_url" [language]="project.language || ''"
-            [topics]="project.topics" [createdAt]="project.created_at" [updatedAt]="project.updated_at"
-            [pullRequests]="project.pull_requests"></app-projects-card>
-        }
-      } @else {
-        <app-projects-card [name]="'No projects found.'" [description]="
+    @if (displayProjects.length > 0) {
+    @for (
+    project of displayProjects;
+    track trackByProjectName($index, project)
+    ) {
+    <app-projects-card [name]="project.name" [org]="org" [repo]="project.name" [description]="project.description || ''"
+      [issue]="project.open_issues_count" [link]="project.html_url" [language]="project.language || ''"
+      [topics]="project.topics" [createdAt]="project.created_at" [updatedAt]="project.updated_at"
+      [pullRequests]="project.pull_requests"></app-projects-card>
+    }
+    } @else {
+    <app-projects-card [name]="'No projects found.'" [description]="
             'Please enter a valid project name or check back later.'
           " class="no-projects"></app-projects-card>
-      }
+    }
     }
     @if (!isLoading && displayProjects.length > 0) {
-      <div class="pagination-container">
-        <div class="pagination">
-          <button (click)="goToFirstPage()" [disabled]="currentPage === 1" title="First Page">
-            <i class="fa fa-angle-double-left"></i>
-          </button>
-          <button (click)="prevPage()" [disabled]="currentPage === 1" title="Previous Page">
-            <i class="fa fa-angle-left"></i>
-          </button>
-          <span>Page {{ currentPage }} of {{ totalPages }}</span>
-          <button (click)="nextPage()" [disabled]="currentPage === totalPages" title="Next Page">
-            <i class="fa fa-angle-right"></i>
-          </button>
-          <button (click)="goToLastPage()" [disabled]="currentPage === totalPages" title="Last Page">
-            <i class="fa fa-angle-double-right"></i>
-          </button>
-        </div>
-        <div class="items-per-page">
-          <label for="itemsPerPage">Show:</label>
-          <select id="itemsPerPage" (change)="onItemsPerPageChange($event)">
-            <option [value]="9" [selected]="projectsPerPage === 9">9</option>
-            <option [value]="18" [selected]="projectsPerPage === 18">18</option>
-            <option [value]="27" [selected]="projectsPerPage === 27">27</option>
-            <option [value]="50" [selected]="projectsPerPage === 50">50</option>
-          </select>
-        </div>
+    <div class="pagination-container">
+      <div class="pagination">
+        <button (click)="goToFirstPage()" [disabled]="currentPage === 1" title="First Page">
+          <i class="fa fa-angle-double-left"></i>
+        </button>
+        <button (click)="prevPage()" [disabled]="currentPage === 1" title="Previous Page">
+          <i class="fa fa-angle-left"></i>
+        </button>
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages" title="Next Page">
+          <i class="fa fa-angle-right"></i>
+        </button>
+        <button (click)="goToLastPage()" [disabled]="currentPage === totalPages" title="Last Page">
+          <i class="fa fa-angle-double-right"></i>
+        </button>
       </div>
+      <div class="items-per-page">
+        <label for="itemsPerPage">Show:</label>
+        <select id="itemsPerPage" (change)="onItemsPerPageChange($event)">
+          <option [value]="9" [selected]="projectsPerPage === 9">9</option>
+          <option [value]="18" [selected]="projectsPerPage === 18">18</option>
+          <option [value]="27" [selected]="projectsPerPage === 27">27</option>
+          <option [value]="50" [selected]="projectsPerPage === 50">50</option>
+        </select>
+      </div>
+    </div>
     }
   </div>
 

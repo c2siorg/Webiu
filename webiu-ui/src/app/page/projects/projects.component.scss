@@ -145,11 +145,38 @@
   margin: 20px 0;
 
   .search-box-container {
-    position: relative;
-    display: block;
+    display: flex;
+    gap: 12px;
     width: 100%;
     max-width: 800px;
     margin: 0 auto;
+    align-items: center;
+
+    .input-wrapper {
+      position: relative;
+      flex: 1;
+      display: flex;
+    }
+
+    .search-btn {
+      padding: 0 24px;
+      height: 45px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        background-color: #004cbf;
+      }
+    }
   }
 
   .search-box {

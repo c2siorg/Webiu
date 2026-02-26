@@ -1,5 +1,4 @@
-import { Subject } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 
@@ -43,7 +42,7 @@ export class ProjectsComponent implements OnInit {
   private metaService = inject(Meta);
   private destroyRef = inject(DestroyRef);
   private projectCacheService = inject(ProjectCacheService);
-  private searchSubject = new Subject<string>();
+
 
   ngOnInit(): void {
     this.titleService.setTitle('Projects | Webiu 2.0');
@@ -61,25 +60,16 @@ export class ProjectsComponent implements OnInit {
     });
 
     this.fetchCurrentPage();
-    this.setupSearchDebounce();
+
   }
 
-  private setupSearchDebounce(): void {
-    this.searchSubject
-      .pipe(
-        debounceTime(300),
-        distinctUntilChanged(),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe(() => {
-        this.currentPage = 1;
-        this.searchError = null;
-        this.fetchCurrentPage();
-      });
-  }
-
-  filterProjects(): void {
-    this.searchSubject.next(this.searchTerm);
+  onSearch(term?: string): void {
+    if (term !== undefined) {
+      this.searchTerm = term;
+    }
+    this.currentPage = 1;
+    this.searchError = null;
+    this.fetchCurrentPage();
   }
 
   /**
