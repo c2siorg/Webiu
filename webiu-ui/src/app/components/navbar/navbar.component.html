@@ -129,6 +129,16 @@
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" class="menu-icon" />
       <p>GSoC 26</p>
     </div>
+    <div
+      class="navbar__menu__items search-item"
+      routerLink="/search"
+      [class.active]="isRouteActive('/search')"
+      (click)="navigateTo('/search')"
+    >
+      <div class="search-hero-icon">
+        <i class="fas fa-search"></i>
+      </div>
+    </div>
     <div class="login-wrapper">
     <button
       class="navbar__menu__items Login_Logout"
