@@ -251,7 +251,7 @@ export class GithubService {
     if (cached) return cached;
 
     const pulls = await this.fetchAllPages(
-      `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls`,
+      `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all`,
     );
     this.cacheService.set(cacheKey, pulls);
     return pulls;

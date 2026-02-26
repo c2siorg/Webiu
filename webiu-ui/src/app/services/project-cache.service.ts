@@ -19,7 +19,7 @@ export class ProjectCacheService {
    */
   getProjects(page = 1, limit = 10): Observable<ProjectResponse> {
     return this.http.get<ProjectResponse>(
-      `${environment.serverUrl}/api/projects/projects?page=${page}&limit=${limit}`,
+      `${environment.serverUrl}/api/projects?page=${page}&limit=${limit}`,
     );
   }
 
