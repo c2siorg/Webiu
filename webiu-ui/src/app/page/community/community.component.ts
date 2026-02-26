@@ -1,10 +1,10 @@
 import { Component, inject, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor } from '../../common/data/contributor';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';
@@ -36,9 +36,7 @@ export class CommunityComponent implements OnInit {
 
   getTopContributors() {
     this.http
-      .get<Contributor[]>(
-        `${environment.serverUrl}/api/contributor/contributors`,
-      )
+      .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
