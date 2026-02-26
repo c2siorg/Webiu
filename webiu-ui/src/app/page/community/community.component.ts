@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor } from '../../common/data/contributor';
-import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
@@ -26,7 +25,6 @@ import { BackToTopComponent } from '../../components/back-to-top/back-to-top.com
   styleUrls: ['./community.component.scss'],
 })
 export class CommunityComponent implements OnInit {
-  private commonUtil = inject(CommmonUtilService);
   private http = inject(HttpClient);
   icons: Media[] = socialMedia;
   users: Contributor[] = [];
@@ -38,12 +36,9 @@ export class CommunityComponent implements OnInit {
 
   getTopContributors() {
     this.http
-      .get<
-        Contributor[]
-      >(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
       .subscribe({
         next: (res) => {
-          // Sort by contributions in descending order, take top 9
           const sorted = (res || []).sort(
             (a, b) => b.contributions - a.contributions,
           );
