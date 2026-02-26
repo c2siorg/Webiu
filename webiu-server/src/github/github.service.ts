@@ -443,7 +443,7 @@ export class GithubService {
     } catch (error) {
       this.logger.error(
         `Error fetching GitHub social data for ${username}:`,
-        error.message,
+        error.response?.data ?? error.message,
       );
       throw error;
     }

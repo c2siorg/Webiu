@@ -1,12 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { ValidationPipe, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import * as compression from 'compression';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const logger = new Logger('Bootstrap');
   const configService = app.get(ConfigService);
 
   app.use(helmet());
@@ -30,6 +31,11 @@ async function bootstrap() {
 
   const port = configService.get<number>('PORT', 5050);
   await app.listen(port);
-  console.log(`Server is listening at port ${port}`);
+  logger.log(`Server is listening at port ${port}`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  const logger = new Logger('Bootstrap');
+  logger.error('Failed to bootstrap application:', error.message);
+  process.exit(1);
+});
