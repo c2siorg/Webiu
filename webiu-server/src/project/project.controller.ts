@@ -38,6 +38,16 @@ export class ProjectController {
   async getProjectInsights(@Param('name') name: string) {
     return this.projectService.getProjectInsights(name);
   }
+
+  /**
+   * GET /api/projects/:name/contributors
+   * Returns the list of contributors for a project.
+   */
+  @Get(':name/contributors')
+  @Header('Cache-Control', 'public, max-age=300')
+  async getProjectContributors(@Param('name') name: string) {
+    return this.projectService.getProjectContributors(name);
+  }
 }
 
 @Controller('api/issues')
