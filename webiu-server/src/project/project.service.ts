@@ -79,4 +79,34 @@ export class ProjectService {
     this.cacheService.set(cacheKey, result);
     return result;
   }
+
+  async searchProjects(query: string) {
+    if (!query) {
+      throw new BadRequestException('Search query is required');
+    }
+
+    const cacheKey = `projects_search_${query}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    const repositories = await this.githubService.searchOrgRepos(query);
+
+    const repositoriesWithPRs = await Promise.all(
+      repositories.map(async (repo) => {
+        try {
+          const pulls = await this.githubService.getRepoPulls(repo.name);
+          return { ...repo, pull_requests: pulls.length };
+        } catch {
+          return { ...repo, pull_requests: 0 };
+        }
+      }),
+    );
+
+    this.cacheService.set(cacheKey, repositoriesWithPRs, CACHE_TTL);
+
+    return {
+      total: repositoriesWithPRs.length,
+      repositories: repositoriesWithPRs,
+    };
+  }
 }

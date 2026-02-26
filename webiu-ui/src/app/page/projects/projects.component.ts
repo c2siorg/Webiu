@@ -78,16 +78,36 @@ export class ProjectsComponent implements OnInit {
   }
 
   performSearch(searchTerm: string): void {
-    this.currentPage = 1;
-    if (!searchTerm) {
-      this.fetchProjects();
-      return;
-    }
-    this.filteredProjects = this.sortProjects(
-      this.filterBySearch(this.projectsData, searchTerm),
-    );
-    this.updateDisplayProjects();
+  this.currentPage = 1;
+
+  if (!searchTerm) {
+    this.fetchProjects();
+    return;
   }
+
+  this.isLoading = true;
+
+  this.projectCacheService.searchProjects(searchTerm)
+    .subscribe({
+      next: (response) => {
+        this.serverTotal = response.total;
+        this.projectsData = this.sortProjects(response.repositories);
+        this.filteredProjects = [...this.projectsData];
+
+        
+        this.totalPages = Math.max(
+          1,
+          Math.ceil(this.filteredProjects.length / this.projectsPerPage),
+        );
+
+        this.updateDisplayProjects();
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+}
 
   fetchProjects(): void {
     this.isLoading = true;
@@ -99,7 +119,9 @@ export class ProjectsComponent implements OnInit {
           this.projectsData = this.sortProjects(response.repositories);
           this.filteredProjects = this.searchTerm
             ? this.sortProjects(
-                this.filterBySearch(this.projectsData, this.searchTerm),
+                this.projectsData.filter((p) =>
+                  p.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
+                ),
               )
             : [...this.projectsData];
           this.updateDisplayProjects();
@@ -118,51 +140,6 @@ export class ProjectsComponent implements OnInit {
   sortProjects(projects: Project[]): Project[] {
     return projects.sort((a, b) =>
       a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-    );
-  }
-
-  private filterBySearch(projects: Project[], term: string): Project[] {
-    const lower = term.toLowerCase();
-    let results = projects.filter((p) =>
-      p.name.toLowerCase().includes(lower),
-    );
-    if (results.length === 0) {
-      results = projects.filter((p) =>
-        this.isFuzzyMatch(lower, p.name.toLowerCase()),
-      );
-    }
-    return results;
-  }
-
-  private levenshtein(a: string, b: string): number {
-    const matrix: number[][] = [];
-    for (let i = 0; i <= b.length; i++) {
-      matrix[i] = [i];
-    }
-    for (let j = 0; j <= a.length; j++) {
-      matrix[0][j] = j;
-    }
-    for (let i = 1; i <= b.length; i++) {
-      for (let j = 1; j <= a.length; j++) {
-        if (b.charAt(i - 1) === a.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
-        } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1,
-            matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1,
-          );
-        }
-      }
-    }
-    return matrix[b.length][a.length];
-  }
-
-  private isFuzzyMatch(query: string, text: string): boolean {
-    const tokens = text.split(/[-_\s]/);
-    const maxAllowed = Math.max(1, Math.floor(query.length * 0.3));
-    return tokens.some(
-      (token) => this.levenshtein(query, token) <= maxAllowed,
     );
   }
 
@@ -244,4 +221,3 @@ export class ProjectsComponent implements OnInit {
     this.updateDisplayProjects();
   }
 }
-
