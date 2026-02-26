@@ -23,7 +23,7 @@
       <app-loading-spinner message="Loading projects..."></app-loading-spinner>
     }
     @if (!isLoading) {
-      @if (filteredProjects.length > 0) {
+      @if (displayProjects.length > 0) {
         @for (
           project of displayProjects;
           track trackByProjectName($index, project)
@@ -39,7 +39,7 @@
           " class="no-projects"></app-projects-card>
       }
     }
-    @if (!isLoading && filteredProjects.length > 0) {
+    @if (!isLoading && displayProjects.length > 0) {
       <div class="pagination-container">
         <div class="pagination">
           <button (click)="goToFirstPage()" [disabled]="currentPage === 1" title="First Page">

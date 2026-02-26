@@ -20,21 +20,27 @@ export class ProjectController {
   }
 
   /**
-   * GET /api/projects/search?q=...
-   * Searches repositories across the entire organization via GitHub Search API.
+   * GET /api/projects/search?q=...&page=1&limit=10
+   * Searches repositories using in-memory filtering of cached org repos.
    * Must be declared before :name to avoid being captured by the wildcard.
    */
   @Get('search')
   @Header('Cache-Control', 'public, max-age=300')
-  async searchProjects(@Query('q') query: string) {
+  async searchProjects(
+    @Query('q') query: string,
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
     if (!query) {
-      return {
-        total: 0,
-        repositories: [],
-      };
+      return { total: 0, page: 1, limit: 10, repositories: [] };
     }
 
-    return this.projectService.searchProjects(query);
+    const pageNum = Math.max(1, parseInt(page as any, 10) || 1);
+    const limitNum = Math.min(
+      100,
+      Math.max(1, parseInt(limit as any, 10) || 10),
+    );
+    return this.projectService.searchProjects(query, pageNum, limitNum);
   }
 
   /**

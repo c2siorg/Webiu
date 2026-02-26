@@ -1,17 +1,25 @@
 import { Resolver, Query, Args, Int } from '@nestjs/graphql';
 import { ProjectService } from '../project/project.service';
-import { Repository } from './models/repository.model';
+import { PaginatedRepositories } from './models/repository.model';
 
-@Resolver(() => Repository)
+@Resolver()
 export class ProjectResolver {
   constructor(private projectService: ProjectService) {}
 
-  @Query(() => [Repository])
+  @Query(() => PaginatedRepositories)
   async repositories(
     @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
     @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
-  ): Promise<Repository[]> {
-    const result = await this.projectService.getAllProjects(page, limit);
-    return result?.repositories ?? [];
+  ): Promise<PaginatedRepositories> {
+    return this.projectService.getAllProjects(page, limit);
+  }
+
+  @Query(() => PaginatedRepositories)
+  async searchRepositories(
+    @Args('query') query: string,
+    @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
+    @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
+  ): Promise<PaginatedRepositories> {
+    return this.projectService.searchProjects(query, page, limit);
   }
 }

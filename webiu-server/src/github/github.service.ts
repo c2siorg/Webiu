@@ -93,6 +93,60 @@ export class GithubService {
     return results;
   }
 
+  /**
+   * Fetches ALL org repos, sorts alphabetically, and caches the full list.
+   * One-time fetch per cache window avoids per-page GitHub API calls.
+   */
+  async getAllOrgReposSorted(): Promise<GithubRepo[]> {
+    const cacheKey = `all_org_repos_sorted_${this.orgName}`;
+    const cached = this.cacheService.get<GithubRepo[]>(cacheKey);
+    if (cached) return cached;
+
+    const repos = await this.fetchAllPages(
+      `${this.baseUrl}/orgs/${this.orgName}/repos`,
+    );
+
+    repos.sort((a: GithubRepo, b: GithubRepo) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
+
+    this.cacheService.set(cacheKey, repos, 600);
+    return repos;
+  }
+
+  /**
+   * Efficient PR count: fetches 1 item and reads the Link header to get total.
+   * Single API call per repo vs. fetching all PR pages.
+   */
+  async getRepoPullCount(repoName: string): Promise<number> {
+    const cacheKey = `pull_count_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<number>(cacheKey);
+    if (cached !== null) return cached;
+
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all&per_page=1`,
+        { headers: this.headers },
+      );
+
+      let count = 0;
+      const linkHeader = response.headers['link'];
+      if (linkHeader) {
+        const lastMatch = linkHeader.match(/page=(\d+)>;\s*rel="last"/);
+        if (lastMatch) {
+          count = parseInt(lastMatch[1], 10);
+        }
+      } else if (Array.isArray(response.data) && response.data.length > 0) {
+        count = response.data.length;
+      }
+
+      this.cacheService.set(cacheKey, count, 600);
+      return count;
+    } catch {
+      return 0;
+    }
+  }
+
   async getOrgRepos(): Promise<any[]>;
   async getOrgRepos(page: number, perPage: number): Promise<any[]>;
   async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {

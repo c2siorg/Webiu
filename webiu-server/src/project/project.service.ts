@@ -42,45 +42,20 @@ export class ProjectService {
     if (cached) return cached;
 
     try {
-      // Use GitHub's native pagination instead of fetching everything
-      const repositories = await this.githubService.getOrgRepos(page, limit);
+      const allRepos = await this.githubService.getAllOrgReposSorted();
+      const total = allRepos.length;
 
-      // Fetch PR counts in batches to avoid overwhelming the API
-      const BATCH_SIZE = 10;
-      const repositoriesWithPRs = [];
-      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
-        const batch = repositories.slice(i, i + BATCH_SIZE);
-        const batchResults = await Promise.all(
-          batch.map(async (repo) => {
-            try {
-              const pulls = await this.githubService.getRepoPulls(repo.name);
-              return { ...repo, pull_requests: pulls.length };
-            } catch {
-              return { ...repo, pull_requests: 0 };
-            }
-          }),
-        );
-        repositoriesWithPRs.push(...batchResults);
-      }
+      const startIndex = (page - 1) * limit;
+      const pageRepos = allRepos.slice(startIndex, startIndex + limit);
 
-      // Get the true total number of public repositories to pass to frontend pagination
-      const orgInfo = await this.githubService.getPublicUserProfile(
-        this.githubService.org,
-      );
-      const total = orgInfo.public_repos || 0;
+      const enriched = await this.enrichWithPullCounts(pageRepos);
 
-      const result = {
-        total,
-        page,
-        limit,
-        repositories: repositoriesWithPRs,
-      };
-
+      const result = { total, page, limit, repositories: enriched };
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
       this.logger.error(
-        'Error fetching repositories or pull requests:',
+        'Error fetching repositories:',
         error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Internal server error');
@@ -329,45 +304,40 @@ export class ProjectService {
   }
 
   /**
-   * Searches repositories across the organization via GitHub Search API.
-   * Enriches results with PR counts using batched requests.
+   * Searches repositories from the cached full list using in-memory filtering.
+   * Matches against name and description, avoiding extra GitHub Search API calls.
    */
-  async searchProjects(query: string) {
+  async searchProjects(query: string, page = 1, limit = 10) {
     if (!query) {
       throw new BadRequestException('Search query is required');
     }
 
     const normalizedQuery = query.toLowerCase();
-    const cacheKey = `projects_search_${normalizedQuery}`;
-    const cached = this.cacheService.get(cacheKey);
+    const cacheKey = `projects_search_${normalizedQuery}_p${page}_pp${limit}`;
+    const cached = this.cacheService.get<{
+      total: number;
+      page: number;
+      limit: number;
+      repositories: any[];
+    }>(cacheKey);
     if (cached) return cached;
 
     try {
-      const repositories = await this.githubService.searchOrgRepos(query);
+      const allRepos = await this.githubService.getAllOrgReposSorted();
 
-      // Fetch PR counts in batches to avoid overwhelming the API
-      const BATCH_SIZE = 10;
-      const repositoriesWithPRs = [];
-      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
-        const batch = repositories.slice(i, i + BATCH_SIZE);
-        const batchResults = await Promise.all(
-          batch.map(async (repo) => {
-            try {
-              const pulls = await this.githubService.getRepoPulls(repo.name);
-              return { ...repo, pull_requests: pulls.length };
-            } catch {
-              return { ...repo, pull_requests: 0 };
-            }
-          }),
-        );
-        repositoriesWithPRs.push(...batchResults);
-      }
+      const filtered = allRepos.filter((repo) => {
+        const name = repo.name.toLowerCase();
+        const desc = (repo.description || '').toLowerCase();
+        return name.includes(normalizedQuery) || desc.includes(normalizedQuery);
+      });
 
-      const result = {
-        total: repositoriesWithPRs.length,
-        repositories: repositoriesWithPRs,
-      };
+      const total = filtered.length;
+      const startIndex = (page - 1) * limit;
+      const pageRepos = filtered.slice(startIndex, startIndex + limit);
 
+      const enriched = await this.enrichWithPullCounts(pageRepos);
+
+      const result = { total, page, limit, repositories: enriched };
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
@@ -377,5 +347,25 @@ export class ProjectService {
       );
       throw new InternalServerErrorException('Failed to search projects');
     }
+  }
+
+  private async enrichWithPullCounts(repos: any[]): Promise<any[]> {
+    const BATCH_SIZE = 10;
+    const enriched: any[] = [];
+    for (let i = 0; i < repos.length; i += BATCH_SIZE) {
+      const batch = repos.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.all(
+        batch.map(async (repo) => {
+          try {
+            const count = await this.githubService.getRepoPullCount(repo.name);
+            return { ...repo, pull_requests: count };
+          } catch {
+            return { ...repo, pull_requests: 0 };
+          }
+        }),
+      );
+      enriched.push(...batchResults);
+    }
+    return enriched;
   }
 }

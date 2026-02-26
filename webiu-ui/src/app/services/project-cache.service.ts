@@ -53,11 +53,15 @@ export class ProjectCacheService {
   }
 
   /**
-   * Searches repositories across the organization via backend GitHub Search API.
+   * Searches repositories with server-side pagination and in-memory filtering.
    */
-  searchProjects(query: string): Observable<ProjectResponse> {
+  searchProjects(
+    query: string,
+    page = 1,
+    limit = 10,
+  ): Observable<ProjectResponse> {
     return this.http.get<ProjectResponse>(
-      `${environment.serverUrl}/api/projects/search?q=${encodeURIComponent(query)}`,
+      `${environment.serverUrl}/api/projects/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     );
   }
 }

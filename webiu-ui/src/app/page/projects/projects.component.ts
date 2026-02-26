@@ -1,5 +1,5 @@
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 
@@ -29,8 +29,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   styleUrls: ['./projects.component.scss'],
 })
 export class ProjectsComponent implements OnInit {
-  projectsData: Project[] = [];
-  filteredProjects: Project[] = [];
   displayProjects: Project[] = [];
   searchTerm = '';
   isLoading = true;
@@ -40,10 +38,10 @@ export class ProjectsComponent implements OnInit {
   totalPages = 1;
   serverTotal = 0;
   searchError: string | null = null;
+
   private titleService = inject(Title);
   private metaService = inject(Meta);
   private destroyRef = inject(DestroyRef);
-
   private projectCacheService = inject(ProjectCacheService);
   private searchSubject = new Subject<string>();
 
@@ -62,207 +60,109 @@ export class ProjectsComponent implements OnInit {
       content: 'Explore the open-source projects hosted by C2SI and SCoRe Lab.',
     });
 
-    this.fetchProjects();
+    this.fetchCurrentPage();
     this.setupSearchDebounce();
   }
 
-  setupSearchDebounce(): void {
+  private setupSearchDebounce(): void {
     this.searchSubject
-      .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
-      .subscribe((searchTerm) => {
-        this.performSearch(searchTerm);
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.searchError = null;
+        this.fetchCurrentPage();
       });
   }
 
-  onSearchInput(searchTerm: string): void {
-    this.searchSubject.next(searchTerm);
+  filterProjects(): void {
+    this.searchSubject.next(this.searchTerm);
   }
 
-  performSearch(searchTerm: string): void {
-    this.currentPage = 1;
-    this.searchError = null;
-
-    if (!searchTerm) {
-      this.fetchProjects();
-      return;
-    }
-
+  /**
+   * Single entry point for all data fetching.
+   * Routes to search or listing based on searchTerm, always server-paginated.
+   */
+  private fetchCurrentPage(): void {
     this.isLoading = true;
 
-    this.projectCacheService
-      .searchProjects(searchTerm)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.serverTotal = response.total;
-          this.projectsData = this.sortProjects(response.repositories);
-          this.filteredProjects = [...this.projectsData];
+    const request$ = this.searchTerm
+      ? this.projectCacheService.searchProjects(
+        this.searchTerm,
+        this.currentPage,
+        this.projectsPerPage,
+      )
+      : this.projectCacheService.getProjects(
+        this.currentPage,
+        this.projectsPerPage,
+      );
 
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: (response) => {
+        this.serverTotal = response.total;
+        this.displayProjects = response.repositories;
+        this.totalPages = Math.max(
+          1,
+          Math.ceil(this.serverTotal / this.projectsPerPage),
+        );
+        this.searchError = null;
+        this.isLoading = false;
+      },
+      error: () => {
+        if (!this.searchTerm) {
+          this.serverTotal = projectsData.total;
+          const start = (this.currentPage - 1) * this.projectsPerPage;
+          this.displayProjects = projectsData.repositories.slice(
+            start,
+            start + this.projectsPerPage,
+          );
           this.totalPages = Math.max(
             1,
-            Math.ceil(this.filteredProjects.length / this.projectsPerPage),
+            Math.ceil(this.serverTotal / this.projectsPerPage),
           );
-
-          this.updateDisplayProjects();
-          this.isLoading = false;
-        },
-        error: () => {
-          this.searchError = 'Search failed. Showing local results.';
-          this.filteredProjects = this.sortProjects(
-            this.filterBySearch(this.projectsData, searchTerm),
-          );
-          this.updateDisplayProjects();
-          this.isLoading = false;
-        },
-      });
-  }
-
-  fetchProjects(): void {
-    this.isLoading = true;
-    this.projectCacheService
-      .getProjects(this.currentPage, this.projectsPerPage)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (response) => {
-          this.serverTotal = response.total;
-          this.projectsData = this.sortProjects(response.repositories);
-          this.filteredProjects = this.searchTerm
-            ? this.sortProjects(
-              this.filterBySearch(this.projectsData, this.searchTerm),
-            )
-            : [...this.projectsData];
-          this.updateDisplayProjects();
-          this.isLoading = false;
-        },
-        error: () => {
-          this.serverTotal = projectsData.total;
-          this.projectsData = this.sortProjects(projectsData.repositories);
-          this.filteredProjects = [...this.projectsData];
-          this.updateDisplayProjects();
-          this.isLoading = false;
-        },
-      });
-  }
-
-  sortProjects(projects: Project[]): Project[] {
-    return projects.sort((a, b) =>
-      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-    );
-  }
-
-  private filterBySearch(projects: Project[], term: string): Project[] {
-    const lower = term.toLowerCase();
-    let results = projects.filter((p) =>
-      p.name.toLowerCase().includes(lower),
-    );
-    if (results.length === 0) {
-      results = projects.filter((p) =>
-        this.isFuzzyMatch(lower, p.name.toLowerCase()),
-      );
-    }
-    return results;
-  }
-
-  private levenshtein(a: string, b: string): number {
-    const matrix: number[][] = [];
-    for (let i = 0; i <= b.length; i++) {
-      matrix[i] = [i];
-    }
-    for (let j = 0; j <= a.length; j++) {
-      matrix[0][j] = j;
-    }
-    for (let i = 1; i <= b.length; i++) {
-      for (let j = 1; j <= a.length; j++) {
-        if (b.charAt(i - 1) === a.charAt(j - 1)) {
-          matrix[i][j] = matrix[i - 1][j - 1];
         } else {
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j - 1] + 1,
-            matrix[i][j - 1] + 1,
-            matrix[i - 1][j] + 1,
-          );
+          this.searchError = 'Search failed. Please try again.';
+          this.displayProjects = [];
+          this.serverTotal = 0;
+          this.totalPages = 1;
         }
-      }
-    }
-    return matrix[b.length][a.length];
-  }
-
-  private isFuzzyMatch(query: string, text: string): boolean {
-    const tokens = text.split(/[-_\s]/);
-    const maxAllowed = Math.max(1, Math.floor(query.length * 0.3));
-    return tokens.some(
-      (token) => this.levenshtein(query, token) <= maxAllowed,
-    );
+        this.isLoading = false;
+      },
+    });
   }
 
   trackByProjectName(index: number, project: Project): string {
     return project.name;
   }
 
-  filterProjects(): void {
-    // Delegates to debounced search handler
-    this.onSearchInput(this.searchTerm);
-  }
-
-  updateDisplayProjects(): void {
-    if (this.searchTerm) {
-      // Local pagination over filtered results on the current server page
-      this.totalPages = Math.max(
-        1,
-        Math.ceil(this.filteredProjects.length / this.projectsPerPage),
-      );
-      const startIndex = (this.currentPage - 1) * this.projectsPerPage;
-      this.displayProjects = this.filteredProjects.slice(
-        startIndex,
-        startIndex + this.projectsPerPage,
-      );
-    } else {
-      // Server already paginated; use total from API for page count
-      this.totalPages = Math.max(
-        1,
-        Math.ceil(this.serverTotal / this.projectsPerPage),
-      );
-      this.displayProjects = [...this.filteredProjects];
-    }
-  }
-
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      if (this.searchTerm) {
-        this.updateDisplayProjects();
-      } else {
-        this.fetchProjects();
-      }
+      this.fetchCurrentPage();
     }
   }
 
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      if (this.searchTerm) {
-        this.updateDisplayProjects();
-      } else {
-        this.fetchProjects();
-      }
+      this.fetchCurrentPage();
     }
   }
 
   goToFirstPage(): void {
-    this.currentPage = 1;
-    if (this.searchTerm) {
-      this.updateDisplayProjects();
-    } else {
-      this.fetchProjects();
+    if (this.currentPage !== 1) {
+      this.currentPage = 1;
+      this.fetchCurrentPage();
     }
   }
 
   goToLastPage(): void {
-    this.currentPage = this.totalPages;
-    if (this.searchTerm) {
-      this.updateDisplayProjects();
-    } else {
-      this.fetchProjects();
+    if (this.currentPage !== this.totalPages) {
+      this.currentPage = this.totalPages;
+      this.fetchCurrentPage();
     }
   }
 
@@ -270,7 +170,6 @@ export class ProjectsComponent implements OnInit {
     const selectElement = event.target as HTMLSelectElement;
     this.projectsPerPage = parseInt(selectElement.value, 10);
     this.currentPage = 1;
-    this.updateDisplayProjects();
+    this.fetchCurrentPage();
   }
 }
-
