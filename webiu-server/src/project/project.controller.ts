@@ -20,6 +20,24 @@ export class ProjectController {
   }
 
   /**
+   * GET /api/projects/search?q=...
+   * Searches repositories across the entire organization via GitHub Search API.
+   * Must be declared before :name to avoid being captured by the wildcard.
+   */
+  @Get('search')
+  @Header('Cache-Control', 'public, max-age=300')
+  async searchProjects(@Query('q') query: string) {
+    if (!query) {
+      return {
+        total: 0,
+        repositories: [],
+      };
+    }
+
+    return this.projectService.searchProjects(query);
+  }
+
+  /**
    * GET /api/projects/:name
    * Returns metadata and tech stack for a specific project.
    */

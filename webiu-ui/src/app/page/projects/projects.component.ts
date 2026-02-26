@@ -39,6 +39,7 @@ export class ProjectsComponent implements OnInit {
   projectsPerPage = 9;
   totalPages = 1;
   serverTotal = 0;
+  searchError: string | null = null;
   private titleService = inject(Title);
   private metaService = inject(Meta);
   private destroyRef = inject(DestroyRef);
@@ -79,14 +80,41 @@ export class ProjectsComponent implements OnInit {
 
   performSearch(searchTerm: string): void {
     this.currentPage = 1;
+    this.searchError = null;
+
     if (!searchTerm) {
       this.fetchProjects();
       return;
     }
-    this.filteredProjects = this.sortProjects(
-      this.filterBySearch(this.projectsData, searchTerm),
-    );
-    this.updateDisplayProjects();
+
+    this.isLoading = true;
+
+    this.projectCacheService
+      .searchProjects(searchTerm)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (response) => {
+          this.serverTotal = response.total;
+          this.projectsData = this.sortProjects(response.repositories);
+          this.filteredProjects = [...this.projectsData];
+
+          this.totalPages = Math.max(
+            1,
+            Math.ceil(this.filteredProjects.length / this.projectsPerPage),
+          );
+
+          this.updateDisplayProjects();
+          this.isLoading = false;
+        },
+        error: () => {
+          this.searchError = 'Search failed. Showing local results.';
+          this.filteredProjects = this.sortProjects(
+            this.filterBySearch(this.projectsData, searchTerm),
+          );
+          this.updateDisplayProjects();
+          this.isLoading = false;
+        },
+      });
   }
 
   fetchProjects(): void {
@@ -100,8 +128,8 @@ export class ProjectsComponent implements OnInit {
           this.projectsData = this.sortProjects(response.repositories);
           this.filteredProjects = this.searchTerm
             ? this.sortProjects(
-                this.filterBySearch(this.projectsData, this.searchTerm),
-              )
+              this.filterBySearch(this.projectsData, this.searchTerm),
+            )
             : [...this.projectsData];
           this.updateDisplayProjects();
           this.isLoading = false;

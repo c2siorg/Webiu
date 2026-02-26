@@ -51,4 +51,13 @@ export class ProjectCacheService {
       `${environment.serverUrl}/api/projects/${name}/contributors`,
     );
   }
+
+  /**
+   * Searches repositories across the organization via backend GitHub Search API.
+   */
+  searchProjects(query: string): Observable<ProjectResponse> {
+    return this.http.get<ProjectResponse>(
+      `${environment.serverUrl}/api/projects/search?q=${encodeURIComponent(query)}`,
+    );
+  }
 }
