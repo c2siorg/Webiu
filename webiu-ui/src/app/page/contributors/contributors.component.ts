@@ -12,7 +12,6 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 
 interface ContributionRange {
   label: string;
@@ -29,7 +28,6 @@ interface ContributionRange {
     ReactiveFormsModule,
     ProfileCardComponent,
     LoadingSpinnerComponent,
-    BackToTopComponent,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],

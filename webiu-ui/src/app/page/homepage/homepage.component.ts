@@ -8,7 +8,7 @@ import { HomepageDetails } from '../../common/data/homepage';
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, RouterModule, BackToTopComponent],
+  imports: [NavbarComponent, CommonModule, RouterModule],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.scss',
 })

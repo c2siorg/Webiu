@@ -23,7 +23,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     NavbarComponent,
     ProjectsCardComponent,
     LoadingSpinnerComponent,
-    BackToTopComponent,
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],

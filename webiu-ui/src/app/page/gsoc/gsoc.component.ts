@@ -7,7 +7,7 @@ import { BackToTopComponent } from '../../components/back-to-top/back-to-top.com
 @Component({
   selector: 'app-gsoc',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, BackToTopComponent],
+  imports: [NavbarComponent, CommonModule],
   templateUrl: './gsoc.component.html',
   styleUrl: './gsoc.component.scss',
 })

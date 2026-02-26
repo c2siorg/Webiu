@@ -8,7 +8,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
+
 
 @Component({
   selector: 'app-community',
@@ -19,7 +19,6 @@ import { BackToTopComponent } from '../../components/back-to-top/back-to-top.com
     HttpClientModule,
     ProfileCardComponent,
     RouterModule,
-    BackToTopComponent,
   ],
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],

@@ -8,7 +8,7 @@ import { publicationsData } from './publications-data';
 @Component({
   selector: 'app-publications',
   standalone: true,
-  imports: [NavbarComponent, PublicationsCardComponent, BackToTopComponent],
+  imports: [NavbarComponent, PublicationsCardComponent],
   templateUrl: './publications.component.html',
   styleUrls: ['./publications.component.scss'],
 })

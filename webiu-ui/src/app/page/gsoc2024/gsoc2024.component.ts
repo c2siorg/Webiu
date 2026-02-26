@@ -7,7 +7,7 @@ import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-gsoc2024',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, BackToTopComponent],
+  imports: [NavbarComponent, CommonModule],
   templateUrl: './gsoc2024.component.html',
   styleUrl: './gsoc2024.component.scss',
 })
