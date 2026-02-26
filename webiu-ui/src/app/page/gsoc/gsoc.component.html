@@ -1,4 +1,5 @@
 <div class="gsoc__page">
+  <!-- Hero Section -->
   <div class="gsoc-hero">
     <div class="gsoc-hero-content">
       <h1>Google Summer of Code 2026</h1>
@@ -10,9 +11,10 @@
     <img src="../../../assets/gsoc_no_bg.png" alt="GSOC" />
   </div>
 
-  <!-- Replaced legacy static text with dynamic innerHTML injection to allow rich blog-style intros from gsocData.ts -->
+  <!-- Intro & Contribution Guidelines (Dynamic HTML) -->
   <div class="gsoc__details" [innerHTML]="gsocData.introHTML"></div>
 
+  <!-- Projects Accordion List -->
   <div class="gsoc__projects__list accordion">
     @for (project of gsocData.projects; track project.id) {
       <div
@@ -30,18 +32,25 @@
             activeProjectIndex === $index ? "−" : "+"
           }}</span>
         </div>
+        
         @if (activeProjectIndex === $index) {
-          <!-- Using Angular 17+ @if syntax instead of *ngIf for better performance and readability -->
           <div class="accordion-content">
-            <!-- Project content is now built using rich HTML grid strings from gsocData to preserve the premium card layout -->
-            <div
-              class="project-details"
-              [innerHTML]="project.detailsHTML"
-            ></div>
+            <div class="project-details" [innerHTML]="project.detailsHTML"></div>
           </div>
         }
       </div>
     }
   </div>
+
+  <!-- Back to Top Button -->
+  <button class="back-to-top" (click)="scrollToTop()" [class.show]="showButton">
+    <img
+      src="../../../assets/up-arrow.svg"
+      alt="Back to Top"
+      width="24"
+      height="24"
+    />
+  </button>
+</div>
   <app-back-to-top></app-back-to-top>
 </div>
