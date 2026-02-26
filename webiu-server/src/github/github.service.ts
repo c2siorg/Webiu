@@ -279,4 +279,18 @@ export class GithubService {
       throw error;
     }
   }
+
+  async searchOrgRepos(query: string): Promise<any[]> {
+    const normalizedQuery = query.toLowerCase();
+    const cacheKey = `search_repos:${normalizedQuery}:${this.orgName}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    const repos = await this.fetchAllSearchPages(
+      `${this.baseUrl}/search/repositories?q=${query}+org:${this.orgName}`,
+    );
+
+    this.cacheService.set(cacheKey, repos);
+    return repos;
+  }
 }

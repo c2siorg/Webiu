@@ -29,10 +29,8 @@ export class ProjectService {
     if (cached) return cached;
 
     try {
-      // Use GitHub's native pagination instead of fetching everything
       const repositories = await this.githubService.getOrgRepos(page, limit);
 
-      // Fetch PR counts in batches to avoid overwhelming the API
       const BATCH_SIZE = 10;
       const repositoriesWithPRs = [];
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
@@ -50,7 +48,6 @@ export class ProjectService {
         repositoriesWithPRs.push(...batchResults);
       }
 
-      // Get the true total number of public repositories to pass to frontend pagination
       const orgInfo = await this.githubService.getPublicUserProfile(
         this.githubService.org,
       );
@@ -98,6 +95,44 @@ export class ProjectService {
         error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Failed to fetch issues and PRs');
+    }
+  }
+
+  async searchProjects(query: string) {
+    if (!query) {
+      throw new BadRequestException('Search query is required');
+    }
+
+    const cacheKey = `projects_search_${query}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const repositories = await this.githubService.searchOrgRepos(query);
+
+      const repositoriesWithPRs = await Promise.all(
+        repositories.map(async (repo) => {
+          try {
+            const pulls = await this.githubService.getRepoPulls(repo.name);
+            return { ...repo, pull_requests: pulls.length };
+          } catch {
+            return { ...repo, pull_requests: 0 };
+          }
+        }),
+      );
+
+      this.cacheService.set(cacheKey, repositoriesWithPRs, CACHE_TTL);
+
+      return {
+        total: repositoriesWithPRs.length,
+        repositories: repositoriesWithPRs,
+      };
+    } catch (error) {
+      this.logger.error(
+        'Error searching repositories:',
+        error.response?.data || error.message,
+      );
+      throw new InternalServerErrorException('Failed to search projects');
     }
   }
 }
