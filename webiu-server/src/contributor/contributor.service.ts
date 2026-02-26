@@ -100,7 +100,7 @@ export class ContributorService {
     } catch (error) {
       this.logger.error(
         'Error fetching user created issues:',
-        error.response ? error.response.data : error.message,
+        error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -121,7 +121,7 @@ export class ContributorService {
     } catch (error) {
       this.logger.error(
         'Error fetching user created pull requests:',
-        error.response ? error.response.data : error.message,
+        error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -145,7 +145,7 @@ export class ContributorService {
     } catch (error) {
       this.logger.error(
         'Error fetching user stats:',
-        error.response ? error.response.data : error.message,
+        error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
@@ -159,7 +159,7 @@ export class ContributorService {
     } catch (error) {
       this.logger.error(
         'Error fetching user followers and following:',
-        error.response ? error.response.data : error.message,
+        error.response?.data || error.message,
       );
       throw new InternalServerErrorException(
         'Failed to fetch followers and following data',

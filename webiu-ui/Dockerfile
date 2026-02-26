@@ -1,15 +1,27 @@
-FROM node:18
+FROM node:18-alpine AS build
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
 
-RUN npm install -g @angular/cli
-
 RUN npm install
 
 COPY . .
 
-EXPOSE 4200
+RUN npm run build
 
-CMD ["ng", "serve", "--host", "0.0.0.0"]
+FROM node:18-alpine
+
+WORKDIR /usr/src/app
+
+COPY --chown=node:node --from=build /usr/src/app/package*.json ./
+
+RUN npm install --omit=dev && chown -R node:node node_modules
+
+COPY --chown=node:node --from=build /usr/src/app/dist ./dist
+
+USER node
+
+EXPOSE 4000
+
+CMD ["node", "dist/webiu/server/server.mjs"]

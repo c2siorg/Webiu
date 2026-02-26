@@ -1,0 +1,86 @@
+<div class="insights-section">
+  <header class="section-header">
+    <h3>Insights & Metadata</h3>
+    @if (insights) {
+      <div class="badge-row">
+        @if (insights.badges) {
+          <span
+            class="insight-badge"
+            [ngClass]="insights.badges.maturity.label.toLowerCase()"
+            [attr.title]="insights.badges.maturity.description"
+          >
+            {{ insights.badges.maturity.label }}
+          </span>
+          <span
+            class="insight-badge"
+            [ngClass]="insights.badges.maintenance.label.toLowerCase()"
+            [attr.title]="insights.badges.maintenance.description"
+          >
+            {{ insights.badges.maintenance.label }}
+          </span>
+          <span
+            class="insight-badge complexity"
+            [attr.title]="insights.badges.complexity.description"
+          >
+            {{ insights.badges.complexity.label }}
+          </span>
+          <span
+            class="insight-badge activity"
+            [ngClass]="insights.badges.activity_level.label.toLowerCase()"
+            [attr.title]="insights.badges.activity_level.description"
+          >
+            {{ insights.badges.activity_level.label }} Activity
+          </span>
+        }
+      </div>
+    }
+  </header>
+
+  <div class="insights-grid">
+    <div class="glass-card graph-card">
+      @if (loading) {
+        <div class="loading-overlay">
+          <div class="skeleton-line graph"></div>
+        </div>
+      } @else if (error) {
+        <div class="error-state">
+          <span>{{ error }}</span>
+        </div>
+      } @else if (insights) {
+        <app-commit-graph
+          [activity]="insights.commit_activity"
+        ></app-commit-graph>
+      }
+    </div>
+
+    @if (insights) {
+      <div class="stats-row">
+        <div class="stat-item glass-card">
+          <span class="label">Project Age</span>
+          <span class="value">{{ insights.stats.age_years }} Years</span>
+        </div>
+        <div class="stat-item glass-card">
+          <span class="label">Recent Commits</span>
+          <span class="value">{{ insights.stats.recent_commits }}</span>
+        </div>
+        <div class="stat-item glass-card">
+          <span class="label">Latest Release</span>
+          <span class="value">{{ insights.stats.release_recency }}</span>
+        </div>
+        <div
+          class="stat-item glass-card"
+          [ngClass]="insights.stats.health.toLowerCase()"
+        >
+          <span class="label">Repository Health</span>
+          <span class="value">{{ insights.stats.health }}</span>
+        </div>
+        <div class="stat-item glass-card">
+          <span class="label">Size</span>
+          <span class="value"
+            >{{ insights.stats.size_label }} &bull; {{ insights.stats.size_mb }} MB</span
+          >
+        </div>
+      </div>
+    }
+  </div>
+</div>
