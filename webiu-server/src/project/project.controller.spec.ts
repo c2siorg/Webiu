@@ -8,6 +8,7 @@ describe('ProjectController', () => {
   const mockProjectService = {
     getAllProjects: jest.fn(),
     getIssuesAndPr: jest.fn(),
+    getRepoTechStack: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -46,6 +47,18 @@ describe('ProjectController', () => {
 
       expect(result).toEqual(mockResult);
       expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(1, 10);
+    });
+  });
+
+  describe('getRepoTechStack', () => {
+    it('should return tech stack for the repo', async () => {
+      const mockResult = { languages: ['TypeScript', 'JavaScript'] };
+      mockProjectService.getRepoTechStack.mockResolvedValue(mockResult);
+
+      const result = await controller.getRepoTechStack('repo1');
+
+      expect(result).toEqual(mockResult);
+      expect(mockProjectService.getRepoTechStack).toHaveBeenCalledWith('repo1');
     });
   });
 });

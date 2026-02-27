@@ -19,11 +19,6 @@ export class ProjectController {
     return this.projectService.getAllProjects(pageNum, limitNum);
   }
 
-  /**
-   * GET /api/projects/search?q=...&page=1&limit=10
-   * Searches repositories using in-memory filtering of cached org repos.
-   * Must be declared before :name to avoid being captured by the wildcard.
-   */
   @Get('search')
   @Header('Cache-Control', 'public, max-age=300')
   async searchProjects(
@@ -43,20 +38,19 @@ export class ProjectController {
     return this.projectService.searchProjects(query, pageNum, limitNum);
   }
 
-  /**
-   * GET /api/projects/:name
-   * Returns metadata and tech stack for a specific project.
-   */
+  @Get('tech-stack/:repo')
+  @Header('Cache-Control', 'public, max-age=300')
+  async getRepoTechStack(@Param('repo') repo: string) {
+    return this.projectService.getRepoTechStack(repo);
+  }
+
+
   @Get(':name')
   @Header('Cache-Control', 'public, max-age=300')
   async getProjectByName(@Param('name') name: string) {
     return this.projectService.getProjectByName(name);
   }
 
-  /**
-   * GET /api/projects/:name/insights
-   * Returns analytical insights, badges, and commit activity for a project.
-   */
   @Get(':name/insights')
   @Header('Cache-Control', 'public, max-age=300')
   async getProjectInsights(@Param('name') name: string) {

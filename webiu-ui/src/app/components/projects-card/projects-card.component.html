@@ -128,6 +128,13 @@
         <p><strong> Created at: </strong> {{ createdAt | date: "medium" }}</p>
         <p><strong> Updated at: </strong> {{ updatedAt | date: "medium" }}</p>
       </div>
+      }
+      @for (lang of languages; track lang) {
+      <div class="projects__card__tag projects__card__lang-tag">
+        <span class="lang-dot" [style.background-color]="getLanguageColor(lang)"></span>
+        {{ lang }}
+      </div>
+      }
     </div>
   }
 </div>
