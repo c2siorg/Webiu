@@ -1,6 +1,7 @@
 import { Component, OnInit, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
@@ -47,6 +48,7 @@ export class ContributorSearchComponent implements OnInit {
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private toastr = inject(ToastrService);
   private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
@@ -105,9 +107,9 @@ export class ContributorSearchComponent implements OnInit {
       this.extractRepositories();
       this.filteredIssues = [...this.issues];
       this.filteredPullRequests = [...this.pullRequests];
+      this.toastr.success(`Found developer data for ${this.username}`, 'Success');
     } catch {
-      this.errorMessage =
-        'Failed to fetch data. Please check the username or try again later.';
+      // Global error interceptor will handle the notification
     } finally {
       this.loading = false;
     }
