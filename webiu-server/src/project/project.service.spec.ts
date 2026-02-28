@@ -88,9 +88,6 @@ describe('ProjectService', () => {
     });
 
     it('should handle PR fetch errors gracefully per repo', async () => {
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       mockGithubService.getOrgRepos.mockResolvedValue([
         { name: 'repo1' },
         { name: 'repo2' },
@@ -106,19 +103,14 @@ describe('ProjectService', () => {
 
       expect(result.repositories[0].pull_requests).toBe(0);
       expect(result.repositories[1].pull_requests).toBe(1);
-      consoleSpy.mockRestore();
     });
 
     it('should throw InternalServerErrorException on total failure', async () => {
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       mockGithubService.getOrgRepos.mockRejectedValue(new Error('API error'));
 
       await expect(service.getAllProjects(1, 10)).rejects.toThrow(
         InternalServerErrorException,
       );
-      consoleSpy.mockRestore();
     });
   });
 
@@ -156,14 +148,10 @@ describe('ProjectService', () => {
     });
 
     it('should throw InternalServerErrorException on API error', async () => {
-      const consoleSpy = jest
-        .spyOn(console, 'error')
-        .mockImplementation(() => {});
       mockGithubService.getRepoIssues.mockRejectedValue(new Error('fail'));
       await expect(service.getIssuesAndPr('c2siorg', 'repo1')).rejects.toThrow(
         InternalServerErrorException,
       );
-      consoleSpy.mockRestore();
     });
   });
 });

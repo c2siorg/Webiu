@@ -99,7 +99,6 @@ export class ContributorsComponent implements OnInit {
           this.fetchFollowerData();
         },
         error: () => {
-          console.error('Error fetching contributors');
           this.handleProfileResponse([]);
         },
       });
