@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { ProjectModule } from './project/project.module';
 import { ContributorModule } from './contributor/contributor.module';
 import { UserModule } from './user/user.module';
+import { GraphqlModule } from './graphql/graphql.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UserModule } from './user/user.module';
     ProjectModule,
     ContributorModule,
     UserModule,
+    GraphqlModule,
   ],
   controllers: [AppController],
   providers: [
