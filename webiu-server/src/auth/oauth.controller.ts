@@ -1,17 +1,32 @@
 import {
   Controller,
   Get,
+  Post,
   Logger,
   Query,
+  Req,
   Res,
   BadRequestException,
   InternalServerErrorException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import axios from 'axios';
 import { OAuth2Client } from 'google-auth-library';
 import { GithubService } from '../github/github.service';
+import { JwtService } from '@nestjs/jwt';
+
+const AUTH_COOKIE_NAME = 'webiu_auth';
+
+interface SessionUser {
+  id: string;
+  login: string;
+  name: string;
+  email?: string;
+  avatar_url?: string;
+  provider: 'google' | 'github';
+}
 
 @Controller('auth')
 export class OAuthController {
@@ -21,11 +36,50 @@ export class OAuthController {
   constructor(
     private configService: ConfigService,
     private githubService: GithubService,
+    private jwtService: JwtService,
   ) {
     this.googleClient = new OAuth2Client(
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
       this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
     );
+  }
+
+  private isProduction() {
+    return this.configService.get<string>('NODE_ENV') === 'production';
+  }
+
+  private setAuthCookie(res: Response, token: string) {
+    res.cookie(AUTH_COOKIE_NAME, token, {
+      httpOnly: true,
+      secure: this.isProduction(),
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 1000,
+      path: '/',
+    });
+  }
+
+  private clearAuthCookie(res: Response) {
+    res.clearCookie(AUTH_COOKIE_NAME, {
+      httpOnly: true,
+      secure: this.isProduction(),
+      sameSite: 'lax',
+      path: '/',
+    });
+  }
+
+  private extractAuthToken(req: Request): string | null {
+    const cookieHeader = req.headers.cookie;
+    if (!cookieHeader) return null;
+
+    const cookies = cookieHeader.split(';');
+    for (const cookie of cookies) {
+      const [key, ...valueParts] = cookie.trim().split('=');
+      if (key === AUTH_COOKIE_NAME) {
+        return decodeURIComponent(valueParts.join('='));
+      }
+    }
+
+    return null;
   }
 
   // ─── Google OAuth ───
@@ -74,13 +128,24 @@ export class OAuthController {
         audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
       });
 
-      const user = userResponse.data;
+      const user = userResponse.data as Record<string, any>;
+      const sessionUser: SessionUser = {
+        id: String(user.id ?? ''),
+        login: String(user.email ?? user.id ?? 'google-user'),
+        name: String(user.name ?? user.email ?? 'User'),
+        email: user.email,
+        avatar_url: user.picture,
+        provider: 'google',
+      };
+
+      const token = await this.jwtService.signAsync({ user: sessionUser });
+      this.setAuthCookie(res, token);
+
       const frontendUrl = this.configService.get<string>(
         'FRONTEND_BASE_URL',
         'http://localhost:4200',
       );
-      const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(JSON.stringify(user))}`;
-      res.redirect(redirectUrl);
+      res.redirect(frontendUrl);
     } catch (error) {
       this.logger.error('Error during Google OAuth:', error);
       throw new InternalServerErrorException({
@@ -118,14 +183,26 @@ export class OAuthController {
         throw new BadRequestException(tokenData.error_description);
       }
 
-      const user = await this.githubService.getUserInfo(tokenData.access_token);
+      const user = (await this.githubService.getUserInfo(
+        tokenData.access_token,
+      )) as Record<string, any>;
+      const sessionUser: SessionUser = {
+        id: String(user.id ?? ''),
+        login: String(user.login ?? user.id ?? 'github-user'),
+        name: String(user.name ?? user.login ?? 'User'),
+        email: user.email ?? undefined,
+        avatar_url: user.avatar_url ?? undefined,
+        provider: 'github',
+      };
+
+      const token = await this.jwtService.signAsync({ user: sessionUser });
+      this.setAuthCookie(res, token);
 
       const frontendUrl = this.configService.get<string>(
         'FRONTEND_BASE_URL',
         'http://localhost:4200',
       );
-      const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(JSON.stringify(user))}`;
-      res.redirect(redirectUrl);
+      res.redirect(frontendUrl);
     } catch (error) {
       this.logger.error('Error during GitHub OAuth:', error);
       throw new InternalServerErrorException({
@@ -133,5 +210,28 @@ export class OAuthController {
         error: error.response?.data || error.message,
       });
     }
+  }
+
+  @Get('me')
+  async me(@Req() req: Request) {
+    const token = this.extractAuthToken(req);
+    if (!token) {
+      throw new UnauthorizedException('Not authenticated');
+    }
+
+    try {
+      const payload = await this.jwtService.verifyAsync<{ user: SessionUser }>(
+        token,
+      );
+      return payload.user;
+    } catch {
+      throw new UnauthorizedException('Invalid or expired session');
+    }
+  }
+
+  @Post('logout')
+  logout(@Res({ passthrough: true }) res: Response) {
+    this.clearAuthCookie(res);
+    return { message: 'Logged out successfully' };
   }
 }
