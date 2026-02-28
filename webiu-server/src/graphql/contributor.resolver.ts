@@ -16,4 +16,23 @@ export class ContributorResolver {
     const start = (page - 1) * limit;
     return all.slice(start, start + limit);
   }
+
+  @Query(() => Contributor, { nullable: true })
+  async contributorByUsername(
+    @Args('username') username: string,
+  ): Promise<Contributor | null> {
+    const all = (await this.contributorService.getAllContributors()) as any[];
+    const contributor = all.find(
+      (c: any) => c.login.toLowerCase() === username.toLowerCase(),
+    );
+
+    if (!contributor) return null;
+
+    return {
+      login: contributor.login,
+      contributions: contributor.contributions,
+      avatar_url: contributor.avatar_url,
+      repos: contributor.repos || [],
+    };
+  }
 }
