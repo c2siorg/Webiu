@@ -329,18 +329,12 @@ export class GithubService {
   }
 
   async searchUserPullRequests(username: string): Promise<any[]> {
-    const start = Date.now(); // START TIMER
+    
 
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `search_prs:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) {
-      const duration = Date.now() - start;
-      const payloadSize = JSON.stringify(cached).length;
-
-      console.log(
-        `[REST] searchUserPullRequests - ${duration}ms - ${payloadSize} bytes (CACHE HIT)`,
-      );
 
       return cached;
     }
@@ -372,12 +366,7 @@ export class GithubService {
 
     this.cacheService.set(cacheKey, enrichedPrs);
 
-    const duration = Date.now() - start;
-    const payloadSize = JSON.stringify(enrichedPrs).length;
-
-    console.log(
-      `[REST] searchUserPullRequests - ${duration}ms - ${payloadSize} bytes`,
-    );
+    
 
     return enrichedPrs;
   }
