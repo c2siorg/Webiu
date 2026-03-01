@@ -1,5 +1,10 @@
 import { ObjectType, Field } from '@nestjs/graphql';
-import { Repository } from './repository.model';
+
+@ObjectType()
+export class PullRequestRepository {
+  @Field()
+  name: string;
+}
 
 @ObjectType()
 export class PullRequest {
@@ -18,6 +23,6 @@ export class PullRequest {
   @Field()
   createdAt: string;
 
-  @Field(() => Repository)
-  repository: Repository;
+  @Field(() => PullRequestRepository)
+  repository: PullRequestRepository;
 }

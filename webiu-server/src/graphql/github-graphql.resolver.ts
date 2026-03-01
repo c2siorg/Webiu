@@ -7,9 +7,7 @@ export class GithubGraphqlResolver {
   constructor(private githubGraphqlService: GithubGraphqlService) {}
 
   @Query(() => [PullRequest])
-  async searchUserPullRequests(
-    @Args('username') username: string,
-  ) {
+  async searchUserPullRequests(@Args('username') username: string) {
     return this.githubGraphqlService.searchUserPullRequests(username);
   }
 }

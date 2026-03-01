@@ -7,6 +7,6 @@ import { GithubGraphqlResolver } from './github-graphql.resolver';
 
 @Module({
   imports: [ProjectModule, ContributorModule],
-  providers: [ProjectResolver, ContributorResolver, GithubGraphqlResolver,],
+  providers: [ProjectResolver, ContributorResolver, GithubGraphqlResolver],
 })
 export class GraphqlResolversModule {}

@@ -8,7 +8,6 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 import { AxiosError } from 'axios';
-import { GithubGraphqlService } from 'src/github/github.graphql.service';
 
 const CACHE_TTL = 300; // 5 minutes
 const INSIGHTS_CACHE_TTL = 3600; // 1 hour
@@ -29,7 +28,6 @@ export class ProjectService {
 
   constructor(
     private githubService: GithubService,
-    private githubGraphqlService: GithubGraphqlService,
     private cacheService: CacheService,
   ) {}
 
