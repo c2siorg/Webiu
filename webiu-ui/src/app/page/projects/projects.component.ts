@@ -3,6 +3,7 @@ import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 
 import { HttpClientModule } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { projectsData } from './projects-data';
@@ -38,6 +39,7 @@ export class ProjectsComponent implements OnInit {
 
   private titleService = inject(Title);
   private metaService = inject(Meta);
+  private toastr = inject(ToastrService);
   private destroyRef = inject(DestroyRef);
   private projectCacheService = inject(ProjectCacheService);
 
@@ -112,7 +114,7 @@ export class ProjectsComponent implements OnInit {
             Math.ceil(this.serverTotal / this.projectsPerPage),
           );
         } else {
-          this.searchError = 'Search failed. Please try again.';
+          // Global error interceptor will handle the notification
           this.displayProjects = [];
           this.serverTotal = 0;
           this.totalPages = 1;
