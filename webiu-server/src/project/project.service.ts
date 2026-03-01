@@ -270,30 +270,59 @@ export class ProjectService {
   }
 
   /**
-   * Fetches the list of contributors for a specific repository.
-   * Results are cached to optimize performance.
+   * Fetches contributors for a repository, enriched with per-user PR and issue stats.
+   * Cross-references the repo's PRs and issues to compute merged/closed/open PR counts,
+   * issue count, and total commits per contributor.
    */
   async getProjectContributors(name: string) {
     if (!name || !/^[a-zA-Z0-9-_\.]+$/.test(name)) {
       throw new BadRequestException('Invalid project name provided');
     }
 
-    const cacheKey = `project_contributors_${name}`;
+    const cacheKey = `project_contributors_enriched_${name}`;
     const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
-      const contributors = await this.githubService.getRepoContributors(
-        this.githubService.org,
-        name,
-      );
+      const [contributors, pulls, issues] = await Promise.all([
+        this.githubService.getRepoContributors(this.githubService.org, name),
+        this.githubService.getRepoPulls(name).catch(() => []),
+        this.githubService
+          .getRepoIssues(this.githubService.org, name)
+          .catch(() => []),
+      ]);
 
       if (!contributors) {
         return [];
       }
 
-      this.cacheService.set(cacheKey, contributors, CACHE_TTL);
-      return contributors;
+      const pureIssues = issues.filter((i: any) => !i.pull_request);
+
+      const enriched = contributors.map((contributor: any) => {
+        const login = contributor.login;
+
+        const userPrs = pulls.filter((pr: any) => pr.user?.login === login);
+        const mergedPrs = userPrs.filter((pr: any) => pr.merged_at).length;
+        const closedPrs = userPrs.filter(
+          (pr: any) => pr.state === 'closed' && !pr.merged_at,
+        ).length;
+        const openPrs = userPrs.filter((pr: any) => pr.state === 'open').length;
+
+        const userIssues = pureIssues.filter(
+          (i: any) => i.user?.login === login,
+        ).length;
+
+        return {
+          ...contributor,
+          merged_prs: mergedPrs,
+          closed_prs: closedPrs,
+          open_prs: openPrs,
+          issues_created: userIssues,
+        };
+      });
+
+      this.cacheService.set(cacheKey, enriched, CACHE_TTL);
+      return enriched;
     } catch (error) {
       this.logger.error(
         `Error fetching contributors for ${name}:`,

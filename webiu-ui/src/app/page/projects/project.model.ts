@@ -162,4 +162,8 @@ export interface Contributor {
   contributions: number;
   avatar_url: string;
   html_url: string;
+  merged_prs?: number;
+  closed_prs?: number;
+  open_prs?: number;
+  issues_created?: number;
 }

@@ -54,7 +54,7 @@
         contributor of (showAllGrid ? contributors : (contributors | slice : 0 : 15));
         track contributor.login
         ) {
-        <a [href]="getPrSearchUrl(contributor.login)" target="_blank" class="contributor-item" [attr.title]="
+        <a [href]="getProfileUrl(contributor.login)" target="_blank" class="contributor-item" [attr.title]="
                   contributor.login +
                   ': ' +
                   contributor.contributions +
@@ -99,7 +99,11 @@
         <div class="list-table-header">
           <span class="col-rank">#</span>
           <span class="col-user">Contributor</span>
-          <span class="col-contributions">Contributions</span>
+          <span class="col-stat" title="Commits"><i class="fas fa-code-commit"></i></span>
+          <span class="col-stat merged" title="Merged PRs"><i class="fas fa-code-merge"></i></span>
+          <span class="col-stat closed" title="Closed PRs"><i class="fas fa-times-circle"></i></span>
+          <span class="col-stat open" title="Open PRs"><i class="fas fa-code-branch"></i></span>
+          <span class="col-stat" title="Issues"><i class="fas fa-exclamation-circle"></i></span>
         </div>
         <div class="list-table-body">
           @for (
@@ -107,25 +111,28 @@
           track contributor.login;
           let i = $index
           ) {
-          <a [href]="getPrSearchUrl(contributor.login)" target="_blank" class="list-row">
+          <div class="list-row">
             <span class="col-rank">{{ i + 1 }}</span>
-            <span class="col-user">
+            <a [href]="getProfileUrl(contributor.login)" target="_blank" class="col-user">
               <img [src]="contributor.avatar_url" [alt]="contributor.login" class="list-avatar" loading="lazy" />
               <span class="list-username">{{ contributor.login }}</span>
-            </span>
-            <span class="col-contributions">
-              <span class="contrib-count">{{
-                contributor.contributions
-                }}</span>
-              <span class="contrib-bar-wrapper">
-                <span class="contrib-bar" [style.width.%]="
-                          (contributor.contributions /
-                            contributors[0].contributions) *
-                          100
-                        "></span>
-              </span>
-            </span>
-          </a>
+            </a>
+            <a [href]="getCommitsUrl(contributor.login)" target="_blank" class="col-stat stat-link">
+              {{ contributor.contributions }}
+            </a>
+            <a [href]="getMergedPrsUrl(contributor.login)" target="_blank" class="col-stat stat-link merged">
+              {{ contributor.merged_prs ?? 0 }}
+            </a>
+            <a [href]="getClosedPrsUrl(contributor.login)" target="_blank" class="col-stat stat-link closed">
+              {{ contributor.closed_prs ?? 0 }}
+            </a>
+            <a [href]="getOpenPrsUrl(contributor.login)" target="_blank" class="col-stat stat-link open">
+              {{ contributor.open_prs ?? 0 }}
+            </a>
+            <a [href]="getIssuesUrl(contributor.login)" target="_blank" class="col-stat stat-link">
+              {{ contributor.issues_created ?? 0 }}
+            </a>
+          </div>
           }
           @if (filteredContributors.length === 0) {
           <div class="no-results">

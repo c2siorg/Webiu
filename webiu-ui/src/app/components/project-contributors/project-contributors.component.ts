@@ -46,8 +46,32 @@ export class ProjectContributorsComponent implements OnInit {
     }
   }
 
-  getPrSearchUrl(username: string): string {
-    return `https://github.com/c2siorg/Webiu/pulls?q=author%3A${encodeURIComponent(username)}`;
+  private get repoBase(): string {
+    return `https://github.com/c2siorg/${this.projectName}`;
+  }
+
+  getCommitsUrl(username: string): string {
+    return `${this.repoBase}/commits?author=${encodeURIComponent(username)}`;
+  }
+
+  getMergedPrsUrl(username: string): string {
+    return `${this.repoBase}/pulls?q=is%3Apr+is%3Amerged+author%3A${encodeURIComponent(username)}`;
+  }
+
+  getClosedPrsUrl(username: string): string {
+    return `${this.repoBase}/pulls?q=is%3Apr+is%3Aclosed+is%3Aunmerged+author%3A${encodeURIComponent(username)}`;
+  }
+
+  getOpenPrsUrl(username: string): string {
+    return `${this.repoBase}/pulls?q=is%3Apr+is%3Aopen+author%3A${encodeURIComponent(username)}`;
+  }
+
+  getIssuesUrl(username: string): string {
+    return `${this.repoBase}/issues?q=is%3Aissue+author%3A${encodeURIComponent(username)}`;
+  }
+
+  getProfileUrl(username: string): string {
+    return `${this.repoBase}/pulls?q=author%3A${encodeURIComponent(username)}`;
   }
 
   toggleView(): void {
