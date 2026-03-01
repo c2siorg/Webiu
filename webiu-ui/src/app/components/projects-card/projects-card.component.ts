@@ -1,9 +1,7 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
-
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
-
 
 @Component({
   selector: 'app-projects-card',
@@ -22,8 +20,8 @@ export class ProjectsCardComponent implements OnInit {
   @Input() topics: string[] = [];
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
-  @Input() org!: string;
-  @Input() repo!: string;
+  @Input() org?: string;      // ← changed to optional
+  @Input() repo?: string;     // ← changed to optional
 
   issueCount = 0;
   pullRequestCount = 0;
@@ -31,14 +29,23 @@ export class ProjectsCardComponent implements OnInit {
 
   private http = inject(HttpClient);
 
-
   ngOnInit(): void {
-    if (!this.initialized) {
+    
+    if (this.org && this.repo && !this.initialized) {
       this.fetchIssuesAndPRs();
+    } else {
+      this.initialized = true; // fallback case 
     }
   }
 
   fetchIssuesAndPRs(): void {
+    
+    if (!this.org || !this.repo) {
+      console.warn('Skipping API call: org or repo missing (fallback card)');
+      this.initialized = true;
+      return;
+    }
+
     const apiUrl = `${environment.serverUrl}/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
     this.http
       .get<{ issues: number; pullRequests: number }>(apiUrl)
@@ -55,6 +62,7 @@ export class ProjectsCardComponent implements OnInit {
       });
   }
 
+  
   public detailsVisible = false;
 
   toggleDetails() {
