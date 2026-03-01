@@ -1,5 +1,3 @@
-@import "../../app.component.scss";
-
 .contributors-section {
   margin-top: 3rem;
   padding-bottom: 2rem;
@@ -15,7 +13,7 @@
     h3 {
       font-size: 1.5rem;
       font-weight: 600;
-      color: var(--text-color, #fff);
+      color: var(--primary-dark);
       margin: 0;
     }
 
@@ -31,9 +29,9 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        background: rgba(255, 255, 255, 0.05);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        color: rgba(255, 255, 255, 0.8);
+        background: var(--gsoc-project-list-bg-2);
+        border: 1px solid var(--border-color);
+        color: var(--font-light);
 
         i {
           font-size: 0.8rem;
@@ -46,7 +44,7 @@
 
         &.distribution {
           border-color: rgba(80, 227, 194, 0.3);
-          color: #50e3c2;
+          color: #16a085;
         }
       }
     }
@@ -64,20 +62,22 @@
 }
 
 .glass-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--gsoc-project-list-bg-2);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
   padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 
 .contributors-list-card {
   .list-header {
     margin-bottom: 1.5rem;
+
     h4 {
       font-size: 1.1rem;
       margin: 0;
-      color: rgba(255, 255, 255, 0.9);
+      color: var(--primary-dark);
     }
   }
 
@@ -92,12 +92,15 @@
     &::-webkit-scrollbar {
       width: 4px;
     }
+
     &::-webkit-scrollbar-track {
       background: transparent;
     }
+
     &::-webkit-scrollbar-thumb {
-      background: rgba(255, 255, 255, 0.1);
+      background: var(--font-light);
       border-radius: 10px;
+      opacity: 0.3;
     }
   }
 
@@ -110,6 +113,7 @@
 
     &:hover {
       transform: translateY(-4px);
+
       .username {
         color: #4a90e2;
       }
@@ -123,7 +127,7 @@
         width: 50px;
         height: 50px;
         border-radius: 50%;
-        border: 2px solid rgba(255, 255, 255, 0.1);
+        border: 2px solid var(--border-color);
         object-fit: cover;
       }
 
@@ -144,7 +148,7 @@
 
     .username {
       font-size: 0.75rem;
-      color: rgba(255, 255, 255, 0.6);
+      color: var(--font-light);
       max-width: 100%;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -156,10 +160,11 @@
   .more-contributors {
     margin-top: 1.5rem;
     text-align: center;
+
     span {
       font-size: 0.85rem;
-      color: rgba(255, 255, 255, 0.4);
-      background: rgba(255, 255, 255, 0.05);
+      color: var(--font-light);
+      background: var(--cards-container);
       padding: 0.4rem 1rem;
       border-radius: 20px;
     }
@@ -177,11 +182,12 @@
     justify-content: center;
 
     .label {
-      font-size: 0.8rem;
-      color: rgba(255, 255, 255, 0.5);
+      font-size: 0.7rem;
+      color: var(--font-light);
       margin-bottom: 0.5rem;
       text-transform: uppercase;
       letter-spacing: 1px;
+      font-weight: 500;
     }
 
     .value-row {
@@ -192,12 +198,12 @@
       .value {
         font-size: 1.75rem;
         font-weight: 700;
-        color: #fff;
+        color: var(--primary-dark);
       }
 
       .trend {
         font-size: 0.8rem;
-        color: #50e3c2;
+        color: #16a085;
         font-weight: 500;
       }
     }
@@ -206,14 +212,16 @@
 
 .loading-overlay {
   padding: 2rem;
+
   .skeleton-grid {
     display: flex;
     gap: 1rem;
+
     .skeleton-avatar {
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: linear-gradient(90deg, rgba(255, 255, 255, 0.05) 25%, rgba(255, 255, 255, 0.1) 50%, rgba(255, 255, 255, 0.05) 75%);
+      background: var(--cards-container);
       background-size: 200% 100%;
       animation: skeleton-loading 1.5s infinite;
     }
@@ -221,12 +229,18 @@
 }
 
 @keyframes skeleton-loading {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
-.error-state, .empty-state {
+.error-state,
+.empty-state {
   text-align: center;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--font-light);
   font-style: italic;
 }
