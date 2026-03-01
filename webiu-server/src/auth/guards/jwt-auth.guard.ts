@@ -14,11 +14,15 @@ export class JwtAuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
 
-    if (!authHeader) {
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
       throw new UnauthorizedException('Not authorized');
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader.slice(7);
+
+    if (!token) {
+      throw new UnauthorizedException('Not authorized');
+    }
 
     try {
       const decoded = this.jwtService.verify(token);
