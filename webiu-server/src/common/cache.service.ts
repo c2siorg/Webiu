@@ -39,6 +39,22 @@ export class CacheService {
     return entry.data as T;
   }
 
+  /**
+   * Check if a key exists in the cache (not expired).
+   * Returns true even if the cached value is null.
+   */
+  has(key: string): boolean {
+    const entry = this.cache.get(key);
+    if (!entry) return false;
+
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return false;
+    }
+
+    return true;
+  }
+
   set<T>(key: string, data: T, ttlSeconds?: number): void {
     const ttl = ttlSeconds ?? this.defaultTtl;
     this.cache.set(key, {

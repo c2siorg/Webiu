@@ -354,17 +354,24 @@ export class GithubService {
     orgName: string,
     repoName: string,
   ): Promise<any[] | null> {
-    const cacheKey = `contributors_${orgName}_${repoName}`;
-    const cached = this.cacheService.get<any[] | null>(cacheKey);
-    if (cached !== null) return cached;
+    const normalizedOrgName = orgName.toLowerCase();
+    const normalizedRepoName = repoName.toLowerCase();
+    const cacheKey = `contributors_${normalizedOrgName}_${normalizedRepoName}`;
+    
+    if (this.cacheService.has(cacheKey)) {
+      const cached = this.cacheService.get<any[] | null>(cacheKey);
+      return cached;
+    }
 
     try {
       const contributors = await this.fetchAllPages(
         `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
       );
-      this.cacheService.set(cacheKey, contributors);
+      this.cacheService.set(cacheKey, contributors, 600);
       return contributors;
     } catch {
+      // Cache null results with shorter TTL to prevent repeated failed requests
+      this.cacheService.set(cacheKey, null, 300);
       return null;
     }
   }
