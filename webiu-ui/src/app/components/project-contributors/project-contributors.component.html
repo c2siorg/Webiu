@@ -2,79 +2,156 @@
   <header class="section-header">
     <h3>Contributors & Activity</h3>
     @if (!loading && contributors.length > 0) {
+    <div class="header-actions">
       <div class="community-badges">
         <span class="community-badge engagement">
           <i class="fas fa-users"></i>
           {{ contributors.length }} Contributors
         </span>
         @if (topContributorShare > 0) {
-          <span class="community-badge distribution" [title]="'Top contributor: ' + topContributorShare + '% share'">
-            <i class="fas fa-chart-pie"></i>
-            {{ topContributorShare }}% Concentration
-          </span>
+        <span class="community-badge distribution" [title]="'Top contributor: ' + topContributorShare + '% share'">
+          <i class="fas fa-chart-pie"></i>
+          {{ topContributorShare }}% Concentration
+        </span>
         }
       </div>
+      <button class="view-toggle" (click)="toggleView()"
+        [attr.aria-label]="viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'"
+        [title]="viewMode === 'grid' ? 'List view' : 'Grid view'">
+        @if (viewMode === 'grid') {
+        <i class="fas fa-list"></i>
+        } @else {
+        <i class="fas fa-th"></i>
+        }
+      </button>
+    </div>
     }
   </header>
 
   <div class="contributors-grid">
     @if (loading) {
-      <div class="loading-overlay">
-        <div class="skeleton-grid">
-          @for (i of [1,2,3,4,5]; track i) {
-            <div class="skeleton-avatar"></div>
-          }
-        </div>
-      </div>
-    } @else if (error) {
-      <div class="error-state glass-card">
-        <span>{{ error }}</span>
-      </div>
-    } @else if (contributors.length > 0) {
-      <!-- Top Contributors List -->
-      <div class="contributors-list-card glass-card">
-        <div class="list-header">
-          <h4>Top Contributors</h4>
-        </div>
-        <div class="contributors-scroll">
-          @for (contributor of contributors | slice:0:15; track contributor.login) {
-            <a [href]="contributor.html_url" target="_blank" class="contributor-item" [attr.title]="contributor.login + ': ' + contributor.contributions + ' contributions'">
-              <div class="avatar-wrapper">
-                <img [src]="contributor.avatar_url" [alt]="contributor.login" loading="lazy">
-                <span class="contribution-count">{{ contributor.contributions }}</span>
-              </div>
-              <span class="username">{{ contributor.login }}</span>
-            </a>
-          }
-        </div>
-        @if (contributors.length > 15) {
-          <div class="more-contributors">
-            <span>+ {{ contributors.length - 15 }} more contributors</span>
-          </div>
+    <div class="loading-overlay">
+      <div class="skeleton-grid">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="skeleton-avatar"></div>
         }
       </div>
+    </div>
+    } @else if (error) {
+    <div class="error-state glass-card">
+      <span>{{ error }}</span>
+    </div>
+    } @else if (contributors.length > 0) {
 
-      <!-- Detail Signals -->
-      <div class="signals-grid">
-        <div class="signal-card glass-card">
-          <span class="label">Community Size</span>
-          <div class="value-row">
-            <span class="value">{{ contributors.length }}</span>
-            <span class="trend">Total</span>
+    <!-- ===== GRID VIEW (default) ===== -->
+    @if (viewMode === 'grid') {
+    <div class="contributors-list-card glass-card">
+      <div class="list-header">
+        <h4>Top Contributors</h4>
+      </div>
+      <div class="contributors-scroll">
+        @for (
+        contributor of contributors | slice : 0 : 15;
+        track contributor.login
+        ) {
+        <a [href]="getPrSearchUrl(contributor.login)" target="_blank" class="contributor-item" [attr.title]="
+                  contributor.login +
+                  ': ' +
+                  contributor.contributions +
+                  ' contributions'
+                ">
+          <div class="avatar-wrapper">
+            <img [src]="contributor.avatar_url" [alt]="contributor.login" loading="lazy" />
+            <span class="contribution-count">{{
+              contributor.contributions
+              }}</span>
           </div>
-        </div>
-        <div class="signal-card glass-card">
-          <span class="label">Engagement</span>
-          <div class="value-row">
-            <span class="value">{{ totalContributions }}</span>
-            <span class="trend">Total Commits</span>
-          </div>
+          <span class="username">{{ contributor.login }}</span>
+        </a>
+        }
+      </div>
+      @if (contributors.length > 15) {
+      <div class="more-contributors">
+        <span>+ {{ contributors.length - 15 }} more contributors</span>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ===== LIST VIEW ===== -->
+    @if (viewMode === 'list') {
+    <div class="contributors-list-view glass-card">
+      <div class="list-view-header">
+        <h4>All Contributors</h4>
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Search contributors..." [(ngModel)]="searchTerm" class="search-input" />
         </div>
       </div>
+
+      <div class="list-table">
+        <div class="list-table-header">
+          <span class="col-rank">#</span>
+          <span class="col-user">Contributor</span>
+          <span class="col-contributions">Contributions</span>
+        </div>
+        <div class="list-table-body">
+          @for (
+          contributor of filteredContributors;
+          track contributor.login;
+          let i = $index
+          ) {
+          <a [href]="getPrSearchUrl(contributor.login)" target="_blank" class="list-row">
+            <span class="col-rank">{{ i + 1 }}</span>
+            <span class="col-user">
+              <img [src]="contributor.avatar_url" [alt]="contributor.login" class="list-avatar" loading="lazy" />
+              <span class="list-username">{{ contributor.login }}</span>
+            </span>
+            <span class="col-contributions">
+              <span class="contrib-count">{{
+                contributor.contributions
+                }}</span>
+              <span class="contrib-bar-wrapper">
+                <span class="contrib-bar" [style.width.%]="
+                          (contributor.contributions /
+                            contributors[0].contributions) *
+                          100
+                        "></span>
+              </span>
+            </span>
+          </a>
+          }
+          @if (filteredContributors.length === 0) {
+          <div class="no-results">
+            No contributors matching "{{ searchTerm }}"
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Detail Signals -->
+    <div class="signals-grid">
+      <div class="signal-card glass-card">
+        <span class="label">Community Size</span>
+        <div class="value-row">
+          <span class="value">{{ contributors.length }}</span>
+          <span class="trend">Total</span>
+        </div>
+      </div>
+      <div class="signal-card glass-card">
+        <span class="label">Engagement</span>
+        <div class="value-row">
+          <span class="value">{{ totalContributions }}</span>
+          <span class="trend">Total Commits</span>
+        </div>
+      </div>
+    </div>
     } @else {
-      <div class="empty-state glass-card">
-        <p>No contributors found for this project.</p>
-      </div>
+    <div class="empty-state glass-card">
+      <p>No contributors found for this project.</p>
+    </div>
     }
   </div>
 </div>

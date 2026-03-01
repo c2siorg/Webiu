@@ -1,14 +1,17 @@
 import { Component, Input, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ProjectCacheService } from '../../services/project-cache.service';
 import { Contributor } from '../../page/projects/project.model';
 
+type ViewMode = 'grid' | 'list';
+
 @Component({
   selector: 'app-project-contributors',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './project-contributors.component.html',
   styleUrls: ['./project-contributors.component.scss'],
 })
@@ -22,15 +25,33 @@ export class ProjectContributorsComponent implements OnInit {
   loading = true;
   error: string | null = null;
 
-  // Community Signals
+  viewMode: ViewMode = 'grid';
+  searchTerm = '';
+
   totalContributions = 0;
   topContributorShare = 0;
-  recentContributorsCount = 0;
+
+  get filteredContributors(): Contributor[] {
+    if (!this.searchTerm) return this.contributors;
+    const term = this.searchTerm.toLowerCase();
+    return this.contributors.filter((c) =>
+      c.login.toLowerCase().includes(term),
+    );
+  }
 
   ngOnInit(): void {
     if (this.projectName) {
       this.fetchContributors();
     }
+  }
+
+  getPrSearchUrl(username: string): string {
+    return `https://github.com/c2siorg/Webiu/pulls?q=author%3A${encodeURIComponent(username)}`;
+  }
+
+  toggleView(): void {
+    this.viewMode = this.viewMode === 'grid' ? 'list' : 'grid';
+    this.searchTerm = '';
   }
 
   private fetchContributors(): void {
@@ -58,15 +79,14 @@ export class ProjectContributorsComponent implements OnInit {
       (acc, c) => acc + c.contributions,
       0,
     );
-    
+
     if (this.totalContributions > 0) {
+      const maxContributions = Math.max(
+        ...this.contributors.map((c) => c.contributions),
+      );
       this.topContributorShare = Math.round(
-        (this.contributors[0].contributions / this.totalContributions) * 100,
+        (maxContributions / this.totalContributions) * 100,
       );
     }
-
-    // In a real scenario, we'd filters by date if available in API. 
-    // For now, we'll treat all as "active" for community size.
-    this.recentContributorsCount = this.contributors.length;
   }
 }
