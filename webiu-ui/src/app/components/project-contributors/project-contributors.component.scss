@@ -85,12 +85,8 @@
 
 .contributors-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 1.5rem;
-
-  @media (max-width: 992px) {
-    grid-template-columns: 1fr;
-  }
 }
 
 .glass-card {
@@ -122,6 +118,11 @@
     max-height: 300px;
     overflow-y: auto;
     padding-right: 0.5rem;
+    transition: max-height 0.3s ease;
+
+    &.expanded {
+      max-height: none;
+    }
 
     &::-webkit-scrollbar {
       width: 4px;
@@ -195,12 +196,22 @@
     margin-top: 1.5rem;
     text-align: center;
 
-    span {
+    .more-btn {
       font-size: 0.85rem;
       color: var(--font-light);
       background: var(--cards-container);
       padding: 0.4rem 1rem;
       border-radius: 20px;
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-family: inherit;
+
+      &:hover {
+        background: #4a90e2;
+        color: #fff;
+        border-color: #4a90e2;
+      }
     }
   }
 }
@@ -380,47 +391,6 @@
       color: var(--font-light);
       font-style: italic;
       font-size: 0.9rem;
-    }
-  }
-}
-
-/* ─── Signals sidebar ─── */
-
-.signals-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
-
-  .signal-card {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-
-    .label {
-      font-size: 0.7rem;
-      color: var(--font-light);
-      margin-bottom: 0.5rem;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 500;
-    }
-
-    .value-row {
-      display: flex;
-      align-items: baseline;
-      gap: 0.5rem;
-
-      .value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        color: var(--primary-dark);
-      }
-
-      .trend {
-        font-size: 0.8rem;
-        color: #16a085;
-        font-weight: 500;
-      }
     }
   }
 }

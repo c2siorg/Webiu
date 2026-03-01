@@ -49,9 +49,9 @@
       <div class="list-header">
         <h4>Top Contributors</h4>
       </div>
-      <div class="contributors-scroll">
+      <div class="contributors-scroll" [class.expanded]="showAllGrid">
         @for (
-        contributor of contributors | slice : 0 : 15;
+        contributor of (showAllGrid ? contributors : (contributors | slice : 0 : 15));
         track contributor.login
         ) {
         <a [href]="getPrSearchUrl(contributor.login)" target="_blank" class="contributor-item" [attr.title]="
@@ -72,7 +72,13 @@
       </div>
       @if (contributors.length > 15) {
       <div class="more-contributors">
-        <span>+ {{ contributors.length - 15 }} more contributors</span>
+        <button (click)="showAllGrid = !showAllGrid" class="more-btn">
+          @if (!showAllGrid) {
+          + {{ contributors.length - 15 }} more contributors
+          } @else {
+          Show less
+          }
+        </button>
       </div>
       }
     </div>
@@ -131,23 +137,6 @@
     </div>
     }
 
-    <!-- Detail Signals -->
-    <div class="signals-grid">
-      <div class="signal-card glass-card">
-        <span class="label">Community Size</span>
-        <div class="value-row">
-          <span class="value">{{ contributors.length }}</span>
-          <span class="trend">Total</span>
-        </div>
-      </div>
-      <div class="signal-card glass-card">
-        <span class="label">Engagement</span>
-        <div class="value-row">
-          <span class="value">{{ totalContributions }}</span>
-          <span class="trend">Total Commits</span>
-        </div>
-      </div>
-    </div>
     } @else {
     <div class="empty-state glass-card">
       <p>No contributors found for this project.</p>

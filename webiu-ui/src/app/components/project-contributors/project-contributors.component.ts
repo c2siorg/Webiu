@@ -27,6 +27,7 @@ export class ProjectContributorsComponent implements OnInit {
 
   viewMode: ViewMode = 'grid';
   searchTerm = '';
+  showAllGrid = false;
 
   totalContributions = 0;
   topContributorShare = 0;
