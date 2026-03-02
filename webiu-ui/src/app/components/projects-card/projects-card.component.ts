@@ -20,8 +20,8 @@ export class ProjectsCardComponent implements OnInit {
   @Input() topics: string[] = [];
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
-  @Input() org?: string;      // ← changed to optional
-  @Input() repo?: string;     // ← changed to optional
+  @Input() org?: string;
+  @Input() repo?: string;
 
   issueCount = 0;
   pullRequestCount = 0;
@@ -41,7 +41,6 @@ export class ProjectsCardComponent implements OnInit {
   fetchIssuesAndPRs(): void {
     
     if (!this.org || !this.repo) {
-      console.warn('Skipping API call: org or repo missing (fallback card)');
       this.initialized = true;
       return;
     }
