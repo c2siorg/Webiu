@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ProjectModule } from '../project/project.module';
 import { ContributorModule } from '../contributor/contributor.module';
-import { ProjectResolver } from './project.resolver';
-import { ContributorResolver } from './contributor.resolver';
+import { ProjectResolver } from './resolvers/project.resolver';
+import { ContributorResolver } from './resolvers/contributor.resolver';
 
 @Module({
   imports: [ProjectModule, ContributorModule],

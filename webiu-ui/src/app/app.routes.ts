@@ -70,6 +70,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'graphql-test',
+    loadComponent: () =>
+      import('./page/graphql-test/graphql-test.component').then(
+        (m) => m.GraphqlTestComponent,
+      ),
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./page/not-found/not-found.component').then(
