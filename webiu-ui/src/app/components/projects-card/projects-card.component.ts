@@ -38,7 +38,7 @@ export class ProjectsCardComponent implements OnInit {
   }
 
   fetchIssuesAndPRs(): void {
-    const apiUrl = `${environment.serverUrl}/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+    const apiUrl = `${environment.serverUrl}/api/v1/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
     this.http
       .get<{ issues: number; pullRequests: number }>(apiUrl)
       .subscribe({

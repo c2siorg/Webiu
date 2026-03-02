@@ -3,7 +3,7 @@ import { Throttle } from '@nestjs/throttler';
 import { ContributorService } from './contributor.service';
 import { UsernameDto } from './dto/username.dto';
 
-@Controller('api/contributor')
+@Controller('api/v1/contributor')
 // All contributor endpoints: stricter limit — each call fans out to GitHub API
 @Throttle({ default: { ttl: 60_000, limit: 10 } })
 export class ContributorController {

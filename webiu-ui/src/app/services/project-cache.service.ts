@@ -20,7 +20,7 @@ export class ProjectCacheService {
    */
   getProjects(page = 1, limit = 10): Observable<ProjectResponse> {
     return this.http.get<ProjectResponse>(
-      `${environment.serverUrl}/api/projects?page=${page}&limit=${limit}`,
+      `${environment.serverUrl}/api/v1/projects?page=${page}&limit=${limit}`,
     );
   }
 
@@ -30,7 +30,7 @@ export class ProjectCacheService {
    */
   getProjectByName(name: string): Observable<Project> {
     return this.http.get<Project>(
-      `${environment.serverUrl}/api/projects/${name}`,
+      `${environment.serverUrl}/api/v1/projects/${name}`,
     );
   }
 
@@ -39,7 +39,7 @@ export class ProjectCacheService {
    */
   getProjectInsights(name: string): Observable<ProjectInsights> {
     return this.http.get<ProjectInsights>(
-      `${environment.serverUrl}/api/projects/${name}/insights`,
+      `${environment.serverUrl}/api/v1/projects/${name}/insights`,
     );
   }
 
@@ -48,7 +48,7 @@ export class ProjectCacheService {
    */
   getProjectContributors(name: string): Observable<Contributor[]> {
     return this.http.get<Contributor[]>(
-      `${environment.serverUrl}/api/projects/${name}/contributors`,
+      `${environment.serverUrl}/api/v1/projects/${name}/contributors`,
     );
   }
 
@@ -61,7 +61,7 @@ export class ProjectCacheService {
     limit = 10,
   ): Observable<ProjectResponse> {
     return this.http.get<ProjectResponse>(
-      `${environment.serverUrl}/api/projects/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
+      `${environment.serverUrl}/api/v1/projects/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     );
   }
 }

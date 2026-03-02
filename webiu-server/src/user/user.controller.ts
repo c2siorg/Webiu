@@ -2,7 +2,7 @@ import { Controller, Get, Post, Param, Body } from '@nestjs/common';
 import { UserService } from './user.service';
 import { BatchSocialDto } from './dto/batch-social.dto';
 
-@Controller('api/user')
+@Controller('api/v1/user')
 export class UserController {
   constructor(private userService: UserService) {}
 

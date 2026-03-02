@@ -94,7 +94,7 @@ export class ContributorsComponent implements OnInit {
   getProfiles() {
     this.http
       .get<Contributor[]>(
-        `${environment.serverUrl}/api/contributor/contributors`,
+        `${environment.serverUrl}/api/v1/contributor/contributors`,
       )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
@@ -118,7 +118,7 @@ export class ContributorsComponent implements OnInit {
 
     this.http
       .post<Record<string, { followers: number; following: number }>>(
-        `${environment.serverUrl}/api/user/batch-social`,
+        `${environment.serverUrl}/api/v1/user/batch-social`,
         { usernames },
       )
       .pipe(takeUntilDestroyed(this.destroyRef))

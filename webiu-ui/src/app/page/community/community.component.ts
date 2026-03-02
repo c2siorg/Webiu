@@ -36,7 +36,7 @@ export class CommunityComponent implements OnInit {
 
   getTopContributors() {
     this.http
-      .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<Contributor[]>(`${environment.serverUrl}/api/v1/contributor/contributors`)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -64,7 +64,7 @@ export class CommunityComponent implements OnInit {
 
     this.http
       .post<Record<string, { followers: number; following: number }>>(
-        `${environment.serverUrl}/api/user/batch-social`,
+        `${environment.serverUrl}/api/v1/user/batch-social`,
         { usernames },
       )
       .pipe(takeUntilDestroyed(this.destroyRef))
