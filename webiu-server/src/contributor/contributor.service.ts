@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  Logger,
-  InternalServerErrorException,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
@@ -10,8 +6,6 @@ const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class ContributorService {
-  private readonly logger = new Logger(ContributorService.name);
-
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
@@ -62,7 +56,7 @@ export class ContributorService {
                 }
               });
             } catch (err) {
-              this.logger.error(`Error processing repo ${repo.name}:`, err);
+              console.error(`Error processing repo ${repo.name}:`, err);
             }
           }),
         );
@@ -78,7 +72,7 @@ export class ContributorService {
       this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
       return allContributors;
     } catch (error) {
-      this.logger.error('Error in getAllContributors:', error);
+      console.error('Error in getAllContributors:', error);
       throw new InternalServerErrorException({
         error: 'Failed to fetch repositories',
         message: error.message,
@@ -98,7 +92,7 @@ export class ContributorService {
 
       return { issues };
     } catch (error) {
-      this.logger.error(
+      console.error(
         'Error fetching user created issues:',
         error.response ? error.response.data : error.message,
       );
@@ -119,7 +113,7 @@ export class ContributorService {
 
       return { pullRequests };
     } catch (error) {
-      this.logger.error(
+      console.error(
         'Error fetching user created pull requests:',
         error.response ? error.response.data : error.message,
       );
@@ -143,7 +137,7 @@ export class ContributorService {
         pullRequests: pullRequests || [],
       };
     } catch (error) {
-      this.logger.error(
+      console.error(
         'Error fetching user stats:',
         error.response ? error.response.data : error.message,
       );
@@ -157,7 +151,7 @@ export class ContributorService {
         await this.githubService.getUserFollowersAndFollowing(username);
       return result;
     } catch (error) {
-      this.logger.error(
+      console.error(
         'Error fetching user followers and following:',
         error.response ? error.response.data : error.message,
       );

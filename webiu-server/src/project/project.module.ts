@@ -7,6 +7,5 @@ import { GithubModule } from '../github/github.module';
   imports: [GithubModule],
   controllers: [ProjectController, IssuesController],
   providers: [ProjectService],
-  exports: [ProjectService],
 })
 export class ProjectModule {}
