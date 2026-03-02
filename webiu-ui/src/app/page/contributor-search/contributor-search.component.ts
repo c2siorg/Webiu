@@ -42,8 +42,8 @@ export class ContributorSearchComponent implements OnInit {
     following: number;
     created_at: string;
   } | null = null;
-  private apiUrl = `${environment.serverUrl}/api/contributor`;
-  private userUrl = `${environment.serverUrl}/api/user`;
+  private apiUrl = `${environment.serverUrl}/api/v1/contributor`;
+  private userUrl = `${environment.serverUrl}/api/v1/user`;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);

@@ -1,7 +1,7 @@
 import { Controller, Get, Query, Header, Param } from '@nestjs/common';
 import { ProjectService } from './project.service';
 
-@Controller('api/projects')
+@Controller('api/v1/projects')
 export class ProjectController {
   constructor(private projectService: ProjectService) {}
 
@@ -20,7 +20,7 @@ export class ProjectController {
   }
 
   /**
-   * GET /api/projects/search?q=...&page=1&limit=10
+   * GET /api/v1/projects/search?q=...&page=1&limit=10
    * Searches repositories using in-memory filtering of cached org repos.
    * Must be declared before :name to avoid being captured by the wildcard.
    */
@@ -44,7 +44,7 @@ export class ProjectController {
   }
 
   /**
-   * GET /api/projects/:name
+   * GET /api/v1/projects/:name
    * Returns metadata and tech stack for a specific project.
    */
   @Get(':name')
@@ -54,7 +54,7 @@ export class ProjectController {
   }
 
   /**
-   * GET /api/projects/:name/insights
+   * GET /api/v1/projects/:name/insights
    * Returns analytical insights, badges, and commit activity for a project.
    */
   @Get(':name/insights')
@@ -64,7 +64,7 @@ export class ProjectController {
   }
 
   /**
-   * GET /api/projects/:name/contributors
+   * GET /api/v1/projects/:name/contributors
    * Returns the list of contributors for a project.
    */
   @Get(':name/contributors')
@@ -74,7 +74,7 @@ export class ProjectController {
   }
 }
 
-@Controller('api/issues')
+@Controller('api/v1/issues')
 export class IssuesController {
   constructor(private projectService: ProjectService) {}
 
