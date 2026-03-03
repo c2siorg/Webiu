@@ -77,4 +77,5 @@ jobs:
       - name: Run unit tests (headless Chrome)
         env:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
+          NODE_OPTIONS: "--max-old-space-size=4096"
         run: npm test -- --browsers=ChromeHeadlessNoSandbox --watch=false --no-progress
