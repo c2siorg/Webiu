@@ -177,6 +177,12 @@ export class NavbarComponent implements OnInit {
     return this.currentRoute === route;
   }
 
+  getCommunityDropdownLabel(): string {
+    return this.currentRoute === '/opportunities'
+      ? 'Opportunities'
+      : 'Community';
+  }
+
   navigateTo(route: string): void {
     this.router.navigate([route]);
     // Close menu after navigation on mobile
