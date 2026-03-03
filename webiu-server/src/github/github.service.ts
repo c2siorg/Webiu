@@ -127,21 +127,46 @@ export class GithubService {
     return issues;
   }
 
-  async getRepoContributors(
+    async getRepoContributors(
     orgName: string,
     repoName: string,
   ): Promise<any[] | null> {
-    const cacheKey = `contributors_${orgName}_${repoName}`;
-    const cached = this.cacheService.get<any[] | null>(cacheKey);
-    if (cached !== null) return cached;
+    
+    if (!orgName?.trim() || !repoName?.trim()) {
+      this.logger.warn('Invalid orgName or repoName passed to getRepoContributors');
+      return null;
+    }
+
+    const normalizedOrg = orgName.toLowerCase().trim();
+    const normalizedRepo = repoName.toLowerCase().trim();
+    const cacheKey = `contributors_${normalizedOrg}_${normalizedRepo}`;
+
+    
+    if (this.cacheService.has(cacheKey)) {
+      return this.cacheService.get<any[] | null>(cacheKey);
+    }
 
     try {
       const contributors = await this.fetchAllPages(
-        `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
+        `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`, // original case for API (GitHub is forgiving)
       );
-      this.cacheService.set(cacheKey, contributors);
+
+      this.cacheService.set(cacheKey, contributors, CACHE_TTL);
       return contributors;
-    } catch {
+    } catch (error: any) {
+      const status = error.response?.status;
+
+      
+      if (status === 404) {
+        this.logger.debug(`Repo not found (cached negative result): ${orgName}/${repoName}`);
+      } else if (status === 429) {
+        this.logger.error(`GitHub rate limit hit on contributors ${orgName}/${repoName}`);
+      } else {
+        this.logger.error(`Failed to fetch contributors for ${orgName}/${repoName}`, error.message);
+      }
+
+      // Negative cache with 300s TTL (as per issue) — prevents hammering dead repos
+      this.cacheService.set(cacheKey, null, 300);
       return null;
     }
   }
@@ -169,11 +194,10 @@ export class GithubService {
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
     );
 
-    // Fetch details for closed PRs to determine if they were merged
+    
     const enrichedPrs = await Promise.all(
       prs.map(async (pr) => {
-        // Only fetch details if closed and we don't know if merged (merged_at missing)
-        // Note: Search API results for PRs don't include merged_at at the top level usually
+      
         if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
           try {
             const response = await axios.get(pr.pull_request.url, {
@@ -183,14 +207,14 @@ export class GithubService {
               pr.merged_at = response.data.merged_at;
             }
           } catch {
-            // Ignore errors for individual PR fetches to avoid failing the whole request
+            
           }
         }
         return pr;
       }),
     );
 
-    // Sort by created_at descending
+    
     enrichedPrs.sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),

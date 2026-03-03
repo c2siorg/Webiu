@@ -54,4 +54,17 @@ export class CacheService {
   clear(): void {
     this.cache.clear();
   }
+
+   
+  has(key: string): boolean {
+    const entry = this.cache.get(key);
+    if (!entry) return false;
+
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return false;
+    }
+
+    return true;
+  }
 }
