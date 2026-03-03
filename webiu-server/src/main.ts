@@ -4,10 +4,14 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
   const configService = app.get(ConfigService);
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
 
   app.use(helmet());
   app.use(compression());
@@ -30,6 +34,7 @@ async function bootstrap() {
 
   const port = configService.get<number>('PORT', 5050);
   await app.listen(port);
-  console.log(`Server is listening at port ${port}`);
+  const logger = app.get(WINSTON_MODULE_NEST_PROVIDER);
+  logger.log(`Server is listening at port ${port}`);
 }
 bootstrap();
