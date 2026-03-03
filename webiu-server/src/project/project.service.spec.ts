@@ -15,10 +15,10 @@ describe('ProjectService', () => {
 
   const mockGithubService = {
     org: 'c2siorg',
-    getOrgRepos: jest.fn(),
+    getAllOrgReposSorted: jest.fn(),
+    getRepoPullCount: jest.fn(),
     getRepoPulls: jest.fn(),
     getRepoIssues: jest.fn(),
-    getPublicUserProfile: jest.fn(),
     getRepo: jest.fn(),
     getRepoLanguages: jest.fn(),
   };
@@ -52,55 +52,44 @@ describe('ProjectService', () => {
 
   describe('getAllProjects', () => {
     it('should return { repositories } with pull request counts using native pagination', async () => {
-      mockGithubService.getOrgRepos.mockResolvedValue([
+      mockGithubService.getAllOrgReposSorted.mockResolvedValue([
         { name: 'repo1' },
         { name: 'repo2' },
       ]);
-      mockGithubService.getRepoPulls
-        .mockResolvedValueOnce([{ id: 1 }, { id: 2 }])
-        .mockResolvedValueOnce([{ id: 3 }]);
-      mockGithubService.getPublicUserProfile.mockResolvedValue({
-        public_repos: 20,
-      });
+      mockGithubService.getRepoPullCount
+        .mockResolvedValueOnce(2)
+        .mockResolvedValueOnce(1);
 
       const result = await service.getAllProjects(1, 10);
 
-      expect(result.total).toBe(20);
+      expect(result.total).toBe(2);
       expect(result.repositories).toHaveLength(2);
       expect(result.repositories[0].pull_requests).toBe(2);
       expect(result.repositories[1].pull_requests).toBe(1);
-      expect(mockGithubService.getOrgRepos).toHaveBeenCalledWith(1, 10);
-      expect(mockGithubService.getPublicUserProfile).toHaveBeenCalledWith(
-        'c2siorg',
-      );
+      expect(mockGithubService.getAllOrgReposSorted).toHaveBeenCalledTimes(1);
     });
 
     it('should cache the response per page/limit', async () => {
-      mockGithubService.getOrgRepos.mockResolvedValue([{ name: 'repo1' }]);
-      mockGithubService.getRepoPulls.mockResolvedValue([]);
-      mockGithubService.getPublicUserProfile.mockResolvedValue({
-        public_repos: 5,
-      });
+      mockGithubService.getAllOrgReposSorted.mockResolvedValue([
+        { name: 'repo1' },
+      ]);
+      mockGithubService.getRepoPullCount.mockResolvedValue(0);
 
       await service.getAllProjects(1, 10);
       await service.getAllProjects(1, 10);
 
       // Only called once due to cache
-      expect(mockGithubService.getOrgRepos).toHaveBeenCalledTimes(1);
-      expect(mockGithubService.getPublicUserProfile).toHaveBeenCalledTimes(1);
+      expect(mockGithubService.getAllOrgReposSorted).toHaveBeenCalledTimes(1);
     });
 
     it('should handle PR fetch errors gracefully per repo', async () => {
-      mockGithubService.getOrgRepos.mockResolvedValue([
+      mockGithubService.getAllOrgReposSorted.mockResolvedValue([
         { name: 'repo1' },
         { name: 'repo2' },
       ]);
-      mockGithubService.getRepoPulls
+      mockGithubService.getRepoPullCount
         .mockRejectedValueOnce(new Error('fail'))
-        .mockResolvedValueOnce([{ id: 1 }]);
-      mockGithubService.getPublicUserProfile.mockResolvedValue({
-        public_repos: 10,
-      });
+        .mockResolvedValueOnce(1);
 
       const result = await service.getAllProjects(1, 10);
 
@@ -109,7 +98,9 @@ describe('ProjectService', () => {
     });
 
     it('should throw InternalServerErrorException on total failure', async () => {
-      mockGithubService.getOrgRepos.mockRejectedValue(new Error('API error'));
+      mockGithubService.getAllOrgReposSorted.mockRejectedValue(
+        new Error('API error'),
+      );
 
       await expect(service.getAllProjects(1, 10)).rejects.toThrow(
         InternalServerErrorException,

@@ -49,21 +49,39 @@ describe('ProjectResolver', () => {
         },
       ];
       mockProjectService.getAllProjects.mockResolvedValue({
+        total: 2,
+        page: 1,
+        limit: 10,
         repositories: mockRepositories,
       });
 
       const result = await resolver.repositories(1, 10);
 
-      expect(result).toEqual(mockRepositories);
+      expect(result).toEqual({
+        total: 2,
+        page: 1,
+        limit: 10,
+        repositories: mockRepositories,
+      });
       expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(1, 10);
     });
 
     it('should return empty array when no repositories exist', async () => {
-      mockProjectService.getAllProjects.mockResolvedValue({ repositories: [] });
+      mockProjectService.getAllProjects.mockResolvedValue({
+        total: 0,
+        page: 1,
+        limit: 10,
+        repositories: [],
+      });
 
       const result = await resolver.repositories(1, 10);
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({
+        total: 0,
+        page: 1,
+        limit: 10,
+        repositories: [],
+      });
     });
   });
 });
