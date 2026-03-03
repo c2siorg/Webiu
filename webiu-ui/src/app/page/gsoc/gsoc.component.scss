@@ -3,387 +3,264 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
+  overflow-x: hidden;
 
+  // ==========================================
+  // 1. HERO SECTION
+  // ==========================================
   .gsoc-hero {
-    max-width: 1000px;
-    margin: 50px auto;
+    max-width: 1100px;
+    width: 90%;
+    margin: 60px auto 40px auto; 
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 60px;
 
     .gsoc-hero-content {
+      flex: 1;
       h1 {
-        color: var(--primary-dark, var(--primary-dark, #0a0a15));
-        font-size: 48px;
-        font-weight: 500;
-        line-height: 150%;
+        color: var(--primary-dark, #0a0a15);
+        font-size: 52px;
+        font-weight: 700;
+        line-height: 1.1;
+        margin-bottom: 20px;
+        :host-context([data-theme="dark"]) & { color: #ffffff; }
       }
-
       p {
-        color: var(--primary-dark, var(--primary-dark, #0a0a15));
-        font-size: 16px;
-        font-weight: light;
-        line-height: 150%;
-        max-width: 450px;
+        color: var(--font-color-p, #586069);
+        font-size: 19px;
+        line-height: 1.6;
+        max-width: 500px;
+        :host-context([data-theme="dark"]) & { color: #cbd5e0; }
       }
+    }
+    
+    img {
+      max-width: 400px;
+      height: auto;
+    }
+
+    @media (max-width: 1024px) {
+      flex-direction: column;
+      text-align: center;
+      margin: 30px auto 40px auto;
+      img { max-width: 280px; }
     }
   }
 
+  // ==========================================
+  // 2. DETAILS SECTION (The Injected HTML)
+  // ==========================================
   .gsoc__details {
     max-width: 900px;
+    width: 90%;
     margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    padding: 20px;
 
-    p {
-      font-size: 16px;
-      line-height: 150%;
+    &, ::ng-deep p, ::ng-deep span, ::ng-deep li, ::ng-deep h3, ::ng-deep h2, ::ng-deep strong {
+      color: var(--font-color-dark, #24292e);
+      transition: color 0.3s ease;
+      :host-context([data-theme="dark"]) & { color: #e8e6e3; }
     }
 
-    .gsoc__section {
-      margin-top: 15px;
-
-      h3 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 10px;
-      }
+    ::ng-deep p {
+      font-size: 17px;
+      line-height: 1.7;
+      margin-top: 0;
+      margin-bottom: 20px;
     }
 
-    .gsoc__videos {
-      margin-top: 20px;
-
-      p {
-        font-weight: 500;
-      }
-
-      ul {
-        margin-top: 10px;
-        padding-left: 20px;
-
-        li {
-          margin-bottom: 5px;
-
-          a {
-            color: #0056b3;
-            text-decoration: underline;
-
-            &:hover {
-              text-decoration: none;
-            }
-          }
-        }
-      }
-    }
-
-    .gsoc__idea__details {
-      margin-top: 20px;
-
-      h3 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 10px;
-      }
-
-      ol {
-        padding-left: 20px;
-
-        li {
-          font-family: Poppins, sans-serif;
-          font-size: 16px;
-          line-height: 150%;
-          margin-bottom: 8px;
-        }
-      }
-    }
-
-    .gsoc__community {
-      margin-top: 20px;
-
-      h3 {
-        font-size: 20px;
-        font-weight: 600;
-        margin-bottom: 10px;
-      }
-
-      ul {
-        padding-left: 20px;
-        margin-bottom: 10px;
-
-        li {
-          margin-bottom: 5px;
-
-          a {
-            color: #0056b3;
-            text-decoration: underline;
-
-            &:hover {
-              text-decoration: none;
-            }
-          }
-        }
-      }
-    }
-
-    .idea-list-header {
-      font-size: 28px;
+    ::ng-deep h3 {
+      font-size: 22px;
       font-weight: 600;
-      margin-top: 40px;
-      margin-bottom: 10px;
-      border-bottom: 2px solid #eaeaea;
-      padding-bottom: 10px;
+      margin-top: 30px; 
+      margin-bottom: 15px;
+      color: var(--primary-color, #0366d6);
+      :host-context([data-theme="dark"]) & { color: #58a6ff; }
+    }
+
+    ::ng-deep ol, ::ng-deep ul {
+      padding-left: 18px; 
+      margin-top: 10px;
+      margin-bottom: 25px;
+
+      li {
+        margin-bottom: 8px; 
+        line-height: 1.6;
+        padding-left: 0;
+
+        &::marker {
+          color: var(--primary-color, #0366d6);
+          font-weight: bold;
+        }
+      }
+    }
+
+    ::ng-deep a {
+      color: var(--primary-color, #0366d6);
+      text-decoration: none;
+      font-weight: 600;
+      &:hover { text-decoration: underline; }
+    }
+
+    ::ng-deep .idea-list-header {
+      font-size: 34px;
+      font-weight: 700;
+      margin-top: 30px; 
+      margin-bottom: 40px;
+      border-bottom: 2px solid var(--border-color, #eaeaea);
+      padding-bottom: 15px;
+      text-align: center;
+      width: 100%;
     }
   }
 
+  // ==========================================
+  // 3. PROJECTS ACCORDION LIST
+  // ==========================================
   .gsoc__projects__list.accordion {
-    width: 100%;
+    width: 90%;
     max-width: 900px;
-    margin: 0 auto 50px auto;
-    display: flex;
-    flex-direction: column;
+    margin: 0 auto 100px auto; 
 
     .accordion-item {
-      border: 1px solid var(--gsoc-project-list-border, #e1e4e8);
-      border-left: 4px solid var(--primary-color, #0366d6);
-      background-color: var(--gsoc-project-list-bg-2, #fff);
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color, #e1e4e8);
+      border-left: 6px solid var(--primary-color, #0366d6);
+      background-color: var(--card-bg, #fff);
+      border-radius: 8px;
+      overflow: hidden;
 
       :host-context([data-theme="dark"]) & {
-        background-color: #11111e;
-        border-color: #282a3b;
-        border-left-color: #e0e0e0;
-      }
-      margin-bottom: -1px;
-
-      &:first-child {
-        border-top-left-radius: 4px;
-        border-top-right-radius: 4px;
-      }
-
-      &:last-child {
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-        margin-bottom: 0;
+        background-color: #161b22;
+        border-color: #30363d;
+        border-left-color: #58a6ff;
       }
 
       .accordion-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding: 16px 20px;
+        padding: 20px 25px;
         cursor: pointer;
-        background-color: transparent;
-        transition: background-color 0.2s ease;
-
-        &:hover {
-          background-color: var(--gsoc-project-list-bg, #f6f8fa);
-        }
-
-        :host-context([data-theme="dark"]) &:hover {
-          background-color: #1b1b28;
-        }
 
         h4 {
           margin: 0;
-          font-size: 16px;
+          font-size: 18px;
           font-weight: 600;
-          color: var(--font-color-dark, #24292e);
-
-          :host-context([data-theme="dark"]) & {
-            color: #e0e0e0;
-          }
+          color: var(--font-color-dark);
+          :host-context([data-theme="dark"]) & { color: #ffffff; }
         }
 
         .icon {
-          font-size: 20px;
+          font-size: 22px;
           color: var(--primary-color, #0366d6);
-          font-weight: bold;
-
-          :host-context([data-theme="dark"]) & {
-            color: #e0e0e0;
-          }
+          :host-context([data-theme="dark"]) & { color: #58a6ff; }
         }
       }
 
       .accordion-content {
-        padding: 20px;
-        border-top: 1px solid var(--gsoc-project-list-border, #e1e4e8);
-        background-color: var(--gsoc-project-list-bg, #fafbfc);
-
+        padding: 30px;
+        border-top: 1px solid var(--border-color, #e1e4e8);
+        background-color: var(--bg-alt, #fafbfc);
         :host-context([data-theme="dark"]) & {
-          background-color: #1b1b28;
-          border-top-color: #282a3b;
-        }
-
-        animation: fadeIn 0.3s ease-in-out;
-
-        ::ng-deep .project-details-grid {
-          display: flex;
-          flex-direction: column;
-          gap: 25px;
-
-          .metadata-boxes {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-
-            .meta-box {
-              display: flex;
-              flex-direction: column;
-              padding: 12px 18px;
-              border-radius: 6px;
-              background: var(--gsoc-project-list-bg-2, #fff);
-              border: 1px solid var(--gsoc-project-list-border, #eaeaea);
-              box-shadow: 0 2px 8px
-                var(--gsoc-project-list-box-shadow, rgba(0, 0, 0, 0.05));
-
-              :host-context([data-theme="dark"]) & {
-                background: #11111e;
-                border-color: #282a3b;
-              }
-
-              min-width: 140px;
-              flex: 1 1 auto;
-
-              strong {
-                font-size: 13px;
-                text-transform: uppercase;
-                letter-spacing: 0.5px;
-                color: var(--primary-color, #0366d6);
-                margin-bottom: 4px;
-
-                :host-context([data-theme="dark"]) & {
-                  color: #e0e0e0;
-                }
-              }
-
-              span {
-                font-size: 15px;
-                font-weight: 500;
-                color: var(--font-color-dark, #24292e);
-
-                :host-context([data-theme="dark"]) & {
-                  color: #e0e0e0;
-                }
-              }
-            }
-          }
-
-          .content-section {
-            background: var(--gsoc-project-list-bg-2, #fff);
-            padding: 20px;
-            border-radius: 6px;
-            border: 1px solid var(--gsoc-project-list-border, #eaeaea);
-
-            :host-context([data-theme="dark"]) & {
-              background: #11111e;
-              border-color: #282a3b;
-            }
-
-            h4 {
-              margin: 0 0 12px 0;
-              font-size: 18px;
-              color: var(--font-color-dark, #24292e);
-              border-bottom: 2px solid var(--gsoc-project-list-border, #eaeaea);
-              padding-bottom: 8px;
-
-              :host-context([data-theme="dark"]) & {
-                color: #e0e0e0;
-                border-bottom-color: #282a3b;
-              }
-            }
-
-            p,
-            ul,
-            ol,
-            li {
-              color: var(--font-color-p, #586069);
-              line-height: 1.6;
-              margin: 0;
-
-              :host-context([data-theme="dark"]) & {
-                color: #e8e6e3;
-              }
-            }
-
-            p {
-              margin-bottom: 10px;
-              &:last-child {
-                margin-bottom: 0;
-              }
-            }
-
-            ul,
-            ol {
-              padding-left: 20px;
-              margin-top: 10px;
-              li {
-                margin-bottom: 6px;
-                &:last-child {
-                  margin-bottom: 0;
-                }
-              }
-            }
-
-            a {
-              color: var(--primary-color, #0366d6);
-              text-decoration: none;
-              font-weight: 500;
-              &:hover {
-                text-decoration: underline;
-              }
-            }
-          }
+          background-color: #0d1117;
+          border-top-color: #30363d;
         }
       }
     }
   }
 }
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-@media screen and (max-width: 1100px) {
-  .gsoc__page .gsoc-hero {
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
+// ==========================================
+// 4. PROJECT INTERNAL GRID (FIXES ALL COLORS)
+// ==========================================
+::ng-deep .project-details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
 
-    .gsoc-hero-content {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+  .metadata-boxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
 
-      p {
-        max-width: 600px;
-        text-align: center;
+    .meta-box {
+      background: var(--card-bg, #fff);
+      border: 1px solid var(--border-color, #ddd);
+      padding: 12px;
+      border-radius: 6px;
+      flex: 1 1 200px;
+
+      strong { 
+        display: block; 
+        color: var(--primary-color, #0366d6); 
+        font-size: 12px; 
+        margin-bottom: 4px; 
+        text-transform: uppercase;
+        :host-context([data-theme="dark"]) & { color: #58a6ff; } 
+      }
+
+      span { 
+        font-weight: 600; 
+        font-size: 15px; 
+        color: var(--font-color-dark, #24292e);
+        :host-context([data-theme="dark"]) & { color: #ffffff; } 
+      }
+
+      :host-context([data-theme="dark"]) & { 
+        background: #1c2128; 
+        border-color: #444c56; 
       }
     }
   }
-}
 
-@media screen and (max-width: 600px) {
-  .gsoc__page .gsoc-hero img {
-    width: 400px;
+  .content-section {
+    h4 { 
+      margin-bottom: 10px; 
+      border-bottom: 1px solid var(--border-color, #ddd); 
+      padding-bottom: 8px; 
+      font-size: 18px; 
+      color: var(--font-color-dark, #24292e);
+      :host-context([data-theme="dark"]) & { color: #ffffff; } // Heading color
+    }
+
+    // FIX FOR PARAGRAPHS AND LISTS (Expected Results, Brief Explanation, etc)
+    p, li, em, i, span { 
+      font-size: 15px; 
+      line-height: 1.6; 
+      color: var(--font-color-p, #586069); 
+
+      // This forces the text to be light in dark mode
+      :host-context([data-theme="dark"]) & { 
+        color: #e8e6e3 !important; 
+      } 
+    }
+
+    ul, ol {
+      padding-left: 20px;
+      margin-top: 10px;
+    }
   }
 }
 
-@media screen and (max-width: 450px) {
-  .gsoc__page .gsoc-hero {
-    .gsoc-hero-content h1 {
-      font-size: 32px;
-    }
-    img {
-      width: 300px;
-    }
-  }
+// Back to Top Button
+.back-to-top {
+  position: fixed;
+  bottom: 25px;
+  right: 25px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+  z-index: 1000;
+  &.show { opacity: 1; visibility: visible; }
+  img { filter: brightness(0) invert(1); }
 }
