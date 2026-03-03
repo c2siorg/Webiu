@@ -12,7 +12,7 @@
   },
   "private": true,
   "overrides": {
-    "tar": "^7.5.9"
+    "tar": "^6.2.1"
   },
   "dependencies": {
     "@angular/animations": "^17.3.0",
