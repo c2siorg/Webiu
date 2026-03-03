@@ -79,10 +79,9 @@ export class ContributorService {
       return allContributors;
     } catch (error) {
       this.logger.error('Error in getAllContributors:', error);
-      throw new InternalServerErrorException({
-        error: 'Failed to fetch repositories',
-        message: error.message,
-      });
+      throw new InternalServerErrorException(
+        'Failed to fetch contributor data',
+      );
     }
   }
 
