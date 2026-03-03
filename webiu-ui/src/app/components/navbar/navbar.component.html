@@ -113,7 +113,7 @@
         [attr.aria-label]="'Community Dropdown'"
       >
         <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
-        <p>Community</p>
+        <p>{{ getCommunityDropdownLabel() }}</p>
         <span class="dropdown-arrow" [class.open]="isCommunityDropdownOpen">▼</span>
       </div>
 
