@@ -266,6 +266,21 @@
         padding: 4px 6px;
         border-radius: 20px;
       }
+
+      .projects__card__lang-tag {
+        border-color: #2b7489;
+        background-color: rgba(43, 116, 137, 0.12);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        .lang-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+      }
     }
 
     .projects__card__details {
