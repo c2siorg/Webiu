@@ -270,4 +270,26 @@ describe('GithubService', () => {
       expect(result).toEqual({ access_token: 'gh-token' });
     });
   });
+
+  describe('getUserFollowersAndFollowing', () => {
+    it('should use the user profile endpoint to return correct follower/following counts and cache them', async () => {
+      mockedAxios.get.mockResolvedValueOnce({
+        data: { followers: 123, following: 456 },
+      });
+
+      const result = await service.getUserFollowersAndFollowing('TestUser');
+      expect(result).toEqual({ followers: 123, following: 456 });
+
+      // ✅ should call /users/:username (not /followers or /following list endpoints)
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        'https://api.github.com/users/TestUser',
+        { headers: { Authorization: 'token test-token' } },
+      );
+
+      // Cached: second call should not hit axios again
+      const result2 = await service.getUserFollowersAndFollowing('TestUser');
+      expect(result2).toEqual({ followers: 123, following: 456 });
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+  });
 });
