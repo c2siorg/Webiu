@@ -47,7 +47,7 @@ export class CommunityComponent implements OnInit {
           this.fetchFollowerData();
         },
         error: (error) => {
-          console.warn('Error fetching contributors:', error);
+          // Error fetching contributors - gracefully degrade
           this.users = [];
           this.isLoading = false;
         },
@@ -78,8 +78,7 @@ export class CommunityComponent implements OnInit {
           this.isLoading = false;
         },
         error: (error) => {
-          console.warn('Error fetching follower data:', error);
-          // Show contributors without social counts rather than failing entirely
+          // Error fetching follower data - show contributors without social counts
           this.isLoading = false;
         },
       });

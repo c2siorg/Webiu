@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Logger } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
@@ -29,7 +29,8 @@ async function bootstrap() {
   );
 
   const port = configService.get<number>('PORT', 5050);
+  const logger = new Logger('Bootstrap');
   await app.listen(port);
-  console.log(`Server is listening at port ${port}`);
+  logger.log(`Server is listening at port ${port}`);
 }
 bootstrap();
