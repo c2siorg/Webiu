@@ -2,14 +2,15 @@ import { Controller, Get, Post, Param, Body } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { UserService } from './user.service';
 import { BatchSocialDto } from './dto/batch-social.dto';
+import { UsernameDto } from './dto/username.dto';   // ← NEW
 
 @Controller('api/user')
 export class UserController {
   constructor(private userService: UserService) {}
 
   @Get('followersAndFollowing/:username')
-  async getFollowersAndFollowing(@Param('username') username: string) {
-    return this.userService.getFollowersAndFollowing(username);
+  async getFollowersAndFollowing(@Param() params: UsernameDto) {   // ← CHANGED
+    return this.userService.getFollowersAndFollowing(params.username);
   }
 
   @Post('batch-social')
@@ -19,7 +20,7 @@ export class UserController {
   }
 
   @Get('profile/:username')
-  async getUserProfile(@Param('username') username: string) {
-    return this.userService.getUserProfile(username);
+  async getUserProfile(@Param() params: UsernameDto) {             // ← CHANGED
+    return this.userService.getUserProfile(params.username);
   }
 }
