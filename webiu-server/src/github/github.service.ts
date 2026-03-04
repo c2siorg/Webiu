@@ -94,6 +94,55 @@ export class GithubService {
   }
 
   /**
+   * Generic ETag-aware GET helper.
+   *
+   * Sends `If-None-Match` when we have a stored ETag for the key.
+   * • 304 → extend TTL via refresh() and return cached data.
+   * • 200 → store new data + ETag and return.
+   *
+   * Edge case: if GitHub returns 304 but the cache entry is missing
+   * (e.g. evicted between the two operations), we fall back to a fresh
+   * GET without `If-None-Match`.
+   */
+  private async getWithEtagCache<T>(opts: {
+    cacheKey: string;
+    url: string;
+    ttlSeconds?: number;
+  }): Promise<T> {
+    const { cacheKey, url, ttlSeconds } = opts;
+
+    const cached = this.cacheService.get<T>(cacheKey);
+    const etag = this.cacheService.getEtag(cacheKey);
+
+    const response = await axios.get<T>(url, {
+      headers: {
+        ...this.headers,
+        ...(etag ? { 'If-None-Match': etag } : {}),
+      },
+      // Prevent Axios from throwing on 304
+      validateStatus: (s) => s === 200 || s === 304,
+    });
+
+    if (response.status === 304) {
+      if (cached !== null) {
+        this.cacheService.refresh(cacheKey, ttlSeconds);
+        return cached;
+      }
+
+      // Rare: 304 but cache entry is gone — fetch fresh without If-None-Match
+      const fresh = await axios.get<T>(url, { headers: this.headers });
+      const freshEtag = fresh.headers?.etag as string | undefined;
+      this.cacheService.set(cacheKey, fresh.data, ttlSeconds, freshEtag);
+      return fresh.data;
+    }
+
+    // 200 OK
+    const newEtag = response.headers?.etag as string | undefined;
+    this.cacheService.set(cacheKey, response.data, ttlSeconds, newEtag);
+    return response.data;
+  }
+
+  /**
    * Fetches ALL org repos, sorts alphabetically, and caches the full list.
    * One-time fetch per cache window avoids per-page GitHub API calls.
    */
@@ -152,27 +201,13 @@ export class GithubService {
   async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {
     if (page !== undefined && perPage !== undefined) {
       const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
-      const cached = this.cacheService.get<any[]>(cacheKey);
-      if (cached) return cached;
-
-      const response = await axios.get(
-        `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-        { headers: this.headers },
-      );
-      const repos = response.data;
-      this.cacheService.set(cacheKey, repos, CACHE_TTL);
-      return repos;
+      const url = `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`;
+      return this.getWithEtagCache<any[]>({ cacheKey, url, ttlSeconds: CACHE_TTL });
     }
 
     const cacheKey = `org_repos_${this.orgName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
-
-    const repos = await this.fetchAllPages(
-      `${this.baseUrl}/orgs/${this.orgName}/repos`,
-    );
-    this.cacheService.set(cacheKey, repos);
-    return repos;
+    const url = `${this.baseUrl}/orgs/${this.orgName}/repos`;
+    return this.getWithEtagCache<any[]>({ cacheKey, url, ttlSeconds: CACHE_TTL });
   }
 
   /**
