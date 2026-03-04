@@ -72,7 +72,7 @@
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** v18.x or higher — [Download](https://nodejs.org/)
+- **Node.js** v20.x or higher — [Download](https://nodejs.org/)
 - **npm** v9.x or higher (ships with Node.js)
 - **Angular CLI** v17.x — Install globally: `npm install -g @angular/cli`
 - **Git** — [Download](https://git-scm.com/)
@@ -85,7 +85,7 @@ You will also need a **GitHub Personal Access Token** for the backend to call th
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/rajutkarsh07/Webiu.git
+git clone https://github.com/c2siorg/Webiu.git
 cd Webiu
 ```
 
