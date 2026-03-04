@@ -1,4 +1,4 @@
-import { Resolver, Query, Args, Int } from '@nestjs/graphql';
+import { Resolver, Query, Args, Int, Extensions } from '@nestjs/graphql';
 import { ProjectService } from '../project/project.service';
 import { PaginatedRepositories } from './models/repository.model';
 
@@ -7,6 +7,7 @@ export class ProjectResolver {
   constructor(private projectService: ProjectService) {}
 
   @Query(() => PaginatedRepositories)
+  @Extensions({ complexity: 10 })
   async repositories(
     @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
     @Args('limit', { type: () => Int, defaultValue: 10 }) limit: number,
@@ -15,6 +16,7 @@ export class ProjectResolver {
   }
 
   @Query(() => PaginatedRepositories)
+  @Extensions({ complexity: 10 })
   async searchRepositories(
     @Args('query') query: string,
     @Args('page', { type: () => Int, defaultValue: 1 }) page: number,

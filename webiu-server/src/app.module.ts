@@ -14,6 +14,7 @@ import { ProjectModule } from './project/project.module';
 import { ContributorModule } from './contributor/contributor.module';
 import { UserModule } from './user/user.module';
 import { GraphqlResolversModule } from './graphql/graphql.module';
+import { createComplexityPlugin } from './graphql/complexity.plugin';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { GraphqlResolversModule } from './graphql/graphql.module';
         playground: configService.get('NODE_ENV') !== 'production',
         introspection: configService.get('NODE_ENV') !== 'production',
         validationRules: [depthLimit(10)],
+        plugins: [createComplexityPlugin(configService)],
         context: ({ req, res }: { req: Request; res: Response }) => ({
           req,
           res,
