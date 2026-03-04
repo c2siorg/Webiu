@@ -357,7 +357,7 @@ export class GithubService {
     const normalizedOrgName = orgName.toLowerCase();
     const normalizedRepoName = repoName.toLowerCase();
     const cacheKey = `contributors_${normalizedOrgName}_${normalizedRepoName}`;
-    
+
     if (this.cacheService.has(cacheKey)) {
       const cached = this.cacheService.get<any[] | null>(cacheKey);
       return cached;
