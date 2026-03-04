@@ -17,26 +17,42 @@ export class NavbarComponent implements OnInit {
   private themeService = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
 
+  // ==================== STATE ====================
   isMenuOpen = false;
   isSunVisible = true;
   isLoggedIn = false;
   showLoginOptions = false;
+  isCommunityDropdownOpen = false;          // ← NEW (dropdown control)
+
   user: any;
   currentRoute = '/';
 
+  // ==================== GETTERS ====================
+  get activeCommunityLabel(): string {
+    return this.currentRoute === '/opportunities' ? 'Opportunities' : 'Community';
+  }
+
+  // Smart active checker (Community + Opportunities dono handle karta hai)
+  isRouteActive(routes: string | string[]): boolean {
+    if (typeof routes === 'string') {
+      return this.currentRoute === routes;
+    }
+    return routes.some(route => this.currentRoute.startsWith(route));
+  }
+
+  // ==================== LIFECYCLE ====================
   ngOnInit(): void {
     this.isSunVisible = !this.themeService.isDarkMode();
+
     this.router.events
-      .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd,
-        ),
-      )
-      .subscribe((event: NavigationEnd) => {
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => {
         this.currentRoute = event.url;
         this.isMenuOpen = false;
+        this.isCommunityDropdownOpen = false;   // ← dropdown bhi band
       });
 
+    // Query param user handling (existing logic)
     if (isPlatformBrowser(this.platformId)) {
       const queryParams = new URLSearchParams(window.location.search);
       const user = queryParams.get('user');
@@ -54,6 +70,17 @@ export class NavbarComponent implements OnInit {
     }
   }
 
+  // ==================== DROPDOWN METHODS ====================
+  toggleCommunityDropdown(event: Event): void {
+    event.stopImmediatePropagation();
+    this.isCommunityDropdownOpen = !this.isCommunityDropdownOpen;
+  }
+
+  closeCommunityDropdown(): void {
+    this.isCommunityDropdownOpen = false;
+  }
+
+  // ==================== EXISTING METHODS (Optimized) ====================
   toggleLoginOptions(): void {
     if (this.isLoggedIn) {
       this.logout();
@@ -104,6 +131,13 @@ export class NavbarComponent implements OnInit {
     }
   }
 
+  navigateTo(route: string): void {
+    this.router.navigate([route]);
+    this.isMenuOpen = false;
+    this.closeCommunityDropdown();          // ← dropdown bhi band
+  }
+
+  // ==================== CLICK OUTSIDE (Enhanced) ====================
   @HostListener('document:click', ['$event'])
   onClickOutside(event: MouseEvent): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -113,7 +147,7 @@ export class NavbarComponent implements OnInit {
     const navbarMenu = document.querySelector('#navbarMenu');
     const navigationButtons = document.querySelector('.navigation__buttons');
 
-    // Handle login options closing
+    // Login options close
     if (
       this.showLoginOptions &&
       !loginOptionsElement?.contains(event.target as Node) &&
@@ -122,7 +156,7 @@ export class NavbarComponent implements OnInit {
       this.showLoginOptions = false;
     }
 
-    // Handle menu closing when clicking outside (but not on the toggle button)
+    // Mobile menu close
     if (
       this.isMenuOpen &&
       navbarMenu &&
@@ -131,17 +165,13 @@ export class NavbarComponent implements OnInit {
     ) {
       this.isMenuOpen = false;
     }
-  }
 
-  isRouteActive(route: string): boolean {
-    return this.currentRoute === route;
-  }
-
-  navigateTo(route: string): void {
-    this.router.navigate([route]);
-    // Close menu after navigation on mobile
-    if (this.isMenuOpen) {
-      this.isMenuOpen = false;
+    // 🔥 Community Dropdown close on outside click
+    if (this.isCommunityDropdownOpen) {
+      const dropdown = document.querySelector('.community-dropdown');
+      if (dropdown && !dropdown.contains(event.target as Node)) {
+        this.isCommunityDropdownOpen = false;
+      }
     }
   }
 }

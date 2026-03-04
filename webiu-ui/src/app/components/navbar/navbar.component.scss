@@ -579,3 +579,80 @@
     border-color: var(--border-color, #282a3b);
   }
 }
+
+
+/* FIXED DROPDOWN STYLING */
+/* ====================== COMMUNITY DROPDOWN (EXACT REFERENCE MATCH) ====================== */
+.community-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.2s ease;
+  background: transparent;
+}
+
+.dropdown-trigger:hover,
+.community-dropdown.active .dropdown-trigger {
+  background: #1e90ff;           /* Exact blue jo screenshot mein hai */
+  color: white;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.25s ease;
+  margin-left: 2px;
+}
+
+.dropdown-arrow.rotated {
+  transform: rotate(180deg);
+}
+
+/* Dropdown Menu - Bilkul reference jaisa */
+.dropdown-menu {
+  position: absolute;
+  top: 100%;                    /* Button ke exact neeche */
+  left: 0;
+  margin-top: 4px;              /* Reference ke hisaab se tight gap */
+  background: #0f0f0f;          /* Same dark as navbar */
+  border: 1px solid #333333;
+  border-radius: 6px;
+  padding: 4px 0;
+  min-width: 165px;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+  z-index: 1200;
+  overflow: hidden;
+}
+
+/* Dropdown Items - Exact style */
+.dropdown-item {
+  display: block;
+  padding: 10px 18px;
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 400;
+  transition: background 0.2s ease;
+  white-space: nowrap;
+}
+
+.dropdown-item:hover,
+.dropdown-item.active {
+  background: #1e1e1e;          /* Reference hover shade */
+}
+
+
+
+
+
+
+
+

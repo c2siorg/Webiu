@@ -101,20 +101,37 @@
       <img src="../../../assets/contributors.svg" alt="Contributors Icon" class="menu-icon" />
       <p>Contributors</p>
     </div>
-    <div
-      class="navbar__menu__items"
-      routerLink="/community"
-      [class.active]="isRouteActive('/community')"
-      (click)="navigateTo('/community')"
-      (keydown.enter)="navigateTo('/community')"
-      (keydown.space)="navigateTo('/community'); $event.preventDefault()"
-      tabindex="0"
-      role="link"
-      [attr.aria-label]="'Community'"
-    >
-      <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
-      <p>Community</p>
-    </div>
+    <!-- FIXED COMMUNITY DROPDOWN -->
+<div class="navbar__menu__items community-dropdown"
+     [class.active]="isRouteActive(['/community', '/opportunities'])">
+
+  <!-- Trigger Button -->
+  <div class="dropdown-trigger"
+       (click)="toggleCommunityDropdown($event)"
+       tabindex="0"
+       role="button"
+       aria-haspopup="true">
+    <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
+    <p>{{ activeCommunityLabel }}</p>
+    <span class="dropdown-arrow" [class.rotated]="isCommunityDropdownOpen">▼</span>
+  </div>
+
+  <!-- Dropdown Menu (ab *ngIf use kiya hai) -->
+  <div class="dropdown-menu" *ngIf="isCommunityDropdownOpen">
+    <a routerLink="/community"
+       class="dropdown-item"
+       routerLinkActive="active"
+       (click)="closeCommunityDropdown()">
+      Community
+    </a>
+    <a routerLink="/opportunities"
+       class="dropdown-item"
+       routerLinkActive="active"
+       (click)="closeCommunityDropdown()">
+      Opportunities
+    </a>
+  </div>
+</div>
     <div
       class="navbar__menu__items"
       routerLink="/gsoc"
