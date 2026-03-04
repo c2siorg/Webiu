@@ -47,7 +47,7 @@ export class ProjectsCardComponent implements OnInit {
           this.pullRequestCount = data.pullRequests;
           this.initialized = true;
         },
-        error: (error) => {
+        error: (_error) => {
           // Error fetching issues/PRs - hide component gracefully
           this.initialized = true;
         }

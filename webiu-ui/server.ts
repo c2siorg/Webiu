@@ -48,9 +48,7 @@ function run(): void {
 
   // Start up the Node server
   const server = app();
-  server.listen(port, () => {
-    // Express server running on port
-  });
+  server.listen(port);
 }
 
 run();
