@@ -38,32 +38,28 @@ export class ContributorService {
 
         await Promise.all(
           batch.map(async (repo) => {
-            try {
-              const contributors = await this.githubService.getRepoContributors(
-                orgName,
-                repo.name,
-              );
-              if (!contributors?.length) return;
+            const contributors = await this.githubService.getRepoContributors(
+              orgName,
+              repo.name,
+            );
+            if (!contributors?.length) return;
 
-              contributors.forEach((contributor) => {
-                const login = contributor.login.toLowerCase();
+            contributors.forEach((contributor) => {
+              const login = contributor.login.toLowerCase();
 
-                if (!contributorsMap.has(login)) {
-                  contributorsMap.set(login, {
-                    login: contributor.login,
-                    contributions: contributor.contributions,
-                    repos: new Set([repo.name]),
-                    avatar_url: contributor.avatar_url,
-                  });
-                } else {
-                  const userData = contributorsMap.get(login);
-                  userData.contributions += contributor.contributions;
-                  userData.repos.add(repo.name);
-                }
-              });
-            } catch (err) {
-              this.logger.error(`Error processing repo ${repo.name}:`, err);
-            }
+              if (!contributorsMap.has(login)) {
+                contributorsMap.set(login, {
+                  login: contributor.login,
+                  contributions: contributor.contributions,
+                  repos: new Set([repo.name]),
+                  avatar_url: contributor.avatar_url,
+                });
+              } else {
+                const userData = contributorsMap.get(login);
+                userData.contributions += contributor.contributions;
+                userData.repos.add(repo.name);
+              }
+            });
           }),
         );
       }
@@ -87,44 +83,28 @@ export class ContributorService {
   }
 
   async getUserCreatedIssues(username: string) {
-    try {
-      const issues = await this.githubService.searchUserIssues(username);
+    const issues = await this.githubService.searchUserIssues(username);
 
-      if (!issues) {
-        throw new InternalServerErrorException(
-          'Failed to fetch user-created issues',
-        );
-      }
-
-      return { issues };
-    } catch (error) {
-      this.logger.error(
-        'Error fetching user created issues:',
-        error.response ? error.response.data : error.message,
+    if (!issues) {
+      throw new InternalServerErrorException(
+        'Failed to fetch user-created issues',
       );
-      throw new InternalServerErrorException('Internal server error');
     }
+
+    return { issues };
   }
 
   async getUserCreatedPullRequests(username: string) {
-    try {
-      const pullRequests =
-        await this.githubService.searchUserPullRequests(username);
+    const pullRequests =
+      await this.githubService.searchUserPullRequests(username);
 
-      if (!pullRequests) {
-        throw new InternalServerErrorException(
-          'Failed to fetch user-created pull requests',
-        );
-      }
-
-      return { pullRequests };
-    } catch (error) {
-      this.logger.error(
-        'Error fetching user created pull requests:',
-        error.response ? error.response.data : error.message,
+    if (!pullRequests) {
+      throw new InternalServerErrorException(
+        'Failed to fetch user-created pull requests',
       );
-      throw new InternalServerErrorException('Internal server error');
     }
+
+    return { pullRequests };
   }
 
   /**
@@ -132,38 +112,20 @@ export class ContributorService {
    * Saves the frontend from making 2 separate requests.
    */
   async getUserStats(username: string) {
-    try {
-      const [issues, pullRequests] = await Promise.all([
-        this.githubService.searchUserIssues(username),
-        this.githubService.searchUserPullRequests(username),
-      ]);
+    const [issues, pullRequests] = await Promise.all([
+      this.githubService.searchUserIssues(username),
+      this.githubService.searchUserPullRequests(username),
+    ]);
 
-      return {
-        issues: issues || [],
-        pullRequests: pullRequests || [],
-      };
-    } catch (error) {
-      this.logger.error(
-        'Error fetching user stats:',
-        error.response ? error.response.data : error.message,
-      );
-      throw new InternalServerErrorException('Internal server error');
-    }
+    return {
+      issues: issues || [],
+      pullRequests: pullRequests || [],
+    };
   }
 
   async getUserFollowersAndFollowing(username: string) {
-    try {
-      const result =
-        await this.githubService.getUserFollowersAndFollowing(username);
-      return result;
-    } catch (error) {
-      this.logger.error(
-        'Error fetching user followers and following:',
-        error.response ? error.response.data : error.message,
-      );
-      throw new InternalServerErrorException(
-        'Failed to fetch followers and following data',
-      );
-    }
+    const result =
+      await this.githubService.getUserFollowersAndFollowing(username);
+    return result;
   }
 }
