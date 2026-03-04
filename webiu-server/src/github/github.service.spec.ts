@@ -137,10 +137,10 @@ describe('GithubService', () => {
       expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     });
 
-    it('should return null on error', async () => {
+    it('should return empty array on error', async () => {
       mockedAxios.get.mockRejectedValue(new Error('API error'));
       const result = await service.getRepoContributors('c2siorg', 'repo1');
-      expect(result).toBeNull();
+      expect(result).toEqual([]);
     });
   });
 
