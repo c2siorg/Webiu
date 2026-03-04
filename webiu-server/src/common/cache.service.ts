@@ -4,12 +4,14 @@ import { ConfigService } from '@nestjs/config';
 interface CacheEntry<T> {
   data: T;
   expiresAt: number;
+  /** ETag header value returned by GitHub for this response, if any. */
+  etag?: string;
 }
 
 @Injectable()
 export class CacheService {
   private readonly logger = new Logger(CacheService.name);
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private readonly defaultTtl: number;
 
   constructor(private configService: ConfigService) {
@@ -27,7 +29,7 @@ export class CacheService {
     }
   }
 
-  get<T>(key: string): T | null {
+  get<T = unknown>(key: string): T | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
 
@@ -55,12 +57,48 @@ export class CacheService {
     return true;
   }
 
-  set<T>(key: string, data: T, ttlSeconds?: number): void {
+  /**
+   * Returns the stored ETag for a cache key, or undefined if the key
+   * does not exist or has expired.
+   */
+  getEtag(key: string): string | undefined {
+    const entry = this.cache.get(key);
+    if (!entry) return undefined;
+
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return undefined;
+    }
+
+    return entry.etag;
+  }
+
+  set<T = unknown>(key: string, data: T, ttlSeconds?: number, etag?: string): void {
     const ttl = ttlSeconds ?? this.defaultTtl;
     this.cache.set(key, {
       data,
       expiresAt: Date.now() + ttl * 1000,
+      ...(etag !== undefined ? { etag } : {}),
     });
+  }
+
+  /**
+   * Extends the TTL of an existing, non-expired cache entry without
+   * changing its data or ETag. Returns true if the entry existed and
+   * was refreshed, false if it was missing or already expired.
+   */
+  refresh(key: string, ttlSeconds?: number): boolean {
+    const entry = this.cache.get(key);
+    if (!entry) return false;
+
+    if (Date.now() > entry.expiresAt) {
+      this.cache.delete(key);
+      return false;
+    }
+
+    const ttl = ttlSeconds ?? this.defaultTtl;
+    entry.expiresAt = Date.now() + ttl * 1000;
+    return true;
   }
 
   delete(key: string): void {
