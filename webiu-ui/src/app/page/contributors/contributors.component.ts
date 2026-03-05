@@ -8,7 +8,7 @@ import { Contributor } from '../../common/data/contributor';
 
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { HttpClientModule, HttpClient } from '@angular/common/http';
-import { CommmonUtilService } from '../../common/service/commmon-util.service';
+import { CommonUtilService } from '../../common/service/common-util.service';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
@@ -59,7 +59,7 @@ export class ContributorsComponent implements OnInit {
   totalPages = 1;
 
   private http = inject(HttpClient);
-  private commonUtil = inject(CommmonUtilService);
+  private commonUtil = inject(CommonUtilService);
   private router = inject(Router);
   private titleService = inject(Title);
   private metaService = inject(Meta);

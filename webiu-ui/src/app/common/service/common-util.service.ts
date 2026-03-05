@@ -6,7 +6,7 @@ import { FormControl } from '@angular/forms';
 @Injectable({
   providedIn: 'root'
 })
-export class CommmonUtilService {
+export class CommonUtilService {
   commonProfiles?: Contributor[];
   commonDisplayProfiles?: Contributor[];
   searchText = new FormControl('');
