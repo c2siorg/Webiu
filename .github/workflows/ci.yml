@@ -23,8 +23,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # version from package.json packageManager field
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
@@ -58,8 +57,7 @@ jobs:
 
       - name: Install pnpm
         uses: pnpm/action-setup@v4
-        with:
-          version: 9
+        # version from package.json packageManager field
 
       - name: Set up Node.js 20
         uses: actions/setup-node@v4
