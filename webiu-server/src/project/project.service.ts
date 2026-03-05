@@ -292,10 +292,6 @@ export class ProjectService {
           .catch(() => []),
       ]);
 
-      if (!contributors) {
-        return [];
-      }
-
       const pureIssues = issues.filter((i: any) => !i.pull_request);
 
       const enriched = contributors.map((contributor: any) => {

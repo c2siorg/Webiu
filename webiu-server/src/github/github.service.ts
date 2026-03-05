@@ -350,10 +350,7 @@ export class GithubService {
     }
   }
 
-  async getRepoContributors(
-    orgName: string,
-    repoName: string,
-  ): Promise<any[] | null> {
+  async getRepoContributors(orgName: string, repoName: string): Promise<any[]> {
     const normalizedOrgName = orgName.toLowerCase();
     const normalizedRepoName = repoName.toLowerCase();
     const cacheKey = `contributors_${normalizedOrgName}_${normalizedRepoName}`;
@@ -370,9 +367,9 @@ export class GithubService {
       this.cacheService.set(cacheKey, contributors, 600);
       return contributors;
     } catch {
-      // Cache null results with shorter TTL to prevent repeated failed requests
-      this.cacheService.set(cacheKey, null, 300);
-      return null;
+      // Cache empty array with shorter TTL to prevent repeated failed requests
+      this.cacheService.set(cacheKey, [], 300);
+      return [];
     }
   }
 
@@ -478,6 +475,7 @@ export class GithubService {
   }> {
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `user_social:${normalizedUsername}`;
+
     const cached = this.cacheService.get<{
       followers: number;
       following: number;
@@ -485,18 +483,17 @@ export class GithubService {
     if (cached) return cached;
 
     try {
-      const [followersResponse, followingResponse] = await Promise.all([
-        axios.get(`${this.baseUrl}/users/${username}/followers`, {
+      // ✅ Correct source of truth: GitHub profile fields (not list endpoints capped at 30)
+      const userResponse = await axios.get(
+        `${this.baseUrl}/users/${username}`,
+        {
           headers: this.headers,
-        }),
-        axios.get(`${this.baseUrl}/users/${username}/following`, {
-          headers: this.headers,
-        }),
-      ]);
+        },
+      );
 
       const result = {
-        followers: followersResponse.data.length || 0,
-        following: followingResponse.data.length || 0,
+        followers: userResponse.data?.followers ?? 0,
+        following: userResponse.data?.following ?? 0,
       };
 
       this.cacheService.set(cacheKey, result);

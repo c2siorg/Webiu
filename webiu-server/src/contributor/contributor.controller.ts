@@ -1,7 +1,7 @@
 import { Controller, Get, Param, Header } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { ContributorService } from './contributor.service';
-import { UsernameDto } from './dto/username.dto';
+import { UsernameDto } from '../common/dto/username.dto';
 
 @Controller('api/v1/contributor')
 // All contributor endpoints: stricter limit — each call fans out to GitHub API
