@@ -36,6 +36,7 @@
     "google-auth-library": "^9.15.0",
     "graphql": "^16.12.0",
     "graphql-depth-limit": "^1.1.0",
+    "graphql-query-complexity": "^1.1.0",
     "helmet": "^8.1.0",
     "mongoose": "^8.8.1",
     "nodemailer": "^6.9.16",
