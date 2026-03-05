@@ -149,6 +149,42 @@ describe('ProjectService', () => {
     });
   });
 
+  describe('getRepoTechStack', () => {
+    it('should return languages array', async () => {
+      mockGithubService.getRepoLanguages.mockResolvedValue({
+        TypeScript: 12345,
+        JavaScript: 6789,
+      });
+
+      const result = await service.getRepoTechStack('repo1');
+      expect(result).toEqual({ languages: ['TypeScript', 'JavaScript'] });
+    });
+
+    it('should cache the result', async () => {
+      mockGithubService.getRepoLanguages.mockResolvedValue({ TypeScript: 1 });
+
+      await service.getRepoTechStack('repo1');
+      await service.getRepoTechStack('repo1');
+
+      expect(mockGithubService.getRepoLanguages).toHaveBeenCalledTimes(1);
+    });
+
+    it('should throw BadRequestException when repoName is empty', async () => {
+      await expect(service.getRepoTechStack('')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
+
+    it('should throw InternalServerErrorException on API error', async () => {
+      mockGithubService.getRepoLanguages.mockRejectedValue(
+        new Error('API error'),
+      );
+      await expect(service.getRepoTechStack('repo1')).rejects.toThrow(
+        InternalServerErrorException,
+      );
+    });
+  });
+
   describe('getProjectByName', () => {
     it('should return enriched project metadata', async () => {
       mockGithubService.getRepo.mockResolvedValue({

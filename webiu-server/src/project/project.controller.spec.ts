@@ -8,6 +8,11 @@ describe('ProjectController', () => {
   const mockProjectService = {
     getAllProjects: jest.fn(),
     getIssuesAndPr: jest.fn(),
+    searchProjects: jest.fn(),
+    getProjectByName: jest.fn(),
+    getRepoTechStack: jest.fn(),
+    getProjectInsights: jest.fn(),
+    getProjectContributors: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -46,6 +51,18 @@ describe('ProjectController', () => {
 
       expect(result).toEqual(mockResult);
       expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(1, 10);
+    });
+  });
+
+  describe('getRepoTechStack', () => {
+    it('should return tech stack from service', async () => {
+      const mockResult = { languages: ['TypeScript', 'JavaScript'] };
+      mockProjectService.getRepoTechStack.mockResolvedValue(mockResult);
+
+      const result = await controller.getRepoTechStack('Webiu');
+
+      expect(result).toEqual(mockResult);
+      expect(mockProjectService.getRepoTechStack).toHaveBeenCalledWith('Webiu');
     });
   });
 });
