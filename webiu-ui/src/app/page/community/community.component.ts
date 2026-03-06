@@ -3,12 +3,11 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
-import { Contributor } from '../../common/data/contributor';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';
-
+import { GithubContributor } from '../../models/github.model';
 
 @Component({
   selector: 'app-community',
@@ -27,7 +26,7 @@ export class CommunityComponent implements OnInit {
   private http = inject(HttpClient);
   private destroyRef = inject(DestroyRef);
   icons: Media[] = socialMedia;
-  users: Contributor[] = [];
+  users: GithubContributor[] = [];
   isLoading = true;
 
   ngOnInit() {
@@ -36,7 +35,9 @@ export class CommunityComponent implements OnInit {
 
   getTopContributors() {
     this.http
-      .get<Contributor[]>(`${environment.serverUrl}/api/v1/contributor/contributors`)
+      .get<GithubContributor[]>(
+        `${environment.serverUrl}/api/v1/contributor/contributors`,
+      )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
@@ -72,8 +73,9 @@ export class CommunityComponent implements OnInit {
         next: (data) => {
           this.users.forEach((user) => {
             const social = data[user.login];
-            user.followers = social?.followers ?? 0;
-            user.following = social?.following ?? 0;
+            // ← Fix: Bracket notation for index signature safety (TS4111 resolved)
+            (user as any)['followers'] = social?.followers ?? 0;
+            (user as any)['following'] = social?.following ?? 0;
           });
           this.isLoading = false;
         },

@@ -8,6 +8,13 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 import { AxiosError } from 'axios';
+import {
+  GithubRepo,
+  GithubIssue,
+  GithubPullRequest,
+  GithubContributor,
+  CommitActivityWeek,
+} from '../github/github.types';
 
 const CACHE_TTL = 300; // 5 minutes
 const INSIGHTS_CACHE_TTL = 3600; // 1 hour
@@ -37,7 +44,7 @@ export class ProjectService {
       total: number;
       page: number;
       limit: number;
-      repositories: any[];
+      repositories: GithubRepo[];
     }>(cacheKey);
     if (cached) return cached;
 
@@ -292,20 +299,26 @@ export class ProjectService {
           .catch(() => []),
       ]);
 
-      const pureIssues = issues.filter((i: any) => !i.pull_request);
+      const pureIssues = issues.filter((i: GithubIssue) => !i.pull_request);
 
-      const enriched = contributors.map((contributor: any) => {
+      const enriched = contributors.map((contributor: GithubContributor) => {
         const login = contributor.login;
 
-        const userPrs = pulls.filter((pr: any) => pr.user?.login === login);
-        const mergedPrs = userPrs.filter((pr: any) => pr.merged_at).length;
-        const closedPrs = userPrs.filter(
-          (pr: any) => pr.state === 'closed' && !pr.merged_at,
+        const userPrs = pulls.filter(
+          (pr: GithubPullRequest) => pr.user?.login === login,
+        );
+        const mergedPrs = userPrs.filter(
+          (pr: GithubPullRequest) => pr.merged_at,
         ).length;
-        const openPrs = userPrs.filter((pr: any) => pr.state === 'open').length;
+        const closedPrs = userPrs.filter(
+          (pr: GithubPullRequest) => pr.state === 'closed' && !pr.merged_at,
+        ).length;
+        const openPrs = userPrs.filter(
+          (pr: GithubPullRequest) => pr.state === 'open',
+        ).length;
 
         const userIssues = pureIssues.filter(
-          (i: any) => i.user?.login === login,
+          (i: GithubIssue) => i.user?.login === login,
         ).length;
 
         return {
@@ -343,7 +356,7 @@ export class ProjectService {
       total: number;
       page: number;
       limit: number;
-      repositories: any[];
+      repositories: GithubRepo[];
     }>(cacheKey);
     if (cached) return cached;
 
@@ -374,9 +387,11 @@ export class ProjectService {
     }
   }
 
-  private async enrichWithPullCounts(repos: any[]): Promise<any[]> {
+  private async enrichWithPullCounts(
+    repos: GithubRepo[],
+  ): Promise<GithubRepo[]> {
     const BATCH_SIZE = 10;
-    const enriched: any[] = [];
+    const enriched: GithubRepo[] = [];
     for (let i = 0; i < repos.length; i += BATCH_SIZE) {
       const batch = repos.slice(i, i + BATCH_SIZE);
       const batchResults = await Promise.all(

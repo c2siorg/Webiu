@@ -1,10 +1,18 @@
-import { Component, HostListener, OnInit, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnInit,
+  inject,
+  PLATFORM_ID,
+  DestroyRef,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { environment } from '../../../environments/environment';
+import { GithubUserProfile } from '../../models/github.model';
 
 @Component({
   selector: 'app-navbar',
@@ -24,7 +32,7 @@ export class NavbarComponent implements OnInit {
   isLoggedIn = false;
   showLoginOptions = false;
   isCommunityDropdownOpen = false;
-  user: any;
+  user: GithubUserProfile | null = null;
   currentRoute = '/';
 
   ngOnInit(): void {
@@ -34,7 +42,7 @@ export class NavbarComponent implements OnInit {
         filter(
           (event): event is NavigationEnd => event instanceof NavigationEnd,
         ),
-        takeUntilDestroyed(this.destroyRef)
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
@@ -47,14 +55,25 @@ export class NavbarComponent implements OnInit {
       const user = queryParams.get('user');
       if (user) {
         try {
-          this.user = JSON.parse(decodeURIComponent(user));
-          this.isLoggedIn = true;
+          // ← Fix: Safe cast with null check
+          const parsedUser = JSON.parse(decodeURIComponent(user));
+          if (parsedUser && parsedUser.login) {
+            this.user = parsedUser as GithubUserProfile;
+            this.isLoggedIn = true;
+          } else {
+            this.user = null;
+            this.isLoggedIn = false;
+          }
         } catch (e) {
           console.warn('Failed to parse user query param:', e);
           this.user = null;
           this.isLoggedIn = false;
         }
-        window.history.replaceState({}, document.title, window.location.pathname);
+        window.history.replaceState(
+          {},
+          document.title,
+          window.location.pathname,
+        );
       }
     }
   }
@@ -171,7 +190,11 @@ export class NavbarComponent implements OnInit {
     if (route === '/projects' && this.currentRoute.startsWith('/project')) {
       return true;
     }
-    if (route === '/community' && (this.currentRoute === '/community' || this.currentRoute === '/opportunities')) {
+    if (
+      route === '/community' &&
+      (this.currentRoute === '/community' ||
+        this.currentRoute === '/opportunities')
+    ) {
       return true;
     }
     return this.currentRoute === route;
