@@ -151,17 +151,81 @@ describe('GithubService', () => {
   });
 
   describe('searchUserPullRequests', () => {
-    it('should fetch and cache user PRs', async () => {
-      mockedAxios.get.mockResolvedValueOnce({
-        data: { items: [{ id: 1, title: 'PR' }] },
-      });
+    const mergedPr = {
+      id: 1,
+      title: 'Merged PR',
+      state: 'closed',
+      closed_at: '2025-01-15T00:00:00Z',
+      created_at: '2025-01-10T00:00:00Z',
+      pull_request: { url: 'https://api.github.com/repos/c2siorg/repo/pulls/1' },
+    };
+
+    const unmergedPr = {
+      id: 2,
+      title: 'Open PR',
+      state: 'open',
+      created_at: '2025-01-20T00:00:00Z',
+      pull_request: { url: 'https://api.github.com/repos/c2siorg/repo/pulls/2' },
+    };
+
+    it('should fetch merged and unmerged PRs, tag merged_at, and sort by created_at desc', async () => {
+      mockedAxios.get
+        .mockResolvedValueOnce({ data: { items: [mergedPr] } })
+        .mockResolvedValueOnce({ data: { items: [unmergedPr] } });
 
       const result = await service.searchUserPullRequests('testuser');
-      expect(result).toEqual([{ id: 1, title: 'PR' }]);
 
-      // Cached
+      expect(result).toHaveLength(2);
+      // Sorted by created_at descending: unmergedPr (Jan 20) before mergedPr (Jan 10)
+      expect(result[0].id).toBe(2);
+      expect(result[1].id).toBe(1);
+      // Merged PR should have merged_at backfilled from closed_at
+      expect(result[1].merged_at).toBe('2025-01-15T00:00:00Z');
+
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        expect.stringContaining('is:merged'),
+        expect.any(Object),
+      );
+      expect(mockedAxios.get).toHaveBeenCalledWith(
+        expect.stringContaining('is:unmerged'),
+        expect.any(Object),
+      );
+    });
+
+    it('should not overwrite existing merged_at on merged PRs', async () => {
+      const prWithMergedAt = { ...mergedPr, merged_at: '2025-01-14T00:00:00Z' };
+
+      mockedAxios.get
+        .mockResolvedValueOnce({ data: { items: [prWithMergedAt] } })
+        .mockResolvedValueOnce({ data: { items: [] } });
+
+      const result = await service.searchUserPullRequests('testuser');
+
+      expect(result).toHaveLength(1);
+      expect(result[0].merged_at).toBe('2025-01-14T00:00:00Z');
+    });
+
+    it('should return cached results on second call', async () => {
+      mockedAxios.get
+        .mockResolvedValueOnce({ data: { items: [mergedPr] } })
+        .mockResolvedValueOnce({ data: { items: [unmergedPr] } });
+
       await service.searchUserPullRequests('testuser');
-      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+      const result = await service.searchUserPullRequests('testuser');
+
+      expect(result).toHaveLength(2);
+      // Only 2 axios calls total (one per search query), not 4
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('should return empty array when no PRs exist', async () => {
+      mockedAxios.get
+        .mockResolvedValueOnce({ data: { items: [] } })
+        .mockResolvedValueOnce({ data: { items: [] } });
+
+      const result = await service.searchUserPullRequests('testuser');
+      expect(result).toEqual([]);
     });
   });
 
