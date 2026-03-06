@@ -14,6 +14,13 @@ export class CacheService {
   private cache = new Map<string, CacheEntry<unknown>>();
   private readonly defaultTtl: number;
 
+  /**
+   * Tracks in-flight fetch promises keyed by cache key.
+   * Prevents cache stampedes: concurrent callers for the same cold-cache key
+   * share one promise instead of each firing an independent HTTP request.
+   */
+  private readonly inFlight = new Map<string, Promise<unknown>>();
+
   constructor(private configService: ConfigService) {
     const raw = this.configService.get<string>('CACHE_TTL_SECONDS');
     const parsed = parseInt(raw, 10);
@@ -101,11 +108,49 @@ export class CacheService {
     return true;
   }
 
+  /**
+   * Deduplicates concurrent fetches for the same cache key.
+   *
+   * If a cached value already exists it is returned immediately.
+   * If a fetch for this key is already in-flight, the same promise is returned
+   * to all concurrent callers — only one HTTP request is ever made.
+   * Once the fetch resolves the result is stored via `set()` using the provided
+   * TTL, the in-flight entry is removed, and all waiters receive the result.
+   *
+   * @param key       Cache key
+   * @param fetcher   Async function that performs the actual fetch and returns
+   *                  `{ data: T; ttlSeconds?: number; etag?: string }`. The caller
+   *                  controls TTL and the optional ETag for conditional-request support.
+   */
+  async dedup<T = unknown>(
+    key: string,
+    fetcher: () => Promise<{ data: T; ttlSeconds?: number; etag?: string }>,
+  ): Promise<T> {
+    const cached = this.get<T>(key);
+    if (cached !== null) return cached;
+
+    const existing = this.inFlight.get(key);
+    if (existing) return existing as Promise<T>;
+
+    const promise = fetcher()
+      .then(({ data, ttlSeconds, etag }) => {
+        this.set(key, data, ttlSeconds, etag);
+        return data;
+      })
+      .finally(() => {
+        this.inFlight.delete(key);
+      });
+
+    this.inFlight.set(key, promise as Promise<unknown>);
+    return promise;
+  }
+
   delete(key: string): void {
     this.cache.delete(key);
   }
 
   clear(): void {
     this.cache.clear();
+    this.inFlight.clear();
   }
 }

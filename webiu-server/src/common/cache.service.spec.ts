@@ -153,6 +153,111 @@ describe('CacheService', () => {
     });
   });
 
+  describe('dedup()', () => {
+    it('returns cached value immediately without calling fetcher', async () => {
+      service.set('key', 'cached-value', 60);
+      const fetcher = jest.fn();
+
+      const result = await service.dedup('key', fetcher);
+
+      expect(result).toBe('cached-value');
+      expect(fetcher).not.toHaveBeenCalled();
+    });
+
+    it('calls fetcher once and stores result when cache is cold', async () => {
+      const fetcher = jest.fn().mockResolvedValue({ data: 'fresh', ttlSeconds: 60 });
+
+      const result = await service.dedup('key', fetcher);
+
+      expect(result).toBe('fresh');
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      expect(service.get('key')).toBe('fresh');
+    });
+
+    it('deduplicates concurrent callers — fetcher called exactly once', async () => {
+      let resolveIt: (v: { data: string; ttlSeconds: number }) => void;
+      const fetcher = jest.fn(
+        () =>
+          new Promise<{ data: string; ttlSeconds: number }>((res) => {
+            resolveIt = res;
+          }),
+      );
+
+      // Fire 5 concurrent callers before the fetch resolves
+      const promises = [
+        service.dedup('key', fetcher),
+        service.dedup('key', fetcher),
+        service.dedup('key', fetcher),
+        service.dedup('key', fetcher),
+        service.dedup('key', fetcher),
+      ];
+
+      // Resolve the single in-flight fetch
+      resolveIt({ data: 'result', ttlSeconds: 60 });
+      const results = await Promise.all(promises);
+
+      expect(fetcher).toHaveBeenCalledTimes(1);
+      expect(results).toEqual(['result', 'result', 'result', 'result', 'result']);
+      expect(service.get('key')).toBe('result');
+    });
+
+    it('second call after resolution returns cached value without refetching', async () => {
+      const fetcher = jest.fn().mockResolvedValue({ data: 'value', ttlSeconds: 60 });
+      await service.dedup('key', fetcher);
+
+      // Cache is now warm; a second call should return the cached value without invoking fetcher2
+      const fetcher2 = jest.fn().mockResolvedValue({ data: 'value2', ttlSeconds: 60 });
+      const result = await service.dedup('key', fetcher2);
+
+      // Should return cache hit, not call second fetcher
+      expect(result).toBe('value');
+      expect(fetcher2).not.toHaveBeenCalled();
+    });
+
+    it('removes in-flight entry and propagates error when fetcher rejects', async () => {
+      const fetcher = jest.fn().mockRejectedValue(new Error('GitHub API down'));
+
+      await expect(service.dedup('key', fetcher)).rejects.toThrow('GitHub API down');
+
+      // After failure, a subsequent call should try the fetcher again (not stuck in-flight)
+      const fetcher2 = jest.fn().mockResolvedValue({ data: 'recovered', ttlSeconds: 60 });
+      const result = await service.dedup('key', fetcher2);
+      expect(result).toBe('recovered');
+      expect(fetcher2).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not deduplicate different keys — each key fetches independently', async () => {
+      const fetcher = jest.fn().mockResolvedValue({ data: 'value', ttlSeconds: 60 });
+
+      await Promise.all([
+        service.dedup('key1', fetcher),
+        service.dedup('key2', fetcher),
+      ]);
+
+      expect(fetcher).toHaveBeenCalledTimes(2);
+    });
+
+    it('clear() also removes all in-flight entries', async () => {
+      let resolveIt: (v: { data: string }) => void;
+      const fetcher = jest.fn(
+        () => new Promise<{ data: string }>((res) => { resolveIt = res; }),
+      );
+
+      const p = service.dedup('key', fetcher);
+      service.clear();
+
+      // After clear, a new call should create a fresh in-flight entry
+      const fetcher2 = jest.fn().mockResolvedValue({ data: 'fresh' });
+      const result2 = await service.dedup('key', fetcher2);
+      expect(result2).toBe('fresh');
+      expect(fetcher2).toHaveBeenCalledTimes(1);
+
+      // Resolve the original promise to avoid unhandled rejection
+      resolveIt({ data: 'late' });
+      await p;
+    });
+  });
+
   describe('refresh()', () => {
     beforeEach(() => {
       jest.useFakeTimers();
