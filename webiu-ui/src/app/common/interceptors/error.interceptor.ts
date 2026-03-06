@@ -35,10 +35,7 @@ export const globalErrorInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: HttpErrorResponse) => {
       const userMessage = getUserMessage(error);
 
-      console.error(
-        `[HTTP ${error.status}] ${req.method} ${req.urlWithParams} - ${userMessage}`,
-      );
-
+      // HTTP error - error message attached to response for UI display
       return throwError(() => Object.assign(error, { userMessage }));
     }),
   );

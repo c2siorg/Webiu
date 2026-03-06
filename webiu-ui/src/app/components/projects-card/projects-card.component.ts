@@ -47,8 +47,8 @@ export class ProjectsCardComponent implements OnInit {
           this.pullRequestCount = data.pullRequests;
           this.initialized = true;
         },
-        error: (error) => {
-          console.error(`Error fetching issues and PRs for ${this.repo}: `, error);
+        error: (_error) => {
+          // Error fetching issues/PRs - hide component gracefully
           this.initialized = true;
         }
       });
