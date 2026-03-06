@@ -1,8 +1,9 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import axios from 'axios';
+import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { formatDistanceToNow } from 'date-fns';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
@@ -10,11 +11,12 @@ import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-sp
 @Component({
   selector: 'app-contributor-search',
   standalone: true,
-  imports: [FormsModule, CommonModule, LoadingSpinnerComponent],
+  imports: [FormsModule, CommonModule, LoadingSpinnerComponent, HttpClientModule],
   templateUrl: './contributor-search.component.html',
   styleUrls: ['./contributor-search.component.scss'],
 })
 export class ContributorSearchComponent implements OnInit {
+  private platformId = inject(PLATFORM_ID);
   username = '';
   issues: any[] = [];
   pullRequests: any[] = [];
@@ -39,48 +41,61 @@ export class ContributorSearchComponent implements OnInit {
     created_at: string;
   } | null = null;
   private apiUrl = `${environment.serverUrl}/api/contributor`;
+  private userUrl = `${environment.serverUrl}/api/user`;
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private http = inject(HttpClient);
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
-      if (params['username']) {
-        this.username = params['username'];
-        this.onSearch();
+      const param = params['username']?.trim();
+      if (param && param !== this.username) {
+        this.username = param;
+        this.fetchUserData();
       }
     });
   }
 
-  async onSearch() {
+  onSearch() {
+    this.username = this.username.trim();
     if (!this.username) {
       this.errorMessage = 'Please enter a username';
       return;
     }
 
+    this.router.navigate([], {
+      queryParams: { username: this.username },
+      queryParamsHandling: 'merge',
+    });
+
+    this.fetchUserData();
+  }
+
+  private async fetchUserData() {
     this.loading = true;
     this.errorMessage = '';
     this.userProfile = null;
 
     try {
-      // Fetch stats (issues + PRs) and user profile in parallel
       const [statsResponse, userProfileResponse] = await Promise.all([
-        axios.get(`${this.apiUrl}/stats/${this.username}`),
-        axios.get(`https://api.github.com/users/${this.username}`),
+        firstValueFrom(this.http.get<any>(`${this.apiUrl}/stats/${this.username}`)),
+        firstValueFrom(this.http.get<any>(`${this.userUrl}/profile/${this.username}`)),
       ]);
 
-      this.issues = statsResponse.data.issues;
-      this.pullRequests = statsResponse.data.pullRequests;
+      this.issues = statsResponse.issues;
+      this.pullRequests = statsResponse.pullRequests;
 
       this.userProfile = {
-        login: userProfileResponse.data.login,
-        avatar_url: userProfileResponse.data.avatar_url,
-        html_url: userProfileResponse.data.html_url,
-        name: userProfileResponse.data.name,
-        bio: userProfileResponse.data.bio,
-        location: userProfileResponse.data.location,
-        followers: userProfileResponse.data.followers || 0,
-        following: userProfileResponse.data.following || 0,
-        created_at: userProfileResponse.data.created_at,
+        login: userProfileResponse.login,
+        avatar_url: userProfileResponse.avatar_url,
+        html_url: userProfileResponse.html_url,
+        name: userProfileResponse.name,
+        bio: userProfileResponse.bio,
+        location: userProfileResponse.location,
+        followers: userProfileResponse.followers || 0,
+        following: userProfileResponse.following || 0,
+        created_at: userProfileResponse.created_at,
       };
 
       this.extractRepositories();
@@ -189,7 +204,7 @@ export class ContributorSearchComponent implements OnInit {
   }
 
   openGitHubProfile(url: string) {
-    if (url) {
+    if (url && isPlatformBrowser(this.platformId)) {
       window.open(url, '_blank');
     }
   }

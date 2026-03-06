@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
@@ -10,23 +11,28 @@ const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class ProjectService {
+  private readonly logger = new Logger(ProjectService.name);
+
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
   ) {}
 
-  async getAllProjects() {
-    const cacheKey = 'all_projects';
-    const cached = this.cacheService.get(cacheKey);
+  async getAllProjects(page = 1, limit = 10) {
+    const cacheKey = `projects_p${page}_pp${limit}`;
+    const cached = this.cacheService.get<{
+      total: number;
+      page: number;
+      limit: number;
+      repositories: any[];
+    }>(cacheKey);
     if (cached) return cached;
 
     try {
-      const repositories = await this.githubService.getOrgRepos();
+      const repositories = await this.githubService.getOrgRepos(page, limit);
 
-      // Batch PR fetches (10 at a time) to avoid GitHub abuse detection
       const BATCH_SIZE = 10;
       const repositoriesWithPRs = [];
-
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
         const batch = repositories.slice(i, i + BATCH_SIZE);
         const batchResults = await Promise.all(
@@ -42,11 +48,22 @@ export class ProjectService {
         repositoriesWithPRs.push(...batchResults);
       }
 
-      const result = { repositories: repositoriesWithPRs };
+      const orgInfo = await this.githubService.getPublicUserProfile(
+        this.githubService.org,
+      );
+      const total = orgInfo.public_repos || 0;
+
+      const result = {
+        total,
+        page,
+        limit,
+        repositories: repositoriesWithPRs,
+      };
+
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
-      console.error(
+      this.logger.error(
         'Error fetching repositories or pull requests:',
         error.response ? error.response.data : error.message,
       );
@@ -70,14 +87,52 @@ export class ProjectService {
       const pullRequests = data.filter((item) => item.pull_request).length;
 
       const result = { issues, pullRequests };
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
-      console.error(
+      this.logger.error(
         'Error fetching issues and PRs:',
         error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Failed to fetch issues and PRs');
+    }
+  }
+
+  async searchProjects(query: string) {
+    if (!query) {
+      throw new BadRequestException('Search query is required');
+    }
+
+    const cacheKey = `projects_search_${query}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const repositories = await this.githubService.searchOrgRepos(query);
+
+      const repositoriesWithPRs = await Promise.all(
+        repositories.map(async (repo) => {
+          try {
+            const pulls = await this.githubService.getRepoPulls(repo.name);
+            return { ...repo, pull_requests: pulls.length };
+          } catch {
+            return { ...repo, pull_requests: 0 };
+          }
+        }),
+      );
+
+      this.cacheService.set(cacheKey, repositoriesWithPRs, CACHE_TTL);
+
+      return {
+        total: repositoriesWithPRs.length,
+        repositories: repositoriesWithPRs,
+      };
+    } catch (error) {
+      this.logger.error(
+        'Error searching repositories:',
+        error.response?.data || error.message,
+      );
+      throw new InternalServerErrorException('Failed to search projects');
     }
   }
 }

@@ -1,14 +1,18 @@
 .app-footer {
   width: 100%;
-  background: var(--navbar-bg, #11111e); // Sync background with navbar
+  background: var(--navbar-bg, #11111e);
   border-top: 1px solid var(--border-color, #282a3b);
-  padding: 40px 20px 20px;
+  padding: 60px 20px 40px; // Increased padding
   margin-top: auto;
   font-family: "Poppins", sans-serif;
 
   :host-context([data-theme="dark"]) & {
     background: #11111e;
     border-top: 1px solid #282a3b;
+  }
+
+  @media (max-width: 600px) {
+    padding-bottom: 80px; 
   }
 }
 
@@ -25,8 +29,9 @@
   }
 
   @media (max-width: 600px) {
-    grid-template-columns: 1fr;
-    text-align: center;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    row-gap: 40px;
   }
 }
 
@@ -36,12 +41,26 @@
 
   &.org-info {
     @media (max-width: 600px) {
+      grid-column: 1 / span 2; // Make logo section take full width
       align-items: center;
+      text-align: center;
+      margin-bottom: 10px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 25px;
+    }
+  }
+
+  &:not(.org-info) {
+    @media (max-width: 600px) {
+      /* Left-aligning links in a 2-column grid looks much cleaner than centering */
+      align-items: flex-start;
+      text-align: left;
+      padding-left: 10px; 
     }
   }
 
   h3 {
-    color: var(--font-color-dark);
+    color: var(--font-color-dark, #ffffff);
     font-size: 18px;
     font-weight: 600;
     margin-bottom: 16px;
@@ -49,6 +68,11 @@
 
     :host-context([data-theme="dark"]) & {
       color: #e0e0e0;
+    }
+
+    @media (max-width: 600px) {
+      font-size: 16px;
+      margin-bottom: 12px;
     }
   }
 
@@ -91,9 +115,7 @@
         color: var(--navbar-p, #586069);
         text-decoration: none;
         font-size: 15px;
-        transition:
-          color 0.2s ease,
-          transform 0.2s ease;
+        transition: color 0.2s ease, transform 0.2s ease;
         display: inline-block;
 
         :host-context([data-theme="dark"]) & {
@@ -108,6 +130,10 @@
           :host-context([data-theme="dark"]) & {
             color: #4a90e2;
           }
+        }
+
+        @media (max-width: 600px) {
+          font-size: 14px;
         }
       }
     }

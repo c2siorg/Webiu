@@ -2,14 +2,15 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
+import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 import { HomepageDetails } from '../../common/data/homepage';
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, RouterModule],
+  imports: [NavbarComponent, CommonModule, RouterModule, BackToTopComponent],
   templateUrl: './homepage.component.html',
-  styleUrl: './homepage.component.scss'
+  styleUrl: './homepage.component.scss',
 })
 export class HomepageComponent {
   homepageData = HomepageDetails;
@@ -26,13 +27,8 @@ export class HomepageComponent {
       Rust: '#dea584',
       Ruby: '#701516',
       PHP: '#4F5D95',
-      Swift: '#ffac45'
+      Swift: '#ffac45',
     };
     return languageColors[language] || '#333';
-  }
-
-  // Navigate to section
-  navigateToSection(): void {
-    // Router navigation will be handled by routerLink in template
   }
 }

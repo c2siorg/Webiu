@@ -1,4 +1,5 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 interface CacheEntry<T> {
   data: T;
@@ -7,7 +8,24 @@ interface CacheEntry<T> {
 
 @Injectable()
 export class CacheService {
+  private readonly logger = new Logger(CacheService.name);
   private cache = new Map<string, CacheEntry<any>>();
+  private readonly defaultTtl: number;
+
+  constructor(private configService: ConfigService) {
+    const raw = this.configService.get<string>('CACHE_TTL_SECONDS');
+    const parsed = parseInt(raw, 10);
+    if (!isNaN(parsed) && parsed > 0) {
+      if (parsed < 10) {
+        this.logger.warn(
+          `CACHE_TTL_SECONDS is set very low (${parsed}s) — this may hammer the GitHub API`,
+        );
+      }
+      this.defaultTtl = parsed;
+    } else {
+      this.defaultTtl = 300;
+    }
+  }
 
   get<T>(key: string): T | null {
     const entry = this.cache.get(key);
@@ -21,10 +39,11 @@ export class CacheService {
     return entry.data as T;
   }
 
-  set<T>(key: string, data: T, ttlSeconds: number): void {
+  set<T>(key: string, data: T, ttlSeconds?: number): void {
+    const ttl = ttlSeconds ?? this.defaultTtl;
     this.cache.set(key, {
       data,
-      expiresAt: Date.now() + ttlSeconds * 1000,
+      expiresAt: Date.now() + ttl * 1000,
     });
   }
 

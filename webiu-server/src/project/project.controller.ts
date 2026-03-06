@@ -7,8 +7,30 @@ export class ProjectController {
 
   @Get('projects')
   @Header('Cache-Control', 'public, max-age=300')
-  async getAllProjects() {
-    return this.projectService.getAllProjects();
+  async getAllProjects(
+    @Query('page') page: string = '1',
+    @Query('limit') limit: string = '10',
+  ) {
+    const pageNum = Math.max(1, parseInt(page as any, 10) || 1);
+    const limitNum = Math.min(
+      100,
+      Math.max(1, parseInt(limit as any, 10) || 10),
+    );
+
+    return this.projectService.getAllProjects(pageNum, limitNum);
+  }
+
+  @Get('search')
+  @Header('Cache-Control', 'public, max-age=300')
+  async searchProjects(@Query('q') query: string) {
+    if (!query) {
+      return {
+        total: 0,
+        repositories: [],
+      };
+    }
+
+    return this.projectService.searchProjects(query);
   }
 }
 

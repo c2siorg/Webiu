@@ -1,18 +1,18 @@
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { gsocData } from '../../common/data/gsoc';
 import { CommonModule } from '@angular/common';
+import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 
 @Component({
   selector: 'app-gsoc',
   standalone: true,
-  imports: [NavbarComponent, CommonModule],
+  imports: [NavbarComponent, CommonModule, BackToTopComponent],
   templateUrl: './gsoc.component.html',
   styleUrl: './gsoc.component.scss',
 })
 export class GsocComponent {
   gsocData = gsocData;
-  showButton = false;
   activeProjectIndex: number | null = null;
 
   toggleAccordion(index: number): void {
@@ -21,14 +21,5 @@ export class GsocComponent {
     } else {
       this.activeProjectIndex = index;
     }
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    this.showButton = window.scrollY > 100;
-  }
-
-  scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
