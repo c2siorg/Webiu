@@ -31,7 +31,7 @@ It’s very important to connect with organizations as soon as possible. The mor
 
 <p>📢 Join Our Community</p>
 
-<p>💬 Slack: <a href="https://c2si-org.slack.com/" target="_blank">C2SI Slack Workspace</a><br />
+<p>💬 Slack: <a href="https://join.slack.com/t/c2si-org/shared_invite/zt-3qja11cmu-m4tbWB9E8M18_s6srLlHbg" target="_blank">C2SI Slack Workspace</a><br />
 📝 Proposal Template: <a href="https://shorturl.at/dtR23" target="_blank">View Here</a><br />
 💻 Explore Our Projects: <a href="https://github.com/c2siorg" target="_blank">C2SI GitHub Repository</a><br /></p>
 
@@ -44,7 +44,7 @@ It’s very important to connect with organizations as soon as possible. The mor
   projects: [
     {
       id: 1,
-      title: "B0Bot",
+      title: 'B0Bot',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Hardik Jindal (hardik1408), Nipuna</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Hard</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#b0bot</span></div>
@@ -77,11 +77,11 @@ It’s very important to connect with organizations as soon as possible. The mor
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/b0bot" target="_blank">https://github.com/c2siorg/b0bot</a></p>
     </div>
-</div>`
+</div>`,
     },
     {
       id: 2,
-      title: "WebiU",
+      title: 'WebiU',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Mahender Goud Thanda (Maahi10001), Charith</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Medium</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#WebiU</span></div>
@@ -147,11 +147,11 @@ The project aims to further improve the platform by optimizing APIs for faster a
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/Webiu" target="_blank">https://github.com/c2siorg/Webiu</a></p>
     </div>
-</div>`
+</div>`,
     },
     {
       id: 3,
-      title: "GDB UI",
+      title: 'GDB UI',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Shubh Mehta (Shubh942), Nipuna, EMSDV</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Medium</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#gdb-ui</span></div>
@@ -207,11 +207,11 @@ GDB-UI enhances the debugging workflow by offering a sleek, user-friendly UI, re
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/GDB-UI" target="_blank">https://github.com/c2siorg/GDB-UI</a></p>
     </div>
-</div>`
+</div>`,
     },
     {
       id: 4,
-      title: "CodeLabz",
+      title: 'CodeLabz',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Mallepally Lokeshwar Reddy(lokeshwar777), Utkarsh Raj(rajutkarsh07)</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Medium</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#codelabz</span></div>
@@ -245,11 +245,11 @@ This project focuses on optimizing learning workflows by integrating an enhanced
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/codelabz" target="_blank">https://github.com/c2siorg/codelabz</a></p>
     </div>
-</div>`
+</div>`,
     },
     {
       id: 5,
-      title: "ImageLab - Improve user experience",
+      title: 'ImageLab - Improve user experience',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Oshan, Charitha</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Medium</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#imagelab</span></div>
@@ -284,11 +284,11 @@ This project focuses on optimizing learning workflows by integrating an enhanced
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/imagelab" target="_blank">https://github.com/c2siorg/imagelab</a></p>
     </div>
-</div>`
+</div>`,
     },
     {
       id: 6,
-      title: "DataLoom",
+      title: 'DataLoom',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Oshan Mudannayake, Danushka V</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Easy</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#dataLoom</span></div>
@@ -316,11 +316,11 @@ Frontend: HTML, CSS, JavaScript, React (recommended)</p>
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/dataloom" target="_blank">https://github.com/c2siorg/dataloom</a></p>
     </div>
-</div>`
+</div>`,
     },
     {
       id: 7,
-      title: "TensorMap",
+      title: 'TensorMap',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Oshan Mudannayake, Utkarsh Raj (rajutkarsh07), UdeshUK</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Hard</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#tensormap</span></div>
@@ -350,11 +350,11 @@ Frontend: HTML, CSS, JavaScript, React (recommended)</p>
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/tensormap" target="_blank">https://github.com/c2siorg/tensormap</a></p>
     </div>
-</div>`
+</div>`,
     },
     {
       id: 8,
-      title: "Honeynet",
+      title: 'Honeynet',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Danushka V, WiztaMax, Keneth</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Easy</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#Honeynet</span></div>
@@ -386,11 +386,11 @@ Frontend: HTML, CSS, JavaScript, React (recommended)</p>
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/honeynet" target="_blank">https://github.com/c2siorg/honeynet</a></p>
     </div>
-</div>`
+</div>`,
     },
     {
       id: 9,
-      title: "RustCloud",
+      title: 'RustCloud',
       detailsHTML: `<div class="project-details-grid">
   <div class="metadata-boxes">
       <div class="meta-box"><strong>Mentors</strong><span>Pratik Dhanave, Mohit Bhat</span></div>\n      <div class="meta-box"><strong>Length</strong><span>350 hours</span></div>\n      <div class="meta-box"><strong>Difficulty</strong><span>Medium</span></div>\n      <div class="meta-box"><strong>Slack</strong><span>#rust-cloud</span></div>
@@ -416,7 +416,7 @@ Frontend: HTML, CSS, JavaScript, React (recommended)</p>
       <h4>Github URL</h4>
       <p><a href="https://github.com/c2siorg/RustCloud" target="_blank">https://github.com/c2siorg/RustCloud</a></p>
     </div>
-</div>`
-    }
-  ]
+</div>`,
+    },
+  ],
 };

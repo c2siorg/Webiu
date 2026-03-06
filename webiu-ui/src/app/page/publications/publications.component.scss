@@ -11,6 +11,14 @@
     align-items: center;
     justify-content: center;
 
+    img {
+      width: 100%;
+      max-width: 455px;
+      height: auto;
+      aspect-ratio: 455 / 323;
+      object-fit: contain;
+    }
+
     .publications-hero-content {
       h1 {
         color: var(--primary-dark, var(--primary-dark, #0a0a15));
@@ -33,7 +41,13 @@
     display: grid;
     gap: 25px;
     grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
     padding: 20px;
+
+    app-publications-card {
+      display: flex;
+      height: 100%;
+    }
   }
 }
 
@@ -67,7 +81,7 @@
   .publications {
     .publications-hero {
       img {
-        width: 400px;
+        max-width: 100%;
       }
     }
   }
@@ -81,32 +95,10 @@
           font-size: 32px;
         }
       }
+
       img {
-        width: 300px;
+        max-width: 80%;
       }
     }
   }
-}
-
-
-.back-to-top {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 0.3s, visibility 0.3s;
-  z-index: 1000;
-}
-
-.back-to-top.show {
-  opacity: 1;
-  visibility: visible;
 }

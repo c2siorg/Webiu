@@ -111,8 +111,59 @@ export interface Project {
     pull: boolean;
   };
   pull_requests: number;
+  languages?: Record<string, number>;
 }
 
 export interface ProjectResponse {
+  total: number;
+  page: number;
+  limit: number;
   repositories: Project[];
+}
+
+export interface InsightBadge {
+  label: string;
+  description: string;
+}
+
+export interface InsightBadges {
+  maturity: InsightBadge;
+  maintenance: InsightBadge;
+  complexity: InsightBadge;
+  activity_level: InsightBadge;
+}
+
+export interface InsightStats {
+  age_years: number;
+  recent_commits: number;
+  total_languages: number;
+  open_issues: number;
+  health: string;
+  size_mb: number;
+  size_label: string;
+  release_recency: string;
+}
+
+export interface CommitWeek {
+  total: number;
+  week?: number;
+  days?: number[];
+}
+
+export interface ProjectInsights {
+  commit_activity: CommitWeek[];
+  latest_release: Record<string, unknown> | null;
+  badges: InsightBadges;
+  stats: InsightStats;
+}
+
+export interface Contributor {
+  login: string;
+  contributions: number;
+  avatar_url: string;
+  html_url: string;
+  merged_prs?: number;
+  closed_prs?: number;
+  open_prs?: number;
+  issues_created?: number;
 }

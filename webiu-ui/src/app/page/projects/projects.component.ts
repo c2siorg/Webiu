@@ -1,6 +1,9 @@
-import { Component, OnInit, HostListener, inject } from '@angular/core';
+
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 
 import { HttpClientModule } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { projectsData } from './projects-data';
@@ -8,6 +11,7 @@ import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-projects',
@@ -23,110 +27,139 @@ import { ProjectCacheService } from 'src/app/services/project-cache.service';
   styleUrls: ['./projects.component.scss'],
 })
 export class ProjectsComponent implements OnInit {
-  projectsData: Project[] = [];
-  filteredProjects: Project[] = [];
   displayProjects: Project[] = [];
   searchTerm = '';
   isLoading = true;
   org = 'c2siorg';
-  showButton = false;
   currentPage = 1;
   projectsPerPage = 9;
   totalPages = 1;
+  serverTotal = 0;
+  searchError: string | null = null;
 
+  private titleService = inject(Title);
+  private metaService = inject(Meta);
+  private toastr = inject(ToastrService);
+  private destroyRef = inject(DestroyRef);
   private projectCacheService = inject(ProjectCacheService);
 
+
   ngOnInit(): void {
-    this.fetchProjects();
+    this.titleService.setTitle('Projects | Webiu 2.0');
+    this.metaService.updateTag({
+      name: 'description',
+      content: 'Explore the open-source projects hosted by C2SI and SCoRe Lab.',
+    });
+    this.metaService.updateTag({
+      property: 'og:title',
+      content: 'Projects | Webiu 2.0',
+    });
+    this.metaService.updateTag({
+      property: 'og:description',
+      content: 'Explore the open-source projects hosted by C2SI and SCoRe Lab.',
+    });
+
+    this.fetchCurrentPage();
+
   }
 
-  fetchProjects(): void {
-    this.projectCacheService.getProjects().subscribe({
+  onSearch(term?: string): void {
+    if (term !== undefined) {
+      this.searchTerm = term;
+    }
+    this.currentPage = 1;
+    this.searchError = null;
+    this.fetchCurrentPage();
+  }
+
+  /**
+   * Single entry point for all data fetching.
+   * Routes to search or listing based on searchTerm, always server-paginated.
+   */
+  private fetchCurrentPage(): void {
+    this.isLoading = true;
+
+    const request$ = this.searchTerm
+      ? this.projectCacheService.searchProjects(
+        this.searchTerm,
+        this.currentPage,
+        this.projectsPerPage,
+      )
+      : this.projectCacheService.getProjects(
+        this.currentPage,
+        this.projectsPerPage,
+      );
+
+    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (response) => {
-        this.projectsData = this.sortProjects(response.repositories);
-        this.filteredProjects = [...this.projectsData];
-        this.updateDisplayProjects();
+        this.serverTotal = response.total;
+        this.displayProjects = response.repositories;
+        this.totalPages = Math.max(
+          1,
+          Math.ceil(this.serverTotal / this.projectsPerPage),
+        );
+        this.searchError = null;
         this.isLoading = false;
       },
       error: () => {
-        this.projectsData = this.sortProjects(projectsData.repositories);
-        this.filteredProjects = [...this.projectsData];
-        this.updateDisplayProjects();
+        if (!this.searchTerm) {
+          this.serverTotal = projectsData.total;
+          const start = (this.currentPage - 1) * this.projectsPerPage;
+          this.displayProjects = projectsData.repositories.slice(
+            start,
+            start + this.projectsPerPage,
+          );
+          this.totalPages = Math.max(
+            1,
+            Math.ceil(this.serverTotal / this.projectsPerPage),
+          );
+        } else {
+          // Global error interceptor will handle the notification
+          this.displayProjects = [];
+          this.serverTotal = 0;
+          this.totalPages = 1;
+        }
         this.isLoading = false;
       },
     });
-  }
-
-  sortProjects(projects: Project[]): Project[] {
-    return projects.sort((a, b) =>
-      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-    );
   }
 
   trackByProjectName(index: number, project: Project): string {
     return project.name;
   }
 
-  filterProjects(): void {
-    const lowerCaseSearchTerm = this.searchTerm.toLowerCase();
-    this.filteredProjects = this.sortProjects(
-      this.projectsData.filter((project) =>
-        project.name.toLowerCase().includes(lowerCaseSearchTerm),
-      ),
-    );
-    this.currentPage = 1;
-    this.updateDisplayProjects();
-  }
-
-  updateDisplayProjects(): void {
-    this.totalPages = Math.max(
-      1,
-      Math.ceil(this.filteredProjects.length / this.projectsPerPage),
-    );
-    const startIndex = (this.currentPage - 1) * this.projectsPerPage;
-    this.displayProjects = this.filteredProjects.slice(
-      startIndex,
-      startIndex + this.projectsPerPage,
-    );
-  }
-
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      this.updateDisplayProjects();
+      this.fetchCurrentPage();
     }
   }
 
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      this.updateDisplayProjects();
+      this.fetchCurrentPage();
     }
   }
 
   goToFirstPage(): void {
-    this.currentPage = 1;
-    this.updateDisplayProjects();
+    if (this.currentPage !== 1) {
+      this.currentPage = 1;
+      this.fetchCurrentPage();
+    }
   }
 
   goToLastPage(): void {
-    this.currentPage = this.totalPages;
-    this.updateDisplayProjects();
+    if (this.currentPage !== this.totalPages) {
+      this.currentPage = this.totalPages;
+      this.fetchCurrentPage();
+    }
   }
 
   onItemsPerPageChange(event: Event): void {
     const selectElement = event.target as HTMLSelectElement;
     this.projectsPerPage = parseInt(selectElement.value, 10);
     this.currentPage = 1;
-    this.updateDisplayProjects();
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    this.showButton = window.scrollY > 100;
-  }
-
-  scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.fetchCurrentPage();
   }
 }

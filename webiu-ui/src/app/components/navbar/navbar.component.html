@@ -8,15 +8,15 @@
   </a>
 
   @if (isMenuOpen) {
-  <div
-    class="menu-overlay"
-    (click)="closeMenu()"
-    (keydown.enter)="closeMenu()"
-    (keydown.space)="closeMenu(); $event.preventDefault()"
-    tabindex="0"
-    role="button"
-    [attr.aria-label]="'Close menu'"
-  ></div>
+    <div
+      class="menu-overlay"
+      (click)="closeMenu()"
+      (keydown.enter)="closeMenu()"
+      (keydown.space)="closeMenu(); $event.preventDefault()"
+      tabindex="0"
+      role="button"
+      [attr.aria-label]="'Close menu'"
+    ></div>
   }
   <div
     [ngClass]="{ navbar__menu: true, open: isMenuOpen }"
@@ -26,6 +26,25 @@
     (keydown.space)="$event.preventDefault(); $event.stopPropagation()"
     tabindex="0"
   >
+    <!-- Sidebar Header (visible only when open on mobile) -->
+    <div class="sidebar-header">
+      <a [routerLink]="['/']" class="logo-link" (click)="closeMenu()">
+        <img
+          src="../../../assets/c2silogo-dark_no_bg.png"
+          alt="C2SI Logo"
+          class="logo"
+        />
+      </a>
+      <button
+        class="sidebar-close-btn"
+        type="button"
+        (click)="closeMenu()"
+        aria-label="Close menu"
+      >
+        <img src="../../../assets/cross.svg" alt="Close menu" />
+      </button>
+    </div>
+
     <div
       class="navbar__menu__items"
       routerLink="/"
@@ -37,7 +56,7 @@
       role="link"
       [attr.aria-label]="'Home'"
     >
-      <img src="../../../assets/home.svg" alt="Home Icon" />
+      <img src="../../../assets/home.svg" alt="Home Icon" class="menu-icon" />
       <p>Home</p>
     </div>
     <div
@@ -51,7 +70,7 @@
       role="link"
       [attr.aria-label]="'Projects'"
     >
-      <img src="../../../assets/projects.svg" alt="Projects Icon" />
+      <img src="../../../assets/projects.svg" alt="Projects Icon" class="menu-icon" />
       <p>Projects</p>
     </div>
     <div
@@ -65,7 +84,7 @@
       role="link"
       [attr.aria-label]="'Publications'"
     >
-      <img src="../../../assets/publications.svg" alt="Publications Icon" />
+      <img src="../../../assets/publications.svg" alt="Publications Icon" class="menu-icon" />
       <p>Publications</p>
     </div>
     <div
@@ -79,22 +98,53 @@
       role="link"
       [attr.aria-label]="'Contributors'"
     >
-      <img src="../../../assets/contributors.svg" alt="Contributors Icon" />
+      <img src="../../../assets/contributors.svg" alt="Contributors Icon" class="menu-icon" />
       <p>Contributors</p>
     </div>
-    <div
-      class="navbar__menu__items"
-      routerLink="/community"
-      [class.active]="isRouteActive('/community')"
-      (click)="navigateTo('/community')"
-      (keydown.enter)="navigateTo('/community')"
-      (keydown.space)="navigateTo('/community'); $event.preventDefault()"
-      tabindex="0"
-      role="link"
-      [attr.aria-label]="'Community'"
-    >
-      <img src="../../../assets/community.svg" alt="Community Icon" />
-      <p>Community</p>
+    <div class="dropdown-container">
+      <div
+        class="navbar__menu__items community-toggle"
+        [class.active]="isRouteActive('/community')"
+        (click)="toggleCommunityDropdown(); $event.stopPropagation()"
+        (keydown.enter)="toggleCommunityDropdown(); $event.stopPropagation()"
+        (keydown.space)="toggleCommunityDropdown(); $event.stopPropagation(); $event.preventDefault()"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="'Community Dropdown'"
+      >
+        <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
+        <p>{{ getCommunityDropdownLabel() }}</p>
+        <span class="dropdown-arrow" [class.open]="isCommunityDropdownOpen">▼</span>
+      </div>
+
+      @if (isCommunityDropdownOpen) {
+        <div class="dropdown-menu community-dropdown" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" tabindex="-1">
+          <div
+            class="dropdown-item"
+            routerLink="/community"
+            [class.active]="currentRoute === '/community'"
+            (click)="navigateTo('/community')"
+            (keydown.enter)="navigateTo('/community')"
+            (keydown.space)="navigateTo('/community'); $event.preventDefault()"
+            tabindex="0"
+            role="link"
+          >
+            <p>Community</p>
+          </div>
+          <div
+            class="dropdown-item"
+            routerLink="/opportunities"
+            [class.active]="currentRoute === '/opportunities'"
+            (click)="navigateTo('/opportunities')"
+            (keydown.enter)="navigateTo('/opportunities')"
+            (keydown.space)="navigateTo('/opportunities'); $event.preventDefault()"
+            tabindex="0"
+            role="link"
+          >
+            <p>Opportunities</p>
+          </div>
+        </div>
+      }
     </div>
     <div
       class="navbar__menu__items"
@@ -107,9 +157,10 @@
       role="link"
       [attr.aria-label]="'Google Summer of Code'"
     >
-      <img src="../../../assets/gsoc.svg" alt="GSoC Icon" />
+      <img src="../../../assets/gsoc.svg" alt="GSoC Icon" class="menu-icon" />
       <p>GSoC 26</p>
     </div>
+    <div class="login-wrapper">
     <button
       class="navbar__menu__items Login_Logout"
       type="button"
@@ -122,13 +173,13 @@
             : '../../../assets/login.svg'
         "
         alt="{{ isLoggedIn ? 'Logout Icon' : 'Login Icon' }}"
-        class="login-logout-icon"
+        class="login-logout-icon menu-icon"
       />
       <p>{{ isLoggedIn ? "Logout" : "Login" }}</p>
     </button>
 
     @if (isLoggedIn) {
-      <p>
+      <p class="welcome-text">
         Welcome,<br />
         {{ user.name }}!
       </p>
@@ -146,7 +197,10 @@
         </button>
       </div>
     }
+    </div>
+  </div>
 
+  <div class="navbar__right-actions">
     <button
       class="sun-moon-toggle"
       type="button"
@@ -160,24 +214,19 @@
         <div class="star small"></div>
       </div>
     </button>
-  </div>
 
-  <div
-    class="navigation__buttons"
-    (click)="toggleMenu()"
-    (keydown.enter)="toggleMenu()"
-    (keydown.space)="toggleMenu(); $event.preventDefault()"
-    tabindex="0"
-    role="button"
-    [attr.aria-label]="isMenuOpen ? 'Close menu' : 'Open menu'"
-  >
-    <div class="nav-btn">
-      @if (!isMenuOpen) {
+    <div
+      class="navigation__buttons"
+      (click)="toggleMenu()"
+      (keydown.enter)="toggleMenu()"
+      (keydown.space)="toggleMenu(); $event.preventDefault()"
+      tabindex="0"
+      role="button"
+      [attr.aria-label]="isMenuOpen ? 'Close menu' : 'Open menu'"
+    >
+      <div class="nav-btn">
         <img src="../../../assets/ham-menu.svg" alt="Open menu" />
-      }
-      @if (isMenuOpen) {
-        <img src="../../../assets/cross.svg" alt="Close menu" />
-      }
+      </div>
     </div>
   </div>
 </div>

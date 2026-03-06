@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ContributorService } from './contributor.service';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
@@ -22,6 +23,7 @@ describe('ContributorService', () => {
         ContributorService,
         CacheService,
         { provide: GithubService, useValue: mockGithubService },
+        { provide: ConfigService, useValue: { get: jest.fn() } },
       ],
     }).compile();
 

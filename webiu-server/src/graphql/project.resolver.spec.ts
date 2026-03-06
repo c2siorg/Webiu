@@ -1,0 +1,87 @@
+import { Test, TestingModule } from '@nestjs/testing';
+import { ProjectResolver } from './project.resolver';
+import { ProjectService } from '../project/project.service';
+import { GqlThrottlerGuard } from './gql-throttler.guard';
+
+describe('ProjectResolver', () => {
+  let resolver: ProjectResolver;
+
+  const mockProjectService = {
+    getAllProjects: jest.fn(),
+  };
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        ProjectResolver,
+        { provide: ProjectService, useValue: mockProjectService },
+      ],
+    })
+      .overrideGuard(GqlThrottlerGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
+
+    resolver = module.get<ProjectResolver>(ProjectResolver);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should be defined', () => {
+    expect(resolver).toBeDefined();
+  });
+
+  describe('repositories', () => {
+    it('should return list of repositories from the service', async () => {
+      const mockRepositories = [
+        {
+          name: 'repo1',
+          pull_requests: 3,
+          stargazers_count: 10,
+          forks_count: 2,
+        },
+        {
+          name: 'repo2',
+          pull_requests: 1,
+          stargazers_count: 5,
+          forks_count: 1,
+        },
+      ];
+      mockProjectService.getAllProjects.mockResolvedValue({
+        total: 2,
+        page: 1,
+        limit: 10,
+        repositories: mockRepositories,
+      });
+
+      const result = await resolver.repositories(1, 10);
+
+      expect(result).toEqual({
+        total: 2,
+        page: 1,
+        limit: 10,
+        repositories: mockRepositories,
+      });
+      expect(mockProjectService.getAllProjects).toHaveBeenCalledWith(1, 10);
+    });
+
+    it('should return empty array when no repositories exist', async () => {
+      mockProjectService.getAllProjects.mockResolvedValue({
+        total: 0,
+        page: 1,
+        limit: 10,
+        repositories: [],
+      });
+
+      const result = await resolver.repositories(1, 10);
+
+      expect(result).toEqual({
+        total: 0,
+        page: 1,
+        limit: 10,
+        repositories: [],
+      });
+    });
+  });
+});

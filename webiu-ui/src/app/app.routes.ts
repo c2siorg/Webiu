@@ -49,10 +49,24 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'opportunities',
+    loadComponent: () =>
+      import('./page/opportunities/opportunities.component').then(
+        (m) => m.OpportunitiesComponent,
+      ),
+  },
+  {
     path: 'idea',
     loadComponent: () =>
       import('./page/gsoc-project-idea/gsoc-project-idea.component').then(
         (m) => m.GsocProjectIdeaComponent,
+      ),
+  },
+  {
+    path: 'project/:id',
+    loadComponent: () =>
+      import('./page/project-details/project-details.component').then(
+        (m) => m.ProjectDetailsComponent,
       ),
   },
   {

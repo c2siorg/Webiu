@@ -1,6 +1,6 @@
 <!-- profile-card/profile-card.component.html-->
 <div class="profile-box">
-  <img class="profile-img" src="{{ avatar_url }}" alt="{{ login }}'s avatar" />
+  <img class="profile-img" src="{{ avatar_url }}" alt="{{ login }}'s avatar" loading="lazy" width="64" height="64" />
   <span class="profile-username" (click)="onUsernameClick(login)" (keyup.enter)="onUsernameClick(login)" tabindex="0">
     {{ login }}
   </span>

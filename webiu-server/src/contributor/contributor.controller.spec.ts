@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ContributorController } from './contributor.controller';
 import { ContributorService } from './contributor.service';
-import { UsernameDto } from './dto/username.dto';
+import { UsernameDto } from '../common/dto/username.dto';
 
 describe('ContributorController', () => {
   let controller: ContributorController;
@@ -41,12 +41,13 @@ describe('ContributorController', () => {
   });
 
   describe('getAllContributors', () => {
-    it('should return all contributors', async () => {
-      const mockResult = [{ login: 'user1', contributions: 10 }];
+    it('should return all contributors from service', async () => {
+      const mockResult = [{ login: 'user1' }, { login: 'user2' }];
       mockContributorService.getAllContributors.mockResolvedValue(mockResult);
 
       const result = await controller.getAllContributors();
       expect(result).toEqual(mockResult);
+      expect(mockContributorService.getAllContributors).toHaveBeenCalled();
     });
   });
 

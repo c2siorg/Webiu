@@ -1,4 +1,4 @@
-import { Component, HostListener } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
@@ -9,22 +9,10 @@ import { HomepageDetails } from '../../common/data/homepage';
   standalone: true,
   imports: [NavbarComponent, CommonModule, RouterModule],
   templateUrl: './homepage.component.html',
-  styleUrl: './homepage.component.scss'
+  styleUrl: './homepage.component.scss',
 })
 export class HomepageComponent {
   homepageData = HomepageDetails;
-  showButton = false;
-
-  // Scroll Listener
-  @HostListener('window:scroll', [])
-  onWindowScroll() {
-    this.showButton = window.scrollY > 300;
-  }
-
-  // Scroll to top function
-  scrollToTop(): void {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }
 
   // Get language color for projects
   getLanguageColor(language: string): string {
@@ -38,7 +26,7 @@ export class HomepageComponent {
       Rust: '#dea584',
       Ruby: '#701516',
       PHP: '#4F5D95',
-      Swift: '#ffac45'
+      Swift: '#ffac45',
     };
     return languageColors[language] || '#333';
   }

@@ -1,9 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnInit, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { formatDistanceToNow } from 'date-fns';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
@@ -16,6 +18,7 @@ import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-sp
   styleUrls: ['./contributor-search.component.scss'],
 })
 export class ContributorSearchComponent implements OnInit {
+  private platformId = inject(PLATFORM_ID);
   username = '';
   issues: any[] = [];
   pullRequests: any[] = [];
@@ -39,33 +42,48 @@ export class ContributorSearchComponent implements OnInit {
     following: number;
     created_at: string;
   } | null = null;
-  private apiUrl = `${environment.serverUrl}/api/contributor`;
-  private userUrl = `${environment.serverUrl}/api/user`;
+  private apiUrl = `${environment.serverUrl}/api/v1/contributor`;
+  private userUrl = `${environment.serverUrl}/api/v1/user`;
 
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private http = inject(HttpClient);
+  private toastr = inject(ToastrService);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
-      if (params['username']) {
-        this.username = params['username'];
-        this.onSearch();
-      }
-    });
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const param = params['username']?.trim();
+        if (param && param !== this.username) {
+          this.username = param;
+          this.fetchUserData();
+        }
+      });
   }
 
-  async onSearch() {
+  onSearch() {
+    this.username = this.username.trim();
     if (!this.username) {
       this.errorMessage = 'Please enter a username';
       return;
     }
 
+    this.router.navigate([], {
+      queryParams: { username: this.username },
+      queryParamsHandling: 'merge',
+    });
+
+    this.fetchUserData();
+  }
+
+  private async fetchUserData() {
     this.loading = true;
     this.errorMessage = '';
     this.userProfile = null;
 
     try {
-      // Fetch stats (issues + PRs) and user profile in parallel
       const [statsResponse, userProfileResponse] = await Promise.all([
         firstValueFrom(this.http.get<any>(`${this.apiUrl}/stats/${this.username}`)),
         firstValueFrom(this.http.get<any>(`${this.userUrl}/profile/${this.username}`)),
@@ -89,9 +107,9 @@ export class ContributorSearchComponent implements OnInit {
       this.extractRepositories();
       this.filteredIssues = [...this.issues];
       this.filteredPullRequests = [...this.pullRequests];
+      this.toastr.success(`Found developer data for ${this.username}`, 'Success');
     } catch {
-      this.errorMessage =
-        'Failed to fetch data. Please check the username or try again later.';
+      // Global error interceptor will handle the notification
     } finally {
       this.loading = false;
     }
@@ -192,7 +210,7 @@ export class ContributorSearchComponent implements OnInit {
   }
 
   openGitHubProfile(url: string) {
-    if (url) {
+    if (url && isPlatformBrowser(this.platformId)) {
       window.open(url, '_blank');
     }
   }

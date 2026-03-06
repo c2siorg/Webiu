@@ -1,6 +1,9 @@
-import { Component, OnInit, HostListener, inject } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
+import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { debounceTime } from 'rxjs/operators';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor } from '../../common/data/contributor';
 
@@ -39,7 +42,6 @@ export class ContributorsComponent implements OnInit {
   selectedSort = '';
   allRepos: string[] = [];
   isLoading = true;
-  showButton = false;
   contributors: Contributor[] = [];
 
   contributionRanges: ContributionRange[] = [
@@ -58,28 +60,49 @@ export class ContributorsComponent implements OnInit {
   private http = inject(HttpClient);
   private commonUtil = inject(CommmonUtilService);
   private router = inject(Router);
+  private titleService = inject(Title);
+  private metaService = inject(Meta);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    this.getProfiles();
-    this.searchText.valueChanges.subscribe(() => {
-      this.currentPage = 1;
-      this.filterProfiles();
+    this.titleService.setTitle('Contributors | Webiu 2.0');
+    this.metaService.updateTag({
+      name: 'description',
+      content: 'Meet the contributors powering C2SI and SCoRe Lab projects.',
     });
+    this.metaService.updateTag({
+      property: 'og:title',
+      content: 'Contributors | Webiu 2.0',
+    });
+    this.metaService.updateTag({
+      property: 'og:description',
+      content: 'Meet the contributors powering C2SI and SCoRe Lab projects.',
+    });
+
+    this.getProfiles();
+    this.searchText.valueChanges
+      .pipe(
+        debounceTime(300),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.filterProfiles();
+      });
   }
 
   getProfiles() {
     this.http
-      .get<
-        Contributor[]
-      >(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<Contributor[]>(
+        `${environment.serverUrl}/api/v1/contributor/contributors`,
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.contributors = res || [];
           this.fetchFollowerData();
-          console.log('fetched contributors');
         },
         error: () => {
-          console.error('Error fetching contributors');
           this.handleProfileResponse([]);
         },
       });
@@ -95,9 +118,10 @@ export class ContributorsComponent implements OnInit {
 
     this.http
       .post<Record<string, { followers: number; following: number }>>(
-        `${environment.serverUrl}/api/user/batch-social`,
+        `${environment.serverUrl}/api/v1/user/batch-social`,
         { usernames },
       )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.contributors.forEach((contributor) => {
@@ -268,14 +292,5 @@ export class ContributorsComponent implements OnInit {
 
   trackByFn(_: number, profile: Contributor): string {
     return profile.login;
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    this.showButton = window.scrollY > 100;
-  }
-
-  scrollToTop() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }
