@@ -157,7 +157,9 @@ describe('GithubService', () => {
       state: 'closed',
       closed_at: '2025-01-15T00:00:00Z',
       created_at: '2025-01-10T00:00:00Z',
-      pull_request: { url: 'https://api.github.com/repos/c2siorg/repo/pulls/1' },
+      pull_request: {
+        url: 'https://api.github.com/repos/c2siorg/repo/pulls/1',
+      },
     };
 
     const unmergedPr = {
@@ -165,7 +167,9 @@ describe('GithubService', () => {
       title: 'Open PR',
       state: 'open',
       created_at: '2025-01-20T00:00:00Z',
-      pull_request: { url: 'https://api.github.com/repos/c2siorg/repo/pulls/2' },
+      pull_request: {
+        url: 'https://api.github.com/repos/c2siorg/repo/pulls/2',
+      },
     };
 
     it('should fetch merged and unmerged PRs, tag merged_at, and sort by created_at desc', async () => {
