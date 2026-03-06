@@ -5,6 +5,7 @@ import {
   IsString,
   MinLength,
 } from 'class-validator';
+import { Match } from '../decorators/match.decorator';
 
 export class RegisterDto {
   @IsNotEmpty()
@@ -17,11 +18,15 @@ export class RegisterDto {
 
   @IsNotEmpty()
   @IsString()
-  @MinLength(6)
+  @MinLength(6, { message: 'Password must be at least 6 characters long' })
   password: string;
 
   @IsNotEmpty()
   @IsString()
+  @MinLength(6, {
+    message: 'Confirm password must be at least 6 characters long',
+  })
+  @Match('password', { message: 'Passwords do not match' })
   confirmPassword: string;
 
   @IsOptional()
