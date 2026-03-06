@@ -41,6 +41,9 @@ jobs:
       - name: Run unit tests
         run: npm test -- --passWithNoTests --forceExit
 
+      - name: Build
+        run: npm run build
+
   # ──────────────────────────────────────────────────────────
   # Frontend: Lint + Test  (Angular 17 / Karma + ChromeHeadless)
   # ──────────────────────────────────────────────────────────
@@ -78,3 +81,6 @@ jobs:
         env:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: npm test -- --browsers=ChromeHeadlessNoSandbox --watch=false --no-progress
+
+      - name: Build
+        run: npm run build
