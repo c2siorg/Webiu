@@ -146,39 +146,38 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const prs = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
-    );
+    const baseQuery = `author:${username}+org:${this.orgName}+type:pr`;
 
-    // Fetch details for closed PRs to determine if they were merged
-    const enrichedPrs = await Promise.all(
-      prs.map(async (pr) => {
-        // Only fetch details if closed and we don't know if merged (merged_at missing)
-        // Note: Search API results for PRs don't include merged_at at the top level usually
-        if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
-          try {
-            const response = await axios.get(pr.pull_request.url, {
-              headers: this.headers,
-            });
-            if (response.data.merged_at) {
-              pr.merged_at = response.data.merged_at;
-            }
-          } catch {
-            // Ignore errors for individual PR fetches to avoid failing the whole request
-          }
-        }
-        return pr;
-      }),
-    );
+    // Two targeted searches replace the old N+1 pattern:
+    // 1) is:merged  → closed PRs that were merged
+    // 2) is:unmerged → open PRs + closed PRs that were NOT merged
+    const [mergedPrs, unmergedPrs] = await Promise.all([
+      this.fetchAllSearchPages(
+        `${this.baseUrl}/search/issues?q=${baseQuery}+is:merged`,
+      ),
+      this.fetchAllSearchPages(
+        `${this.baseUrl}/search/issues?q=${baseQuery}+is:unmerged`,
+      ),
+    ]);
+
+    // Tag merged PRs with merged_at so downstream consumers can distinguish them.
+    // The Search API does not include merged_at; closed_at is the closest timestamp.
+    for (const pr of mergedPrs) {
+      if (!pr.merged_at) {
+        pr.merged_at = pr.closed_at;
+      }
+    }
+
+    const allPrs = [...mergedPrs, ...unmergedPrs];
 
     // Sort by created_at descending
-    enrichedPrs.sort(
+    allPrs.sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
     );
 
-    this.cacheService.set(cacheKey, enrichedPrs, CACHE_TTL);
-    return enrichedPrs;
+    this.cacheService.set(cacheKey, allPrs, CACHE_TTL);
+    return allPrs;
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
