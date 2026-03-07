@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ValidationPipe } from '@nestjs/common';
 import { ProjectController, IssuesController } from './project.controller';
 import { ProjectService } from './project.service';
 
@@ -87,6 +88,38 @@ describe('IssuesController', () => {
         'c2siorg',
         'repo1',
       );
+    });
+
+    it('should reject invalid org name with special characters', async () => {
+      const pipe = new ValidationPipe();
+      const dto = { org: '../../etc/passwd', repo: 'repo1' };
+      await expect(
+        pipe.transform(dto, { type: 'query', metatype: OrgRepoQueryDto }),
+      ).rejects.toThrow();
+    });
+
+    it('should reject org name exceeding 39 characters', async () => {
+      const pipe = new ValidationPipe();
+      const dto = { org: 'a'.repeat(40), repo: 'repo1' };
+      await expect(
+        pipe.transform(dto, { type: 'query', metatype: OrgRepoQueryDto }),
+      ).rejects.toThrow();
+    });
+
+    it('should reject missing org', async () => {
+      const pipe = new ValidationPipe();
+      const dto = { org: '', repo: 'repo1' };
+      await expect(
+        pipe.transform(dto, { type: 'query', metatype: OrgRepoQueryDto }),
+      ).rejects.toThrow();
+    });
+
+    it('should reject invalid repo name with special characters', async () => {
+      const pipe = new ValidationPipe();
+      const dto = { org: 'c2siorg', repo: 'repo name!' };
+      await expect(
+        pipe.transform(dto, { type: 'query', metatype: OrgRepoQueryDto }),
+      ).rejects.toThrow();
     });
   });
 });
