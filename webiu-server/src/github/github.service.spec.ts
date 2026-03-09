@@ -142,6 +142,17 @@ describe('GithubService', () => {
       const result = await service.getRepoContributors('c2siorg', 'repo1');
       expect(result).toEqual([]);
     });
+
+    it('should cache empty array on error and avoid repeated API calls', async () => {
+      mockedAxios.get.mockRejectedValue(new Error('API error'));
+
+      const first = await service.getRepoContributors('c2siorg', 'repo1');
+      const second = await service.getRepoContributors('c2siorg', 'repo1');
+
+      expect(first).toEqual([]);
+      expect(second).toEqual([]);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('getRepo', () => {
@@ -225,6 +236,17 @@ describe('GithubService', () => {
       const result = await service.searchUserIssues('testuser');
       expect(result).toEqual([]);
     });
+
+    it('should cache empty issue results and avoid repeated API calls', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: { items: [] } });
+
+      const first = await service.searchUserIssues('testuser');
+      const second = await service.searchUserIssues('testuser');
+
+      expect(first).toEqual([]);
+      expect(second).toEqual([]);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('searchUserPullRequests', () => {
@@ -238,6 +260,17 @@ describe('GithubService', () => {
 
       // Cached
       await service.searchUserPullRequests('testuser');
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cache empty pull request results and avoid repeated API calls', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: { items: [] } });
+
+      const first = await service.searchUserPullRequests('testuser');
+      const second = await service.searchUserPullRequests('testuser');
+
+      expect(first).toEqual([]);
+      expect(second).toEqual([]);
       expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     });
   });
