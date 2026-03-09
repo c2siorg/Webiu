@@ -39,7 +39,7 @@ export class ProjectService {
       limit: number;
       repositories: any[];
     }>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const allRepos = await this.githubService.getAllOrgReposSorted();
@@ -69,7 +69,7 @@ export class ProjectService {
 
     const cacheKey = `issues_pr_count_${org}_${repo}`;
     const cached = this.cacheService.get(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const data = await this.githubService.getRepoIssues(org, repo);
@@ -101,7 +101,7 @@ export class ProjectService {
 
     const cacheKey = `project_details_${name}`;
     const cached = this.cacheService.get(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       // Direct fetch of a single repo as requested by maintainers
@@ -152,7 +152,7 @@ export class ProjectService {
 
     const cacheKey = `project_insights_v2_${name}`;
     const cached = this.cacheService.get(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const [project, activity, release, languages] = await Promise.all([
@@ -281,7 +281,7 @@ export class ProjectService {
 
     const cacheKey = `project_contributors_enriched_${name}`;
     const cached = this.cacheService.get(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const [contributors, pulls, issues] = await Promise.all([
@@ -345,7 +345,7 @@ export class ProjectService {
       limit: number;
       repositories: any[];
     }>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const allRepos = await this.githubService.getAllOrgReposSorted();

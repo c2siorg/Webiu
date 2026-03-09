@@ -45,7 +45,7 @@ export class GithubGraphqlService {
     const cacheKey = `graphql_prs_${normalizedUsername}`;
 
     const cached = this.cacheService.get(cacheKey);
-    if (cached) {
+    if (cached !== null) {
       return cached;
     }
 
