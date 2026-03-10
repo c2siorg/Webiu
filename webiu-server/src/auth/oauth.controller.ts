@@ -12,11 +12,13 @@ import { Response } from 'express';
 import axios from 'axios';
 import { OAuth2Client } from 'google-auth-library';
 import { GithubService } from '../github/github.service';
+import { randomBytes } from 'crypto';
 
 @Controller('auth')
 export class OAuthController {
   private readonly logger = new Logger(OAuthController.name);
   private googleClient: OAuth2Client;
+  private validStates = new Map<string, number>();
 
   constructor(
     private configService: ConfigService,
@@ -26,22 +28,62 @@ export class OAuthController {
       this.configService.get<string>('GOOGLE_CLIENT_ID'),
       this.configService.get<string>('GOOGLE_CLIENT_SECRET'),
     );
+    this.cleanupExpiredStates();
+  }
+
+  private generateState(): string {
+    const state = randomBytes(32).toString('hex');
+    this.validStates.set(state, Date.now() + 10 * 60 * 1000);
+    return state;
+  }
+
+  private validateState(state: string): boolean {
+    const expiresAt = this.validStates.get(state);
+    if (!expiresAt) return false;
+    if (Date.now() > expiresAt) {
+      this.validStates.delete(state);
+      return false;
+    }
+    this.validStates.delete(state);
+    return true;
+  }
+
+  private cleanupExpiredStates(): void {
+    setInterval(
+      () => {
+        const now = Date.now();
+        for (const [state, expiresAt] of this.validStates.entries()) {
+          if (now > expiresAt) {
+            this.validStates.delete(state);
+          }
+        }
+      },
+      60 * 60 * 1000,
+    );
   }
 
   // ─── Google OAuth ───
 
   @Get('google')
   googleAuth(@Res() res: Response) {
+    const state = this.generateState();
     const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
     const redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI');
-    const googleAuthURL = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=email%20profile`;
+    const googleAuthURL = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=email%20profile&state=${state}`;
     res.redirect(googleAuthURL);
   }
 
   @Get('google/callback')
-  async googleCallback(@Query('code') code: string, @Res() res: Response) {
+  async googleCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
     if (!code) {
       throw new BadRequestException('Authorization code missing');
+    }
+    if (!state || !this.validateState(state)) {
+      throw new BadRequestException('Invalid or missing state parameter');
     }
 
     try {
@@ -94,16 +136,24 @@ export class OAuthController {
 
   @Get('github')
   githubAuth(@Res() res: Response) {
+    const state = this.generateState();
     const clientId = this.configService.get<string>('GITHUB_CLIENT_ID');
     const redirectUri = this.configService.get<string>('GITHUB_REDIRECT_URI');
-    const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user`;
+    const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user&state=${state}`;
     res.redirect(githubAuthURL);
   }
 
   @Get('github/callback')
-  async githubCallback(@Query('code') code: string, @Res() res: Response) {
+  async githubCallback(
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
     if (!code) {
       throw new BadRequestException('Authorization code missing');
+    }
+    if (!state || !this.validateState(state)) {
+      throw new BadRequestException('Invalid or missing state parameter');
     }
 
     try {
