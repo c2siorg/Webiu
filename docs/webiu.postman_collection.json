@@ -11,6 +11,21 @@
             "value": "http://localhost:5050",
             "type": "string",
             "description": "Backend base URL. Change this to point to a different environment."
+        },
+        {
+            "key": "githubOrg",
+            "value": "c2siorg",
+            "type": "string"
+        },
+        {
+            "key": "githubRepo",
+            "value": "Webiu",
+            "type": "string"
+        },
+        {
+            "key": "githubUsername",
+            "value": "octocat",
+            "type": "string"
         }
     ],
     "item": [
@@ -57,7 +72,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/issues/issuesAndPr?org=c2siorg&repo=Webiu",
+                            "raw": "{{baseUrl}}/api/issues/issuesAndPr?org={{githubOrg}}&repo={{githubRepo}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -69,12 +84,12 @@
                             "query": [
                                 {
                                     "key": "org",
-                                    "value": "c2siorg",
+                                    "value": "{{githubOrg}}",
                                     "description": "GitHub organisation name (required)"
                                 },
                                 {
                                     "key": "repo",
-                                    "value": "Webiu",
+                                    "value": "{{githubRepo}}",
                                     "description": "Repository name (required)"
                                 }
                             ]
@@ -153,7 +168,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/contributor/issues/octocat",
+                            "raw": "{{baseUrl}}/api/contributor/issues/{{githubUsername}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -161,7 +176,7 @@
                                 "api",
                                 "contributor",
                                 "issues",
-                                "octocat"
+                                "{{githubUsername}}"
                             ]
                         },
                         "description": "Returns all issues created by a specific GitHub user within the c2siorg organisation.\n\nReplace `octocat` in the URL with the target GitHub username."
@@ -187,7 +202,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/contributor/pull-requests/octocat",
+                            "raw": "{{baseUrl}}/api/contributor/pull-requests/{{githubUsername}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -195,7 +210,7 @@
                                 "api",
                                 "contributor",
                                 "pull-requests",
-                                "octocat"
+                                "{{githubUsername}}"
                             ]
                         },
                         "description": "Returns all pull requests created by a specific GitHub user within the c2siorg organisation. Includes merge status for closed PRs.\n\nReplace `octocat` in the URL with the target GitHub username."
@@ -221,7 +236,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/contributor/stats/octocat",
+                            "raw": "{{baseUrl}}/api/contributor/stats/{{githubUsername}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -229,7 +244,7 @@
                                 "api",
                                 "contributor",
                                 "stats",
-                                "octocat"
+                                "{{githubUsername}}"
                             ]
                         },
                         "description": "Returns both issues and pull requests for a user in a single request. Equivalent to calling /issues/:username and /pull-requests/:username in parallel.\n\nReplace `octocat` in the URL with the target GitHub username."
@@ -562,7 +577,7 @@
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/api/user/followersAndFollowing/octocat",
+                            "raw": "{{baseUrl}}/api/user/followersAndFollowing/{{githubUsername}}",
                             "host": [
                                 "{{baseUrl}}"
                             ],
@@ -570,7 +585,7 @@
                                 "api",
                                 "user",
                                 "followersAndFollowing",
-                                "octocat"
+                                "{{githubUsername}}"
                             ]
                         },
                         "description": "⚠️ Placeholder endpoint — returns a stub response. Full implementation is pending.\n\nReplace `octocat` in the URL with the target GitHub username."
