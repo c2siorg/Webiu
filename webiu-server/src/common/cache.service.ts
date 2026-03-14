@@ -1,5 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import Redis from 'ioredis';
 
 interface CacheEntry<T> {
   data: T;
@@ -8,11 +9,17 @@ interface CacheEntry<T> {
   etag?: string;
 }
 
+interface RedisPayload<T> {
+  data: T;
+  etag?: string;
+}
+
 @Injectable()
-export class CacheService {
+export class CacheService implements OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name);
-  private cache = new Map<string, CacheEntry<unknown>>();
-  private readonly defaultTtl: number;
+  private readonly memCache = new Map<string, CacheEntry<unknown>>();
+  private readonly redis: Redis | null = null;
+  readonly defaultTtl: number;
 
   constructor(private configService: ConfigService) {
     const raw = this.configService.get<string>('CACHE_TTL_SECONDS');
@@ -27,85 +34,148 @@ export class CacheService {
     } else {
       this.defaultTtl = 300;
     }
+
+    const redisUrl = this.configService.get<string>('REDIS_URL');
+    if (redisUrl) {
+      this.redis = new Redis(redisUrl, { lazyConnect: true });
+      this.redis.on('error', (err: Error) =>
+        this.logger.error('Redis connection error:', err.message),
+      );
+      this.redis
+        .connect()
+        .then(() =>
+          this.logger.log('Redis connected — using distributed cache'),
+        )
+        .catch((err: Error) =>
+          this.logger.error(
+            'Redis connect failed, falling back to in-memory cache:',
+            err.message,
+          ),
+        );
+    } else {
+      this.logger.log('No REDIS_URL configured — using in-memory cache');
+    }
   }
 
-  get<T = unknown>(key: string): T | null {
-    const entry = this.cache.get(key);
+  async onModuleDestroy(): Promise<void> {
+    if (this.redis) {
+      await this.redis.quit();
+    }
+  }
+
+  async get<T = unknown>(key: string): Promise<T | null> {
+    if (this.redis && this.redis.status === 'ready') {
+      const raw = await this.redis.get(key);
+      if (raw === null) return null;
+      const payload = JSON.parse(raw) as RedisPayload<T>;
+      return payload.data;
+    }
+
+    const entry = this.memCache.get(key);
     if (!entry) return null;
 
     if (Date.now() > entry.expiresAt) {
-      this.cache.delete(key);
+      this.memCache.delete(key);
       return null;
     }
 
     return entry.data as T;
   }
 
-  /**
-   * Check if a key exists in the cache (not expired).
-   * Returns true even if the cached value is null.
-   */
-  has(key: string): boolean {
-    const entry = this.cache.get(key);
+  async has(key: string): Promise<boolean> {
+    if (this.redis && this.redis.status === 'ready') {
+      return (await this.redis.exists(key)) === 1;
+    }
+
+    const entry = this.memCache.get(key);
     if (!entry) return false;
 
     if (Date.now() > entry.expiresAt) {
-      this.cache.delete(key);
+      this.memCache.delete(key);
       return false;
     }
 
     return true;
   }
 
-  /**
-   * Returns the stored ETag for a cache key, or undefined if the key
-   * does not exist or has expired.
-   */
-  getEtag(key: string): string | undefined {
-    const entry = this.cache.get(key);
+  async getEtag(key: string): Promise<string | undefined> {
+    if (this.redis && this.redis.status === 'ready') {
+      const raw = await this.redis.get(key);
+      if (raw === null) return undefined;
+      const payload = JSON.parse(raw) as RedisPayload<unknown>;
+      return payload.etag;
+    }
+
+    const entry = this.memCache.get(key);
     if (!entry) return undefined;
 
     if (Date.now() > entry.expiresAt) {
-      this.cache.delete(key);
+      this.memCache.delete(key);
       return undefined;
     }
 
     return entry.etag;
   }
 
-  set<T = unknown>(key: string, data: T, ttlSeconds?: number, etag?: string): void {
+  async set<T = unknown>(
+    key: string,
+    data: T,
+    ttlSeconds?: number,
+    etag?: string,
+  ): Promise<void> {
     const ttl = ttlSeconds ?? this.defaultTtl;
-    this.cache.set(key, {
+
+    if (this.redis && this.redis.status === 'ready') {
+      const payload: RedisPayload<T> = {
+        data,
+        ...(etag !== undefined ? { etag } : {}),
+      };
+      await this.redis.setex(key, ttl, JSON.stringify(payload));
+      return;
+    }
+
+    this.memCache.set(key, {
       data,
       expiresAt: Date.now() + ttl * 1000,
       ...(etag !== undefined ? { etag } : {}),
     });
   }
 
-  /**
-   * Extends the TTL of an existing, non-expired cache entry without
-   * changing its data or ETag. Returns true if the entry existed and
-   * was refreshed, false if it was missing or already expired.
-   */
-  refresh(key: string, ttlSeconds?: number): boolean {
-    const entry = this.cache.get(key);
+  async refresh(key: string, ttlSeconds?: number): Promise<boolean> {
+    const ttl = ttlSeconds ?? this.defaultTtl;
+
+    if (this.redis && this.redis.status === 'ready') {
+      const result = await this.redis.expire(key, ttl);
+      return result === 1;
+    }
+
+    const entry = this.memCache.get(key);
     if (!entry) return false;
 
     if (Date.now() > entry.expiresAt) {
-      this.cache.delete(key);
+      this.memCache.delete(key);
       return false;
     }
 
-    const ttl = ttlSeconds ?? this.defaultTtl;
     entry.expiresAt = Date.now() + ttl * 1000;
     return true;
   }
 
-  delete(key: string): void {
-    this.cache.delete(key);
+  async delete(key: string): Promise<void> {
+    if (this.redis && this.redis.status === 'ready') {
+      await this.redis.del(key);
+      return;
+    }
+
+    this.memCache.delete(key);
   }
 
-  clear(): void {
-    this.cache.clear();
+  async clear(): Promise<void> {
+    if (this.redis && this.redis.status === 'ready') {
+      await this.redis.flushdb();
+      return;
+    }
+
+    this.memCache.clear();
   }
 }

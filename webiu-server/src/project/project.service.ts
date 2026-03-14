@@ -33,7 +33,7 @@ export class ProjectService {
 
   async getAllProjects(page = 1, limit = 10) {
     const cacheKey = `projects_p${page}_pp${limit}`;
-    const cached = this.cacheService.get<{
+    const cached = await this.cacheService.get<{
       total: number;
       page: number;
       limit: number;
@@ -51,7 +51,7 @@ export class ProjectService {
       const enriched = await this.enrichWithPullCounts(pageRepos);
 
       const result = { total, page, limit, repositories: enriched };
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      await this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
       this.logger.error(
@@ -68,7 +68,7 @@ export class ProjectService {
     }
 
     const cacheKey = `issues_pr_count_${org}_${repo}`;
-    const cached = this.cacheService.get(cacheKey);
+    const cached = await this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -78,7 +78,7 @@ export class ProjectService {
       const pullRequests = data.filter((item) => item.pull_request).length;
 
       const result = { issues, pullRequests };
-      this.cacheService.set(cacheKey, result);
+      await this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
       this.logger.error(
@@ -100,7 +100,7 @@ export class ProjectService {
     }
 
     const cacheKey = `project_details_${name}`;
-    const cached = this.cacheService.get(cacheKey);
+    const cached = await this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -123,7 +123,7 @@ export class ProjectService {
         pull_requests: pulls.length,
       };
 
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      await this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error: unknown) {
       if (error instanceof NotFoundException) throw error;
@@ -151,7 +151,7 @@ export class ProjectService {
     }
 
     const cacheKey = `project_insights_v2_${name}`;
-    const cached = this.cacheService.get(cacheKey);
+    const cached = await this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -257,7 +257,7 @@ export class ProjectService {
         },
       };
 
-      this.cacheService.set(cacheKey, result, INSIGHTS_CACHE_TTL);
+      await this.cacheService.set(cacheKey, result, INSIGHTS_CACHE_TTL);
       return result;
     } catch (error: unknown) {
       if (error instanceof NotFoundException) throw error;
@@ -280,7 +280,7 @@ export class ProjectService {
     }
 
     const cacheKey = `project_contributors_enriched_${name}`;
-    const cached = this.cacheService.get(cacheKey);
+    const cached = await this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -317,7 +317,7 @@ export class ProjectService {
         };
       });
 
-      this.cacheService.set(cacheKey, enriched, CACHE_TTL);
+      await this.cacheService.set(cacheKey, enriched, CACHE_TTL);
       return enriched;
     } catch (error) {
       this.logger.error(
@@ -339,7 +339,7 @@ export class ProjectService {
 
     const normalizedQuery = query.toLowerCase();
     const cacheKey = `projects_search_${normalizedQuery}_p${page}_pp${limit}`;
-    const cached = this.cacheService.get<{
+    const cached = await this.cacheService.get<{
       total: number;
       page: number;
       limit: number;
@@ -363,7 +363,7 @@ export class ProjectService {
       const enriched = await this.enrichWithPullCounts(pageRepos);
 
       const result = { total, page, limit, repositories: enriched };
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      await this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
       this.logger.error(

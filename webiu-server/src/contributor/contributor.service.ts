@@ -19,7 +19,7 @@ export class ContributorService {
 
   async getAllContributors() {
     const cacheKey = 'all_contributors';
-    const cached = this.cacheService.get(cacheKey);
+    const cached = await this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -75,7 +75,7 @@ export class ContributorService {
         }),
       );
 
-      this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
+      await this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
       return allContributors;
     } catch (error) {
       this.logger.error('Error in getAllContributors:', error);
