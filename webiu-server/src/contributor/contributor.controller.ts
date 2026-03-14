@@ -7,7 +7,7 @@ import { UsernameDto } from '../common/dto/username.dto';
 // All contributor endpoints: stricter limit — each call fans out to GitHub API
 @Throttle({ default: { ttl: 60_000, limit: 10 } })
 export class ContributorController {
-  constructor(private contributorService: ContributorService) { }
+  constructor(private contributorService: ContributorService) {}
 
   // Most expensive endpoint: fetches contributors for every repo in the org.
   // Tightest limit: 5 requests per IP per minute.
