@@ -292,4 +292,62 @@ describe('GithubService', () => {
       expect(mockedAxios.get).toHaveBeenCalledTimes(1);
     });
   });
+
+  describe('falsy value caching regression', () => {
+    it('should cache an empty array from getOrgRepos and not re-fetch', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+      const result = await service.getOrgRepos();
+      expect(result).toEqual([]);
+
+      // Second call must use cache — axios must NOT be called again
+      const result2 = await service.getOrgRepos();
+      expect(result2).toEqual([]);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cache an empty array from getRepoPulls and not re-fetch', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+      const result = await service.getRepoPulls('empty-repo');
+      expect(result).toEqual([]);
+
+      const result2 = await service.getRepoPulls('empty-repo');
+      expect(result2).toEqual([]);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cache an empty array from getRepoIssues and not re-fetch', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: [] });
+
+      const result = await service.getRepoIssues('c2siorg', 'empty-repo');
+      expect(result).toEqual([]);
+
+      const result2 = await service.getRepoIssues('c2siorg', 'empty-repo');
+      expect(result2).toEqual([]);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cache an empty items result from searchUserIssues and not re-fetch', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: { items: [] } });
+
+      const result = await service.searchUserIssues('ghostuser');
+      expect(result).toEqual([]);
+
+      const result2 = await service.searchUserIssues('ghostuser');
+      expect(result2).toEqual([]);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cache an empty items result from searchUserPullRequests and not re-fetch', async () => {
+      mockedAxios.get.mockResolvedValueOnce({ data: { items: [] } });
+
+      const result = await service.searchUserPullRequests('ghostuser');
+      expect(result).toEqual([]);
+
+      const result2 = await service.searchUserPullRequests('ghostuser');
+      expect(result2).toEqual([]);
+      expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    });
+  });
 });
