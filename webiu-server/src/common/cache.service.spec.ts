@@ -194,4 +194,79 @@ describe('CacheService', () => {
       expect(service.getEtag('key')).toBe('"etag-v1"');
     });
   });
+
+  describe('LRU and Eviction Policies', () => {
+    it('should evict least recently used items when max size is exceeded', () => {
+      // Default max size is 1000, let's create a service with a smaller limit
+      const config = {
+        get: jest.fn((key: string) => {
+          if (key === 'CACHE_MAX_SIZE') return '3';
+          return undefined;
+        }),
+      } as any;
+      const s = new CacheService(config);
+
+      s.set('a', 1);
+      s.set('b', 2);
+      s.set('c', 3);
+      expect(s.has('a')).toBe(true);
+
+      s.set('d', 4); // Should evict 'a'
+      expect(s.has('a')).toBe(false);
+      expect(s.has('b')).toBe(true);
+      expect(s.has('c')).toBe(true);
+      expect(s.has('d')).toBe(true);
+    });
+
+    it('should move accessed items to Most Recently Used position (LRU ordering)', () => {
+      const config = {
+        get: jest.fn((key: string) => {
+          if (key === 'CACHE_MAX_SIZE') return '3';
+          return undefined;
+        }),
+      } as any;
+      const s = new CacheService(config);
+
+      s.set('a', 1);
+      s.set('b', 2);
+      s.set('c', 3);
+
+      // Access 'a' so it becomes MRU
+      s.get('a');
+
+      s.set('d', 4); // Should evict 'b' (the new LRU), not 'a'
+      expect(s.has('b')).toBe(false);
+      expect(s.has('a')).toBe(true);
+      expect(s.has('c')).toBe(true);
+      expect(s.has('d')).toBe(true);
+    });
+
+    it('should periodically sweep expired entries', () => {
+      jest.useFakeTimers();
+      const config = {
+        get: jest.fn((key: string) => {
+          if (key === 'CACHE_SWEEP_INTERVAL_SECONDS') return '60';
+          if (key === 'CACHE_TTL_SECONDS') return '10';
+          return undefined;
+        }),
+      } as any;
+      const s = new CacheService(config);
+
+      s.set('key1', 'val1');
+      s.set('key2', 'val2');
+
+      // Advance time past TTL but before sweep
+      jest.advanceTimersByTime(11_000);
+      // Items are logically expired but still in the internal map
+      const internalMap = (s as any).cache as Map<string, any>;
+      expect(internalMap.size).toBe(2);
+
+      // Advance time to trigger sweep
+      jest.advanceTimersByTime(50_000);
+      expect(internalMap.size).toBe(0);
+
+      s.onModuleDestroy(); // Clean up timer
+      jest.useRealTimers();
+    });
+  });
 });
