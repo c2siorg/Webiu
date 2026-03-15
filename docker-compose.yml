@@ -22,12 +22,14 @@ services:
       context: ./webiu-ui
     container_name: webiu-ui
     ports:
-      - 4200:4000
+      - 4200:80
+    expose:
+      - 80
     environment:
-      - PORT=4000
+      - PORT=80
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000"]
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:80"]
       interval: 30s
       timeout: 5s
       retries: 3
