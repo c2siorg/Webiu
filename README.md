@@ -85,7 +85,7 @@ You will also need a **GitHub Personal Access Token** for the backend to call th
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/rajutkarsh07/Webiu.git
+git clone https://github.com/c2siorg/Webiu.git
 cd Webiu
 ```
 
