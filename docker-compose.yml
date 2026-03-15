@@ -17,12 +17,9 @@ services:
     build:
       context: ./webiu-ui
     container_name: webiu-ui
-    volumes:
-      - ./webiu-ui:/usr/src/app
-      - /usr/src/app/node_modules
     ports:
-      - 4200:4200
+      - 4200:80
     expose:
-      - 4200
+      - 80
     depends_on:
       - webiu-server
