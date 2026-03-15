@@ -13,19 +13,62 @@ export class CacheService {
   private readonly logger = new Logger(CacheService.name);
   private cache = new Map<string, CacheEntry<unknown>>();
   private readonly defaultTtl: number;
+  private readonly maxCacheSize: number;
+  private readonly sweepIntervalMs: number;
+  private sweepTimeout: NodeJS.Timeout;
 
   constructor(private configService: ConfigService) {
-    const raw = this.configService.get<string>('CACHE_TTL_SECONDS');
-    const parsed = parseInt(raw, 10);
-    if (!isNaN(parsed) && parsed > 0) {
-      if (parsed < 10) {
-        this.logger.warn(
-          `CACHE_TTL_SECONDS is set very low (${parsed}s) — this may hammer the GitHub API`,
-        );
+    // TTL Configuration
+    const rawTtl = this.configService.get<string>('CACHE_TTL_SECONDS');
+    const parsedTtl = parseInt(rawTtl, 10);
+    this.defaultTtl = !isNaN(parsedTtl) && parsedTtl > 0 ? parsedTtl : 300;
+
+    if (this.defaultTtl < 10) {
+      this.logger.warn(
+        `CACHE_TTL_SECONDS is set very low (${this.defaultTtl}s) — this may hammer the GitHub API`,
+      );
+    }
+
+    // LRU & Sweep Configuration
+    const rawMaxSize = this.configService.get<string>('CACHE_MAX_SIZE');
+    const parsedMaxSize = parseInt(rawMaxSize, 10);
+    this.maxCacheSize =
+      !isNaN(parsedMaxSize) && parsedMaxSize > 0 ? parsedMaxSize : 1000;
+
+    const rawSweep = this.configService.get<string>(
+      'CACHE_SWEEP_INTERVAL_SECONDS',
+    );
+    const parsedSweep = parseInt(rawSweep, 10);
+    this.sweepIntervalMs =
+      (!isNaN(parsedSweep) && parsedSweep > 0 ? parsedSweep : 60) * 1000;
+
+    this.scheduleSweep();
+  }
+
+  onModuleDestroy() {
+    if (this.sweepTimeout) {
+      clearTimeout(this.sweepTimeout);
+    }
+  }
+
+  private scheduleSweep() {
+    this.sweepTimeout = setTimeout(() => {
+      this.sweep();
+      this.scheduleSweep();
+    }, this.sweepIntervalMs);
+  }
+
+  private sweep() {
+    const now = Date.now();
+    let evictedCount = 0;
+    for (const [key, entry] of this.cache.entries()) {
+      if (now > entry.expiresAt) {
+        this.cache.delete(key);
+        evictedCount++;
       }
-      this.defaultTtl = parsed;
-    } else {
-      this.defaultTtl = 300;
+    }
+    if (evictedCount > 0) {
+      this.logger.debug(`Swept ${evictedCount} expired cache entries`);
     }
   }
 
@@ -38,13 +81,13 @@ export class CacheService {
       return null;
     }
 
+    // Move to end (most recently used)
+    this.cache.delete(key);
+    this.cache.set(key, entry);
+
     return entry.data as T;
   }
 
-  /**
-   * Check if a key exists in the cache (not expired).
-   * Returns true even if the cached value is null.
-   */
   has(key: string): boolean {
     const entry = this.cache.get(key);
     if (!entry) return false;
@@ -57,10 +100,6 @@ export class CacheService {
     return true;
   }
 
-  /**
-   * Returns the stored ETag for a cache key, or undefined if the key
-   * does not exist or has expired.
-   */
   getEtag(key: string): string | undefined {
     const entry = this.cache.get(key);
     if (!entry) return undefined;
@@ -73,8 +112,25 @@ export class CacheService {
     return entry.etag;
   }
 
-  set<T = unknown>(key: string, data: T, ttlSeconds?: number, etag?: string): void {
+  set<T = unknown>(
+    key: string,
+    data: T,
+    ttlSeconds?: number,
+    etag?: string,
+  ): void {
     const ttl = ttlSeconds ?? this.defaultTtl;
+
+    // If key exists, delete it first to ensure it moved to the end
+    if (this.cache.has(key)) {
+      this.cache.delete(key);
+    } else if (this.cache.size >= this.maxCacheSize) {
+      // Evict least recently used (first item in Map)
+      const firstKey = this.cache.keys().next().value;
+      if (firstKey !== undefined) {
+        this.cache.delete(firstKey);
+      }
+    }
+
     this.cache.set(key, {
       data,
       expiresAt: Date.now() + ttl * 1000,
@@ -82,11 +138,6 @@ export class CacheService {
     });
   }
 
-  /**
-   * Extends the TTL of an existing, non-expired cache entry without
-   * changing its data or ETag. Returns true if the entry existed and
-   * was refreshed, false if it was missing or already expired.
-   */
   refresh(key: string, ttlSeconds?: number): boolean {
     const entry = this.cache.get(key);
     if (!entry) return false;
@@ -98,6 +149,11 @@ export class CacheService {
 
     const ttl = ttlSeconds ?? this.defaultTtl;
     entry.expiresAt = Date.now() + ttl * 1000;
+
+    // Move to end
+    this.cache.delete(key);
+    this.cache.set(key, entry);
+
     return true;
   }
 
