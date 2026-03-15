@@ -5,8 +5,9 @@ import {
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
+import { sanitizeContributor } from '../common/sanitizers/githubResponseSanitizer';
 
-const CACHE_TTL = 300; // 5 minutes
+const CACHE_TTL = 300;
 
 @Injectable()
 export class ContributorService {
@@ -15,7 +16,7 @@ export class ContributorService {
   constructor(
     private githubService: GithubService,
     private cacheService: CacheService,
-  ) {}
+  ) { }
 
   async getAllContributors() {
     const cacheKey = 'all_contributors';
@@ -25,17 +26,13 @@ export class ContributorService {
     try {
       const orgName = this.githubService.org;
       const contributorsMap = new Map();
-
       const repositories = await this.githubService.getOrgRepos();
 
-      if (repositories.length === 0) {
-        return [];
-      }
+      if (repositories.length === 0) return [];
 
       const BATCH_SIZE = 10;
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
         const batch = repositories.slice(i, i + BATCH_SIZE);
-
         await Promise.all(
           batch.map(async (repo) => {
             try {
@@ -46,18 +43,18 @@ export class ContributorService {
               if (!contributors?.length) return;
 
               contributors.forEach((contributor) => {
-                const login = contributor.login.toLowerCase();
+                const clean = sanitizeContributor(contributor);
+                if (!clean) return;
+                const login = clean.login.toLowerCase();
 
                 if (!contributorsMap.has(login)) {
                   contributorsMap.set(login, {
-                    login: contributor.login,
-                    contributions: contributor.contributions,
+                    ...clean,
                     repos: new Set([repo.name]),
-                    avatar_url: contributor.avatar_url,
                   });
                 } else {
                   const userData = contributorsMap.get(login);
-                  userData.contributions += contributor.contributions;
+                  userData.contributions += clean.contributions;
                   userData.repos.add(repo.name);
                 }
               });
@@ -89,13 +86,9 @@ export class ContributorService {
   async getUserCreatedIssues(username: string) {
     try {
       const issues = await this.githubService.searchUserIssues(username);
-
       if (!issues) {
-        throw new InternalServerErrorException(
-          'Failed to fetch user-created issues',
-        );
+        throw new InternalServerErrorException('Failed to fetch user-created issues');
       }
-
       return { issues };
     } catch (error) {
       this.logger.error(
@@ -108,15 +101,10 @@ export class ContributorService {
 
   async getUserCreatedPullRequests(username: string) {
     try {
-      const pullRequests =
-        await this.githubService.searchUserPullRequests(username);
-
+      const pullRequests = await this.githubService.searchUserPullRequests(username);
       if (!pullRequests) {
-        throw new InternalServerErrorException(
-          'Failed to fetch user-created pull requests',
-        );
+        throw new InternalServerErrorException('Failed to fetch user-created pull requests');
       }
-
       return { pullRequests };
     } catch (error) {
       this.logger.error(
@@ -127,17 +115,12 @@ export class ContributorService {
     }
   }
 
-  /**
-   * Combined endpoint: fetches both issues and PRs in parallel.
-   * Saves the frontend from making 2 separate requests.
-   */
   async getUserStats(username: string) {
     try {
       const [issues, pullRequests] = await Promise.all([
         this.githubService.searchUserIssues(username),
         this.githubService.searchUserPullRequests(username),
       ]);
-
       return {
         issues: issues || [],
         pullRequests: pullRequests || [],
@@ -153,17 +136,14 @@ export class ContributorService {
 
   async getUserFollowersAndFollowing(username: string) {
     try {
-      const result =
-        await this.githubService.getUserFollowersAndFollowing(username);
+      const result = await this.githubService.getUserFollowersAndFollowing(username);
       return result;
     } catch (error) {
       this.logger.error(
         'Error fetching user followers and following:',
         error.response ? error.response.data : error.message,
       );
-      throw new InternalServerErrorException(
-        'Failed to fetch followers and following data',
-      );
+      throw new InternalServerErrorException('Failed to fetch followers and following data');
     }
   }
 }
