@@ -147,7 +147,7 @@
 
   .pagination-container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-top: 40px;
     margin-bottom: 40px;
@@ -157,7 +157,7 @@
 
     .pagination {
       display: flex;
-      justify-content: flex-start;
+      justify-content: center;
       align-items: center;
       gap: 8px;
       flex: 1;
