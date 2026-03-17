@@ -124,4 +124,108 @@ describe('CacheService', () => {
       expect(s.get('key2')).toBeNull();
     });
   });
+<<<<<<< Updated upstream
+=======
+
+  describe('getEtag()', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(0);
+    });
+    afterEach(() => jest.useRealTimers());
+
+    it('should return the etag stored alongside data', () => {
+      service.set('key', 'value', 60, '"abc123"');
+      expect(service.getEtag('key')).toBe('"abc123"');
+    });
+
+    it('should return undefined when no etag was stored', () => {
+      service.set('key', 'value', 60);
+      expect(service.getEtag('key')).toBeUndefined();
+    });
+
+    it('should return undefined for a missing key', () => {
+      expect(service.getEtag('nonexistent')).toBeUndefined();
+    });
+
+    it('should return undefined and evict an expired entry', () => {
+      service.set('key', 'value', 1, '"etag"');
+      jest.advanceTimersByTime(1100);
+      expect(service.getEtag('key')).toBeUndefined();
+      // entry should have been evicted — get() also returns null
+      expect(service.get('key')).toBeNull();
+    });
+
+    it('should not affect data retrieval when etag is present', () => {
+      service.set('key', { count: 42 }, 60, '"xyz"');
+      expect(service.get<{ count: number }>('key')).toEqual({ count: 42 });
+      expect(service.getEtag('key')).toBe('"xyz"');
+    });
+  });
+
+  describe('refresh()', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(0);
+    });
+    afterEach(() => jest.useRealTimers());
+
+    it('should return true and extend the TTL of a live entry', () => {
+      service.set('key', 'value', 60);
+
+      // t=30s: still alive (original TTL=60s), extend by 120s → new expiry at t=150s
+      jest.advanceTimersByTime(30_000);
+      expect(service.refresh('key', 120)).toBe(true);
+
+      // t=130s: past original expiry (60s) but within new expiry (150s)
+      jest.advanceTimersByTime(100_000);
+      expect(service.get('key')).toBe('value');
+
+      // t=151s: past new expiry (150s) → evicted
+      jest.advanceTimersByTime(21_000);
+      expect(service.get('key')).toBeNull();
+    });
+
+    it('should return false for a missing key', () => {
+      expect(service.refresh('nonexistent', 60)).toBe(false);
+    });
+
+    it('should return false and evict an already-expired entry', () => {
+      service.set('key', 'value', 1);
+      jest.advanceTimersByTime(1100);
+      expect(service.refresh('key', 60)).toBe(false);
+      expect(service.get('key')).toBeNull();
+    });
+
+    it('should preserve data and etag after refresh', () => {
+      service.set('key', { stars: 10 }, 60, '"etag-v1"');
+      service.refresh('key', 120);
+      expect(service.get<{ stars: number }>('key')).toEqual({ stars: 10 });
+      expect(service.getEtag('key')).toBe('"etag-v1"');
+    });
+  });
+
+  describe('pruneExpiredEntries()', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(0);
+    });
+    afterEach(() => jest.useRealTimers());
+
+    it('should remove only expired entries', () => {
+      service.set('expired1', 'val1', 10); // expires at 10s
+      service.set('expired2', 'val2', 20); // expires at 20s
+      service.set('valid', 'val3', 60);    // expires at 60s
+
+      jest.advanceTimersByTime(30_000); // Now at 30s
+
+      service.pruneExpiredEntries();
+
+      expect(service.has('expired1')).toBe(false);
+      expect(service.has('expired2')).toBe(false);
+      expect(service.has('valid')).toBe(true);
+      expect(service.get('valid')).toBe('val3');
+    });
+  });
+>>>>>>> Stashed changes
 });
