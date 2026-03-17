@@ -5,7 +5,7 @@ import { UsernameDto } from '../common/dto/username.dto';
 
 @Controller('api/v1/user')
 export class UserController {
-  constructor(private userService: UserService) { }
+  constructor(private userService: UserService) {}
 
   @Get('followersAndFollowing/:username')
   async getFollowersAndFollowing(@Param() params: UsernameDto) {

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -7,6 +7,7 @@ import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import * as depthLimit from 'graphql-depth-limit';
 import { Request, Response } from 'express';
+import { WinstonModule } from 'nest-winston';
 import { AppController } from './app.controller';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
@@ -14,6 +15,8 @@ import { ProjectModule } from './project/project.module';
 import { ContributorModule } from './contributor/contributor.module';
 import { UserModule } from './user/user.module';
 import { GraphqlResolversModule } from './graphql/graphql.module';
+import { createWinstonLoggerOptions } from './common/logging/logger.config';
+import { RequestLoggingMiddleware } from './common/logging/request-logging.middleware';
 
 @Module({
   imports: [
@@ -39,6 +42,14 @@ import { GraphqlResolversModule } from './graphql/graphql.module';
       }),
       inject: [ConfigService],
     }),
+    WinstonModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) =>
+        createWinstonLoggerOptions(
+          configService.get('NODE_ENV') === 'production',
+        ),
+    }),
     GraphqlResolversModule,
     CommonModule,
     // MongooseModule can be re-enabled when MongoDB is needed:
@@ -63,4 +74,8 @@ import { GraphqlResolversModule } from './graphql/graphql.module';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer): void {
+    consumer.apply(RequestLoggingMiddleware).exclude('/health').forRoutes('*');
+  }
+}
