@@ -12,7 +12,7 @@
   }
 
   @media (max-width: 600px) {
-    padding-bottom: 80px; 
+    padding-bottom: 80px;
   }
 }
 
@@ -55,7 +55,7 @@
       /* Left-aligning links in a 2-column grid looks much cleaner than centering */
       align-items: flex-start;
       text-align: left;
-      padding-left: 10px; 
+      padding-left: 10px;
     }
   }
 
@@ -115,7 +115,9 @@
         color: var(--navbar-p, #586069);
         text-decoration: none;
         font-size: 15px;
-        transition: color 0.2s ease, transform 0.2s ease;
+        transition:
+          color 0.2s ease,
+          transform 0.2s ease;
         display: inline-block;
 
         :host-context([data-theme="dark"]) & {
@@ -124,7 +126,7 @@
 
         &:hover,
         &.active {
-          color: var(--primary-color, #2f80ed);
+          color: var(--primary-color, #3498db);
           transform: translateX(2px);
 
           :host-context([data-theme="dark"]) & {

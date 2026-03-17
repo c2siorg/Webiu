@@ -1,4 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
@@ -8,7 +9,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
+
 
 @Component({
   selector: 'app-community',
@@ -19,13 +20,13 @@ import { BackToTopComponent } from '../../components/back-to-top/back-to-top.com
     HttpClientModule,
     ProfileCardComponent,
     RouterModule,
-    BackToTopComponent,
   ],
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],
 })
 export class CommunityComponent implements OnInit {
   private http = inject(HttpClient);
+  private destroyRef = inject(DestroyRef);
   icons: Media[] = socialMedia;
   users: Contributor[] = [];
   isLoading = true;
@@ -36,7 +37,12 @@ export class CommunityComponent implements OnInit {
 
   getTopContributors() {
     this.http
+ fix/cache-memory-leak
       .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
+
+      .get<Contributor[]>(`${environment.serverUrl}/api/v1/contributor/contributors`)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+ webiu-2026-pre-gsoc
       .subscribe({
         next: (res) => {
           const sorted = (res || []).sort(
@@ -45,12 +51,17 @@ export class CommunityComponent implements OnInit {
           this.users = sorted.slice(0, 8);
           this.fetchFollowerData();
         },
+ fix/cache-memory-leak
         error: (error: HttpErrorResponse) => {
           console.error('Error fetching contributors', {
             status: error.status,
             message: error.message,
             body: error.error,
           });
+
+        error: (error) => {
+          console.warn('Error fetching contributors:', error);
+ webiu-2026-pre-gsoc
           this.users = [];
           this.isLoading = false;
         },
@@ -63,6 +74,7 @@ export class CommunityComponent implements OnInit {
       return;
     }
 
+ fix/cache-memory-leak
     const usernames = this.users.map((profile) => profile.login);
 
     this.http
@@ -95,6 +107,28 @@ export class CommunityComponent implements OnInit {
             followers: profile.followers ?? 0,
             following: profile.following ?? 0,
           }));
+
+    const usernames = this.users.map((u) => u.login);
+
+    this.http
+      .post<Record<string, { followers: number; following: number }>>(
+        `${environment.serverUrl}/api/v1/user/batch-social`,
+        { usernames },
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.users.forEach((user) => {
+            const social = data[user.login];
+            user.followers = social?.followers ?? 0;
+            user.following = social?.following ?? 0;
+          });
+          this.isLoading = false;
+        },
+        error: (error) => {
+          console.warn('Error fetching follower data:', error);
+          // Show contributors without social counts rather than failing entirely
+ webiu-2026-pre-gsoc
           this.isLoading = false;
         },
       });
