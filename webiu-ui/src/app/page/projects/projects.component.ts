@@ -63,6 +63,76 @@ export class ProjectsComponent implements OnInit {
 
   }
 
+ fix/cache-memory-leak
+  onSearchInput(searchTerm: string): void {
+    this.searchSubject.next(searchTerm);
+  }
+
+  performSearch(searchTerm: string): void {
+  this.currentPage = 1;
+
+  if (!searchTerm) {
+    this.fetchProjects();
+    return;
+  }
+
+  this.isLoading = true;
+
+  this.projectCacheService.searchProjects(searchTerm)
+    .subscribe({
+      next: (response) => {
+        this.serverTotal = response.total;
+        this.projectsData = this.sortProjects(response.repositories);
+        this.filteredProjects = [...this.projectsData];
+
+        
+        this.totalPages = Math.max(
+          1,
+          Math.ceil(this.filteredProjects.length / this.projectsPerPage),
+        );
+
+        this.updateDisplayProjects();
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+}
+
+  fetchProjects(): void {
+    this.isLoading = true;
+    this.projectCacheService
+      .getProjects(this.currentPage, this.projectsPerPage)
+      .subscribe({
+        next: (response) => {
+          this.serverTotal = response.total;
+          this.projectsData = this.sortProjects(response.repositories);
+          this.filteredProjects = this.searchTerm
+            ? this.sortProjects(
+                this.projectsData.filter((p) =>
+                  p.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
+                ),
+              )
+            : [...this.projectsData];
+          this.updateDisplayProjects();
+          this.isLoading = false;
+        },
+        error: () => {
+          this.serverTotal = projectsData.total;
+          this.projectsData = this.sortProjects(projectsData.repositories);
+          this.filteredProjects = [...this.projectsData];
+          this.updateDisplayProjects();
+          this.isLoading = false;
+        },
+      });
+  }
+
+  sortProjects(projects: Project[]): Project[] {
+    return projects.sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
+
   onSearch(term?: string): void {
     if (term !== undefined) {
       this.searchTerm = term;
@@ -122,6 +192,7 @@ export class ProjectsComponent implements OnInit {
         this.isLoading = false;
       },
     });
+ webiu-2026-pre-gsoc
   }
 
   trackByProjectName(index: number, project: Project): string {
@@ -162,4 +233,8 @@ export class ProjectsComponent implements OnInit {
     this.currentPage = 1;
     this.fetchCurrentPage();
   }
+ fix/cache-memory-leak
 }
+
+}
+ webiu-2026-pre-gsoc

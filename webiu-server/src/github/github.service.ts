@@ -516,9 +516,14 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
+ fix/cache-memory-leak
+    const repos = await this.fetchAllSearchPages(
+      `${this.baseUrl}/search/repositories?q=${query}+org:${this.orgName}`,
+
     const encoded = encodeURIComponent(query);
     const repos = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/repositories?q=${encoded}+org:${this.orgName}`,
+ webiu-2026-pre-gsoc
     );
 
     this.cacheService.set(cacheKey, repos);
