@@ -29,6 +29,10 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.isSunVisible = !this.themeService.isDarkMode();
+    this.currentRoute = this.router.url;
+    this.isCommunityDropdownOpen = 
+      this.currentRoute === '/community' || 
+      this.currentRoute === '/opportunities';
     this.router.events
       .pipe(
         filter(
@@ -37,9 +41,11 @@ export class NavbarComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((event: NavigationEnd) => {
-        this.currentRoute = event.url;
+        this.currentRoute = event.urlAfterRedirects;
         this.isMenuOpen = false;
-        this.isCommunityDropdownOpen = false;
+        this.isCommunityDropdownOpen = 
+          this.currentRoute === '/community' || 
+          this.currentRoute === '/opportunities';
       });
 
     if (isPlatformBrowser(this.platformId)) {
@@ -171,7 +177,10 @@ export class NavbarComponent implements OnInit {
     if (route === '/projects' && this.currentRoute.startsWith('/project')) {
       return true;
     }
-    if (route === '/community' && (this.currentRoute === '/community' || this.currentRoute === '/opportunities')) {
+    if (route === '/community' && (
+      this.currentRoute === '/community' || 
+      this.currentRoute === '/opportunities'
+    )) {
       return true;
     }
     return this.currentRoute === route;
