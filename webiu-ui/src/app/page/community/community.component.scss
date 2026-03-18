@@ -130,6 +130,21 @@
             justify-content: center;
             text-align: center;
 
+            .user-avatar {
+              width: 72px;
+              height: 72px;
+              border-radius: 50%;
+              object-fit: cover;
+              border: 1px solid var(--community-card-border, #e1e4e8);
+              margin-bottom: 10px;
+              background: var(--community-card-bg, #ffffff);
+
+              @media screen and (max-width: 480px) {
+                width: 64px;
+                height: 64px;
+              }
+            }
+
             .user-name {
               font-size: 16px;
               font-weight: 600;
