@@ -34,6 +34,14 @@
           @for (user of users; track $index) {
             <div class="card">
               <div class="card-data">
+                <img
+                  class="user-avatar"
+                  [src]="user.avatar_url || 'https://github.com/' + user.login + '.png'"
+                  [alt]="user.login + ' avatar'"
+                  loading="lazy"
+                  width="72"
+                  height="72"
+                />
                 <a
                   class="user-name"
                   href="https://github.com/{{ user.login }}"
