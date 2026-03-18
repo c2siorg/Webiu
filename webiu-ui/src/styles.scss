@@ -16,7 +16,51 @@ body {
   width: 100%;
   overflow-x: hidden;
 }
+main {
+  width: 95%;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
 
+figure {
+  margin: 20px auto;
+  text-align: center;
+}
+
+section {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
+
+p {
+  line-height: 1.6;
+}
+@media (min-width: 1200px) {
+  body {
+    padding-left: 2%;
+    padding-right: 2%;
+  }
+}
+
+@media (max-width: 768px) {
+  main {
+    width: 95%;
+  }
+
+  img {
+    margin: 10px auto;
+  }
+}
+
+
+html {
+  scroll-behavior: smooth;
+}
 :root {
   --primary-color: #3498db;
   --secondary-color: #2ecc71;
