@@ -155,29 +155,28 @@
   .search-box {
     width: 100%;
     padding: 10px 10px 10px 36px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--select-border);
     border-radius: 8px;
     outline: none;
     margin: 0;
     transition: all 0.3s ease-in-out;
-    background-color: #f9f9f9;
+    background-color: var(--select-bg);
+    color: var(--search-color);
     height: 45px;
     box-sizing: border-box;
 
     &:hover {
       border-color: #bdbdbd;
-      background-color: #f2f2f2;
       box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     }
 
     &:focus {
       border-color: #007bff;
       box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
-      background-color: #ffffff;
     }
 
     &::placeholder {
-      color: #070202;
+      color: var(--search-color);
       font-style: italic;
     }
   }

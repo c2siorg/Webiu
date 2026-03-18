@@ -2,60 +2,61 @@
   <div class="community-hero">
     <div class="community-hero-content">
       <h1>Join our community</h1>
+
       <div class="media-icons">
         @for (icon of icons; track $index) {
-          <a class="icon-link" href="{{ icon.link }}"
-            ><img
+          <a class="icon-link" [href]="icon.link" target="_blank">
+            <img
               class="icon"
-              src="{{ icon.media_icon }}"
-              alt="Social Media Icon"
-          /></a>
+              [src]="icon.media_icon"
+              alt="social media icon"
+            />
+          </a>
         }
       </div>
     </div>
-    <img src="../../../assets/projects-img.png" alt="community" />
+
+    <img
+      src="assets/projects-img.png"
+      alt="community illustration"
+    />
   </div>
 
   <div class="team-details">
     <p class="team-caption">Top Contributors</p>
-    <p class="team-description">
-      Dedicated individuals who are pushing the boundaries of technology
-    </p>
 
-    @if (isLoading) {
-      <div class="loading-spinner">
-        <p>Loading contributors...</p>
-      </div>
-    }
-
-    @if (!isLoading) {
+    @if (!isLoading && users?.length) {
       <div class="team">
         <div class="team-align">
           @for (user of users; track $index) {
+
             <div class="card">
+
+              <img
+                class="user-avatar"
+                [src]="user.avatar_url"
+                [alt]="user.login"
+              />
+
               <div class="card-data">
                 <a
                   class="user-name"
-                  href="https://github.com/{{ user.login }}"
+                  [href]="'https://github.com/' + user.login"
                   target="_blank"
-                  rel="noopener noreferrer"
-                  style="text-decoration: none; display: block"
                 >
                   {{ user.login }}
                 </a>
-                <p class="user-designation">{{ user.contributions }} commits</p>
-              </div>
-            </div>
-          }
-        </div>
 
-        <div class="view-all-container">
-          <a routerLink="/contributors" class="view-all-link"
-            >View All Contributors &rarr;</a
-          >
+                <p class="user-designation">
+                  {{ user.contributions }} commits
+                </p>
+              </div>
+
+            </div>
+
+          }
         </div>
       </div>
     }
   </div>
-  <app-back-to-top></app-back-to-top>
 </div>
