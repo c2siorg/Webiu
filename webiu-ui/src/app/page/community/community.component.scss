@@ -4,7 +4,7 @@
   flex-direction: column;
   align-items: center;
   width: 100%;
-  overflow-x: hidden; // Prevents any accidental side-scrolling
+  overflow-x: hidden;
 
   // ==============================
   // Hero Section
@@ -56,7 +56,7 @@
   // ==============================
   .team-details {
     margin-top: 60px;
-    width: 90%; // Use more screen space
+    width: 90%;
     max-width: 1200px;
     display: flex;
     flex-direction: column;
@@ -111,19 +111,29 @@
           width: 100%;
           display: flex;
           flex-direction: column;
+          align-items: center;
           border-radius: 12px;
           border: 1px solid var(--community-card-border, #e1e4e8);
           background: var(--community-card-bg, #ffffff);
           box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
           transition: all 0.3s ease;
+          padding-top: 20px;
 
           &:hover {
             transform: translateY(-5px);
             box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
           }
 
+          .user-avatar {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--community-card-border, #e1e4e8);
+          }
+
           .card-data {
-            padding: 20px 10px; // Optimized padding
+            padding: 20px 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -136,7 +146,7 @@
               color: #24292e;
               margin-bottom: 5px;
               width: 100%;
-              word-break: break-word; // Ensures long GitHub names don't break layout
+              word-break: break-word;
 
               @media screen and (max-width: 480px) {
                 font-size: 14px;
@@ -206,7 +216,7 @@
 
 @media screen and (max-width: 600px) {
   .community .team-details {
-    width: 95%; // Maximum width on tiny screens
+    width: 95%;
 
     .team-caption {
       font-size: 32px;

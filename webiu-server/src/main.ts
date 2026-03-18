@@ -13,15 +13,13 @@ async function bootstrap() {
   app.use(helmet());
   app.use(compression());
 
-  const frontendUrl = configService.get<string>(
-    'FRONTEND_BASE_URL',
-    'http://localhost:4200',
-  );
+  // 🔥 FIXED CORS (allow current frontend origin dynamically)
   app.enableCors({
-    origin: frontendUrl,
+    origin: true, // allows all origins in dev
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   });
+
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -31,7 +29,9 @@ async function bootstrap() {
 
   const port = configService.get<number>('PORT', 5050);
   await app.listen(port);
+
   const logger = new Logger('Bootstrap');
   logger.log(`Server is listening at port ${port}`);
 }
+
 bootstrap();
