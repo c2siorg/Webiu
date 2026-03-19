@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   webiu-server:
     build:
@@ -7,22 +5,33 @@ services:
     container_name: webiu-server
     ports:
       - 5050:5050
+    env_file:
+      - ./webiu-server/.env
     environment:
-      - NODE_ENV=development
-    volumes:
-      - ./webiu-server:/usr/src/app
-    command: ["npm", "start"]
+      - NODE_ENV=production
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5050/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
 
   webiu-ui:
     build:
       context: ./webiu-ui
     container_name: webiu-ui
-    volumes:
-      - ./webiu-ui:/usr/src/app
-      - /usr/src/app/node_modules
     ports:
-      - 4200:4200
-    expose:
-      - 4200
+      - 4200:4000
+    environment:
+      - PORT=4000
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
     depends_on:
-      - webiu-server
+      webiu-server:
+        condition: service_healthy

@@ -1,4 +1,9 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
+ fix/github-n-plus-1
+
+import { RouterModule } from '@angular/router';
+
+ webiu-2026-pre-gsoc
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
@@ -6,7 +11,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-projects-card',
   standalone: true,
-  imports: [HttpClientModule, CommonModule],
+  imports: [HttpClientModule, CommonModule, RouterModule],
   templateUrl: './projects-card.component.html',
   styleUrls: ['./projects-card.component.scss'],
 })
@@ -39,6 +44,7 @@ export class ProjectsCardComponent implements OnInit {
   }
 
   fetchIssuesAndPRs(): void {
+ fix/github-n-plus-1
     
     if (!this.org || !this.repo) {
       this.initialized = true;
@@ -46,6 +52,9 @@ export class ProjectsCardComponent implements OnInit {
     }
 
     const apiUrl = `${environment.serverUrl}/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+
+    const apiUrl = `${environment.serverUrl}/api/v1/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+ webiu-2026-pre-gsoc
     this.http
       .get<{ issues: number; pullRequests: number }>(apiUrl)
       .subscribe({
