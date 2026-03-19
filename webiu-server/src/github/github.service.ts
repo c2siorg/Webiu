@@ -100,7 +100,7 @@ export class GithubService {
   async getAllOrgReposSorted(): Promise<GithubRepo[]> {
     const cacheKey = `all_org_repos_sorted_${this.orgName}`;
     const cached = this.cacheService.get<GithubRepo[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     const repos = await this.fetchAllPages(
       `${this.baseUrl}/orgs/${this.orgName}/repos`,
@@ -153,7 +153,7 @@ export class GithubService {
     if (page !== undefined && perPage !== undefined) {
       const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
       const cached = this.cacheService.get<any[]>(cacheKey);
-      if (cached) return cached;
+      if (cached !== null) return cached;
 
       const response = await axios.get(
         `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
@@ -166,7 +166,7 @@ export class GithubService {
 
     const cacheKey = `org_repos_${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     const repos = await this.fetchAllPages(
       `${this.baseUrl}/orgs/${this.orgName}/repos`,
@@ -182,7 +182,7 @@ export class GithubService {
   async getRepo(repoName: string): Promise<GithubRepo | null> {
     const cacheKey = `repo_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<GithubRepo>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const response = await axios.get(
@@ -207,7 +207,7 @@ export class GithubService {
   async getCommitActivity(repoName: string): Promise<any[]> {
     const cacheKey = `commit_activity_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const response = await axios.get(
@@ -245,7 +245,7 @@ export class GithubService {
   async getParticipationStats(repoName: string): Promise<any[]> {
     const cacheKey = `participation_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const response = await axios.get(
@@ -277,7 +277,7 @@ export class GithubService {
   async getLatestRelease(repoName: string): Promise<any | null> {
     const cacheKey = `latest_release_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<any>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const response = await axios.get(
@@ -302,7 +302,7 @@ export class GithubService {
   async getRepoPulls(repoName: string): Promise<any[]> {
     const cacheKey = `pulls_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     const pulls = await this.fetchAllPages(
       `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all`,
@@ -314,7 +314,7 @@ export class GithubService {
   async getRepoIssues(org: string, repo: string): Promise<any[]> {
     const cacheKey = `issues_${org}_${repo}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     const issues = await this.fetchAllPages(
       `${this.baseUrl}/repos/${org}/${repo}/issues`,
@@ -330,7 +330,7 @@ export class GithubService {
   async getRepoLanguages(repoName: string): Promise<Record<string, number>> {
     const cacheKey = `languages_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<Record<string, number>>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const response = await axios.get(
@@ -350,10 +350,7 @@ export class GithubService {
     }
   }
 
-  async getRepoContributors(
-    orgName: string,
-    repoName: string,
-  ): Promise<any[]> {
+  async getRepoContributors(orgName: string, repoName: string): Promise<any[]> {
     const normalizedOrgName = orgName.toLowerCase();
     const normalizedRepoName = repoName.toLowerCase();
     const cacheKey = `contributors_${normalizedOrgName}_${normalizedRepoName}`;
@@ -380,7 +377,7 @@ export class GithubService {
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `search_issues:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     const issues = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
@@ -393,7 +390,7 @@ export class GithubService {
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `search_prs:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     const prs = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
@@ -440,7 +437,7 @@ export class GithubService {
   async getPublicUserProfile(username: string): Promise<any> {
     const cacheKey = `user_profile_${username}`;
     const cached = this.cacheService.get<any>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     const response = await axios.get(`${this.baseUrl}/users/${username}`, {
       headers: this.headers,
@@ -483,7 +480,7 @@ export class GithubService {
       followers: number;
       following: number;
     }>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       // ✅ Correct source of truth: GitHub profile fields (not list endpoints capped at 30)
@@ -514,7 +511,7 @@ export class GithubService {
     const normalizedQuery = query.toLowerCase();
     const cacheKey = `search_repos:${normalizedQuery}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     const encoded = encodeURIComponent(query);
     const repos = await this.fetchAllSearchPages(
