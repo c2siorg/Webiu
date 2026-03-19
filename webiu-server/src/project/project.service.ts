@@ -31,6 +31,8 @@ export class ProjectService {
     try {
       const repositories = await this.githubService.getOrgRepos(page, limit);
 
+      // OPTIMIZATION: Use getRepoPullCount (1 req/repo) instead of getRepoPulls
+      // (N paginated reqs/repo). See GithubService.getRepoPullCount for details.
       const BATCH_SIZE = 10;
       const repositoriesWithPRs = [];
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
@@ -38,8 +40,10 @@ export class ProjectService {
         const batchResults = await Promise.all(
           batch.map(async (repo) => {
             try {
-              const pulls = await this.githubService.getRepoPulls(repo.name);
-              return { ...repo, pull_requests: pulls.length };
+              const pullCount = await this.githubService.getRepoPullCount(
+                repo.name,
+              );
+              return { ...repo, pull_requests: pullCount };
             } catch {
               return { ...repo, pull_requests: 0 };
             }
@@ -110,16 +114,27 @@ export class ProjectService {
     try {
       const repositories = await this.githubService.searchOrgRepos(query);
 
-      const repositoriesWithPRs = await Promise.all(
-        repositories.map(async (repo) => {
-          try {
-            const pulls = await this.githubService.getRepoPulls(repo.name);
-            return { ...repo, pull_requests: pulls.length };
-          } catch {
-            return { ...repo, pull_requests: 0 };
-          }
-        }),
-      );
+      // OPTIMIZATION 1: Batched (was unbounded Promise.all — search can return 30+ repos,
+      // each triggering simultaneous GitHub API calls which risks hitting rate limits).
+      // OPTIMIZATION 2: Use getRepoPullCount (1 req/repo) instead of getRepoPulls (N reqs/repo).
+      const BATCH_SIZE = 10;
+      const repositoriesWithPRs = [];
+      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
+        const batch = repositories.slice(i, i + BATCH_SIZE);
+        const batchResults = await Promise.all(
+          batch.map(async (repo) => {
+            try {
+              const pullCount = await this.githubService.getRepoPullCount(
+                repo.name,
+              );
+              return { ...repo, pull_requests: pullCount };
+            } catch {
+              return { ...repo, pull_requests: 0 };
+            }
+          }),
+        );
+        repositoriesWithPRs.push(...batchResults);
+      }
 
       this.cacheService.set(cacheKey, repositoriesWithPRs, CACHE_TTL);
 
