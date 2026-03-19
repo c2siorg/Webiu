@@ -1,6 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
+ fix/github-rate-limit-handling
+import axios, { AxiosInstance } from 'axios';
+
 import axios, { AxiosError } from 'axios';
 
 export interface GithubRepo {
@@ -20,6 +23,7 @@ export interface GithubRepo {
   pushed_at: string;
   [key: string]: unknown;
 }
+ webiu-2026-pre-gsoc
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -27,6 +31,7 @@ const CACHE_TTL = 300; // 5 minutes
 export class GithubService {
   private readonly logger = new Logger(GithubService.name);
   private readonly baseUrl = 'https://api.github.com';
+  private readonly githubAxios: AxiosInstance;
   private readonly accessToken: string;
   private readonly orgName = 'c2siorg';
 
@@ -35,12 +40,37 @@ export class GithubService {
     private cacheService: CacheService,
   ) {
     this.accessToken = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
-  }
 
-  private get headers() {
-    return {
-      Authorization: `token ${this.accessToken}`,
-    };
+    this.githubAxios = axios.create({
+      baseURL: this.baseUrl,
+      headers: {
+        Authorization: `token ${this.accessToken}`,
+      },
+    });
+
+    this.githubAxios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const { config, response } = error;
+        if (response && (response.status === 403 || response.status === 429)) {
+          const rateLimitRemaining = response.headers['x-ratelimit-remaining'];
+          const rateLimitReset = response.headers['x-ratelimit-reset'];
+
+          if (rateLimitRemaining === '0' || response.status === 429) {
+            const resetTime = parseInt(rateLimitReset) * 1000;
+            const waitTime = Math.max(resetTime - Date.now(), 0) + 1000; // +1s buffer
+
+            this.logger.warn(
+              `GitHub Rate limit exceeded. Waiting ${waitTime / 1000}s until reset.`,
+            );
+
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            return this.githubAxios(config); // Retry the request
+          }
+        }
+        return Promise.reject(error);
+      },
+    );
   }
 
   get org(): string {
@@ -53,9 +83,8 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
+      const response = await this.githubAxios.get(
         `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
       );
 
       const data = response.data;
@@ -76,9 +105,8 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
+      const response = await this.githubAxios.get(
         `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
       );
 
       const items = response.data.items || [];
@@ -155,9 +183,8 @@ export class GithubService {
       const cached = this.cacheService.get<any[]>(cacheKey);
       if (cached) return cached;
 
-      const response = await axios.get(
-        `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-        { headers: this.headers },
+      const response = await this.githubAxios.get(
+        `/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
       );
       const repos = response.data;
       this.cacheService.set(cacheKey, repos, CACHE_TTL);
@@ -168,9 +195,7 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllPages(
-      `${this.baseUrl}/orgs/${this.orgName}/repos`,
-    );
+    const repos = await this.fetchAllPages(`/orgs/${this.orgName}/repos`);
     this.cacheService.set(cacheKey, repos);
     return repos;
   }
@@ -305,7 +330,11 @@ export class GithubService {
     if (cached) return cached;
 
     const pulls = await this.fetchAllPages(
+ fix/github-rate-limit-handling
+      `/repos/${this.orgName}/${repoName}/pulls`,
+
       `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all`,
+ webiu-2026-pre-gsoc
     );
     this.cacheService.set(cacheKey, pulls);
     return pulls;
@@ -316,9 +345,7 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const issues = await this.fetchAllPages(
-      `${this.baseUrl}/repos/${org}/${repo}/issues`,
-    );
+    const issues = await this.fetchAllPages(`/repos/${org}/${repo}/issues`);
     this.cacheService.set(cacheKey, issues);
     return issues;
   }
@@ -365,7 +392,7 @@ export class GithubService {
 
     try {
       const contributors = await this.fetchAllPages(
-        `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
+        `/repos/${orgName}/${repoName}/contributors`,
       );
       this.cacheService.set(cacheKey, contributors, 600);
       return contributors;
@@ -383,7 +410,7 @@ export class GithubService {
     if (cached) return cached;
 
     const issues = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
+      `/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
     );
     this.cacheService.set(cacheKey, issues);
     return issues;
@@ -395,43 +422,46 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const prs = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
-    );
+    const baseQuery = `author:${username} org:${this.orgName} type:pr`;
 
-    // Fetch details for closed PRs to determine if they were merged
-    const enrichedPrs = await Promise.all(
-      prs.map(async (pr) => {
-        // Only fetch details if closed and we don't know if merged (merged_at missing)
-        // Note: Search API results for PRs don't include merged_at at the top level usually
-        if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
-          try {
-            const response = await axios.get(pr.pull_request.url, {
-              headers: this.headers,
-            });
-            if (response.data.merged_at) {
-              pr.merged_at = response.data.merged_at;
-            }
-          } catch {
-            // Ignore errors for individual PR fetches to avoid failing the whole request
-          }
-        }
-        return pr;
-      }),
-    );
+    try {
+      // Parallel searches for merged and unmerged PRs to eliminate N+1 calls
+      // This reduces O(N) requests to exactly 2 REST calls (plus pagination)
+      const [mergedPrs, unmergedPrs] = await Promise.all([
+        this.fetchAllSearchPages(
+          `/search/issues?q=${encodeURIComponent(baseQuery + ' is:merged')}`,
+        ),
+        this.fetchAllSearchPages(
+          `/search/issues?q=${encodeURIComponent(baseQuery + ' is:unmerged')}`,
+        ),
+      ]);
 
-    // Sort by created_at descending
-    enrichedPrs.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
+      // Enrich merged PRs with merged_at status using closed_at as proxy (API parity)
+      const processedMerged = mergedPrs.map((pr) => ({
+        ...pr,
+        merged_at: pr.closed_at,
+      }));
 
-    this.cacheService.set(cacheKey, enrichedPrs);
-    return enrichedPrs;
+      const allPrs = [...processedMerged, ...unmergedPrs];
+
+      // Sort by created_at descending to maintain consistent order
+      allPrs.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+
+      this.cacheService.set(cacheKey, allPrs);
+      return allPrs;
+    } catch (error) {
+      this.logger.error(
+        `Error searching PRs for ${username}: ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
-    const response = await axios.get(`${this.baseUrl}/user`, {
+    const response = await this.githubAxios.get('/user', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     return response.data;
@@ -442,9 +472,7 @@ export class GithubService {
     const cached = this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(`${this.baseUrl}/users/${username}`, {
-      headers: this.headers,
-    });
+    const response = await this.githubAxios.get(`/users/${username}`);
     this.cacheService.set(cacheKey, response.data);
     return response.data;
   }
@@ -486,6 +514,12 @@ export class GithubService {
     if (cached) return cached;
 
     try {
+ fix/github-rate-limit-handling
+      const [followersResponse, followingResponse] = await Promise.all([
+        this.githubAxios.get(`/users/${username}/followers`),
+        this.githubAxios.get(`/users/${username}/following`),
+      ]);
+
       // ✅ Correct source of truth: GitHub profile fields (not list endpoints capped at 30)
       const userResponse = await axios.get(
         `${this.baseUrl}/users/${username}`,
@@ -493,6 +527,7 @@ export class GithubService {
           headers: this.headers,
         },
       );
+ webiu-2026-pre-gsoc
 
       const result = {
         followers: userResponse.data?.followers ?? 0,
@@ -516,9 +551,14 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
+ fix/github-rate-limit-handling
+    const repos = await this.fetchAllSearchPages(
+      `/search/repositories?q=${query}+org:${this.orgName}`,
+
     const encoded = encodeURIComponent(query);
     const repos = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/repositories?q=${encoded}+org:${this.orgName}`,
+ webiu-2026-pre-gsoc
     );
 
     this.cacheService.set(cacheKey, repos);

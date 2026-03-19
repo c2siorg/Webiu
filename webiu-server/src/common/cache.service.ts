@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cron, CronExpression } from '@nestjs/schedule';
 
 interface CacheEntry<T> {
   data: T;
@@ -107,5 +108,26 @@ export class CacheService {
 
   clear(): void {
     this.cache.clear();
+  }
+
+  /**
+   * Periodically remove expired entries from the cache to prevent memory leaks.
+   * Runs every minute.
+   */
+  @Cron(CronExpression.EVERY_MINUTE)
+  pruneExpiredEntries(): void {
+    const now = Date.now();
+    let count = 0;
+
+    for (const [key, entry] of this.cache.entries()) {
+      if (now > entry.expiresAt) {
+        this.cache.delete(key);
+        count++;
+      }
+    }
+
+    if (count > 0) {
+      this.logger.debug(`Pruned ${count} expired entries from cache`);
+    }
   }
 }
