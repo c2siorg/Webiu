@@ -1,6 +1,9 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
+ fix/github-n-plus-1
+
 import { RouterModule } from '@angular/router';
 
+ webiu-2026-pre-gsoc
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
@@ -22,8 +25,8 @@ export class ProjectsCardComponent implements OnInit {
   @Input() topics: string[] = [];
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
-  @Input() org!: string;
-  @Input() repo!: string;
+  @Input() org?: string;
+  @Input() repo?: string;
 
   issueCount = 0;
   pullRequestCount = 0;
@@ -32,13 +35,26 @@ export class ProjectsCardComponent implements OnInit {
   private http = inject(HttpClient);
 
   ngOnInit(): void {
-    if (!this.initialized) {
+    
+    if (this.org && this.repo && !this.initialized) {
       this.fetchIssuesAndPRs();
+    } else {
+      this.initialized = true; // fallback case 
     }
   }
 
   fetchIssuesAndPRs(): void {
+ fix/github-n-plus-1
+    
+    if (!this.org || !this.repo) {
+      this.initialized = true;
+      return;
+    }
+
+    const apiUrl = `${environment.serverUrl}/api/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+
     const apiUrl = `${environment.serverUrl}/api/v1/issues/issuesAndPr?org=${this.org}&repo=${this.repo}`;
+ webiu-2026-pre-gsoc
     this.http
       .get<{ issues: number; pullRequests: number }>(apiUrl)
       .subscribe({
@@ -54,6 +70,7 @@ export class ProjectsCardComponent implements OnInit {
       });
   }
 
+  
   public detailsVisible = false;
 
   toggleDetails() {

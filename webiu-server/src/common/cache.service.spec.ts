@@ -116,6 +116,11 @@ describe('CacheService', () => {
       expect(s.get('key2')).toBeNull();
     });
   });
+ fix/github-n-plus-1
+ Updated upstream
+
+
+ webiu-2026-pre-gsoc
 
   describe('getEtag()', () => {
     beforeEach(() => {
@@ -194,4 +199,31 @@ describe('CacheService', () => {
       expect(service.getEtag('key')).toBe('"etag-v1"');
     });
   });
+ fix/github-n-plus-1
+
+  describe('pruneExpiredEntries()', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(0);
+    });
+    afterEach(() => jest.useRealTimers());
+
+    it('should remove only expired entries', () => {
+      service.set('expired1', 'val1', 10); // expires at 10s
+      service.set('expired2', 'val2', 20); // expires at 20s
+      service.set('valid', 'val3', 60);    // expires at 60s
+
+      jest.advanceTimersByTime(30_000); // Now at 30s
+
+      service.pruneExpiredEntries();
+
+      expect(service.has('expired1')).toBe(false);
+      expect(service.has('expired2')).toBe(false);
+      expect(service.has('valid')).toBe(true);
+      expect(service.get('valid')).toBe('val3');
+    });
+  });
+ Stashed changes
+
+ webiu-2026-pre-gsoc
 });

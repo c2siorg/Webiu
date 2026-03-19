@@ -16,8 +16,22 @@ export class ProjectController {
       100,
       Math.max(1, parseInt(limit as any, 10) || 10),
     );
+
     return this.projectService.getAllProjects(pageNum, limitNum);
   }
+
+ fix/github-n-plus-1
+  @Get('search')
+  @Header('Cache-Control', 'public, max-age=300')
+  async searchProjects(@Query('q') query: string) {
+    if (!query) {
+      return {
+        total: 0,
+        repositories: [],
+      };
+    }
+
+    return this.projectService.searchProjects(query);
 
   /**
    * GET /api/v1/projects/search?q=...&page=1&limit=10
@@ -71,6 +85,7 @@ export class ProjectController {
   @Header('Cache-Control', 'public, max-age=300')
   async getProjectContributors(@Param('name') name: string) {
     return this.projectService.getProjectContributors(name);
+ webiu-2026-pre-gsoc
   }
 }
 

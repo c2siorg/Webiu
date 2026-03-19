@@ -395,39 +395,42 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const prs = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
-    );
+    const baseQuery = `author:${username} org:${this.orgName} type:pr`;
 
-    // Fetch details for closed PRs to determine if they were merged
-    const enrichedPrs = await Promise.all(
-      prs.map(async (pr) => {
-        // Only fetch details if closed and we don't know if merged (merged_at missing)
-        // Note: Search API results for PRs don't include merged_at at the top level usually
-        if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
-          try {
-            const response = await axios.get(pr.pull_request.url, {
-              headers: this.headers,
-            });
-            if (response.data.merged_at) {
-              pr.merged_at = response.data.merged_at;
-            }
-          } catch {
-            // Ignore errors for individual PR fetches to avoid failing the whole request
-          }
-        }
-        return pr;
-      }),
-    );
+    try {
+      // Parallel searches for merged and unmerged PRs to eliminate N+1 calls
+      // This reduces O(N) requests to exactly 2 REST calls (plus pagination)
+      const [mergedPrs, unmergedPrs] = await Promise.all([
+        this.fetchAllSearchPages(
+          `${this.baseUrl}/search/issues?q=${encodeURIComponent(baseQuery + ' is:merged')}`,
+        ),
+        this.fetchAllSearchPages(
+          `${this.baseUrl}/search/issues?q=${encodeURIComponent(baseQuery + ' is:unmerged')}`,
+        ),
+      ]);
 
-    // Sort by created_at descending
-    enrichedPrs.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
+      // Enrich merged PRs with merged_at status using closed_at as proxy (API parity)
+      const processedMerged = mergedPrs.map((pr) => ({
+        ...pr,
+        merged_at: pr.closed_at,
+      }));
 
-    this.cacheService.set(cacheKey, enrichedPrs);
-    return enrichedPrs;
+      const allPrs = [...processedMerged, ...unmergedPrs];
+
+      // Sort by created_at descending to maintain consistent order
+      allPrs.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+
+      this.cacheService.set(cacheKey, allPrs);
+      return allPrs;
+    } catch (error) {
+      this.logger.error(
+        `Error searching PRs for ${username}: ${error.message}`,
+      );
+      throw error;
+    }
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
@@ -516,9 +519,14 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
+ fix/github-n-plus-1
+    const repos = await this.fetchAllSearchPages(
+      `${this.baseUrl}/search/repositories?q=${query}+org:${this.orgName}`,
+
     const encoded = encodeURIComponent(query);
     const repos = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/repositories?q=${encoded}+org:${this.orgName}`,
+ webiu-2026-pre-gsoc
     );
 
     this.cacheService.set(cacheKey, repos);
