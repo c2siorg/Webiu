@@ -10,7 +10,13 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.use(helmet());
-  app.use(compression());
+  // OPTIMIZATION: Only compress responses larger than 1 KB.
+  // PROBLEM: compression() with no threshold compresses every response including tiny
+  // JSON payloads (e.g. { followers: 3 }). For small responses, gzip overhead (CPU +
+  // latency) can exceed the bandwidth savings — net negative performance.
+  // SOLUTION: Set threshold: 1024 so compression is skipped for responses < 1 KB,
+  // where it provides no real benefit.
+  app.use(compression({ threshold: 1024 }));
 
   const frontendUrl = configService.get<string>(
     'FRONTEND_BASE_URL',
