@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
-import axios from 'axios';
+import axios, { AxiosInstance } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -9,6 +9,7 @@ const CACHE_TTL = 300; // 5 minutes
 export class GithubService {
   private readonly logger = new Logger(GithubService.name);
   private readonly baseUrl = 'https://api.github.com';
+  private readonly githubAxios: AxiosInstance;
   private readonly accessToken: string;
   private readonly orgName = 'c2siorg';
 
@@ -17,12 +18,37 @@ export class GithubService {
     private cacheService: CacheService,
   ) {
     this.accessToken = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
-  }
 
-  private get headers() {
-    return {
-      Authorization: `token ${this.accessToken}`,
-    };
+    this.githubAxios = axios.create({
+      baseURL: this.baseUrl,
+      headers: {
+        Authorization: `token ${this.accessToken}`,
+      },
+    });
+
+    this.githubAxios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const { config, response } = error;
+        if (response && (response.status === 403 || response.status === 429)) {
+          const rateLimitRemaining = response.headers['x-ratelimit-remaining'];
+          const rateLimitReset = response.headers['x-ratelimit-reset'];
+
+          if (rateLimitRemaining === '0' || response.status === 429) {
+            const resetTime = parseInt(rateLimitReset) * 1000;
+            const waitTime = Math.max(resetTime - Date.now(), 0) + 1000; // +1s buffer
+
+            this.logger.warn(
+              `GitHub Rate limit exceeded. Waiting ${waitTime / 1000}s until reset.`,
+            );
+
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            return this.githubAxios(config); // Retry the request
+          }
+        }
+        return Promise.reject(error);
+      },
+    );
   }
 
   get org(): string {
@@ -35,9 +61,8 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
+      const response = await this.githubAxios.get(
         `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
       );
 
       const data = response.data;
@@ -58,9 +83,8 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
+      const response = await this.githubAxios.get(
         `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
       );
 
       const items = response.data.items || [];
@@ -83,9 +107,8 @@ export class GithubService {
       const cached = this.cacheService.get<any[]>(cacheKey);
       if (cached) return cached;
 
-      const response = await axios.get(
-        `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-        { headers: this.headers },
+      const response = await this.githubAxios.get(
+        `/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
       );
       const repos = response.data;
       this.cacheService.set(cacheKey, repos, CACHE_TTL);
@@ -96,9 +119,7 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllPages(
-      `${this.baseUrl}/orgs/${this.orgName}/repos`,
-    );
+    const repos = await this.fetchAllPages(`/orgs/${this.orgName}/repos`);
     this.cacheService.set(cacheKey, repos);
     return repos;
   }
@@ -109,7 +130,7 @@ export class GithubService {
     if (cached) return cached;
 
     const pulls = await this.fetchAllPages(
-      `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls`,
+      `/repos/${this.orgName}/${repoName}/pulls`,
     );
     this.cacheService.set(cacheKey, pulls);
     return pulls;
@@ -120,9 +141,7 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const issues = await this.fetchAllPages(
-      `${this.baseUrl}/repos/${org}/${repo}/issues`,
-    );
+    const issues = await this.fetchAllPages(`/repos/${org}/${repo}/issues`);
     this.cacheService.set(cacheKey, issues);
     return issues;
   }
@@ -137,7 +156,7 @@ export class GithubService {
 
     try {
       const contributors = await this.fetchAllPages(
-        `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
+        `/repos/${orgName}/${repoName}/contributors`,
       );
       this.cacheService.set(cacheKey, contributors);
       return contributors;
@@ -153,7 +172,7 @@ export class GithubService {
     if (cached) return cached;
 
     const issues = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
+      `/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
     );
     this.cacheService.set(cacheKey, issues);
     return issues;
@@ -172,10 +191,10 @@ export class GithubService {
       // This reduces O(N) requests to exactly 2 REST calls (plus pagination)
       const [mergedPrs, unmergedPrs] = await Promise.all([
         this.fetchAllSearchPages(
-          `${this.baseUrl}/search/issues?q=${encodeURIComponent(baseQuery + ' is:merged')}`,
+          `/search/issues?q=${encodeURIComponent(baseQuery + ' is:merged')}`,
         ),
         this.fetchAllSearchPages(
-          `${this.baseUrl}/search/issues?q=${encodeURIComponent(baseQuery + ' is:unmerged')}`,
+          `/search/issues?q=${encodeURIComponent(baseQuery + ' is:unmerged')}`,
         ),
       ]);
 
@@ -204,7 +223,7 @@ export class GithubService {
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
-    const response = await axios.get(`${this.baseUrl}/user`, {
+    const response = await this.githubAxios.get('/user', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     return response.data;
@@ -215,9 +234,7 @@ export class GithubService {
     const cached = this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(`${this.baseUrl}/users/${username}`, {
-      headers: this.headers,
-    });
+    const response = await this.githubAxios.get(`/users/${username}`);
     this.cacheService.set(cacheKey, response.data);
     return response.data;
   }
@@ -259,12 +276,8 @@ export class GithubService {
 
     try {
       const [followersResponse, followingResponse] = await Promise.all([
-        axios.get(`${this.baseUrl}/users/${username}/followers`, {
-          headers: this.headers,
-        }),
-        axios.get(`${this.baseUrl}/users/${username}/following`, {
-          headers: this.headers,
-        }),
+        this.githubAxios.get(`/users/${username}/followers`),
+        this.githubAxios.get(`/users/${username}/following`),
       ]);
 
       const result = {
@@ -290,7 +303,7 @@ export class GithubService {
     if (cached) return cached;
 
     const repos = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/repositories?q=${query}+org:${this.orgName}`,
+      `/search/repositories?q=${query}+org:${this.orgName}`,
     );
 
     this.cacheService.set(cacheKey, repos);
