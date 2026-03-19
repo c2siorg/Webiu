@@ -1,6 +1,8 @@
-import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import { Component, OnInit, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
@@ -40,21 +42,25 @@ export class ContributorSearchComponent implements OnInit {
     following: number;
     created_at: string;
   } | null = null;
-  private apiUrl = `${environment.serverUrl}/api/contributor`;
-  private userUrl = `${environment.serverUrl}/api/user`;
+  private apiUrl = `${environment.serverUrl}/api/v1/contributor`;
+  private userUrl = `${environment.serverUrl}/api/v1/user`;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private toastr = inject(ToastrService);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
-      const param = params['username']?.trim();
-      if (param && param !== this.username) {
-        this.username = param;
-        this.fetchUserData();
-      }
-    });
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const param = params['username']?.trim();
+        if (param && param !== this.username) {
+          this.username = param;
+          this.fetchUserData();
+        }
+      });
   }
 
   onSearch() {
@@ -101,9 +107,9 @@ export class ContributorSearchComponent implements OnInit {
       this.extractRepositories();
       this.filteredIssues = [...this.issues];
       this.filteredPullRequests = [...this.pullRequests];
+      this.toastr.success(`Found developer data for ${this.username}`, 'Success');
     } catch {
-      this.errorMessage =
-        'Failed to fetch data. Please check the username or try again later.';
+      // Global error interceptor will handle the notification
     } finally {
       this.loading = false;
     }

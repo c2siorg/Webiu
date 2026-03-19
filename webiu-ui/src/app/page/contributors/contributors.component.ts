@@ -1,7 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs/operators';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor } from '../../common/data/contributor';
@@ -11,7 +12,6 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 
 interface ContributionRange {
   label: string;
@@ -28,7 +28,6 @@ interface ContributionRange {
     ReactiveFormsModule,
     ProfileCardComponent,
     LoadingSpinnerComponent,
-    BackToTopComponent,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
@@ -63,6 +62,7 @@ export class ContributorsComponent implements OnInit {
   private router = inject(Router);
   private titleService = inject(Title);
   private metaService = inject(Meta);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
     this.titleService.setTitle('Contributors | Webiu 2.0');
@@ -80,19 +80,23 @@ export class ContributorsComponent implements OnInit {
     });
 
     this.getProfiles();
-    this.searchText.valueChanges.pipe(
-      debounceTime(300)
-    ).subscribe(() => {
-      this.currentPage = 1;
-      this.filterProfiles();
-    });
+    this.searchText.valueChanges
+      .pipe(
+        debounceTime(300),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => {
+        this.currentPage = 1;
+        this.filterProfiles();
+      });
   }
 
   getProfiles() {
     this.http
-      .get<
-        Contributor[]
-      >(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<Contributor[]>(
+        `${environment.serverUrl}/api/v1/contributor/contributors`,
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           this.contributors = res || [];
@@ -113,9 +117,11 @@ export class ContributorsComponent implements OnInit {
     const usernames = this.contributors.map((c) => c.login);
 
     this.http
-      .post<
-        Record<string, { followers: number; following: number }>
-      >(`${environment.serverUrl}/api/user/batch-social`, { usernames })
+      .post<Record<string, { followers: number; following: number }>>(
+        `${environment.serverUrl}/api/v1/user/batch-social`,
+        { usernames },
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.contributors.forEach((contributor) => {

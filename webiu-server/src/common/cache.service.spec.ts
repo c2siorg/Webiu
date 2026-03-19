@@ -20,19 +20,34 @@ describe('CacheService', () => {
     expect(service.get('nonexistent')).toBeNull();
   });
 
-  it('should return null for expired entries', async () => {
-    service.set('key', 'value', 1); // expires in 1 second
+  it('should return null for expired entries', () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(0);
+    service.set('key', 'value', 1);
     expect(service.get('key')).toBe('value');
 
-    // Wait for expiry
-    await new Promise((resolve) => setTimeout(resolve, 1100));
+    jest.advanceTimersByTime(1100);
     expect(service.get('key')).toBeNull();
+
+    jest.useRealTimers();
   });
 
   it('should delete a specific key', () => {
     service.set('key', 'value', 60);
     service.delete('key');
     expect(service.get('key')).toBeNull();
+  });
+
+  it('has() should return true even for falsy cached values', () => {
+    // get() returns null for missing keys, so callers must use has() when the
+    // cached value itself could be falsy (0, false, '', [])
+    service.set('zero', 0 as unknown, 60);
+    service.set('empty', [], 60);
+    service.set('falsy', false as unknown, 60);
+    expect(service.has('zero')).toBe(true);
+    expect(service.has('empty')).toBe(true);
+    expect(service.has('falsy')).toBe(true);
+    expect(service.has('nonexistent')).toBe(false);
   });
 
   it('should clear all entries', () => {
@@ -50,82 +65,62 @@ describe('CacheService', () => {
   });
 
   describe('TTL configuration', () => {
-    afterEach(() => {
-      jest.restoreAllMocks();
+    beforeEach(() => {
+      jest.useFakeTimers();
+      jest.setSystemTime(0);
     });
+    afterEach(() => jest.useRealTimers());
 
     it('should use CACHE_TTL_SECONDS from config as default TTL', () => {
-      const now = 1_000_000;
-      jest
-        .spyOn(Date, 'now')
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 59_000)
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 61_000);
-
       const s = new CacheService(mockConfig('60'));
+
       s.set('key', 'value');
+      jest.advanceTimersByTime(59_000);
       expect(s.get('key')).toBe('value');
 
       s.set('key2', 'value2');
+      jest.advanceTimersByTime(61_000);
       expect(s.get('key2')).toBeNull();
     });
 
     it('should fall back to 300s when CACHE_TTL_SECONDS is missing', () => {
-      const now = 1_000_000;
-      jest
-        .spyOn(Date, 'now')
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 301_000);
-
       const s = new CacheService(mockConfig(undefined));
       s.set('key', 'value');
+      jest.advanceTimersByTime(301_000);
       expect(s.get('key')).toBeNull();
     });
 
     it('should fall back to 300s when CACHE_TTL_SECONDS is invalid (NaN)', () => {
-      const now = 1_000_000;
-      jest
-        .spyOn(Date, 'now')
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 301_000);
-
       const s = new CacheService(mockConfig('abc'));
       s.set('key', 'value');
+      jest.advanceTimersByTime(301_000);
       expect(s.get('key')).toBeNull();
     });
 
     it('should fall back to 300s when CACHE_TTL_SECONDS is zero or negative', () => {
-      const now = 1_000_000;
-      jest
-        .spyOn(Date, 'now')
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 301_000);
-
       const s = new CacheService(mockConfig('0'));
       s.set('key', 'value');
+      jest.advanceTimersByTime(301_000);
       expect(s.get('key')).toBeNull();
     });
 
     it('should use defaultTtl when set() is called without explicit ttlSeconds', () => {
-      const now = 1_000_000;
-      jest
-        .spyOn(Date, 'now')
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 119_000)
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 121_000);
-
       const s = new CacheService(mockConfig('120'));
+
       s.set('key', 'value');
+      jest.advanceTimersByTime(119_000);
       expect(s.get('key')).toBe('value');
 
       s.set('key2', 'value2');
+      jest.advanceTimersByTime(121_000);
       expect(s.get('key2')).toBeNull();
     });
   });
-<<<<<<< Updated upstream
-=======
+ fix/github-rate-limit-handling
+ Updated upstream
+
+
+ webiu-2026-pre-gsoc
 
   describe('getEtag()', () => {
     beforeEach(() => {
@@ -204,6 +199,7 @@ describe('CacheService', () => {
       expect(service.getEtag('key')).toBe('"etag-v1"');
     });
   });
+ fix/github-rate-limit-handling
 
   describe('pruneExpiredEntries()', () => {
     beforeEach(() => {
@@ -227,5 +223,7 @@ describe('CacheService', () => {
       expect(service.get('valid')).toBe('val3');
     });
   });
->>>>>>> Stashed changes
+ Stashed changes
+
+ webiu-2026-pre-gsoc
 });
