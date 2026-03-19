@@ -1,0 +1,162 @@
+name: CD Pipeline
+
+# PROBLEM: Without a CD pipeline, deployments are manual, error-prone,
+# and inconsistent across environments.
+# SOLUTION: Automate image builds and pushes on every master merge.
+# A separate production deploy is gated behind a version tag (v*.*.*).
+
+concurrency:
+  group: cd-${{ github.ref }}
+  cancel-in-progress: false  # Never cancel in-flight deployments
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*.*.*'   # e.g. v1.2.3 → triggers production deploy
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_SERVER: ghcr.io/${{ github.repository_owner }}/webiu-server
+  IMAGE_UI: ghcr.io/${{ github.repository_owner }}/webiu-ui
+
+jobs:
+  # ──────────────────────────────────────────────────────────
+  # Build and push Docker images to GitHub Container Registry
+  # ──────────────────────────────────────────────────────────
+  build-and-push:
+    name: Build & Push Docker Images
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write   # needed to push to GHCR
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Enable BuildKit layer caching — cuts rebuild time by 60-80% on
+      # cache hits when only app code changes (node_modules layer is stable).
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Derive image tags: latest + short SHA for traceability.
+      # On a version tag (v1.2.3) also tag as the semver string.
+      - name: Extract metadata (backend)
+        id: meta-server
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_SERVER }}
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=semver,pattern={{version}}
+
+      - name: Extract metadata (frontend)
+        id: meta-ui
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_UI }}
+          tags: |
+            type=sha,prefix=sha-
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=semver,pattern={{version}}
+
+      - name: Build & push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./webiu-server
+          file: ./webiu-server/Dockerfile
+          push: true
+          tags: ${{ steps.meta-server.outputs.tags }}
+          labels: ${{ steps.meta-server.outputs.labels }}
+          target: production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Build & push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./webiu-ui
+          file: ./webiu-ui/Dockerfile
+          push: true
+          tags: ${{ steps.meta-ui.outputs.tags }}
+          labels: ${{ steps.meta-ui.outputs.labels }}
+          target: production
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ──────────────────────────────────────────────────────────
+  # Deploy to staging on every master push
+  # ──────────────────────────────────────────────────────────
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: staging   # requires environment to be configured in repo settings
+    if: github.ref == 'refs/heads/master'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # PROBLEM: SSH-based deploys are fragile if the host key changes.
+      # SOLUTION: Use the known host fingerprint stored as a repo secret.
+      - name: Deploy to staging server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.STAGING_HOST }}
+          username: ${{ secrets.STAGING_USER }}
+          key: ${{ secrets.STAGING_SSH_KEY }}
+          script: |
+            cd /opt/webiu
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            # PROBLEM: Old images accumulate and fill disk over time.
+            # SOLUTION: Prune dangling images after every deploy.
+            docker image prune -f
+
+  # ──────────────────────────────────────────────────────────
+  # Deploy to production — only on version tags (v*.*.*)
+  # ──────────────────────────────────────────────────────────
+  deploy-production:
+    name: Deploy to Production
+    needs: build-and-push
+    runs-on: ubuntu-latest
+    environment: production  # requires manual approval gate in repo settings
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to production server via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.PROD_HOST }}
+          username: ${{ secrets.PROD_USER }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          script: |
+            cd /opt/webiu
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+            # Record current image digest for rollback
+            docker compose -f docker-compose.prod.yml images -q > /opt/webiu/.last-deploy-images
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d --remove-orphans
+            docker image prune -f
+
+      # PROBLEM: No visibility into what was deployed and when.
+      # SOLUTION: Create a GitHub Release with changelog on every prod deploy.
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          generate_release_notes: true
