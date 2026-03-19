@@ -1,0 +1,50 @@
+# Production compose file — uses pre-built images from GHCR.
+# Run: docker compose -f docker-compose.prod.yml up -d
+#
+# PROBLEM: The dev docker-compose.yml mounts source code as a volume
+# and runs `npm start` (dev server with watch mode), making it unusable
+# in production.
+# SOLUTION: Separate prod compose that pulls tagged images, sets
+# NODE_ENV=production, and never mounts source files.
+
+version: "3.8"
+
+services:
+  webiu-server:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/webiu-server:latest
+    container_name: webiu-server
+    restart: unless-stopped
+    ports:
+      - "5050:5050"
+    environment:
+      - NODE_ENV=production
+      - PORT=5050
+      - MONGODB_URI=${MONGODB_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - FRONTEND_BASE_URL=${FRONTEND_BASE_URL}
+      - GMAIL_USER=${GMAIL_USER}
+      - GMAIL_PASSWORD=${GMAIL_PASSWORD}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_REDIRECT_URI=${GOOGLE_REDIRECT_URI}
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - GITHUB_REDIRECT_URI=${GITHUB_REDIRECT_URI}
+      - GITHUB_ACCESS_TOKEN=${GITHUB_ACCESS_TOKEN}
+      - CACHE_TTL_SECONDS=${CACHE_TTL_SECONDS:-300}
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5050/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  webiu-ui:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER}/webiu-ui:latest
+    container_name: webiu-ui
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      webiu-server:
+        condition: service_healthy

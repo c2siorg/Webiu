@@ -1,20 +1,26 @@
 name: CI Pipeline
 
+# Cancel any in-progress run for the same branch/PR so redundant
+# runs don't pile up when commits are pushed quickly.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     branches:
       - '**'
     types:
-      - opened        # PR is first opened
-      - synchronize   # new commit pushed to the PR branch
-      - reopened      # PR is re-opened
+      - opened
+      - synchronize
+      - reopened
 
 jobs:
   # ──────────────────────────────────────────────────────────
-  # Backend: Lint + Test  (NestJS / Jest)
+  # Backend: Audit → Lint → Test → Build  (NestJS / Jest)
   # ──────────────────────────────────────────────────────────
   backend:
-    name: Backend - Lint & Test
+    name: Backend - Audit, Lint, Test & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -34,18 +40,32 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # PROBLEM: Without a security audit, high-severity CVEs can ship silently.
+      # SOLUTION: Fail CI on high or critical vulnerabilities; ignore moderate ones
+      # to avoid false-positive noise from transitive deps.
+      - name: Security audit
+        run: npm audit --audit-level=high
+
       # Run ESLint WITHOUT --fix so CI only checks, never modifies files.
-      - name: Lint (ESLint + Prettier check)
+      - name: Lint (ESLint)
         run: npx eslint "{src,apps,libs,test}/**/*.ts"
 
-      - name: Run unit tests
-        run: npm test -- --passWithNoTests --forceExit
+      # PROBLEM: tests can pass while TypeScript compilation is broken.
+      # SOLUTION: run tests first (fast feedback), then verify the build compiles.
+      - name: Run unit tests with coverage
+        run: npm test -- --passWithNoTests --forceExit --coverage --coverageReporters=text-summary
+
+      # PROBLEM: The old pipeline never ran `nest build`, so a broken build
+      # could land in master undetected.
+      # SOLUTION: Build as the final gate — if compilation fails, the job fails.
+      - name: Build (verify compilation)
+        run: npm run build
 
   # ──────────────────────────────────────────────────────────
-  # Frontend: Lint + Test  (Angular 17 / Karma + ChromeHeadless)
+  # Frontend: Audit → Lint → Test → Build  (Angular / Karma)
   # ──────────────────────────────────────────────────────────
   frontend:
-    name: Frontend - Lint & Test
+    name: Frontend - Audit, Lint, Test & Build
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -65,6 +85,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Security audit
+        run: npm audit --audit-level=high
+
       - name: Lint (angular-eslint)
         run: npm run lint
 
@@ -78,3 +101,9 @@ jobs:
         env:
           CHROME_BIN: ${{ steps.setup-chrome.outputs.chrome-path }}
         run: npm test -- --browsers=ChromeHeadlessNoSandbox --watch=false --no-progress
+
+      # PROBLEM: Angular build failures are only caught at deploy time.
+      # SOLUTION: Run production build here so broken templates/imports are
+      # caught at PR review, not after merging.
+      - name: Build (production)
+        run: npm run build
