@@ -20,7 +20,7 @@ export class ContributorService {
   async getAllContributors() {
     const cacheKey = 'all_contributors';
     const cached = this.cacheService.get(cacheKey);
-    if (cached) return cached;
+    if (cached !== null) return cached;
 
     try {
       const orgName = this.githubService.org;
