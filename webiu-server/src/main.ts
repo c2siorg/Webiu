@@ -11,11 +11,25 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   app.use(helmet());
-  app.use(compression());
 
-  // 🔥 FIXED CORS (allow current frontend origin dynamically)
+  app.use(
+    compression({
+      level: 6,
+      threshold: 1024,
+      filter: (req, res) => {
+        if (req.headers['x-no-compression']) {
+          return false;
+        }
+        return compression.filter(req, res);
+      },
+    }),
+  );
+
   app.enableCors({
-    origin: true, // allows all origins in dev
+    origin: configService.get<string>(
+      'FRONTEND_BASE_URL',
+      'http://localhost:4200',
+    ),
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     credentials: true,
   });
@@ -29,9 +43,7 @@ async function bootstrap() {
 
   const port = configService.get<number>('PORT', 5050);
   await app.listen(port);
-
   const logger = new Logger('Bootstrap');
   logger.log(`Server is listening at port ${port}`);
 }
-
 bootstrap();
