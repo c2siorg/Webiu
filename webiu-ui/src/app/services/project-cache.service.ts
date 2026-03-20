@@ -2,14 +2,18 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { ProjectResponse } from '../page/projects/project.model';
+import {
+  Project,
+  ProjectInsights,
+  ProjectResponse,
+  Contributor,
+} from '../page/projects/project.model';
 
 @Injectable({
-    providedIn: 'root',
+  providedIn: 'root',
 })
 export class ProjectCacheService {
-  
-    private http = inject(HttpClient);
+  private http = inject(HttpClient);
 
     getProjects(page = 1, limit = 10): Observable<ProjectResponse> {
       return this.http.get<ProjectResponse>(

@@ -1,9 +1,9 @@
-import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 
 import { HttpClientModule } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { projectsData } from './projects-data';
@@ -29,8 +29,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   styleUrls: ['./projects.component.scss'],
 })
 export class ProjectsComponent implements OnInit {
-  projectsData: Project[] = [];
-  filteredProjects: Project[] = [];
   displayProjects: Project[] = [];
   searchTerm = '';
   isLoading = true;
@@ -39,12 +37,14 @@ export class ProjectsComponent implements OnInit {
   projectsPerPage = 9;
   totalPages = 1;
   serverTotal = 0;
+  searchError: string | null = null;
+
   private titleService = inject(Title);
   private metaService = inject(Meta);
+  private toastr = inject(ToastrService);
   private destroyRef = inject(DestroyRef);
-
   private projectCacheService = inject(ProjectCacheService);
-  private searchSubject = new Subject<string>();
+
 
   ngOnInit(): void {
     this.titleService.setTitle('Projects | Webiu 2.0');
@@ -61,16 +61,8 @@ export class ProjectsComponent implements OnInit {
       content: 'Explore the open-source projects hosted by C2SI and SCoRe Lab.',
     });
 
-    this.fetchProjects();
-    this.setupSearchDebounce();
-  }
+    this.fetchCurrentPage();
 
-  setupSearchDebounce(): void {
-    this.searchSubject
-      .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
-      .subscribe((searchTerm) => {
-        this.performSearch(searchTerm);
-      });
   }
 
   onSearchInput(searchTerm: string): void {
@@ -147,70 +139,31 @@ export class ProjectsComponent implements OnInit {
     return project.name;
   }
 
-  filterProjects(): void {
-    // Delegates to debounced search handler
-    this.onSearchInput(this.searchTerm);
-  }
-
-  updateDisplayProjects(): void {
-    if (this.searchTerm) {
-      // Local pagination over filtered results on the current server page
-      this.totalPages = Math.max(
-        1,
-        Math.ceil(this.filteredProjects.length / this.projectsPerPage),
-      );
-      const startIndex = (this.currentPage - 1) * this.projectsPerPage;
-      this.displayProjects = this.filteredProjects.slice(
-        startIndex,
-        startIndex + this.projectsPerPage,
-      );
-    } else {
-      // Server already paginated; use total from API for page count
-      this.totalPages = Math.max(
-        1,
-        Math.ceil(this.serverTotal / this.projectsPerPage),
-      );
-      this.displayProjects = [...this.filteredProjects];
-    }
-  }
-
   nextPage(): void {
     if (this.currentPage < this.totalPages) {
       this.currentPage++;
-      if (this.searchTerm) {
-        this.updateDisplayProjects();
-      } else {
-        this.fetchProjects();
-      }
+      this.fetchCurrentPage();
     }
   }
 
   prevPage(): void {
     if (this.currentPage > 1) {
       this.currentPage--;
-      if (this.searchTerm) {
-        this.updateDisplayProjects();
-      } else {
-        this.fetchProjects();
-      }
+      this.fetchCurrentPage();
     }
   }
 
   goToFirstPage(): void {
-    this.currentPage = 1;
-    if (this.searchTerm) {
-      this.updateDisplayProjects();
-    } else {
-      this.fetchProjects();
+    if (this.currentPage !== 1) {
+      this.currentPage = 1;
+      this.fetchCurrentPage();
     }
   }
 
   goToLastPage(): void {
-    this.currentPage = this.totalPages;
-    if (this.searchTerm) {
-      this.updateDisplayProjects();
-    } else {
-      this.fetchProjects();
+    if (this.currentPage !== this.totalPages) {
+      this.currentPage = this.totalPages;
+      this.fetchCurrentPage();
     }
   }
 
@@ -218,6 +171,6 @@ export class ProjectsComponent implements OnInit {
     const selectElement = event.target as HTMLSelectElement;
     this.projectsPerPage = parseInt(selectElement.value, 10);
     this.currentPage = 1;
-    this.updateDisplayProjects();
+    this.fetchCurrentPage();
   }
 }

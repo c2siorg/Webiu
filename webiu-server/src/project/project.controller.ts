@@ -1,11 +1,11 @@
-import { Controller, Get, Query, Header } from '@nestjs/common';
+import { Controller, Get, Query, Header, Param } from '@nestjs/common';
 import { ProjectService } from './project.service';
 
-@Controller('api/projects')
+@Controller('api/v1/projects')
 export class ProjectController {
   constructor(private projectService: ProjectService) {}
 
-  @Get('projects')
+  @Get()
   @Header('Cache-Control', 'public, max-age=300')
   async getAllProjects(
     @Query('page') page: string = '1',
@@ -34,7 +34,7 @@ export class ProjectController {
   }
 }
 
-@Controller('api/issues')
+@Controller('api/v1/issues')
 export class IssuesController {
   constructor(private projectService: ProjectService) {}
 

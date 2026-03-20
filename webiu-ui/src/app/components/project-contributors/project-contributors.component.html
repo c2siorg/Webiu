@@ -1,0 +1,153 @@
+<div class="contributors-section">
+  <header class="section-header">
+    <h3>Contributors & Activity</h3>
+    @if (!loading && contributors.length > 0) {
+    <div class="header-actions">
+      <div class="community-badges">
+        <span class="community-badge engagement">
+          <i class="fas fa-users"></i>
+          {{ contributors.length }} Contributors
+        </span>
+        @if (topContributorShare > 0) {
+        <span class="community-badge distribution" [title]="'Top contributor: ' + topContributorShare + '% share'">
+          <i class="fas fa-chart-pie"></i>
+          {{ topContributorShare }}% Concentration
+        </span>
+        }
+      </div>
+      <button class="view-toggle" (click)="toggleView()"
+        [attr.aria-label]="viewMode === 'grid' ? 'Switch to list view' : 'Switch to grid view'"
+        [title]="viewMode === 'grid' ? 'List view' : 'Grid view'">
+        @if (viewMode === 'grid') {
+        <i class="fas fa-list"></i>
+        } @else {
+        <i class="fas fa-th"></i>
+        }
+      </button>
+    </div>
+    }
+  </header>
+
+  <div class="contributors-grid">
+    @if (loading) {
+    <div class="loading-overlay">
+      <div class="skeleton-grid">
+        @for (i of [1, 2, 3, 4, 5]; track i) {
+        <div class="skeleton-avatar"></div>
+        }
+      </div>
+    </div>
+    } @else if (error) {
+    <div class="error-state glass-card">
+      <span>{{ error }}</span>
+    </div>
+    } @else if (contributors.length > 0) {
+
+    <!-- ===== GRID VIEW (default) ===== -->
+    @if (viewMode === 'grid') {
+    <div class="contributors-list-card glass-card">
+      <div class="list-header">
+        <h4>Top Contributors</h4>
+      </div>
+      <div class="contributors-scroll" [class.expanded]="showAllGrid">
+        @for (
+        contributor of (showAllGrid ? contributors : (contributors | slice : 0 : 15));
+        track contributor.login
+        ) {
+        <a [href]="getProfileUrl(contributor.login)" target="_blank" class="contributor-item" [attr.title]="
+                  contributor.login +
+                  ': ' +
+                  contributor.contributions +
+                  ' contributions'
+                ">
+          <div class="avatar-wrapper">
+            <img [src]="contributor.avatar_url" [alt]="contributor.login" loading="lazy" />
+            <span class="contribution-count">{{
+              contributor.contributions
+              }}</span>
+          </div>
+          <span class="username">{{ contributor.login }}</span>
+        </a>
+        }
+      </div>
+      @if (contributors.length > 15) {
+      <div class="more-contributors">
+        <button (click)="showAllGrid = !showAllGrid" class="more-btn">
+          @if (!showAllGrid) {
+          + {{ contributors.length - 15 }} more contributors
+          } @else {
+          Show less
+          }
+        </button>
+      </div>
+      }
+    </div>
+    }
+
+    <!-- ===== LIST VIEW ===== -->
+    @if (viewMode === 'list') {
+    <div class="contributors-list-view glass-card">
+      <div class="list-view-header">
+        <h4>All Contributors</h4>
+        <div class="search-box">
+          <i class="fas fa-search search-icon"></i>
+          <input type="text" placeholder="Search contributors..." [(ngModel)]="searchTerm" class="search-input" />
+        </div>
+      </div>
+
+      <div class="list-table">
+        <div class="list-table-header">
+          <span class="col-rank">#</span>
+          <span class="col-user">Contributor</span>
+          <span class="col-stat" title="Commits"><i class="fas fa-code-commit"></i></span>
+          <span class="col-stat merged" title="Merged PRs"><i class="fas fa-code-merge"></i></span>
+          <span class="col-stat closed" title="Closed PRs"><i class="fas fa-times-circle"></i></span>
+          <span class="col-stat open" title="Open PRs"><i class="fas fa-code-branch"></i></span>
+          <span class="col-stat" title="Issues"><i class="fas fa-exclamation-circle"></i></span>
+        </div>
+        <div class="list-table-body">
+          @for (
+          contributor of filteredContributors;
+          track contributor.login;
+          let i = $index
+          ) {
+          <div class="list-row">
+            <span class="col-rank">{{ i + 1 }}</span>
+            <a [href]="getProfileUrl(contributor.login)" target="_blank" class="col-user">
+              <img [src]="contributor.avatar_url" [alt]="contributor.login" class="list-avatar" loading="lazy" />
+              <span class="list-username">{{ contributor.login }}</span>
+            </a>
+            <a [href]="getCommitsUrl(contributor.login)" target="_blank" class="col-stat stat-link">
+              {{ contributor.contributions }}
+            </a>
+            <a [href]="getMergedPrsUrl(contributor.login)" target="_blank" class="col-stat stat-link merged">
+              {{ contributor.merged_prs ?? 0 }}
+            </a>
+            <a [href]="getClosedPrsUrl(contributor.login)" target="_blank" class="col-stat stat-link closed">
+              {{ contributor.closed_prs ?? 0 }}
+            </a>
+            <a [href]="getOpenPrsUrl(contributor.login)" target="_blank" class="col-stat stat-link open">
+              {{ contributor.open_prs ?? 0 }}
+            </a>
+            <a [href]="getIssuesUrl(contributor.login)" target="_blank" class="col-stat stat-link">
+              {{ contributor.issues_created ?? 0 }}
+            </a>
+          </div>
+          }
+          @if (filteredContributors.length === 0) {
+          <div class="no-results">
+            No contributors matching "{{ searchTerm }}"
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+    }
+
+    } @else {
+    <div class="empty-state glass-card">
+      <p>No contributors found for this project.</p>
+    </div>
+    }
+  </div>
+</div>

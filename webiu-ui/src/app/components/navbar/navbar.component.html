@@ -8,15 +8,15 @@
   </a>
 
   @if (isMenuOpen) {
-  <div
-    class="menu-overlay"
-    (click)="closeMenu()"
-    (keydown.enter)="closeMenu()"
-    (keydown.space)="closeMenu(); $event.preventDefault()"
-    tabindex="0"
-    role="button"
-    [attr.aria-label]="'Close menu'"
-  ></div>
+    <div
+      class="menu-overlay"
+      (click)="closeMenu()"
+      (keydown.enter)="closeMenu()"
+      (keydown.space)="closeMenu(); $event.preventDefault()"
+      tabindex="0"
+      role="button"
+      [attr.aria-label]="'Close menu'"
+    ></div>
   }
   <div
     [ngClass]="{ navbar__menu: true, open: isMenuOpen }"
@@ -101,19 +101,50 @@
       <img src="../../../assets/contributors.svg" alt="Contributors Icon" class="menu-icon" />
       <p>Contributors</p>
     </div>
-    <div
-      class="navbar__menu__items"
-      routerLink="/community"
-      [class.active]="isRouteActive('/community')"
-      (click)="navigateTo('/community')"
-      (keydown.enter)="navigateTo('/community')"
-      (keydown.space)="navigateTo('/community'); $event.preventDefault()"
-      tabindex="0"
-      role="link"
-      [attr.aria-label]="'Community'"
-    >
-      <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
-      <p>Community</p>
+    <div class="dropdown-container">
+      <div
+        class="navbar__menu__items community-toggle"
+        [class.active]="isRouteActive('/community')"
+        (click)="toggleCommunityDropdown(); $event.stopPropagation()"
+        (keydown.enter)="toggleCommunityDropdown(); $event.stopPropagation()"
+        (keydown.space)="toggleCommunityDropdown(); $event.stopPropagation(); $event.preventDefault()"
+        tabindex="0"
+        role="button"
+        [attr.aria-label]="'Community Dropdown'"
+      >
+        <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
+        <p>{{ getCommunityDropdownLabel() }}</p>
+        <span class="dropdown-arrow" [class.open]="isCommunityDropdownOpen">▼</span>
+      </div>
+
+      @if (isCommunityDropdownOpen) {
+        <div class="dropdown-menu community-dropdown" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" tabindex="-1">
+          <div
+            class="dropdown-item"
+            routerLink="/community"
+            [class.active]="currentRoute === '/community'"
+            (click)="navigateTo('/community')"
+            (keydown.enter)="navigateTo('/community')"
+            (keydown.space)="navigateTo('/community'); $event.preventDefault()"
+            tabindex="0"
+            role="link"
+          >
+            <p>Community</p>
+          </div>
+          <div
+            class="dropdown-item"
+            routerLink="/opportunities"
+            [class.active]="currentRoute === '/opportunities'"
+            (click)="navigateTo('/opportunities')"
+            (keydown.enter)="navigateTo('/opportunities')"
+            (keydown.space)="navigateTo('/opportunities'); $event.preventDefault()"
+            tabindex="0"
+            role="link"
+          >
+            <p>Opportunities</p>
+          </div>
+        </div>
+      }
     </div>
     <div
       class="navbar__menu__items"
@@ -129,6 +160,7 @@
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" class="menu-icon" />
       <p>GSoC 26</p>
     </div>
+    <div class="login-wrapper">
     <button
       class="navbar__menu__items Login_Logout"
       type="button"
@@ -165,6 +197,7 @@
         </button>
       </div>
     }
+    </div>
   </div>
 
   <div class="navbar__right-actions">

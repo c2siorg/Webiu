@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ContributorController } from './contributor.controller';
 import { ContributorService } from './contributor.service';
-import { UsernameDto } from './dto/username.dto';
+import { UsernameDto } from '../common/dto/username.dto';
 
 describe('ContributorController', () => {
   let controller: ContributorController;
