@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
+import { PersistenceService } from '../common/persistence.service';
 import axios, { AxiosInstance } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
@@ -16,6 +17,7 @@ export class GithubService {
   constructor(
     private configService: ConfigService,
     private cacheService: CacheService,
+    private persistenceService: PersistenceService,
   ) {
     this.accessToken = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
 
@@ -99,29 +101,39 @@ export class GithubService {
     return results;
   }
 
-  async getOrgRepos(): Promise<any[]>;
-  async getOrgRepos(page: number, perPage: number): Promise<any[]>;
   async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {
-    if (page !== undefined && perPage !== undefined) {
-      const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
-      const cached = this.cacheService.get<any[]>(cacheKey);
-      if (cached) return cached;
+    const cacheKey =
+      page !== undefined && perPage !== undefined
+        ? `org_repos_${this.orgName}_p${page}_pp${perPage}`
+        : `org_repos_${this.orgName}`;
 
-      const response = await this.githubAxios.get(
-        `/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-      );
-      const repos = response.data;
-      this.cacheService.set(cacheKey, repos, CACHE_TTL);
-      return repos;
-    }
-
-    const cacheKey = `org_repos_${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllPages(`/orgs/${this.orgName}/repos`);
-    this.cacheService.set(cacheKey, repos);
-    return repos;
+    try {
+      const repos =
+        page !== undefined && perPage !== undefined
+          ? (
+              await this.githubAxios.get(
+                `/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
+              )
+            ).data
+          : await this.fetchAllPages(`/orgs/${this.orgName}/repos`);
+
+      this.cacheService.set(cacheKey, repos, CACHE_TTL);
+      await this.persistenceService.save(cacheKey, repos);
+      return repos;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching repos for ${cacheKey}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) {
+        this.logger.log(`Serving stale repo data for key ${cacheKey}`);
+        return fallback;
+      }
+      throw error;
+    }
   }
 
   async getRepoPulls(repoName: string): Promise<any[]> {
@@ -129,11 +141,21 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const pulls = await this.fetchAllPages(
-      `/repos/${this.orgName}/${repoName}/pulls`,
-    );
-    this.cacheService.set(cacheKey, pulls);
-    return pulls;
+    try {
+      const pulls = await this.fetchAllPages(
+        `/repos/${this.orgName}/${repoName}/pulls`,
+      );
+      this.cacheService.set(cacheKey, pulls);
+      await this.persistenceService.save(cacheKey, pulls);
+      return pulls;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching pulls for ${repoName}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   async getRepoIssues(org: string, repo: string): Promise<any[]> {
@@ -141,9 +163,19 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const issues = await this.fetchAllPages(`/repos/${org}/${repo}/issues`);
-    this.cacheService.set(cacheKey, issues);
-    return issues;
+    try {
+      const issues = await this.fetchAllPages(`/repos/${org}/${repo}/issues`);
+      this.cacheService.set(cacheKey, issues);
+      await this.persistenceService.save(cacheKey, issues);
+      return issues;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching issues for ${repo}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   async getRepoContributors(
@@ -159,8 +191,14 @@ export class GithubService {
         `/repos/${orgName}/${repoName}/contributors`,
       );
       this.cacheService.set(cacheKey, contributors);
+      await this.persistenceService.save(cacheKey, contributors);
       return contributors;
-    } catch {
+    } catch (error) {
+      this.logger.error(
+        `Error fetching contributors for ${repoName}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback !== null) return fallback;
       return null;
     }
   }
@@ -171,11 +209,21 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const issues = await this.fetchAllSearchPages(
-      `/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
-    );
-    this.cacheService.set(cacheKey, issues);
-    return issues;
+    try {
+      const issues = await this.fetchAllSearchPages(
+        `/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
+      );
+      this.cacheService.set(cacheKey, issues);
+      await this.persistenceService.save(cacheKey, issues);
+      return issues;
+    } catch (error) {
+      this.logger.error(
+        `Error searching issues for ${username}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   async searchUserPullRequests(username: string): Promise<any[]> {
@@ -213,11 +261,14 @@ export class GithubService {
       );
 
       this.cacheService.set(cacheKey, allPrs);
+      await this.persistenceService.save(cacheKey, allPrs);
       return allPrs;
     } catch (error) {
       this.logger.error(
-        `Error searching PRs for ${username}: ${error.message}`,
+        `Error searching PRs for ${username}: ${error.message}. Attempting persistence fallback.`,
       );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
       throw error;
     }
   }
@@ -234,9 +285,20 @@ export class GithubService {
     const cached = this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
-    const response = await this.githubAxios.get(`/users/${username}`);
-    this.cacheService.set(cacheKey, response.data);
-    return response.data;
+    try {
+      const response = await this.githubAxios.get(`/users/${username}`);
+      const data = response.data;
+      this.cacheService.set(cacheKey, data);
+      await this.persistenceService.save(cacheKey, data);
+      return data;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching user profile for ${username}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   async exchangeGithubCode(
@@ -302,11 +364,21 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllSearchPages(
-      `/search/repositories?q=${query}+org:${this.orgName}`,
-    );
+    try {
+      const repos = await this.fetchAllSearchPages(
+        `/search/repositories?q=${query}+org:${this.orgName}`,
+      );
 
-    this.cacheService.set(cacheKey, repos);
-    return repos;
+      this.cacheService.set(cacheKey, repos);
+      await this.persistenceService.save(cacheKey, repos);
+      return repos;
+    } catch (error) {
+      this.logger.error(
+        `Error searching repos for ${query}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 }

@@ -5,11 +5,13 @@
   align-items: center;
 
   .publications-hero {
-    max-width: 1000px;
+    max-width: 1600px;
     margin: 50px auto;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 1rem;
 
     img {
       width: 100%;

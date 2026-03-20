@@ -4,9 +4,9 @@
 
   // General container and section styling
   .container {
-    max-width: 1200px;
+    max-width: 1600px;
     margin: 0 auto;
-    padding: 0 20px;
+    padding: 0 1rem;
   }
 
   section {
@@ -93,7 +93,7 @@
     );
 
     .hero-content {
-      max-width: 1200px;
+      max-width: 1600px;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -136,12 +136,12 @@
     .hero-image {
       flex: 1;
       display: flex;
-      justify-content: center;
+      justify-content: flex-end;
       align-items: center;
-      aspect-ratio: 1 / 1;
 
       img {
         width: 100%;
+        max-width: 600px;
         height: auto;
         border-radius: 12px;
         box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
