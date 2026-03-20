@@ -1,4 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
@@ -8,7 +9,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
+
 
 @Component({
   selector: 'app-community',
@@ -19,13 +20,13 @@ import { BackToTopComponent } from '../../components/back-to-top/back-to-top.com
     HttpClientModule,
     ProfileCardComponent,
     RouterModule,
-    BackToTopComponent,
   ],
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],
 })
 export class CommunityComponent implements OnInit {
   private http = inject(HttpClient);
+  private destroyRef = inject(DestroyRef);
   icons: Media[] = socialMedia;
   users: Contributor[] = [];
   isLoading = true;

@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 @Component({
   selector: 'app-projects-card',
   standalone: true,
-  imports: [HttpClientModule, CommonModule],
+  imports: [HttpClientModule, CommonModule, RouterModule],
   templateUrl: './projects-card.component.html',
   styleUrls: ['./projects-card.component.scss'],
 })

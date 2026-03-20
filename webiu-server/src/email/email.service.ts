@@ -22,16 +22,16 @@ export class EmailService {
     email: string,
     verificationToken: string,
   ): Promise<void> {
-    const frontendBaseUrl = this.configService.get<string>(
-      'FRONTEND_BASE_URL',
-      'http://localhost:4200',
+    const backendBaseUrl = this.configService.get<string>(
+      'BACKEND_BASE_URL',
+      `http://localhost:${this.configService.get<number>('PORT', 5050)}`,
     );
 
     const mailOptions = {
       from: `"Webiu" <${this.configService.get<string>('GMAIL_USER')}>`,
       to: email,
       subject: 'Verify Your Email Address',
-      html: getVerifyEmailTemplate(frontendBaseUrl, verificationToken),
+      html: getVerifyEmailTemplate(backendBaseUrl, verificationToken),
     };
 
     try {

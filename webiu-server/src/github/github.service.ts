@@ -1,8 +1,30 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
+ feat/github-persistence
 import { PersistenceService } from '../common/persistence.service';
 import axios, { AxiosInstance } from 'axios';
+
+import axios, { AxiosError } from 'axios';
+
+export interface GithubRepo {
+  name: string;
+  full_name: string;
+  html_url: string;
+  description: string | null;
+  homepage: string | null;
+  language: string | null;
+  stargazers_count: number;
+  forks_count: number;
+  open_issues_count: number;
+  topics: string[];
+  archived: boolean;
+  fork: boolean;
+  created_at: string;
+  pushed_at: string;
+  [key: string]: unknown;
+}
+ webiu-2026-pre-gsoc
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -101,6 +123,64 @@ export class GithubService {
     return results;
   }
 
+ feat/github-persistence
+
+  /**
+   * Fetches ALL org repos, sorts alphabetically, and caches the full list.
+   * One-time fetch per cache window avoids per-page GitHub API calls.
+   */
+  async getAllOrgReposSorted(): Promise<GithubRepo[]> {
+    const cacheKey = `all_org_repos_sorted_${this.orgName}`;
+    const cached = this.cacheService.get<GithubRepo[]>(cacheKey);
+    if (cached) return cached;
+
+    const repos = await this.fetchAllPages(
+      `${this.baseUrl}/orgs/${this.orgName}/repos`,
+    );
+
+    repos.sort((a: GithubRepo, b: GithubRepo) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
+
+    this.cacheService.set(cacheKey, repos, 600);
+    return repos;
+  }
+
+  /**
+   * Efficient PR count: fetches 1 item and reads the Link header to get total.
+   * Single API call per repo vs. fetching all PR pages.
+   */
+  async getRepoPullCount(repoName: string): Promise<number> {
+    const cacheKey = `pull_count_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<number>(cacheKey);
+    if (cached !== null) return cached;
+
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all&per_page=1`,
+        { headers: this.headers },
+      );
+
+      let count = 0;
+      const linkHeader = response.headers['link'];
+      if (linkHeader) {
+        const lastMatch = linkHeader.match(/page=(\d+)>;\s*rel="last"/);
+        if (lastMatch) {
+          count = parseInt(lastMatch[1], 10);
+        }
+      } else if (Array.isArray(response.data) && response.data.length > 0) {
+        count = response.data.length;
+      }
+
+      this.cacheService.set(cacheKey, count, 600);
+      return count;
+    } catch {
+      return 0;
+    }
+  }
+
+  async getOrgRepos(): Promise<any[]>;
+  async getOrgRepos(page: number, perPage: number): Promise<any[]>;
   async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {
     const cacheKey =
       page !== undefined && perPage !== undefined
@@ -136,11 +216,136 @@ export class GithubService {
     }
   }
 
+  /**
+   * Fetches metadata for a single repository.
+   * Returns null if the repository is not found (404).
+   */
+  async getRepo(repoName: string): Promise<GithubRepo | null> {
+    const cacheKey = `repo_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<GithubRepo>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}`,
+        { headers: this.headers },
+      );
+      const repo = response.data;
+      this.cacheService.set(cacheKey, repo, CACHE_TTL);
+      return repo;
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        return null;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Fetches the commit activity stats for a repository (last 52 weeks).
+   * Note: GitHub stats endpoints can return 202 Accepted if the data is being computed.
+   */
+  async getCommitActivity(repoName: string): Promise<any[]> {
+    const cacheKey = `commit_activity_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}/stats/commit_activity`,
+        { headers: this.headers },
+      );
+
+      // Handle 202 Accepted or empty: Try fallback to participation stats
+      if (
+        response.status === 202 ||
+        !response.data ||
+        response.data.length === 0
+      ) {
+        this.logger.log(
+          `Commit activity for ${repoName} is missing or being computed. Trying participation fallback.`,
+        );
+        return this.getParticipationStats(repoName);
+      }
+
+      const activity = response.data;
+      const STATS_CACHE_TTL = 3600 * 24; // 24 hours
+      this.cacheService.set(cacheKey, activity, STATS_CACHE_TTL);
+      return activity;
+    } catch {
+      this.logger.warn(
+        `Commit activity failed for ${repoName}, falling back to participation.`,
+      );
+      return this.getParticipationStats(repoName);
+    }
+  }
+
+  /**
+   * Fetches the participation stats (last 52 weeks) as a fallback for activity.
+   */
+  async getParticipationStats(repoName: string): Promise<any[]> {
+    const cacheKey = `participation_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}/stats/participation`,
+        { headers: this.headers },
+      );
+
+      if (response.data && response.data.all) {
+        // Map [1, 2, 3] to [{ total: 1 }, { total: 2 }, { total: 3 }]
+        const activity = response.data.all.map((count: number) => ({
+          total: count,
+        }));
+        this.cacheService.set(cacheKey, activity, 3600 * 24);
+        return activity;
+      }
+      return [];
+    } catch (error: unknown) {
+      this.logger.error(
+        `Failed to fetch participation stats for ${repoName}:`,
+        (error as Error).message,
+      );
+      return [];
+    }
+  }
+
+  /**
+   * Fetches the latest release for a repository.
+   */
+  async getLatestRelease(repoName: string): Promise<any | null> {
+    const cacheKey = `latest_release_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<any>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}/releases/latest`,
+        { headers: this.headers },
+      );
+      const release = response.data;
+      this.cacheService.set(cacheKey, release, CACHE_TTL);
+      return release;
+    } catch (error: unknown) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        return null;
+      }
+      this.logger.error(
+        `Failed to fetch latest release for ${repoName}:`,
+        (error as Error).message,
+      );
+      return null;
+    }
+  }
+
   async getRepoPulls(repoName: string): Promise<any[]> {
     const cacheKey = `pulls_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
+ feat/github-persistence
     try {
       const pulls = await this.fetchAllPages(
         `/repos/${this.orgName}/${repoName}/pulls`,
@@ -156,6 +361,13 @@ export class GithubService {
       if (fallback) return fallback;
       throw error;
     }
+
+    const pulls = await this.fetchAllPages(
+      `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all`,
+    );
+    this.cacheService.set(cacheKey, pulls);
+    return pulls;
+ webiu-2026-pre-gsoc
   }
 
   async getRepoIssues(org: string, repo: string): Promise<any[]> {
@@ -178,18 +390,51 @@ export class GithubService {
     }
   }
 
+  /**
+   * Fetches the full language breakdown (bytes per language) for a specific repository.
+   * Results are cached to minimize GitHub API quota consumption.
+   */
+  async getRepoLanguages(repoName: string): Promise<Record<string, number>> {
+    const cacheKey = `languages_${this.orgName}_${repoName}`;
+    const cached = this.cacheService.get<Record<string, number>>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const response = await axios.get(
+        `${this.baseUrl}/repos/${this.orgName}/${repoName}/languages`,
+        { headers: this.headers },
+      );
+      const languages = response.data;
+      this.cacheService.set(cacheKey, languages, CACHE_TTL);
+      return languages;
+    } catch (error: unknown) {
+      const axiosErr = error instanceof AxiosError ? error : null;
+      this.logger.error(
+        `Failed to fetch languages for ${repoName}:`,
+        axiosErr?.response?.data || (error as Error).message,
+      );
+      return {};
+    }
+  }
+
   async getRepoContributors(
     orgName: string,
     repoName: string,
-  ): Promise<any[] | null> {
-    const cacheKey = `contributors_${orgName}_${repoName}`;
-    const cached = this.cacheService.get<any[] | null>(cacheKey);
-    if (cached !== null) return cached;
+  ): Promise<any[]> {
+    const normalizedOrgName = orgName.toLowerCase();
+    const normalizedRepoName = repoName.toLowerCase();
+    const cacheKey = `contributors_${normalizedOrgName}_${normalizedRepoName}`;
+
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached !== null) {
+      return cached;
+    }
 
     try {
       const contributors = await this.fetchAllPages(
         `/repos/${orgName}/${repoName}/contributors`,
       );
+ 
       this.cacheService.set(cacheKey, contributors);
       await this.persistenceService.save(cacheKey, contributors);
       return contributors;
@@ -200,6 +445,13 @@ export class GithubService {
       const fallback = await this.persistenceService.load(cacheKey);
       if (fallback !== null) return fallback;
       return null;
+
+      this.cacheService.set(cacheKey, contributors, 600);
+      return contributors;
+    } catch {
+      // Cache empty array with shorter TTL to prevent repeated failed requests
+      this.cacheService.set(cacheKey, [], 300);
+      return [];
     }
   }
 
@@ -330,6 +582,7 @@ export class GithubService {
   }> {
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `user_social:${normalizedUsername}`;
+
     const cached = this.cacheService.get<{
       followers: number;
       following: number;
@@ -343,8 +596,8 @@ export class GithubService {
       ]);
 
       const result = {
-        followers: followersResponse.data.length || 0,
-        following: followingResponse.data.length || 0,
+        followers: userResponse.data?.followers ?? 0,
+        following: userResponse.data?.following ?? 0,
       };
 
       this.cacheService.set(cacheKey, result);

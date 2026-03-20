@@ -104,15 +104,14 @@
             <h4 class="breakdown-title" style="margin-top: 16px;">PR Breakdown</h4>
             <div class="breakdown-bar">
               <div class="bar-segment pr-open"
-              [style.width.%]="pullRequests.length ? (openPRs / pullRequests.length) * 100 : 0"></div>
+                [style.width.%]="pullRequests.length ? (openPRs / pullRequests.length) * 100 : 0"></div>
               <div class="bar-segment pr-closed"
-              [style.width.%]="pullRequests.length ? (mergedOrClosedPRs / pullRequests.length) * 100 : 0"></div>
+                [style.width.%]="pullRequests.length ? (mergedOrClosedPRs / pullRequests.length) * 100 : 0"></div>
             </div>
             <div class="breakdown-legend">
               <span class="legend-item"><i class="fas fa-circle pr-open-dot"></i> {{ openPRs }} Open</span>
-              <span class="legend-item"><i class="fas fa-circle pr-closed-dot"></i> {{ mergedOrClosedPRs }}
-            Merged/Closed</span>
-          </div>
+              <span class="legend-item"><i class="fas fa-circle pr-closed-dot"></i> {{ mergedOrClosedPRs }} Merged/Closed</span>
+            </div>
         </div>
       </div>
     </aside>

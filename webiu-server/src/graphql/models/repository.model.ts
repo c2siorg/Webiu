@@ -23,3 +23,18 @@ export class Repository {
   @Field(() => Int)
   pull_requests: number;
 }
+
+@ObjectType()
+export class PaginatedRepositories {
+  @Field(() => Int)
+  total: number;
+
+  @Field(() => Int)
+  page: number;
+
+  @Field(() => Int)
+  limit: number;
+
+  @Field(() => [Repository])
+  repositories: Repository[];
+}

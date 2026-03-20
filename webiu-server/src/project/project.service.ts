@@ -3,11 +3,24 @@ import {
   Logger,
   InternalServerErrorException,
   BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
+import { AxiosError } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
+const INSIGHTS_CACHE_TTL = 3600; // 1 hour
+
+// Badge thresholds for project insights
+const MATURITY_MIN_STARS = 50;
+const MATURITY_MIN_AGE_YEARS = 1;
+const MAINTENANCE_STALE_DAYS = 90;
+const POLYGLOT_MIN_LANGUAGES = 3;
+const ACTIVITY_HIGH_COMMITS = 10;
+const HEALTH_HEALTHY_ISSUES_PER_YEAR = 5;
+const HEALTH_MODERATE_ISSUES_PER_YEAR = 20;
+const SIZE_LARGE_THRESHOLD_MB = 50;
 
 @Injectable()
 export class ProjectService {
@@ -53,19 +66,15 @@ export class ProjectService {
       );
       const total = orgInfo.public_repos || 0;
 
-      const result = {
-        total,
-        page,
-        limit,
-        repositories: repositoriesWithPRs,
-      };
+      const enriched = await this.enrichWithPullCounts(pageRepos);
 
+      const result = { total, page, limit, repositories: enriched };
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
       this.logger.error(
-        'Error fetching repositories or pull requests:',
-        error.response ? error.response.data : error.message,
+        'Error fetching repositories:',
+        error.response?.data || error.message,
       );
       throw new InternalServerErrorException('Internal server error');
     }
