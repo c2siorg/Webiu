@@ -2,6 +2,16 @@
 <html lang="en">
   <head>
     <meta charset="utf-8"/>
+    <script>
+      (function() {
+        try {
+          var isDark = localStorage.getItem('dark-mode') === 'true';
+          if (isDark) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+          }
+        } catch (e) {}
+      })();
+    </script>
     <title>Webiu</title>
     <base href="/"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
