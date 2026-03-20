@@ -8,12 +8,12 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { formatDistanceToNow } from 'date-fns';
 import { environment } from '../../../environments/environment';
-import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { SkeletonCardComponent } from '../../shared/skeleton-card/skeleton-card.component';
 
 @Component({
   selector: 'app-contributor-search',
   standalone: true,
-  imports: [FormsModule, CommonModule, LoadingSpinnerComponent, HttpClientModule],
+  imports: [FormsModule, CommonModule, SkeletonCardComponent, HttpClientModule],
   templateUrl: './contributor-search.component.html',
   styleUrls: ['./contributor-search.component.scss'],
 })

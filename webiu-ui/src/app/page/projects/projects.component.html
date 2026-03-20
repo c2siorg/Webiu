@@ -23,7 +23,11 @@
     </div>
 
     @if (isLoading) {
-    <app-loading-spinner message="Loading projects..."></app-loading-spinner>
+    <div class="projects-cards-container">
+      @for (i of [1,2,3,4,5,6,7,8,9]; track i) {
+        <app-skeleton-card type="project"></app-skeleton-card>
+      }
+    </div>
     }
     @if (!isLoading) {
     @if (displayProjects.length > 0) {

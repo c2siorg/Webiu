@@ -1,0 +1,44 @@
+<div class="skeleton-card" [ngClass]="type">
+  <div class="shimmer"></div>
+  
+  <ng-container [ngSwitch]="type">
+    <!-- Profile Skeleton -->
+    <div *ngSwitchCase="'profile'" class="profile-skeleton">
+      <div class="skeleton-img circle"></div>
+      <div class="skeleton-text title"></div>
+      <div class="skeleton-text subtitle"></div>
+      <div class="skeleton-chips">
+        <div class="skeleton-chip"></div>
+        <div class="skeleton-chip"></div>
+        <div class="skeleton-chip"></div>
+      </div>
+      <div class="skeleton-footer">
+        <div class="skeleton-icon"></div>
+        <div class="skeleton-text small"></div>
+      </div>
+    </div>
+
+    <!-- Project Skeleton -->
+    <div *ngSwitchCase="'project'" class="project-skeleton">
+      <div class="project-header">
+        <div class="skeleton-text title"></div>
+        <div class="skeleton-text body"></div>
+        <div class="skeleton-text body short"></div>
+      </div>
+      <div class="project-details">
+        <div class="skeleton-detail">
+          <div class="skeleton-circle-small"></div>
+          <div class="skeleton-text small"></div>
+        </div>
+        <div class="project-stats">
+          <div class="skeleton-stat"></div>
+          <div class="skeleton-stat"></div>
+          <div class="skeleton-stat"></div>
+        </div>
+      </div>
+      <div class="project-footer">
+        <div class="skeleton-button"></div>
+      </div>
+    </div>
+  </ng-container>
+</div>

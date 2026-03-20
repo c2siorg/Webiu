@@ -21,7 +21,7 @@
         </div>
         <button class="search-button" (click)="filterProfiles()">
           <span>search</span>
-          <img src="../../../assets/search.svg" alt="Search Icon" />
+          <img src="../../../assets/search.svg" alt="Search Icon" loading="lazy" />
         </button>
       </div>
     </div>
@@ -64,9 +64,11 @@
     </div>
 
     @if (isLoading) {
-      <app-loading-spinner
-        message="Loading contributors..."
-      ></app-loading-spinner>
+      <div class="contributors-grid">
+        @for (i of [1,2,3,4,5,6,7,8,9]; track i) {
+          <app-skeleton-card type="profile"></app-skeleton-card>
+        }
+      </div>
     }
 
     @if (!isLoading) {

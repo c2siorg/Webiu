@@ -9,7 +9,8 @@ import { ProjectsCardComponent } from '../../components/projects-card/projects-c
 import { projectsData } from './projects-data';
 import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
-import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { SkeletonCardComponent } from '../../shared/skeleton-card/skeleton-card.component';
+import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -21,7 +22,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     FormsModule,
     NavbarComponent,
     ProjectsCardComponent,
-    LoadingSpinnerComponent,
+    SkeletonCardComponent,
+    BackToTopComponent,
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],
@@ -63,65 +65,74 @@ export class ProjectsComponent implements OnInit {
 
   }
 
-  onSearch(term?: string): void {
-    if (term !== undefined) {
-      this.searchTerm = term;
-    }
-    this.currentPage = 1;
-    this.searchError = null;
-    this.fetchCurrentPage();
+  onSearchInput(searchTerm: string): void {
+    this.searchSubject.next(searchTerm);
   }
 
-  /**
-   * Single entry point for all data fetching.
-   * Routes to search or listing based on searchTerm, always server-paginated.
-   */
-  private fetchCurrentPage(): void {
-    this.isLoading = true;
+  performSearch(searchTerm: string): void {
+  this.currentPage = 1;
 
-    const request$ = this.searchTerm
-      ? this.projectCacheService.searchProjects(
-        this.searchTerm,
-        this.currentPage,
-        this.projectsPerPage,
-      )
-      : this.projectCacheService.getProjects(
-        this.currentPage,
-        this.projectsPerPage,
-      );
+  if (!searchTerm) {
+    this.fetchProjects();
+    return;
+  }
 
-    request$.pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+  this.isLoading = true;
+
+  this.projectCacheService.searchProjects(searchTerm)
+    .subscribe({
       next: (response) => {
         this.serverTotal = response.total;
-        this.displayProjects = response.repositories;
+        this.projectsData = this.sortProjects(response.repositories);
+        this.filteredProjects = [...this.projectsData];
+
+        
         this.totalPages = Math.max(
           1,
-          Math.ceil(this.serverTotal / this.projectsPerPage),
+          Math.ceil(this.filteredProjects.length / this.projectsPerPage),
         );
-        this.searchError = null;
+
+        this.updateDisplayProjects();
         this.isLoading = false;
       },
       error: () => {
-        if (!this.searchTerm) {
-          this.serverTotal = projectsData.total;
-          const start = (this.currentPage - 1) * this.projectsPerPage;
-          this.displayProjects = projectsData.repositories.slice(
-            start,
-            start + this.projectsPerPage,
-          );
-          this.totalPages = Math.max(
-            1,
-            Math.ceil(this.serverTotal / this.projectsPerPage),
-          );
-        } else {
-          // Global error interceptor will handle the notification
-          this.displayProjects = [];
-          this.serverTotal = 0;
-          this.totalPages = 1;
-        }
         this.isLoading = false;
-      },
+      }
     });
+}
+
+  fetchProjects(): void {
+    this.isLoading = true;
+    this.projectCacheService
+      .getProjects(this.currentPage, this.projectsPerPage)
+      .subscribe({
+        next: (response) => {
+          this.serverTotal = response.total;
+          this.projectsData = this.sortProjects(response.repositories);
+          this.filteredProjects = this.searchTerm
+            ? this.sortProjects(
+                this.projectsData.filter((p) =>
+                  p.name.toLowerCase().includes(this.searchTerm.toLowerCase()),
+                ),
+              )
+            : [...this.projectsData];
+          this.updateDisplayProjects();
+          this.isLoading = false;
+        },
+        error: () => {
+          this.serverTotal = projectsData.total;
+          this.projectsData = this.sortProjects(projectsData.repositories);
+          this.filteredProjects = [...this.projectsData];
+          this.updateDisplayProjects();
+          this.isLoading = false;
+        },
+      });
+  }
+
+  sortProjects(projects: Project[]): Project[] {
+    return projects.sort((a, b) =>
+      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
+    );
   }
 
   trackByProjectName(index: number, project: Project): string {

@@ -1,7 +1,24 @@
 <div class="search-page">
   <!-- Loading Spinner -->
   @if (loading) {
-    <app-loading-spinner message="Fetching contributor data..."></app-loading-spinner>
+    <div class="content-wrapper">
+      <aside class="sidebar">
+        <app-skeleton-card type="profile"></app-skeleton-card>
+      </aside>
+      <main class="main-area">
+        <div class="items-list">
+          @for (i of [1,2,3,4,5]; track i) {
+            <div class="list-item">
+              <div class="skeleton-icon" style="width: 24px; height: 24px; background: #e2e5e7; border-radius: 50%;"></div>
+              <div class="item-content" style="width: 100%;">
+                <div class="skeleton-text" style="height: 20px; width: 60%; background: #e2e5e7; border-radius: 4px; margin-bottom: 8px;"></div>
+                <div class="skeleton-text" style="height: 14px; width: 30%; background: #e2e5e7; border-radius: 4px;"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </main>
+    </div>
   }
 
   <!-- Default Search Hero — shown when no profile is loaded yet -->
@@ -42,7 +59,7 @@
       <!-- Sidebar: Profile Card -->
       <aside class="sidebar">
         <div class="profile-card">
-          <img [src]="userProfile.avatar_url" alt="{{ userProfile.login }}'s avatar" class="profile-avatar" />
+          <img [src]="userProfile.avatar_url" alt="{{ userProfile.login }}'s avatar" class="profile-avatar" loading="lazy" />
           <h2 class="profile-name">{{ userProfile.name || userProfile.login }}</h2>
           @if (userProfile.name) {
             <p class="profile-login">&#64;{{ userProfile.login }}</p>

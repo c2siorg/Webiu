@@ -1,25 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
-import axios, { AxiosError } from 'axios';
-
-export interface GithubRepo {
-  name: string;
-  full_name: string;
-  html_url: string;
-  description: string | null;
-  homepage: string | null;
-  language: string | null;
-  stargazers_count: number;
-  forks_count: number;
-  open_issues_count: number;
-  topics: string[];
-  archived: boolean;
-  fork: boolean;
-  created_at: string;
-  pushed_at: string;
-  [key: string]: unknown;
-}
+import { PersistenceService } from '../common/persistence.service';
+import axios, { AxiosInstance } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -27,20 +10,47 @@ const CACHE_TTL = 300; // 5 minutes
 export class GithubService {
   private readonly logger = new Logger(GithubService.name);
   private readonly baseUrl = 'https://api.github.com';
+  private readonly githubAxios: AxiosInstance;
   private readonly accessToken: string;
   private readonly orgName = 'c2siorg';
 
   constructor(
     private configService: ConfigService,
     private cacheService: CacheService,
+    private persistenceService: PersistenceService,
   ) {
     this.accessToken = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
-  }
 
-  private get headers() {
-    return {
-      Authorization: `token ${this.accessToken}`,
-    };
+    this.githubAxios = axios.create({
+      baseURL: this.baseUrl,
+      headers: {
+        Authorization: `token ${this.accessToken}`,
+      },
+    });
+
+    this.githubAxios.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const { config, response } = error;
+        if (response && (response.status === 403 || response.status === 429)) {
+          const rateLimitRemaining = response.headers['x-ratelimit-remaining'];
+          const rateLimitReset = response.headers['x-ratelimit-reset'];
+
+          if (rateLimitRemaining === '0' || response.status === 429) {
+            const resetTime = parseInt(rateLimitReset) * 1000;
+            const waitTime = Math.max(resetTime - Date.now(), 0) + 1000; // +1s buffer
+
+            this.logger.warn(
+              `GitHub Rate limit exceeded. Waiting ${waitTime / 1000}s until reset.`,
+            );
+
+            await new Promise((resolve) => setTimeout(resolve, waitTime));
+            return this.githubAxios(config); // Retry the request
+          }
+        }
+        return Promise.reject(error);
+      },
+    );
   }
 
   get org(): string {
@@ -53,9 +63,8 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
+      const response = await this.githubAxios.get(
         `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
       );
 
       const data = response.data;
@@ -76,9 +85,8 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
+      const response = await this.githubAxios.get(
         `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
       );
 
       const items = response.data.items || [];
@@ -93,86 +101,39 @@ export class GithubService {
     return results;
   }
 
-  /**
-   * Fetches ALL org repos, sorts alphabetically, and caches the full list.
-   * One-time fetch per cache window avoids per-page GitHub API calls.
-   */
-  async getAllOrgReposSorted(): Promise<GithubRepo[]> {
-    const cacheKey = `all_org_repos_sorted_${this.orgName}`;
-    const cached = this.cacheService.get<GithubRepo[]>(cacheKey);
-    if (cached) return cached;
-
-    const repos = await this.fetchAllPages(
-      `${this.baseUrl}/orgs/${this.orgName}/repos`,
-    );
-
-    repos.sort((a: GithubRepo, b: GithubRepo) =>
-      a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
-    );
-
-    this.cacheService.set(cacheKey, repos, 600);
-    return repos;
-  }
-
-  /**
-   * Efficient PR count: fetches 1 item and reads the Link header to get total.
-   * Single API call per repo vs. fetching all PR pages.
-   */
-  async getRepoPullCount(repoName: string): Promise<number> {
-    const cacheKey = `pull_count_${this.orgName}_${repoName}`;
-    const cached = this.cacheService.get<number>(cacheKey);
-    if (cached !== null) return cached;
-
-    try {
-      const response = await axios.get(
-        `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all&per_page=1`,
-        { headers: this.headers },
-      );
-
-      let count = 0;
-      const linkHeader = response.headers['link'];
-      if (linkHeader) {
-        const lastMatch = linkHeader.match(/page=(\d+)>;\s*rel="last"/);
-        if (lastMatch) {
-          count = parseInt(lastMatch[1], 10);
-        }
-      } else if (Array.isArray(response.data) && response.data.length > 0) {
-        count = response.data.length;
-      }
-
-      this.cacheService.set(cacheKey, count, 600);
-      return count;
-    } catch {
-      return 0;
-    }
-  }
-
-  async getOrgRepos(): Promise<any[]>;
-  async getOrgRepos(page: number, perPage: number): Promise<any[]>;
   async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {
-    if (page !== undefined && perPage !== undefined) {
-      const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
-      const cached = this.cacheService.get<any[]>(cacheKey);
-      if (cached) return cached;
+    const cacheKey =
+      page !== undefined && perPage !== undefined
+        ? `org_repos_${this.orgName}_p${page}_pp${perPage}`
+        : `org_repos_${this.orgName}`;
 
-      const response = await axios.get(
-        `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-        { headers: this.headers },
-      );
-      const repos = response.data;
-      this.cacheService.set(cacheKey, repos, CACHE_TTL);
-      return repos;
-    }
-
-    const cacheKey = `org_repos_${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllPages(
-      `${this.baseUrl}/orgs/${this.orgName}/repos`,
-    );
-    this.cacheService.set(cacheKey, repos);
-    return repos;
+    try {
+      const repos =
+        page !== undefined && perPage !== undefined
+          ? (
+              await this.githubAxios.get(
+                `/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
+              )
+            ).data
+          : await this.fetchAllPages(`/orgs/${this.orgName}/repos`);
+
+      this.cacheService.set(cacheKey, repos, CACHE_TTL);
+      await this.persistenceService.save(cacheKey, repos);
+      return repos;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching repos for ${cacheKey}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) {
+        this.logger.log(`Serving stale repo data for key ${cacheKey}`);
+        return fallback;
+      }
+      throw error;
+    }
   }
 
   /**
@@ -304,11 +265,21 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const pulls = await this.fetchAllPages(
-      `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all`,
-    );
-    this.cacheService.set(cacheKey, pulls);
-    return pulls;
+    try {
+      const pulls = await this.fetchAllPages(
+        `/repos/${this.orgName}/${repoName}/pulls`,
+      );
+      this.cacheService.set(cacheKey, pulls);
+      await this.persistenceService.save(cacheKey, pulls);
+      return pulls;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching pulls for ${repoName}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   async getRepoIssues(org: string, repo: string): Promise<any[]> {
@@ -316,11 +287,19 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const issues = await this.fetchAllPages(
-      `${this.baseUrl}/repos/${org}/${repo}/issues`,
-    );
-    this.cacheService.set(cacheKey, issues);
-    return issues;
+    try {
+      const issues = await this.fetchAllPages(`/repos/${org}/${repo}/issues`);
+      this.cacheService.set(cacheKey, issues);
+      await this.persistenceService.save(cacheKey, issues);
+      return issues;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching issues for ${repo}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   /**
@@ -365,14 +344,18 @@ export class GithubService {
 
     try {
       const contributors = await this.fetchAllPages(
-        `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
+        `/repos/${orgName}/${repoName}/contributors`,
       );
-      this.cacheService.set(cacheKey, contributors, 600);
+      this.cacheService.set(cacheKey, contributors);
+      await this.persistenceService.save(cacheKey, contributors);
       return contributors;
-    } catch {
-      // Cache empty array with shorter TTL to prevent repeated failed requests
-      this.cacheService.set(cacheKey, [], 300);
-      return [];
+    } catch (error) {
+      this.logger.error(
+        `Error fetching contributors for ${repoName}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback !== null) return fallback;
+      return null;
     }
   }
 
@@ -382,11 +365,21 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const issues = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
-    );
-    this.cacheService.set(cacheKey, issues);
-    return issues;
+    try {
+      const issues = await this.fetchAllSearchPages(
+        `/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
+      );
+      this.cacheService.set(cacheKey, issues);
+      await this.persistenceService.save(cacheKey, issues);
+      return issues;
+    } catch (error) {
+      this.logger.error(
+        `Error searching issues for ${username}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   async searchUserPullRequests(username: string): Promise<any[]> {
@@ -395,43 +388,49 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const prs = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
-    );
+    const baseQuery = `author:${username} org:${this.orgName} type:pr`;
 
-    // Fetch details for closed PRs to determine if they were merged
-    const enrichedPrs = await Promise.all(
-      prs.map(async (pr) => {
-        // Only fetch details if closed and we don't know if merged (merged_at missing)
-        // Note: Search API results for PRs don't include merged_at at the top level usually
-        if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
-          try {
-            const response = await axios.get(pr.pull_request.url, {
-              headers: this.headers,
-            });
-            if (response.data.merged_at) {
-              pr.merged_at = response.data.merged_at;
-            }
-          } catch {
-            // Ignore errors for individual PR fetches to avoid failing the whole request
-          }
-        }
-        return pr;
-      }),
-    );
+    try {
+      // Parallel searches for merged and unmerged PRs to eliminate N+1 calls
+      // This reduces O(N) requests to exactly 2 REST calls (plus pagination)
+      const [mergedPrs, unmergedPrs] = await Promise.all([
+        this.fetchAllSearchPages(
+          `/search/issues?q=${encodeURIComponent(baseQuery + ' is:merged')}`,
+        ),
+        this.fetchAllSearchPages(
+          `/search/issues?q=${encodeURIComponent(baseQuery + ' is:unmerged')}`,
+        ),
+      ]);
 
-    // Sort by created_at descending
-    enrichedPrs.sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-    );
+      // Enrich merged PRs with merged_at status using closed_at as proxy (API parity)
+      const processedMerged = mergedPrs.map((pr) => ({
+        ...pr,
+        merged_at: pr.closed_at,
+      }));
 
-    this.cacheService.set(cacheKey, enrichedPrs);
-    return enrichedPrs;
+      const allPrs = [...processedMerged, ...unmergedPrs];
+
+      // Sort by created_at descending to maintain consistent order
+      allPrs.sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+      );
+
+      this.cacheService.set(cacheKey, allPrs);
+      await this.persistenceService.save(cacheKey, allPrs);
+      return allPrs;
+    } catch (error) {
+      this.logger.error(
+        `Error searching PRs for ${username}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   async getUserInfo(accessToken: string): Promise<any> {
-    const response = await axios.get(`${this.baseUrl}/user`, {
+    const response = await this.githubAxios.get('/user', {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     return response.data;
@@ -442,11 +441,20 @@ export class GithubService {
     const cached = this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(`${this.baseUrl}/users/${username}`, {
-      headers: this.headers,
-    });
-    this.cacheService.set(cacheKey, response.data);
-    return response.data;
+    try {
+      const response = await this.githubAxios.get(`/users/${username}`);
+      const data = response.data;
+      this.cacheService.set(cacheKey, data);
+      await this.persistenceService.save(cacheKey, data);
+      return data;
+    } catch (error) {
+      this.logger.error(
+        `Error fetching user profile for ${username}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 
   async exchangeGithubCode(
@@ -486,13 +494,10 @@ export class GithubService {
     if (cached) return cached;
 
     try {
-      // ✅ Correct source of truth: GitHub profile fields (not list endpoints capped at 30)
-      const userResponse = await axios.get(
-        `${this.baseUrl}/users/${username}`,
-        {
-          headers: this.headers,
-        },
-      );
+      const [followersResponse, followingResponse] = await Promise.all([
+        this.githubAxios.get(`/users/${username}/followers`),
+        this.githubAxios.get(`/users/${username}/following`),
+      ]);
 
       const result = {
         followers: userResponse.data?.followers ?? 0,
@@ -516,12 +521,21 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const encoded = encodeURIComponent(query);
-    const repos = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/repositories?q=${encoded}+org:${this.orgName}`,
-    );
+    try {
+      const repos = await this.fetchAllSearchPages(
+        `/search/repositories?q=${query}+org:${this.orgName}`,
+      );
 
-    this.cacheService.set(cacheKey, repos);
-    return repos;
+      this.cacheService.set(cacheKey, repos);
+      await this.persistenceService.save(cacheKey, repos);
+      return repos;
+    } catch (error) {
+      this.logger.error(
+        `Error searching repos for ${query}: ${error.message}. Attempting persistence fallback.`,
+      );
+      const fallback = await this.persistenceService.load(cacheKey);
+      if (fallback) return fallback;
+      throw error;
+    }
   }
 }
