@@ -9,7 +9,7 @@ import { ProjectsCardComponent } from '../../components/projects-card/projects-c
 import { projectsData } from './projects-data';
 import { Project } from './project.model';
 import { FormsModule } from '@angular/forms';
-import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { SkeletonCardComponent } from '../../shared/skeleton-card/skeleton-card.component';
 import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -22,7 +22,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     FormsModule,
     NavbarComponent,
     ProjectsCardComponent,
-    LoadingSpinnerComponent,
+    SkeletonCardComponent,
     BackToTopComponent,
   ],
   templateUrl: './projects.component.html',
