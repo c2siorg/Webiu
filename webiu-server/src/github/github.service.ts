@@ -127,12 +127,10 @@ export class GithubService {
     return issues;
   }
 
-  async getRepoContributors(
-    orgName: string,
-    repoName: string,
-  ): Promise<any[] | null> {
+  async getRepoContributors(orgName: string, repoName: string): Promise<any[]> {
+    // ✅ Change 1: removed | null
     const cacheKey = `contributors_${orgName}_${repoName}`;
-    const cached = this.cacheService.get<any[] | null>(cacheKey);
+    const cached = this.cacheService.get<any[]>(cacheKey); // ✅ Change 2: removed | null
     if (cached !== null) return cached;
 
     try {
@@ -142,7 +140,7 @@ export class GithubService {
       this.cacheService.set(cacheKey, contributors);
       return contributors;
     } catch {
-      return null;
+      return []; // ✅ Change 3: null → []
     }
   }
 
@@ -172,8 +170,6 @@ export class GithubService {
     // Fetch details for closed PRs to determine if they were merged
     const enrichedPrs = await Promise.all(
       prs.map(async (pr) => {
-        // Only fetch details if closed and we don't know if merged (merged_at missing)
-        // Note: Search API results for PRs don't include merged_at at the top level usually
         if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
           try {
             const response = await axios.get(pr.pull_request.url, {
