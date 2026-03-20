@@ -17,6 +17,40 @@ body {
   color: #333;
   width: 100%;
   overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+.img-standard {
+  margin: 1.5rem auto;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+  }
+}
+
+.img-align-center {
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.img-align-left {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.img-align-right {
+  margin-left: auto;
+  margin-right: 0;
 }
 
 :root {

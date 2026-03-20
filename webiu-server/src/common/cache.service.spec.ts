@@ -117,12 +117,30 @@ describe('CacheService', () => {
     });
   });
 
+ feat/github-persistence
+  describe('pruneExpiredEntries()', () => {
+
   describe('getEtag()', () => {
+ webiu-2026-pre-gsoc
     beforeEach(() => {
       jest.useFakeTimers();
       jest.setSystemTime(0);
     });
     afterEach(() => jest.useRealTimers());
+
+ feat/github-persistence
+    it('should remove only expired entries', () => {
+      service.set('expired1', 'val1', 10); // expires at 10s
+      service.set('expired2', 'val2', 20); // expires at 20s
+      service.set('valid', 'val3', 60); // expires at 60s
+
+      jest.advanceTimersByTime(30000); // Now at 30s
+
+      service.pruneExpiredEntries();
+
+      expect(service.get('expired1')).toBeNull();
+      expect(service.get('expired2')).toBeNull();
+      expect(service.get('valid')).toBe('val3');
 
     it('should return the etag stored alongside data', () => {
       service.set('key', 'value', 60, '"abc123"');
@@ -192,6 +210,7 @@ describe('CacheService', () => {
       service.refresh('key', 120);
       expect(service.get<{ stars: number }>('key')).toEqual({ stars: 10 });
       expect(service.getEtag('key')).toBe('"etag-v1"');
+ webiu-2026-pre-gsoc
     });
   });
 });
