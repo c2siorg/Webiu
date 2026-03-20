@@ -1,3 +1,19 @@
+:root {
+  --community-card-bg: #ffffff;
+  --community-card-border: #e1e4e8;
+  --community-text-primary: #24292e;
+  --community-text-secondary: #586069;
+  --community-link: #007bff;
+}
+
+.dark {
+  --community-card-bg: #1e1e2f;
+  --community-card-border: #2e2e40;
+  --community-text-primary: #ffffff;
+  --community-text-secondary: #c0c0d0;
+  --community-link: #4da3ff;
+}
+
 .community {
   margin-top: 5%;
   display: flex;
@@ -6,9 +22,6 @@
   width: 100%;
   overflow-x: hidden;
 
-  // ==============================
-  // Hero Section
-  // ==============================
   .community-hero {
     max-width: 1100px;
     width: 90%;
@@ -22,38 +35,26 @@
       flex: 1;
 
       h1 {
-        color: var(--primary-dark, #0a0a15);
         font-size: 48px;
         margin-bottom: 20px;
-        font-weight: 600;
-        line-height: 1.2;
       }
 
       .media-icons {
         display: flex;
         gap: 15px;
-        margin-top: 25px;
 
         .icon {
           height: 45px;
           width: 45px;
-          transition: transform 0.2s ease;
-          &:hover {
-            transform: scale(1.1);
-          }
         }
       }
     }
 
     img {
       max-width: 450px;
-      height: auto;
     }
   }
 
-  // ==============================
-  // Team Details Section
-  // ==============================
   .team-details {
     margin-top: 60px;
     width: 90%;
@@ -64,29 +65,11 @@
 
     .team-caption {
       font-size: 42px;
-      font-weight: 600;
-      text-align: center;
       margin-bottom: 10px;
-      color: var(--primary-dark, #0a0a15);
-    }
-
-    .team-description {
-      text-align: center;
-      max-width: 700px;
-      color: #586069;
-      margin-bottom: 40px;
-      line-height: 1.6;
-    }
-
-    .loading-spinner {
-      margin: 2rem 0;
-      font-size: 1.2rem;
-      color: var(--primary-dark, #0a0a15);
     }
 
     .team {
       width: 80%;
-      max-width: 1200px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -95,7 +78,6 @@
         display: grid;
         grid-template-columns: repeat(4, 1fr);
         gap: 20px;
-        margin: 2rem 0;
         width: 100%;
 
         @media screen and (max-width: 1024px) {
@@ -104,24 +86,20 @@
 
         @media screen and (max-width: 768px) {
           grid-template-columns: repeat(2, 1fr);
-          gap: 12px;
         }
 
         .card {
-          width: 100%;
           display: flex;
           flex-direction: column;
           align-items: center;
           border-radius: 12px;
-          border: 1px solid var(--community-card-border, #e1e4e8);
-          background: var(--community-card-bg, #ffffff);
-          box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+          border: 1px solid var(--community-card-border);
+          background: var(--community-card-bg);
+          padding: 20px;
           transition: all 0.3s ease;
-          padding-top: 20px;
 
           &:hover {
-            transform: translateY(-5px);
-            box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-4px);
           }
 
           .user-avatar {
@@ -129,97 +107,55 @@
             height: 80px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid var(--community-card-border, #e1e4e8);
           }
 
           .card-data {
-            padding: 20px 10px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             text-align: center;
 
             .user-name {
-              font-size: 16px;
+              color: var(--community-link);
               font-weight: 600;
-              color: #24292e;
-              margin-bottom: 5px;
-              width: 100%;
-              word-break: break-word;
+            }
 
-              @media screen and (max-width: 480px) {
-                font-size: 14px;
-              }
+            .dark .user-name {
+              color: #6cb6ff;
             }
 
             .user-designation {
               font-size: 13px;
-              color: #586069;
-              margin: 0;
-
-              @media screen and (max-width: 480px) {
-                font-size: 11px;
-              }
+              color: var(--community-text-secondary);
             }
           }
         }
-      }
 
-      .view-all-container {
-        margin: 2rem 0 4rem;
+        .skeleton-card {
+          height: 150px;
+          border-radius: 12px;
+          background: linear-gradient(
+            90deg,
+            #e0e0e0 25%,
+            #f0f0f0 50%,
+            #e0e0e0 75%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.5s infinite;
+        }
 
-        .view-all-link {
-          display: inline-block;
-          padding: 10px 24px;
-          background: var(--primary-blue, #007bff);
-          color: white;
-          text-decoration: none;
-          border-radius: 8px;
-          font-weight: 500;
-          transition: background 0.2s;
-
-          &:hover {
-            background: var(--primary-blue-dark, #0056b3);
-          }
+        /* Dark mode skeleton tweak */
+        .dark & .skeleton-card {
+          background: linear-gradient(
+            90deg,
+            #2a2a3d 25%,
+            #3a3a55 50%,
+            #2a2a3d 75%
+          );
         }
       }
     }
   }
 }
 
-// ==============================
-// Media Queries for Hero/Responsiveness
-// ==============================
-@media screen and (max-width: 1100px) {
-  .community .community-hero {
-    flex-direction: column;
-    text-align: center;
-    padding: 20px;
-
-    .community-hero-content {
-      align-items: center;
-      h1 {
-        font-size: 36px;
-      }
-      .media-icons {
-        justify-content: center;
-      }
-    }
-
-    img {
-      width: 100%;
-      max-width: 400px;
-    }
-  }
-}
-
-@media screen and (max-width: 600px) {
-  .community .team-details {
-    width: 95%;
-
-    .team-caption {
-      font-size: 32px;
-    }
-  }
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
 }

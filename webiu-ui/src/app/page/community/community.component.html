@@ -16,22 +16,27 @@
       </div>
     </div>
 
-    <img
-      src="assets/projects-img.png"
-      alt="community illustration"
-    />
+    <img src="assets/projects-img.png" alt="community illustration" />
   </div>
 
   <div class="team-details">
     <p class="team-caption">Top Contributors</p>
 
-    @if (!isLoading && users?.length) {
-      <div class="team">
-        <div class="team-align">
+    <div class="team">
+      <div class="team-align">
+
+        <!-- 🔥 SKELETON -->
+        @if (isLoading) {
+          @for (item of [1,2,3,4,5,6,7,8]; track $index) {
+            <div class="card skeleton-card"></div>
+          }
+        }
+
+        <!-- ✅ REAL DATA -->
+        @if (!isLoading && users.length) {
           @for (user of users; track $index) {
 
             <div class="card">
-
               <img
                 class="user-avatar"
                 [src]="user.avatar_url"
@@ -51,12 +56,12 @@
                   {{ user.contributions }} commits
                 </p>
               </div>
-
             </div>
 
           }
-        </div>
+        }
+
       </div>
-    }
+    </div>
   </div>
 </div>
