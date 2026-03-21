@@ -1,23 +1,38 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Get, Param, Post, Logger } from '@nestjs/common';
 import {
   TechStackDetectorService,
   TechStackResult,
 } from './tech-stack-detector.service';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
-import { GithubService } from './github.service';
+import axios from 'axios';
 
 @Controller('api/v1/projects')
 export class TechStackController {
   private readonly token: string;
+  private readonly logger = new Logger(TechStackController.name);
+  private readonly baseUrl = 'https://api.github.com';
 
   constructor(
     private readonly techStackDetector: TechStackDetectorService,
     private readonly cacheService: CacheService,
     private readonly configService: ConfigService,
-    private readonly githubService: GithubService,
   ) {
     this.token = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
+  }
+
+  private async getRepoPushedAt(org: string, repo: string): Promise<string> {
+    try {
+      const response = await axios.get(`${this.baseUrl}/repos/${org}/${repo}`, {
+        headers: { Authorization: `token ${this.token}` },
+      });
+      return response.data.pushed_at || new Date().toISOString();
+    } catch (err) {
+      this.logger.warn(
+        `Failed to fetch repo metadata for ${org}/${repo}: ${err.message}`,
+      );
+      return new Date().toISOString();
+    }
   }
 
   @Get('tech-stack/:org/:repo')
@@ -25,14 +40,11 @@ export class TechStackController {
     @Param('org') org: string,
     @Param('repo') repo: string,
   ): Promise<TechStackResult> {
-    const cacheKey = `tech_stack:${org}:${repo}`;
+    const pushedAt = await this.getRepoPushedAt(org, repo);
+    const cacheKey = `tech_stack:${org}:${repo}:${pushedAt}`;
+
     const cached = this.cacheService.get<TechStackResult>(cacheKey);
     if (cached) return cached;
-
-    // Get repo info to check pushed_at
-    const repos = await this.githubService.getOrgRepos();
-    const repoInfo = repos.find((r) => r.name === repo);
-    const pushedAt = repoInfo?.pushed_at || new Date().toISOString();
 
     const result = await this.techStackDetector.detectTechStack(
       org,
@@ -41,7 +53,6 @@ export class TechStackController {
       this.token,
     );
 
-    // Cache using pushed_at as version — only re-detect if repo was updated
     this.cacheService.set(cacheKey, result, 3600);
     return result;
   }
@@ -51,12 +62,10 @@ export class TechStackController {
     @Param('org') org: string,
     @Param('repo') repo: string,
   ): Promise<TechStackResult> {
-    const cacheKey = `tech_stack:${org}:${repo}`;
-    this.cacheService.delete(cacheKey);
+    const pushedAt = await this.getRepoPushedAt(org, repo);
+    const cacheKey = `tech_stack:${org}:${repo}:${pushedAt}`;
 
-    const repos = await this.githubService.getOrgRepos();
-    const repoInfo = repos.find((r) => r.name === repo);
-    const pushedAt = repoInfo?.pushed_at || new Date().toISOString();
+    this.cacheService.delete(cacheKey);
 
     const result = await this.techStackDetector.detectTechStack(
       org,

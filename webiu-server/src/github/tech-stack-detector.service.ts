@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import axios from 'axios';
 
 export interface DetectedTechnology {
@@ -16,7 +16,6 @@ export interface TechStackResult {
 }
 
 const TECH_PATTERNS: Record<string, Record<string, string[]>> = {
-  // package.json dependencies
   'package.json': {
     React: ['react', 'react-dom'],
     Angular: ['@angular/core'],
@@ -29,7 +28,6 @@ const TECH_PATTERNS: Record<string, Record<string, string[]>> = {
     GraphQL: ['graphql', '@apollo/client'],
     Jest: ['jest'],
   },
-  // requirements.txt
   'requirements.txt': {
     Django: ['django'],
     Flask: ['flask'],
@@ -71,6 +69,7 @@ const LANGUAGE_MAP: Record<string, string> = {
 @Injectable()
 export class TechStackDetectorService {
   private readonly baseUrl = 'https://api.github.com';
+  private readonly logger = new Logger(TechStackDetectorService.name);
 
   private getHeaders(token: string) {
     return {
@@ -95,7 +94,10 @@ export class TechStackDetectorService {
         { headers: this.getHeaders(token) },
       );
       rootContents = response.data;
-    } catch {
+    } catch (err) {
+      this.logger.warn(
+        `Failed to fetch contents for ${org}/${repo}: ${err?.response?.status ?? err.message}`,
+      );
       return {
         org,
         repo,
@@ -143,7 +145,6 @@ export class TechStackDetectorService {
           }
         }
 
-        // Detect Node.js
         if (!technologies.find((t) => t.name === 'Node.js')) {
           technologies.push({
             name: 'Node.js',
@@ -151,8 +152,10 @@ export class TechStackDetectorService {
             source: 'package.json',
           });
         }
-      } catch {
-        // ignore
+      } catch (err) {
+        this.logger.warn(
+          `Failed to parse package.json for ${org}/${repo}: ${err.message}`,
+        );
       }
     }
 
@@ -183,8 +186,10 @@ export class TechStackDetectorService {
             source: 'requirements.txt',
           });
         }
-      } catch {
-        // ignore
+      } catch (err) {
+        this.logger.warn(
+          `Failed to parse requirements.txt for ${org}/${repo}: ${err.message}`,
+        );
       }
     }
 
