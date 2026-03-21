@@ -22,8 +22,8 @@ export class ProjectsCardComponent implements OnInit {
   @Input() topics: string[] = [];
   @Input() createdAt!: string;
   @Input() updatedAt!: string;
-  @Input() org!: string;
-  @Input() repo!: string;
+  @Input() org?: string;
+  @Input() repo?: string;
 
   issueCount = 0;
   pullRequestCount = 0;
@@ -32,8 +32,11 @@ export class ProjectsCardComponent implements OnInit {
   private http = inject(HttpClient);
 
   ngOnInit(): void {
-    if (!this.initialized) {
+    
+    if (this.org && this.repo && !this.initialized) {
       this.fetchIssuesAndPRs();
+    } else {
+      this.initialized = true; // fallback case 
     }
   }
 
@@ -54,6 +57,7 @@ export class ProjectsCardComponent implements OnInit {
       });
   }
 
+  
   public detailsVisible = false;
 
   toggleDetails() {

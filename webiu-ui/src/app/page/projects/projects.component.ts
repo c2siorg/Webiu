@@ -163,3 +163,4 @@ export class ProjectsComponent implements OnInit {
     this.fetchCurrentPage();
   }
 }
+

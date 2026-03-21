@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';

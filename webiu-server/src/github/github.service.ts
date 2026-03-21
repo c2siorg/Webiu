@@ -500,6 +500,7 @@ export class GithubService {
     }
   }
 
+
   async searchOrgRepos(query: string): Promise<GithubRepo[]> {
     const normalizedQuery = query.toLowerCase();
     const cacheKey = `search_repos:${normalizedQuery}:${this.orgName}`;
@@ -509,6 +510,7 @@ export class GithubService {
     const encoded = encodeURIComponent(query);
     const repos = await this.fetchAllSearchPages<GithubRepo>(
       `${this.baseUrl}/search/repositories?q=${encoded}+org:${this.orgName}`,
+
     );
 
     this.cacheService.set(cacheKey, repos);
