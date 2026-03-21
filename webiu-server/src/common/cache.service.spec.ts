@@ -1,4 +1,5 @@
 import { CacheService } from './cache.service';
+import { CacheKey } from './cache.types';
 
 function mockConfig(ttl?: string) {
   return { get: jest.fn().mockReturnValue(ttl) } as any;
@@ -11,42 +12,59 @@ describe('CacheService', () => {
     service = new CacheService(mockConfig());
   });
 
+  const validKey: CacheKey = 'user_social:test';
+  const validValue = { followers: 10, following: 5 };
+
+  const validKey2: CacheKey = 'all_contributors';
+  const validValue2 = [
+    { login: 'test', contributions: 1, repos: [], avatar_url: '' },
+  ];
+
+  const nonexistentKey: CacheKey = 'user_social:missing';
+
   it('should store and retrieve values', () => {
-    service.set('key', 'value', 60);
-    expect(service.get('key')).toBe('value');
+    service.set(validKey, validValue, 60);
+    expect(service.get(validKey)).toEqual(validValue);
   });
 
   it('should return null for missing keys', () => {
-    expect(service.get('nonexistent')).toBeNull();
+    expect(service.get(nonexistentKey)).toBeNull();
   });
 
   it('should return null for expired entries', async () => {
-    service.set('key', 'value', 1); // expires in 1 second
-    expect(service.get('key')).toBe('value');
+    service.set(validKey, validValue, 1); // expires in 1 second
+    expect(service.get(validKey)).toEqual(validValue);
 
     // Wait for expiry
     await new Promise((resolve) => setTimeout(resolve, 1100));
-    expect(service.get('key')).toBeNull();
+    expect(service.get(validKey)).toBeNull();
   });
 
   it('should delete a specific key', () => {
-    service.set('key', 'value', 60);
-    service.delete('key');
-    expect(service.get('key')).toBeNull();
+    service.set(validKey, validValue, 60);
+    service.delete(validKey);
+    expect(service.get(validKey)).toBeNull();
   });
 
   it('should clear all entries', () => {
-    service.set('key1', 'value1', 60);
-    service.set('key2', 'value2', 60);
+    service.set(validKey, validValue, 60);
+    service.set(validKey2, validValue2, 60);
     service.clear();
-    expect(service.get('key1')).toBeNull();
-    expect(service.get('key2')).toBeNull();
+    expect(service.get(validKey)).toBeNull();
+    expect(service.get(validKey2)).toBeNull();
   });
 
   it('should handle complex objects', () => {
-    const data = { repos: [{ name: 'repo1' }], count: 5 };
-    service.set('complex', data, 60);
-    expect(service.get('complex')).toEqual(data);
+    const data = [
+      {
+        login: 'user1',
+        contributions: 10,
+        repos: ['repo1'],
+        avatar_url: 'url',
+      },
+    ];
+    service.set('all_contributors', data, 60);
+    expect(service.get('all_contributors')).toEqual(data);
   });
 
   describe('TTL configuration', () => {
@@ -64,11 +82,11 @@ describe('CacheService', () => {
         .mockReturnValueOnce(now + 61_000);
 
       const s = new CacheService(mockConfig('60'));
-      s.set('key', 'value');
-      expect(s.get('key')).toBe('value');
+      s.set(validKey, validValue);
+      expect(s.get(validKey)).toEqual(validValue);
 
-      s.set('key2', 'value2');
-      expect(s.get('key2')).toBeNull();
+      s.set(validKey2, validValue2);
+      expect(s.get(validKey2)).toBeNull();
     });
 
     it('should fall back to 300s when CACHE_TTL_SECONDS is missing', () => {
@@ -79,8 +97,8 @@ describe('CacheService', () => {
         .mockReturnValueOnce(now + 301_000);
 
       const s = new CacheService(mockConfig(undefined));
-      s.set('key', 'value');
-      expect(s.get('key')).toBeNull();
+      s.set(validKey, validValue);
+      expect(s.get(validKey)).toBeNull();
     });
 
     it('should fall back to 300s when CACHE_TTL_SECONDS is invalid (NaN)', () => {
@@ -91,8 +109,8 @@ describe('CacheService', () => {
         .mockReturnValueOnce(now + 301_000);
 
       const s = new CacheService(mockConfig('abc'));
-      s.set('key', 'value');
-      expect(s.get('key')).toBeNull();
+      s.set(validKey, validValue);
+      expect(s.get(validKey)).toBeNull();
     });
 
     it('should fall back to 300s when CACHE_TTL_SECONDS is zero or negative', () => {
@@ -103,8 +121,8 @@ describe('CacheService', () => {
         .mockReturnValueOnce(now + 301_000);
 
       const s = new CacheService(mockConfig('0'));
-      s.set('key', 'value');
-      expect(s.get('key')).toBeNull();
+      s.set(validKey, validValue);
+      expect(s.get(validKey)).toBeNull();
     });
 
     it('should use defaultTtl when set() is called without explicit ttlSeconds', () => {
@@ -117,11 +135,11 @@ describe('CacheService', () => {
         .mockReturnValueOnce(now + 121_000);
 
       const s = new CacheService(mockConfig('120'));
-      s.set('key', 'value');
-      expect(s.get('key')).toBe('value');
+      s.set(validKey, validValue);
+      expect(s.get(validKey)).toEqual(validValue);
 
-      s.set('key2', 'value2');
-      expect(s.get('key2')).toBeNull();
+      s.set(validKey2, validValue2);
+      expect(s.get(validKey2)).toBeNull();
     });
   });
 });

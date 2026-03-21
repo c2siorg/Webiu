@@ -1,6 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
+import {
+  GithubRepo,
+  GithubPullRequest,
+  GithubIssue,
+  GithubContributor,
+  GithubUserProfile,
+  GithubOauthResponse,
+} from '../common/cache.types';
 import axios from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
@@ -29,8 +37,8 @@ export class GithubService {
     return this.orgName;
   }
 
-  private async fetchAllPages(url: string): Promise<any[]> {
-    const results: any[] = [];
+  private async fetchAllPages<T>(url: string): Promise<T[]> {
+    const results: T[] = [];
     let page = 1;
 
     while (true) {
@@ -52,8 +60,8 @@ export class GithubService {
     return results;
   }
 
-  private async fetchAllSearchPages(url: string): Promise<any[]> {
-    const results: any[] = [];
+  private async fetchAllSearchPages<T>(url: string): Promise<T[]> {
+    const results: T[] = [];
     let page = 1;
 
     while (true) {
@@ -75,12 +83,13 @@ export class GithubService {
     return results;
   }
 
-  async getOrgRepos(): Promise<any[]>;
-  async getOrgRepos(page: number, perPage: number): Promise<any[]>;
-  async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {
+  async getOrgRepos(): Promise<GithubRepo[]>;
+  async getOrgRepos(page: number, perPage: number): Promise<GithubRepo[]>;
+  async getOrgRepos(page?: number, perPage?: number): Promise<GithubRepo[]> {
     if (page !== undefined && perPage !== undefined) {
-      const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
-      const cached = this.cacheService.get<any[]>(cacheKey);
+      const cacheKey =
+        `org_repos_${this.orgName}_p${page}_pp${perPage}` as const;
+      const cached = this.cacheService.get(cacheKey);
       if (cached) return cached;
 
       const response = await axios.get(
@@ -92,35 +101,35 @@ export class GithubService {
       return repos;
     }
 
-    const cacheKey = `org_repos_${this.orgName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cacheKey = `org_repos_${this.orgName}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllPages(
+    const repos = await this.fetchAllPages<GithubRepo>(
       `${this.baseUrl}/orgs/${this.orgName}/repos`,
     );
     this.cacheService.set(cacheKey, repos);
     return repos;
   }
 
-  async getRepoPulls(repoName: string): Promise<any[]> {
-    const cacheKey = `pulls_${this.orgName}_${repoName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+  async getRepoPulls(repoName: string): Promise<GithubPullRequest[]> {
+    const cacheKey = `pulls_${this.orgName}_${repoName}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
-    const pulls = await this.fetchAllPages(
+    const pulls = await this.fetchAllPages<GithubPullRequest>(
       `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls`,
     );
     this.cacheService.set(cacheKey, pulls);
     return pulls;
   }
 
-  async getRepoIssues(org: string, repo: string): Promise<any[]> {
-    const cacheKey = `issues_${org}_${repo}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+  async getRepoIssues(org: string, repo: string): Promise<GithubIssue[]> {
+    const cacheKey = `issues_${org}_${repo}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
-    const issues = await this.fetchAllPages(
+    const issues = await this.fetchAllPages<GithubIssue>(
       `${this.baseUrl}/repos/${org}/${repo}/issues`,
     );
     this.cacheService.set(cacheKey, issues);
@@ -130,13 +139,13 @@ export class GithubService {
   async getRepoContributors(
     orgName: string,
     repoName: string,
-  ): Promise<any[] | null> {
-    const cacheKey = `contributors_${orgName}_${repoName}`;
-    const cached = this.cacheService.get<any[] | null>(cacheKey);
+  ): Promise<GithubContributor[] | null> {
+    const cacheKey = `contributors_${orgName}_${repoName}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached !== null) return cached;
 
     try {
-      const contributors = await this.fetchAllPages(
+      const contributors = await this.fetchAllPages<GithubContributor>(
         `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
       );
       this.cacheService.set(cacheKey, contributors);
@@ -146,26 +155,28 @@ export class GithubService {
     }
   }
 
-  async searchUserIssues(username: string): Promise<any[]> {
+  async searchUserIssues(username: string): Promise<GithubIssue[]> {
     const normalizedUsername = username.toLowerCase();
-    const cacheKey = `search_issues:${normalizedUsername}:${this.orgName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cacheKey =
+      `search_issues:${normalizedUsername}:${this.orgName}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
-    const issues = await this.fetchAllSearchPages(
+    const issues = await this.fetchAllSearchPages<GithubIssue>(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
     );
     this.cacheService.set(cacheKey, issues);
     return issues;
   }
 
-  async searchUserPullRequests(username: string): Promise<any[]> {
+  async searchUserPullRequests(username: string): Promise<GithubPullRequest[]> {
     const normalizedUsername = username.toLowerCase();
-    const cacheKey = `search_prs:${normalizedUsername}:${this.orgName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cacheKey =
+      `search_prs:${normalizedUsername}:${this.orgName}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
-    const prs = await this.fetchAllSearchPages(
+    const prs = await this.fetchAllSearchPages<GithubPullRequest>(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
     );
 
@@ -200,16 +211,16 @@ export class GithubService {
     return enrichedPrs;
   }
 
-  async getUserInfo(accessToken: string): Promise<any> {
+  async getUserInfo(accessToken: string): Promise<GithubUserProfile> {
     const response = await axios.get(`${this.baseUrl}/user`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
     return response.data;
   }
 
-  async getPublicUserProfile(username: string): Promise<any> {
-    const cacheKey = `user_profile_${username}`;
-    const cached = this.cacheService.get<any>(cacheKey);
+  async getPublicUserProfile(username: string): Promise<GithubUserProfile> {
+    const cacheKey = `user_profile_${username}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     const response = await axios.get(`${this.baseUrl}/users/${username}`, {
@@ -224,7 +235,7 @@ export class GithubService {
     clientSecret: string,
     code: string,
     redirectUri: string,
-  ): Promise<any> {
+  ): Promise<GithubOauthResponse> {
     const response = await axios.post(
       'https://github.com/login/oauth/access_token',
       new URLSearchParams({
@@ -247,11 +258,8 @@ export class GithubService {
     following: number;
   }> {
     const normalizedUsername = username.toLowerCase();
-    const cacheKey = `user_social:${normalizedUsername}`;
-    const cached = this.cacheService.get<{
-      followers: number;
-      following: number;
-    }>(cacheKey);
+    const cacheKey = `user_social:${normalizedUsername}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -280,13 +288,13 @@ export class GithubService {
     }
   }
 
-  async searchOrgRepos(query: string): Promise<any[]> {
+  async searchOrgRepos(query: string): Promise<GithubRepo[]> {
     const normalizedQuery = query.toLowerCase();
-    const cacheKey = `search_repos:${normalizedQuery}:${this.orgName}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cacheKey = `search_repos:${normalizedQuery}:${this.orgName}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllSearchPages(
+    const repos = await this.fetchAllSearchPages<GithubRepo>(
       `${this.baseUrl}/search/repositories?q=${query}+org:${this.orgName}`,
     );
 

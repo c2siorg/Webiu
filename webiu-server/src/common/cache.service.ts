@@ -1,15 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-
-interface CacheEntry<T> {
-  data: T;
-  expiresAt: number;
-}
+import { CacheEntry, CacheKey, CacheValue } from './cache.types';
 
 @Injectable()
 export class CacheService {
   private readonly logger = new Logger(CacheService.name);
-  private cache = new Map<string, CacheEntry<any>>();
+  private cache = new Map<string, CacheEntry<unknown>>();
   private readonly defaultTtl: number;
 
   constructor(private configService: ConfigService) {
@@ -27,7 +23,7 @@ export class CacheService {
     }
   }
 
-  get<T>(key: string): T | null {
+  get<K extends CacheKey>(key: K): CacheValue<K> | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
 
@@ -36,10 +32,14 @@ export class CacheService {
       return null;
     }
 
-    return entry.data as T;
+    return entry.data as CacheValue<K>;
   }
 
-  set<T>(key: string, data: T, ttlSeconds?: number): void {
+  set<K extends CacheKey>(
+    key: K,
+    data: CacheValue<K>,
+    ttlSeconds?: number,
+  ): void {
     const ttl = ttlSeconds ?? this.defaultTtl;
     this.cache.set(key, {
       data,
@@ -47,7 +47,7 @@ export class CacheService {
     });
   }
 
-  delete(key: string): void {
+  delete(key: CacheKey): void {
     this.cache.delete(key);
   }
 
