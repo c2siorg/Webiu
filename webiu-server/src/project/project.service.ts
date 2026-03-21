@@ -19,13 +19,8 @@ export class ProjectService {
   ) {}
 
   async getAllProjects(page = 1, limit = 10) {
-    const cacheKey = `projects_p${page}_pp${limit}`;
-    const cached = this.cacheService.get<{
-      total: number;
-      page: number;
-      limit: number;
-      repositories: any[];
-    }>(cacheKey);
+    const cacheKey = `projects_p${page}_pp${limit}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -76,7 +71,7 @@ export class ProjectService {
       throw new BadRequestException('Organization and repository are required');
     }
 
-    const cacheKey = `issues_pr_count_${org}_${repo}`;
+    const cacheKey = `issues_pr_count_${org}_${repo}` as const;
     const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
@@ -103,8 +98,8 @@ export class ProjectService {
       throw new BadRequestException('Search query is required');
     }
 
-    const cacheKey = `projects_search_${query}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cacheKey = `projects_search_${query}` as const;
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -121,12 +116,14 @@ export class ProjectService {
         }),
       );
 
-      this.cacheService.set(cacheKey, repositoriesWithPRs, CACHE_TTL);
-
-      return {
+      const result = {
         total: repositoriesWithPRs.length,
         repositories: repositoriesWithPRs,
       };
+
+      this.cacheService.set(cacheKey, result, CACHE_TTL);
+
+      return result;
     } catch (error) {
       this.logger.error(
         'Error searching repositories:',

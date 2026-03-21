@@ -65,7 +65,7 @@ describe('ContributorService', () => {
           { login: 'user2', contributions: 5, avatar_url: 'url2' },
         ]);
 
-      const result = (await service.getAllContributors()) as any[];
+      const result = await service.getAllContributors();
 
       expect(result).toHaveLength(2);
       const user1 = result.find((c) => c.login === 'user1');

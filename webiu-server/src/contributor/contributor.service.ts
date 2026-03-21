@@ -18,7 +18,7 @@ export class ContributorService {
   ) {}
 
   async getAllContributors() {
-    const cacheKey = 'all_contributors';
+    const cacheKey = 'all_contributors' as const;
     const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
