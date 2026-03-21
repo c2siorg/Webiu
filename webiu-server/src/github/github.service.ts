@@ -29,49 +29,43 @@ export class GithubService {
     return this.orgName;
   }
 
+  private delay(ms: number): Promise<void> {
+    return new Promise((res) => setTimeout(res, ms));
+  }
+
   private async fetchAllPages(url: string): Promise<any[]> {
     const results: any[] = [];
     let page = 1;
-
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
       const response = await axios.get(
         `${url}${separator}per_page=100&page=${page}`,
         { headers: this.headers },
       );
-
       const data = response.data;
       if (!Array.isArray(data) || data.length === 0) break;
-
       results.push(...data);
-
       if (data.length < 100) break;
       page++;
     }
-
     return results;
   }
 
   private async fetchAllSearchPages(url: string): Promise<any[]> {
     const results: any[] = [];
     let page = 1;
-
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
       const response = await axios.get(
         `${url}${separator}per_page=100&page=${page}`,
         { headers: this.headers },
       );
-
       const items = response.data.items || [];
       if (items.length === 0) break;
-
       results.push(...items);
-
       if (items.length < 100) break;
       page++;
     }
-
     return results;
   }
 
@@ -82,7 +76,6 @@ export class GithubService {
       const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
       const cached = this.cacheService.get<any[]>(cacheKey);
       if (cached) return cached;
-
       const response = await axios.get(
         `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
         { headers: this.headers },
@@ -91,11 +84,9 @@ export class GithubService {
       this.cacheService.set(cacheKey, repos, CACHE_TTL);
       return repos;
     }
-
     const cacheKey = `org_repos_${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
-
     const repos = await this.fetchAllPages(
       `${this.baseUrl}/orgs/${this.orgName}/repos`,
     );
@@ -107,7 +98,6 @@ export class GithubService {
     const cacheKey = `pulls_${this.orgName}_${repoName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
-
     const pulls = await this.fetchAllPages(
       `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls`,
     );
@@ -119,7 +109,6 @@ export class GithubService {
     const cacheKey = `issues_${org}_${repo}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
-
     const issues = await this.fetchAllPages(
       `${this.baseUrl}/repos/${org}/${repo}/issues`,
     );
@@ -134,7 +123,6 @@ export class GithubService {
     const cacheKey = `contributors_${orgName}_${repoName}`;
     const cached = this.cacheService.get<any[] | null>(cacheKey);
     if (cached !== null) return cached;
-
     try {
       const contributors = await this.fetchAllPages(
         `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
@@ -151,7 +139,6 @@ export class GithubService {
     const cacheKey = `search_issues:${normalizedUsername}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
-
     const issues = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
     );
@@ -169,28 +156,35 @@ export class GithubService {
       `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
     );
 
-    // Fetch details for closed PRs to determine if they were merged
-    const enrichedPrs = await Promise.all(
-      prs.map(async (pr) => {
-        // Only fetch details if closed and we don't know if merged (merged_at missing)
-        // Note: Search API results for PRs don't include merged_at at the top level usually
-        if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
-          try {
-            const response = await axios.get(pr.pull_request.url, {
-              headers: this.headers,
-            });
-            if (response.data.merged_at) {
-              pr.merged_at = response.data.merged_at;
-            }
-          } catch {
-            // Ignore errors for individual PR fetches to avoid failing the whole request
-          }
-        }
-        return pr;
-      }),
-    );
+    // Process PRs in batches of 5 to avoid GitHub secondary rate limits
+    const BATCH_SIZE = 5;
+    const enrichedPrs: any[] = [];
 
-    // Sort by created_at descending
+    for (let i = 0; i < prs.length; i += BATCH_SIZE) {
+      const batch = prs.slice(i, i + BATCH_SIZE);
+      const results = await Promise.all(
+        batch.map(async (pr) => {
+          if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
+            try {
+              const response = await axios.get(pr.pull_request.url, {
+                headers: this.headers,
+              });
+              if (response.data.merged_at) {
+                pr.merged_at = response.data.merged_at;
+              }
+            } catch {
+              // Ignore errors for individual PR fetches
+            }
+          }
+          return pr;
+        }),
+      );
+      enrichedPrs.push(...results);
+      if (i + BATCH_SIZE < prs.length) {
+        await this.delay(200);
+      }
+    }
+
     enrichedPrs.sort(
       (a, b) =>
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
@@ -211,7 +205,6 @@ export class GithubService {
     const cacheKey = `user_profile_${username}`;
     const cached = this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
-
     const response = await axios.get(`${this.baseUrl}/users/${username}`, {
       headers: this.headers,
     });
@@ -253,7 +246,6 @@ export class GithubService {
       following: number;
     }>(cacheKey);
     if (cached) return cached;
-
     try {
       const [followersResponse, followingResponse] = await Promise.all([
         axios.get(`${this.baseUrl}/users/${username}/followers`, {
@@ -263,12 +255,10 @@ export class GithubService {
           headers: this.headers,
         }),
       ]);
-
       const result = {
         followers: followersResponse.data.length || 0,
         following: followingResponse.data.length || 0,
       };
-
       this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
@@ -285,11 +275,9 @@ export class GithubService {
     const cacheKey = `search_repos:${normalizedQuery}:${this.orgName}`;
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
-
     const repos = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/repositories?q=${query}+org:${this.orgName}`,
     );
-
     this.cacheService.set(cacheKey, repos);
     return repos;
   }
