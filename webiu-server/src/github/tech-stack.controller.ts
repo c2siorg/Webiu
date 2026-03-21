@@ -7,7 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import { GithubService } from './github.service';
 
-@Controller('api/projects')
+@Controller('api/v1/projects')
 export class TechStackController {
   private readonly token: string;
 
