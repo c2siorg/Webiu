@@ -1,14 +1,14 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, DestroyRef, OnInit } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
-import { Contributor } from '../../common/data/contributor';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';
-import { BackToTopComponent } from '../../components/back-to-top/back-to-top.component';
+import { GithubContributor } from '../../models/github.model';
 
 @Component({
   selector: 'app-community',
@@ -19,15 +19,15 @@ import { BackToTopComponent } from '../../components/back-to-top/back-to-top.com
     HttpClientModule,
     ProfileCardComponent,
     RouterModule,
-    BackToTopComponent,
   ],
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],
 })
 export class CommunityComponent implements OnInit {
   private http = inject(HttpClient);
+  private destroyRef = inject(DestroyRef);
   icons: Media[] = socialMedia;
-  users: Contributor[] = [];
+  users: GithubContributor[] = [];
   isLoading = true;
 
   ngOnInit() {
@@ -36,7 +36,10 @@ export class CommunityComponent implements OnInit {
 
   getTopContributors() {
     this.http
-      .get<Contributor[]>(`${environment.serverUrl}/api/contributor/contributors`)
+      .get<GithubContributor[]>(
+        `${environment.serverUrl}/api/v1/contributor/contributors`,
+      )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (res) => {
           const sorted = (res || []).sort(
@@ -45,12 +48,8 @@ export class CommunityComponent implements OnInit {
           this.users = sorted.slice(0, 8);
           this.fetchFollowerData();
         },
-        error: (error: HttpErrorResponse) => {
-          console.error('Error fetching contributors', {
-            status: error.status,
-            message: error.message,
-            body: error.error,
-          });
+        error: (error) => {
+          console.warn('Error fetching contributors:', error);
           this.users = [];
           this.isLoading = false;
         },
@@ -63,38 +62,27 @@ export class CommunityComponent implements OnInit {
       return;
     }
 
-    const usernames = this.users.map((profile) => profile.login);
+    const usernames = this.users.map((u) => u.login);
 
     this.http
       .post<Record<string, { followers: number; following: number }>>(
-        `${environment.serverUrl}/api/user/batch-social`,
+        `${environment.serverUrl}/api/v1/user/batch-social`,
         { usernames },
       )
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
-          this.users = this.users.map((profile) => {
-            // Guard against null/undefined data
-            const socials = data ?? {};
-            const social = socials[profile.login] ?? null;
-            return {
-              ...profile,
-              followers: social?.followers ?? 0,
-              following: social?.following ?? 0,
-            };
+          this.users.forEach((user) => {
+            const social = data[user.login];
+            // ← Fix: Bracket notation for index signature safety (TS4111 resolved)
+            (user as any)['followers'] = social?.followers ?? 0;
+            (user as any)['following'] = social?.following ?? 0;
           });
           this.isLoading = false;
         },
-        error: (error: HttpErrorResponse) => {
-          console.error('Error fetching followers and following data', {
-            status: error.status,
-            message: error.message,
-            body: error.error,
-          });
-          this.users = this.users.map((profile) => ({
-            ...profile,
-            followers: profile.followers ?? 0,
-            following: profile.following ?? 0,
-          }));
+        error: (error) => {
+          console.warn('Error fetching follower data:', error);
+          // Show contributors without social counts rather than failing entirely
           this.isLoading = false;
         },
       });

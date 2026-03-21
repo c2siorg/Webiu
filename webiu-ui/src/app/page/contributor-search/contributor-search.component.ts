@@ -1,60 +1,72 @@
-import { Component, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  PLATFORM_ID,
+  DestroyRef,
+} from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { formatDistanceToNow } from 'date-fns';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import {
+  GithubIssue,
+  GithubPullRequest,
+  GithubUserProfile,
+} from '../../models/github.model';
 
 @Component({
   selector: 'app-contributor-search',
   standalone: true,
-  imports: [FormsModule, CommonModule, LoadingSpinnerComponent, HttpClientModule],
+  imports: [
+    FormsModule,
+    CommonModule,
+    LoadingSpinnerComponent,
+    HttpClientModule,
+  ],
   templateUrl: './contributor-search.component.html',
   styleUrls: ['./contributor-search.component.scss'],
 })
 export class ContributorSearchComponent implements OnInit {
   private platformId = inject(PLATFORM_ID);
   username = '';
-  issues: any[] = [];
-  pullRequests: any[] = [];
+  issues: GithubIssue[] = [];
+  pullRequests: GithubPullRequest[] = [];
   uniqueRepositories: string[] = [];
-  filteredIssues: any[] = [];
-  filteredPullRequests: any[] = [];
+  filteredIssues: GithubIssue[] = [];
+  filteredPullRequests: GithubPullRequest[] = [];
   errorMessage = '';
   loading = false;
   activeView: 'issues' | 'pullRequests' = 'issues';
   selectedStatus = '';
   selectedSort = 'updated-desc';
   selectedRepo = '';
-  userProfile: {
-    login: string;
-    avatar_url: string;
-    html_url: string;
-    name: string | null;
-    bio: string | null;
-    location: string | null;
-    followers: number;
-    following: number;
-    created_at: string;
-  } | null = null;
-  private apiUrl = `${environment.serverUrl}/api/contributor`;
-  private userUrl = `${environment.serverUrl}/api/user`;
+  userProfile: GithubUserProfile | null = null;
+  private apiUrl = `${environment.serverUrl}/api/v1/contributor`;
+  private userUrl = `${environment.serverUrl}/api/v1/user`;
 
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private http = inject(HttpClient);
+  private toastr = inject(ToastrService);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    this.route.queryParams.subscribe((params) => {
-      const param = params['username']?.trim();
-      if (param && param !== this.username) {
-        this.username = param;
-        this.fetchUserData();
-      }
-    });
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const param = params['username']?.trim();
+        if (param && param !== this.username) {
+          this.username = param;
+          this.fetchUserData();
+        }
+      });
   }
 
   onSearch() {
@@ -79,8 +91,14 @@ export class ContributorSearchComponent implements OnInit {
 
     try {
       const [statsResponse, userProfileResponse] = await Promise.all([
-        firstValueFrom(this.http.get<any>(`${this.apiUrl}/stats/${this.username}`)),
-        firstValueFrom(this.http.get<any>(`${this.userUrl}/profile/${this.username}`)),
+        firstValueFrom(
+          this.http.get<any>(`${this.apiUrl}/stats/${this.username}`),
+        ),
+        firstValueFrom(
+          this.http.get<GithubUserProfile>(
+            `${this.userUrl}/profile/${this.username}`,
+          ),
+        ),
       ]);
 
       this.issues = statsResponse.issues;
@@ -101,9 +119,12 @@ export class ContributorSearchComponent implements OnInit {
       this.extractRepositories();
       this.filteredIssues = [...this.issues];
       this.filteredPullRequests = [...this.pullRequests];
+      this.toastr.success(
+        `Found developer data for ${this.username}`,
+        'Success',
+      );
     } catch {
-      this.errorMessage =
-        'Failed to fetch data. Please check the username or try again later.';
+      // Global error interceptor will handle the notification
     } finally {
       this.loading = false;
     }
@@ -116,7 +137,8 @@ export class ContributorSearchComponent implements OnInit {
         ...this.pullRequests.map((pr) => pr.repository_url.split('/').pop()),
       ]),
     ];
-    this.uniqueRepositories = allRepos;
+    // ← Fix: Filter out undefined (from pop() on malformed URL)
+    this.uniqueRepositories = allRepos.filter((repo): repo is string => !!repo);
   }
 
   onRepoFilterChange(event: Event) {
@@ -137,11 +159,16 @@ export class ContributorSearchComponent implements OnInit {
   applyFilters() {
     // Filter by repository
     let filteredIssues = this.selectedRepo
-      ? this.issues.filter((issue) => issue.repository_url.split('/').pop() === this.selectedRepo)
+      ? this.issues.filter(
+          (issue) =>
+            issue.repository_url.split('/').pop() === this.selectedRepo,
+        )
       : [...this.issues];
 
     let filteredPRs = this.selectedRepo
-      ? this.pullRequests.filter((pr) => pr.repository_url.split('/').pop() === this.selectedRepo)
+      ? this.pullRequests.filter(
+          (pr) => pr.repository_url.split('/').pop() === this.selectedRepo,
+        )
       : [...this.pullRequests];
 
     // Filter by status
@@ -164,35 +191,54 @@ export class ContributorSearchComponent implements OnInit {
     this.filteredPullRequests = this.sortItems(filteredPRs, this.selectedSort);
   }
 
-  sortItems(items: any[], sortBy: string): any[] {
+  sortItems(
+    items: (GithubIssue | GithubPullRequest)[],
+    sortBy: string,
+  ): (GithubIssue | GithubPullRequest)[] {
     const sorted = [...items];
 
     switch (sortBy) {
       case 'updated-desc':
-        return sorted.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+        return sorted.sort(
+          (a, b) =>
+            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime(),
+        );
       case 'updated-asc':
-        return sorted.sort((a, b) => new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime());
+        return sorted.sort(
+          (a, b) =>
+            new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime(),
+        );
       case 'created-desc':
-        return sorted.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        return sorted.sort(
+          (a, b) =>
+            new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        );
       case 'created-asc':
-        return sorted.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        return sorted.sort(
+          (a, b) =>
+            new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+        );
       case 'title-asc':
-        return sorted.sort((a, b) => a.title.toLowerCase().localeCompare(b.title.toLowerCase()));
+        return sorted.sort((a, b) =>
+          a.title.toLowerCase().localeCompare(b.title.toLowerCase()),
+        );
       case 'title-desc':
-        return sorted.sort((a, b) => b.title.toLowerCase().localeCompare(a.title.toLowerCase()));
+        return sorted.sort((a, b) =>
+          b.title.toLowerCase().localeCompare(a.title.toLowerCase()),
+        );
       default:
         return sorted;
     }
   }
 
-  getPrStatusClass(pr: any): string {
+  getPrStatusClass(pr: GithubPullRequest): string {
     if (pr.merged_at) return 'merged';
     if (pr.closed_at) return 'closed-pr';
     if (pr.draft) return 'draft';
     return 'open';
   }
 
-  getPrIconClass(pr: any): string {
+  getPrIconClass(pr: GithubPullRequest): string {
     if (pr.merged_at) return 'fas fa-code-branch';
     if (pr.closed_at) return 'fas fa-ban'; // Changed from fa-times-circle to fa-ban which is cleaner
     if (pr.draft) return 'far fa-file-alt';
@@ -238,6 +284,9 @@ export class ContributorSearchComponent implements OnInit {
   get memberSince(): string {
     if (!this.userProfile?.created_at) return '';
     const date = new Date(this.userProfile.created_at);
-    return date.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      year: 'numeric',
+    });
   }
 }

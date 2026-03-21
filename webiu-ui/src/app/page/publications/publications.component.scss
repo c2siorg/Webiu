@@ -41,7 +41,13 @@
     display: grid;
     gap: 25px;
     grid-template-columns: repeat(2, 1fr);
+    grid-auto-rows: 1fr;
     padding: 20px;
+
+    app-publications-card {
+      display: flex;
+      height: 100%;
+    }
   }
 }
 
