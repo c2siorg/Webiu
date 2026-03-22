@@ -87,7 +87,7 @@ export class ContributorsComponent implements OnInit {
 
   fetchFollowerData() {
     if (!this.contributors || this.contributors.length === 0) {
-      this.isLoading = false;
+      this.handleProfileResponse([]);
       return;
     }
 
@@ -112,7 +112,6 @@ export class ContributorsComponent implements OnInit {
         error: () => {
           this.profiles = [...this.contributors];
           this.handleProfileResponse(this.profiles);
-          this.isLoading = false;
         },
       });
   }
