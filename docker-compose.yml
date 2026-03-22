@@ -5,8 +5,10 @@ services:
     build:
       context: ./webiu-server
     container_name: webiu-server
-    env_files:
-      - ./webiu-server/ .env
+
+    env_file:
+      - ./webiu-server/.env
+
     ports:
       - 5050:5050
     environment:
