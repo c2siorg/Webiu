@@ -23,14 +23,14 @@ export class ProjectController {
   @Get('search')
   @Header('Cache-Control', 'public, max-age=300')
   async searchProjects(@Query('q') query: string) {
-    if (!query) {
+    if (!query || !query.trim()) {
       return {
         total: 0,
         repositories: [],
       };
     }
 
-    return this.projectService.searchProjects(query);
+    return this.projectService.searchProjects(query.trim());
   }
 }
 
