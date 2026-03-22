@@ -19,9 +19,10 @@ describe('GithubService', () => {
         {
           provide: ConfigService,
           useValue: {
-            get: jest.fn((key: string) => {
+            get: jest.fn((key: string, defaultValue?: any) => {
               if (key === 'GITHUB_ACCESS_TOKEN') return 'test-token';
-              return null;
+              if (key === 'GITHUB_ORG_NAME') return defaultValue || 'c2siorg';
+              return defaultValue || null;
             }),
           },
         },
