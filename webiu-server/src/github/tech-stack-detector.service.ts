@@ -66,6 +66,11 @@ const LANGUAGE_MAP: Record<string, string> = {
   'docker-compose.yml': 'Docker Compose',
 };
 
+function toErrorMessage(err: unknown): string {
+  if (err instanceof Error) return err.message;
+  return String(err);
+}
+
 @Injectable()
 export class TechStackDetectorService {
   private readonly baseUrl = 'https://api.github.com';
@@ -86,7 +91,6 @@ export class TechStackDetectorService {
   ): Promise<TechStackResult> {
     const technologies: DetectedTechnology[] = [];
 
-    // Step 1: Get root file tree
     let rootContents: any[] = [];
     try {
       const response = await axios.get(
@@ -95,8 +99,9 @@ export class TechStackDetectorService {
       );
       rootContents = response.data;
     } catch (err) {
+      const status = (err as any)?.response?.status;
       this.logger.warn(
-        `Failed to fetch contents for ${org}/${repo}: ${err?.response?.status ?? err.message}`,
+        `Failed to fetch contents for ${org}/${repo}: ${status ?? toErrorMessage(err)}`,
       );
       return {
         org,
@@ -111,7 +116,6 @@ export class TechStackDetectorService {
       .filter((f) => f.type === 'file')
       .map((f) => f.name);
 
-    // Step 2: Detect from manifest file presence
     for (const file of MANIFEST_FILES) {
       if (fileNames.includes(file) && LANGUAGE_MAP[file]) {
         technologies.push({
@@ -122,7 +126,6 @@ export class TechStackDetectorService {
       }
     }
 
-    // Step 3: Analyze package.json
     if (fileNames.includes('package.json')) {
       try {
         const pkgFile = rootContents.find((f) => f.name === 'package.json');
@@ -154,12 +157,11 @@ export class TechStackDetectorService {
         }
       } catch (err) {
         this.logger.warn(
-          `Failed to parse package.json for ${org}/${repo}: ${err.message}`,
+          `Failed to parse package.json for ${org}/${repo}: ${toErrorMessage(err)}`,
         );
       }
     }
 
-    // Step 4: Analyze requirements.txt
     if (fileNames.includes('requirements.txt')) {
       try {
         const reqFile = rootContents.find((f) => f.name === 'requirements.txt');
@@ -188,12 +190,11 @@ export class TechStackDetectorService {
         }
       } catch (err) {
         this.logger.warn(
-          `Failed to parse requirements.txt for ${org}/${repo}: ${err.message}`,
+          `Failed to parse requirements.txt for ${org}/${repo}: ${toErrorMessage(err)}`,
         );
       }
     }
 
-    // Step 5: Detect Go
     if (fileNames.includes('go.mod')) {
       if (!technologies.find((t) => t.name === 'Go')) {
         technologies.push({
@@ -204,7 +205,6 @@ export class TechStackDetectorService {
       }
     }
 
-    // Step 6: Deduplicate
     const seen = new Set<string>();
     const unique = technologies.filter((t) => {
       if (seen.has(t.name)) return false;
