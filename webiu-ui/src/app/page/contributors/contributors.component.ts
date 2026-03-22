@@ -107,7 +107,6 @@ export class ContributorsComponent implements OnInit {
           });
           this.profiles = [...this.contributors];
           this.handleProfileResponse(this.profiles);
-          this.isLoading = false;
         },
         error: () => {
           this.profiles = [...this.contributors];
