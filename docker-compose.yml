@@ -5,13 +5,17 @@ services:
     build:
       context: ./webiu-server
     container_name: webiu-server
+
+    env_file:
+      - ./webiu-server/.env
+
     ports:
       - 5050:5050
     environment:
       - NODE_ENV=development
     volumes:
       - ./webiu-server:/usr/src/app
-    command: ["npm", "start"]
+    command: [ "npm", "start" ]
 
   webiu-ui:
     build:
