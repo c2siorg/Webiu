@@ -14,4 +14,16 @@ export class ProjectResolver {
     const result = await this.projectService.getAllProjects(page, limit);
     return result?.repositories ?? [];
   }
+
+  @Query(() => [Repository])
+  async searchRepositories(
+    @Args('query', { type: () => String }) query: string,
+  ): Promise<Repository[]> {
+    if (!query || !query.trim()) return [];
+    const result = await this.projectService.searchProjects(query.trim());
+    return (
+      (result as { total: number; repositories: Repository[] })?.repositories ??
+      []
+    );
+  }
 }
