@@ -1,0 +1,218 @@
+<mat-toolbar class="admin-toolbar" color="primary">
+  <button
+    mat-icon-button
+    (click)="toggleSidenav()"
+    *ngIf="isMobile"
+    class="menu-button"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <h1 class="app-title">Admin Dashboard</h1>
+
+  <span class="spacer"></span>
+
+  <button
+    mat-icon-button
+    [matMenuTriggerFor]="userMenu"
+    class="user-menu-trigger"
+    [attr.aria-label]="'User menu'"
+  >
+    <span class="user-avatar">{{ getInitials() }}</span>
+  </button>
+
+  <mat-menu #userMenu="matMenu" class="user-menu">
+    <div class="user-info">
+      <div class="user-avatar-large">{{ getInitials() }}</div>
+      <div class="user-details">
+        <p class="user-name">{{ currentUser?.name }}</p>
+        <p class="user-email">{{ currentUser?.email }}</p>
+        <span class="user-role">{{ currentUser?.role }}</span>
+      </div>
+    </div>
+    <mat-divider></mat-divider>
+    <button mat-menu-item>
+      <mat-icon>settings</mat-icon>
+      <span>Settings</span>
+    </button>
+    <button mat-menu-item>
+      <mat-icon>help</mat-icon>
+      <span>Help</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item (click)="logout()">
+      <mat-icon>logout</mat-icon>
+      <span>Logout</span>
+    </button>
+  </mat-menu>
+</mat-toolbar>
+
+<mat-sidenav-container class="admin-container" autosize>
+  <mat-sidenav
+    #sidenav
+    [opened]="sidenavOpened"
+    mode="side"
+    [fixedInViewport]="isMobile"
+    [fixedTopGap]="isMobile ? 64 : 0"
+    class="admin-sidenav"
+  >
+    <mat-nav-list>
+      <h2 matSubheader>MENU</h2>
+
+      <mat-list-item routerLink="/admin/overview" routerLinkActive="active">
+        <mat-icon matListItemIcon>dashboard</mat-icon>
+        <span matListItemTitle>Overview</span>
+      </mat-list-item>
+
+      <mat-list-item routerLink="/admin/users" routerLinkActive="active">
+        <mat-icon matListItemIcon>people</mat-icon>
+        <span matListItemTitle>Users</span>
+      </mat-list-item>
+
+      <mat-list-item routerLink="/admin/content" routerLinkActive="active">
+        <mat-icon matListItemIcon>article</mat-icon>
+        <span matListItemTitle>Content</span>
+      </mat-list-item>
+
+      <mat-list-item routerLink="/admin/settings" routerLinkActive="active">
+        <mat-icon matListItemIcon>settings</mat-icon>
+        <span matListItemTitle>Settings</span>
+      </mat-list-item>
+
+      <mat-list-item routerLink="/admin/analytics" routerLinkActive="active">
+        <mat-icon matListItemIcon>analytics</mat-icon>
+        <span matListItemTitle>Analytics</span>
+      </mat-list-item>
+    </mat-nav-list>
+
+    <mat-divider></mat-divider>
+
+    <mat-nav-list>
+      <h2 matSubheader>GENERAL</h2>
+
+      <mat-list-item routerLink="/" target="_blank">
+        <mat-icon matListItemIcon>public</mat-icon>
+        <span matListItemTitle>View Website</span>
+      </mat-list-item>
+
+      <mat-list-item (click)="logout()">
+        <mat-icon matListItemIcon>exit_to_app</mat-icon>
+        <span matListItemTitle>Logout</span>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="admin-content">
+    <main class="main-content">
+      <!-- Overview Section -->
+      <section class="dashboard-section">
+        <h2 class="section-title">Welcome, {{ currentUser?.name }}!</h2>
+        <p class="section-subtitle">
+          Here's what's happening with your website today.
+        </p>
+
+        <mat-grid-list cols="4" rowHeight="200px" class="stats-grid">
+          <!-- Total Users Card -->
+          <mat-grid-tile>
+            <mat-card class="stat-card">
+              <mat-card-header>
+                <mat-icon class="stat-icon blue">people</mat-icon>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="stat-number">1,234</p>
+                <p class="stat-label">Total Users</p>
+              </mat-card-content>
+            </mat-card>
+          </mat-grid-tile>
+
+          <!-- Active Sessions Card -->
+          <mat-grid-tile>
+            <mat-card class="stat-card">
+              <mat-card-header>
+                <mat-icon class="stat-icon green">login</mat-icon>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="stat-number">42</p>
+                <p class="stat-label">Active Sessions</p>
+              </mat-card-content>
+            </mat-card>
+          </mat-grid-tile>
+
+          <!-- Content Items Card -->
+          <mat-grid-tile>
+            <mat-card class="stat-card">
+              <mat-card-header>
+                <mat-icon class="stat-icon orange">article</mat-icon>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="stat-number">89</p>
+                <p class="stat-label">Content Items</p>
+              </mat-card-content>
+            </mat-card>
+          </mat-grid-tile>
+
+          <!-- Page Views Card -->
+          <mat-grid-tile>
+            <mat-card class="stat-card">
+              <mat-card-header>
+                <mat-icon class="stat-icon red">visibility</mat-icon>
+              </mat-card-header>
+              <mat-card-content>
+                <p class="stat-number">12.5K</p>
+                <p class="stat-label">Page Views</p>
+              </mat-card-content>
+            </mat-card>
+          </mat-grid-tile>
+        </mat-grid-list>
+      </section>
+
+      <!-- Recent Activity Section -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Recent Activity</h3>
+        <mat-card class="activity-card">
+          <mat-card-content>
+            <p class="placeholder-text">
+              Recent activity logs and updates will appear here.
+            </p>
+          </mat-card-content>
+        </mat-card>
+      </section>
+
+      <!-- Additional Resources -->
+      <section class="dashboard-section">
+        <h3 class="section-title">Quick Links</h3>
+        <div class="quick-links">
+          <mat-card class="link-card">
+            <mat-card-header>
+              <h4>Documentation</h4>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Learn how to manage your website content and users.</p>
+              <button mat-stroked-button color="primary">View Docs</button>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="link-card">
+            <mat-card-header>
+              <h4>Support</h4>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Need help? Contact our support team for assistance.</p>
+              <button mat-stroked-button color="primary">Get Help</button>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="link-card">
+            <mat-card-header>
+              <h4>API Reference</h4>
+            </mat-card-header>
+            <mat-card-content>
+              <p>Integrate with our APIs to extend functionality.</p>
+              <button mat-stroked-button color="primary">View API</button>
+            </mat-card-content>
+          </mat-card>
+        </div>
+      </section>
+    </main>
+  </mat-sidenav-content>
+</mat-sidenav-container>

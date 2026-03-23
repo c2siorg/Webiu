@@ -1,0 +1,370 @@
+.admin-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  .menu-button {
+    margin-right: 1rem;
+  }
+
+  .app-title {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+
+  .spacer {
+    flex: 1 1 auto;
+  }
+
+  .user-menu-trigger {
+    margin-left: 1rem;
+  }
+
+  .user-avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.3);
+    font-weight: 600;
+    color: white;
+    font-size: 0.9rem;
+  }
+}
+
+.user-menu {
+  :host ::ng-deep .mat-mdc-menu-content {
+    padding-top: 0 !important;
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    background-color: #f5f5f5;
+
+    .user-avatar-large {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .user-details {
+      flex: 1;
+
+      .user-name {
+        margin: 0;
+        font-weight: 600;
+        color: #333;
+      }
+
+      .user-email {
+        margin: 0.25rem 0 0;
+        font-size: 0.85rem;
+        color: #666;
+      }
+
+      .user-role {
+        display: inline-block;
+        margin-top: 0.5rem;
+        padding: 0.25rem 0.75rem;
+        background-color: #667eea;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+    }
+  }
+}
+
+.admin-container {
+  min-height: calc(100vh - 64px);
+}
+
+.admin-sidenav {
+  width: 280px;
+  background-color: #fafafa;
+  border-right: 1px solid #e0e0e0;
+
+  mat-nav-list {
+    padding: 0;
+  }
+
+  h2 {
+    margin: 1rem 1rem 0.5rem;
+    padding: 0;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #999;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+  }
+
+  mat-list-item {
+    &.active {
+      background-color: #e3f2fd;
+      color: #667eea;
+
+      mat-icon {
+        color: #667eea;
+      }
+    }
+
+    &:hover {
+      background-color: #f0f0f0;
+    }
+  }
+
+  mat-divider {
+    margin: 0.5rem 0;
+  }
+}
+
+.admin-content {
+  background-color: #f9f9f9;
+}
+
+.main-content {
+  padding: 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.dashboard-section {
+  margin-bottom: 3rem;
+
+  .section-title {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #333;
+  }
+
+  .section-subtitle {
+    margin: 0 0 1.5rem;
+    color: #666;
+    font-size: 1rem;
+  }
+}
+
+.stats-grid {
+  width: 100%;
+  margin-bottom: 2rem;
+
+  mat-grid-tile {
+    padding: 0.5rem;
+
+    .stat-card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+
+      mat-card-header {
+        padding: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+
+        .stat-icon {
+          font-size: 2rem;
+          width: 2rem;
+          height: 2rem;
+
+          &.blue {
+            color: #667eea;
+          }
+
+          &.green {
+            color: #4caf50;
+          }
+
+          &.orange {
+            color: #ff9800;
+          }
+
+          &.red {
+            color: #f44336;
+          }
+        }
+      }
+
+      mat-card-content {
+        padding: 0 1rem 1rem;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+
+        .stat-number {
+          margin: 0;
+          font-size: 1.75rem;
+          font-weight: 700;
+          color: #333;
+        }
+
+        .stat-label {
+          margin: 0.5rem 0 0;
+          font-size: 0.9rem;
+          color: #999;
+        }
+      }
+
+      &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        transition: all 0.3s ease;
+      }
+    }
+  }
+}
+
+.activity-card {
+  background: white;
+  border-radius: 8px;
+
+  .placeholder-text {
+    text-align: center;
+    color: #999;
+    padding: 2rem 0;
+    margin: 0;
+  }
+}
+
+.quick-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+
+  .link-card {
+    background: white;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transform: translateY(-2px);
+    }
+
+    mat-card-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid #f0f0f0;
+
+      h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #333;
+      }
+    }
+
+    mat-card-content {
+      padding: 1.5rem;
+
+      p {
+        margin: 0 0 1.5rem;
+        color: #666;
+        font-size: 0.95rem;
+      }
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .stats-grid {
+    :host ::ng-deep .mat-grid-tile {
+      grid-row-span: 2 !important;
+      grid-column-span: 2 !important;
+    }
+  }
+
+  .quick-links {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-toolbar {
+    .app-title {
+      font-size: 1.2rem;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      font-size: 0.8rem;
+    }
+  }
+
+  .admin-sidenav {
+    width: 240px;
+  }
+
+  .main-content {
+    padding: 1.5rem;
+  }
+
+  .dashboard-section {
+    margin-bottom: 2rem;
+
+    .section-title {
+      font-size: 1.5rem;
+    }
+  }
+
+  .stats-grid {
+    :host ::ng-deep {
+      .mat-grid-tile {
+        grid-row-span: 2 !important;
+        grid-column-span: 2 !important;
+        padding: 0.25rem !important;
+      }
+    }
+  }
+
+  .quick-links {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-toolbar {
+    .app-title {
+      font-size: 1rem;
+      margin-left: 0.5rem;
+    }
+  }
+
+  .main-content {
+    padding: 1rem;
+  }
+
+  .dashboard-section {
+    .section-title {
+      font-size: 1.25rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.9rem;
+      margin-bottom: 1rem;
+    }
+  }
+}

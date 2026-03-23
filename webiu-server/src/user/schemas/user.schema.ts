@@ -4,6 +4,11 @@ import * as bcrypt from 'bcryptjs';
 
 export type UserDocument = User & Document;
 
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+}
+
 @Schema({ timestamps: true })
 export class User {
   @Prop({ required: true })
@@ -23,6 +28,9 @@ export class User {
 
   @Prop()
   verificationToken: string;
+
+  @Prop({ enum: UserRole, default: UserRole.USER })
+  role: UserRole;
 
   matchPassword: (password: string) => Promise<boolean>;
 }
