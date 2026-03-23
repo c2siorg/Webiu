@@ -1,4 +1,5 @@
 import { Resolver, Query, Args, Int } from '@nestjs/graphql';
+import { BadRequestException } from '@nestjs/common';
 import { ContributorService } from '../contributor/contributor.service';
 import { Contributor } from './models/contributor.model';
 
@@ -11,9 +12,14 @@ export class ContributorResolver {
     @Args('page', { type: () => Int, defaultValue: 1 }) page: number,
     @Args('limit', { type: () => Int, defaultValue: 30 }) limit: number,
   ): Promise<Contributor[]> {
-    const all =
-      (await this.contributorService.getAllContributors()) as Contributor[];
-    const start = (page - 1) * limit;
-    return all.slice(start, start + limit);
+    if (page < 1) throw new BadRequestException('page must be at least 1');
+    if (limit < 1 || limit > 100)
+      throw new BadRequestException('limit must be between 1 and 100');
+
+    const result = await this.contributorService.getPaginatedContributors(
+      page,
+      limit,
+    );
+    return result.contributors as Contributor[];
   }
 }
