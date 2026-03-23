@@ -1,7 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
-import axios from 'axios';
+import axios, { AxiosResponse } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -11,6 +11,10 @@ export class GithubService {
   private readonly baseUrl = 'https://api.github.com';
   private readonly accessToken: string;
   private readonly orgName = 'c2siorg';
+
+  // Background computation retry parameters
+  private readonly maxApiRetries = 2;
+  private readonly apiRetryDelayMs = 2500;
 
   constructor(
     private configService: ConfigService,
@@ -29,15 +33,52 @@ export class GithubService {
     return this.orgName;
   }
 
+  private async performHttpRequest(
+    url: string,
+    retryCount = 0,
+  ): Promise<AxiosResponse> {
+    const response = await axios.get(url, { headers: this.headers });
+
+    // Handle GitHub's background calculation edge case (202 Accepted)
+    if (response.status === 202 && retryCount < this.maxApiRetries) {
+      const retryAfterHeader = response.headers['retry-after'];
+      let delayMs = this.apiRetryDelayMs;
+
+      if (retryAfterHeader) {
+        const parsed = parseInt(retryAfterHeader, 10);
+        if (!isNaN(parsed) && isFinite(parsed)) {
+          delayMs = parsed * 1000;
+        }
+      }
+
+      this.logger.warn(
+        `GitHub returned 202 Accepted for ${url}. Waiting ${delayMs}ms for background processing... (Retry attempt ${retryCount + 1} of ${this.maxApiRetries})`,
+      );
+      await new Promise((resolve) => setTimeout(resolve, delayMs));
+      return this.performHttpRequest(url, retryCount + 1);
+    }
+
+    if (response.status === 202 && retryCount >= this.maxApiRetries) {
+      this.logger.error(
+        `GitHub 202 persisted after ${this.maxApiRetries} retries for ${url}`,
+      );
+      throw new HttpException(
+        'GitHub background computation is still processing. Please retry later.',
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
+    }
+
+    return response;
+  }
+
   private async fetchAllPages(url: string): Promise<any[]> {
     const results: any[] = [];
     let page = 1;
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
+      const response = await this.performHttpRequest(
         `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
       );
 
       const data = response.data;
@@ -58,9 +99,8 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
+      const response = await this.performHttpRequest(
         `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
       );
 
       const items = response.data.items || [];
@@ -83,9 +123,8 @@ export class GithubService {
       const cached = this.cacheService.get<any[]>(cacheKey);
       if (cached) return cached;
 
-      const response = await axios.get(
+      const response = await this.performHttpRequest(
         `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-        { headers: this.headers },
       );
       const repos = response.data;
       this.cacheService.set(cacheKey, repos, CACHE_TTL);
@@ -176,14 +215,19 @@ export class GithubService {
         // Note: Search API results for PRs don't include merged_at at the top level usually
         if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
           try {
-            const response = await axios.get(pr.pull_request.url, {
-              headers: this.headers,
-            });
+            const response = await this.performHttpRequest(pr.pull_request.url);
             if (response.data.merged_at) {
               pr.merged_at = response.data.merged_at;
             }
-          } catch {
-            // Ignore errors for individual PR fetches to avoid failing the whole request
+          } catch (error) {
+            // Rethrow 503 Service Unavailable (persistent 202s) so the caller knows to try again later
+            if (
+              error instanceof HttpException &&
+              error.getStatus() === HttpStatus.SERVICE_UNAVAILABLE
+            ) {
+              throw error;
+            }
+            // Ignore other errors for individual PR fetches to avoid failing the whole request
           }
         }
         return pr;
@@ -212,9 +256,9 @@ export class GithubService {
     const cached = this.cacheService.get<any>(cacheKey);
     if (cached) return cached;
 
-    const response = await axios.get(`${this.baseUrl}/users/${username}`, {
-      headers: this.headers,
-    });
+    const response = await this.performHttpRequest(
+      `${this.baseUrl}/users/${username}`,
+    );
     this.cacheService.set(cacheKey, response.data);
     return response.data;
   }
@@ -256,12 +300,8 @@ export class GithubService {
 
     try {
       const [followersResponse, followingResponse] = await Promise.all([
-        axios.get(`${this.baseUrl}/users/${username}/followers`, {
-          headers: this.headers,
-        }),
-        axios.get(`${this.baseUrl}/users/${username}/following`, {
-          headers: this.headers,
-        }),
+        this.performHttpRequest(`${this.baseUrl}/users/${username}/followers`),
+        this.performHttpRequest(`${this.baseUrl}/users/${username}/following`),
       ]);
 
       const result = {

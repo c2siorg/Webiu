@@ -76,6 +76,63 @@ describe('GithubService', () => {
       mockedAxios.get.mockRejectedValue(new Error('API error'));
       await expect(service.getOrgRepos()).rejects.toThrow('API error');
     });
+
+    it('should handle 202 Accepted and retry (202 -> 200)', async () => {
+      mockedAxios.get
+        .mockResolvedValueOnce({
+          status: 202,
+          headers: { 'retry-after': '1' },
+          data: {},
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          headers: {},
+          data: [{ name: 'repo-after-retry' }],
+        });
+
+      const result = await service.getOrgRepos(1, 10);
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('repo-after-retry');
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('should throw 503 Service Unavailable on persistent 202', async () => {
+      mockedAxios.get.mockResolvedValue({
+        status: 202,
+        headers: { 'retry-after': '1' },
+        data: {},
+      });
+
+      await expect(service.getOrgRepos(1, 10)).rejects.toThrow(
+        'GitHub background computation is still processing. Please retry later.',
+      );
+      // It should try initially + maxApiRetries (2) = 3 times
+      expect(mockedAxios.get).toHaveBeenCalledTimes(3);
+    });
+
+    it('should handle bad or missing Retry-After header by using default delay', async () => {
+      mockedAxios.get
+        .mockResolvedValueOnce({
+          status: 202,
+          headers: { 'retry-after': 'invalid-date' }, // bad Retry-After
+          data: {},
+        })
+        .mockResolvedValueOnce({
+          status: 200,
+          headers: {},
+          data: [{ name: 'repo-after-bad-retry' }],
+        });
+
+      const startTime = Date.now();
+      const result = await service.getOrgRepos(1, 10);
+      const duration = Date.now() - startTime;
+
+      expect(result).toHaveLength(1);
+      expect(result[0].name).toBe('repo-after-bad-retry');
+      expect(mockedAxios.get).toHaveBeenCalledTimes(2);
+      // Default delay is 2500ms
+      expect(duration).toBeGreaterThanOrEqual(2500);
+    });
   });
 
   describe('getRepoPulls', () => {
