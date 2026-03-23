@@ -42,12 +42,17 @@ export class GithubService {
     // Handle GitHub's background calculation edge case (202 Accepted)
     if (response.status === 202 && retryCount < this.maxApiRetries) {
       const retryAfterHeader = response.headers['retry-after'];
-      const delayMs = retryAfterHeader
-        ? parseInt(retryAfterHeader, 10) * 1000
-        : this.apiRetryDelayMs;
+      let delayMs = this.apiRetryDelayMs;
+
+      if (retryAfterHeader) {
+        const parsed = parseInt(retryAfterHeader, 10);
+        if (!isNaN(parsed) && isFinite(parsed)) {
+          delayMs = parsed * 1000;
+        }
+      }
 
       this.logger.warn(
-        `GitHub returned 202 Accepted for ${url}. Waiting ${delayMs}ms for background processing... (Attempt ${retryCount + 1}/${this.maxApiRetries})`,
+        `GitHub returned 202 Accepted for ${url}. Waiting ${delayMs}ms for background processing... (Retry attempt ${retryCount + 1} of ${this.maxApiRetries})`,
       );
       await new Promise((resolve) => setTimeout(resolve, delayMs));
       return this.performHttpRequest(url, retryCount + 1);
@@ -214,8 +219,15 @@ export class GithubService {
             if (response.data.merged_at) {
               pr.merged_at = response.data.merged_at;
             }
-          } catch {
-            // Ignore errors for individual PR fetches to avoid failing the whole request
+          } catch (error) {
+            // Rethrow 503 Service Unavailable (persistent 202s) so the caller knows to try again later
+            if (
+              error instanceof HttpException &&
+              error.getStatus() === HttpStatus.SERVICE_UNAVAILABLE
+            ) {
+              throw error;
+            }
+            // Ignore other errors for individual PR fetches to avoid failing the whole request
           }
         }
         return pr;
