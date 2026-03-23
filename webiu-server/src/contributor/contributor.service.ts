@@ -86,6 +86,14 @@ export class ContributorService {
     }
   }
 
+  async getPaginatedContributors(page: number, limit: number) {
+    const all = (await this.getAllContributors()) as any[];
+    const total = all.length;
+    const start = (page - 1) * limit;
+    const contributors = all.slice(start, start + limit);
+    return { total, page, limit, contributors };
+  }
+
   async getUserCreatedIssues(username: string) {
     try {
       const issues = await this.githubService.searchUserIssues(username);
