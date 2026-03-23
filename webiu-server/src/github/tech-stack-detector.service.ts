@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
 export interface DetectedTechnology {
@@ -42,19 +43,6 @@ const TECH_PATTERNS: Record<string, Record<string, string[]>> = {
   },
 };
 
-const MANIFEST_FILES = [
-  'package.json',
-  'requirements.txt',
-  'go.mod',
-  'pom.xml',
-  'build.gradle',
-  'Cargo.toml',
-  'Gemfile',
-  'composer.json',
-  'Dockerfile',
-  'docker-compose.yml',
-];
-
 const LANGUAGE_MAP: Record<string, string> = {
   'go.mod': 'Go',
   'pom.xml': 'Java',
@@ -66,6 +54,8 @@ const LANGUAGE_MAP: Record<string, string> = {
   'docker-compose.yml': 'Docker Compose',
 };
 
+const MANIFEST_FILES = Object.keys(LANGUAGE_MAP);
+
 function toErrorMessage(err: unknown): string {
   if (err instanceof Error) return err.message;
   return String(err);
@@ -75,10 +65,15 @@ function toErrorMessage(err: unknown): string {
 export class TechStackDetectorService {
   private readonly baseUrl = 'https://api.github.com';
   private readonly logger = new Logger(TechStackDetectorService.name);
+  private readonly token: string;
 
-  private getHeaders(token: string) {
+  constructor(private readonly configService: ConfigService) {
+    this.token = this.configService.get<string>('GITHUB_ACCESS_TOKEN');
+  }
+
+  private get headers() {
     return {
-      Authorization: `token ${token}`,
+      Authorization: `token ${this.token}`,
       Accept: 'application/vnd.github.v3+json',
     };
   }
@@ -87,7 +82,6 @@ export class TechStackDetectorService {
     org: string,
     repo: string,
     pushedAt: string,
-    token: string,
   ): Promise<TechStackResult> {
     const technologies: DetectedTechnology[] = [];
 
@@ -95,7 +89,7 @@ export class TechStackDetectorService {
     try {
       const response = await axios.get(
         `${this.baseUrl}/repos/${org}/${repo}/contents`,
-        { headers: this.getHeaders(token) },
+        { headers: this.headers },
       );
       rootContents = response.data;
     } catch (err) {
