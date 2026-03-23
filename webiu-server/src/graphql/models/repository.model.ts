@@ -6,6 +6,9 @@ export class Repository {
   name: string;
 
   @Field({ nullable: true })
+  full_name?: string;
+
+  @Field({ nullable: true })
   description?: string;
 
   @Field({ nullable: true })
@@ -21,5 +24,11 @@ export class Repository {
   forks_count: number;
 
   @Field(() => Int)
+  open_issues_count: number;
+
+  @Field(() => Int)
   pull_requests: number;
+
+  @Field(() => [String], { nullable: true })
+  topics?: string[];
 }
