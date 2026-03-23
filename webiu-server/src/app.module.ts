@@ -14,14 +14,14 @@ import { ProjectModule } from './project/project.module';
 import { ContributorModule } from './contributor/contributor.module';
 import { UserModule } from './user/user.module';
 import { GraphqlResolversModule } from './graphql/graphql.module';
+import { GithubModule } from './github/github.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    // Global rate limit: 30 requests per IP per minute
     ThrottlerModule.forRoot([
       {
-        ttl: 60_000, // 1-minute window (ms)
+        ttl: 60_000,
         limit: 30,
       },
     ]),
@@ -41,14 +41,7 @@ import { GraphqlResolversModule } from './graphql/graphql.module';
     }),
     GraphqlResolversModule,
     CommonModule,
-    // MongooseModule can be re-enabled when MongoDB is needed:
-    // MongooseModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: (configService: ConfigService) => ({
-    //     uri: configService.get<string>('MONGODB_URI'),
-    //   }),
-    //   inject: [ConfigService],
-    // }),
+    GithubModule,
     AuthModule,
     ProjectModule,
     ContributorModule,
@@ -56,7 +49,6 @@ import { GraphqlResolversModule } from './graphql/graphql.module';
   ],
   controllers: [AppController],
   providers: [
-    // Apply GqlThrottlerGuard globally — handles both HTTP and GraphQL contexts
     {
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
