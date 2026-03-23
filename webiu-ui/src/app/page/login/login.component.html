@@ -1,0 +1,80 @@
+<div class="login-container">
+  <mat-card class="login-card">
+    <mat-card-header>
+      <h1 class="login-title">Admin Login</h1>
+      <p class="login-subtitle">C2SI Official Website</p>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+        <!-- Email Field -->
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Email Address</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            placeholder="Enter your email"
+            [class.is-invalid]="submitted && f['email'].errors"
+          />
+          <mat-error *ngIf="submitted && f['email'].hasError('required')">
+            Email is required
+          </mat-error>
+          <mat-error *ngIf="submitted && f['email'].hasError('email')">
+            Please enter a valid email address
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Password Field -->
+        <mat-form-field class="full-width" appearance="outline">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Enter your password"
+            [class.is-invalid]="submitted && f['password'].errors"
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            (click)="togglePasswordVisibility()"
+            type="button"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="showPassword"
+          >
+            <mat-icon *ngIf="!showPassword">visibility_off</mat-icon>
+            <mat-icon *ngIf="showPassword">visibility</mat-icon>
+          </button>
+          <mat-error *ngIf="submitted && f['password'].hasError('required')">
+            Password is required
+          </mat-error>
+          <mat-error *ngIf="submitted && f['password'].hasError('minlength')">
+            Password must be at least 6 characters
+          </mat-error>
+        </mat-form-field>
+
+        <!-- Submit Button -->
+        <button
+          mat-raised-button
+          color="primary"
+          type="submit"
+          class="login-button"
+          [disabled]="loading"
+        >
+          <mat-spinner *ngIf="loading" diameter="20" class="button-spinner"></mat-spinner>
+          <span *ngIf="!loading">Login</span>
+          <span *ngIf="loading">Logging in...</span>
+        </button>
+      </form>
+
+      <!-- Info Message -->
+      <div class="info-message">
+        <p>
+          This is a secure admin area. Only authorized administrators can access
+          and manage the website content.
+        </p>
+      </div>
+    </mat-card-content>
+  </mat-card>
+</div>

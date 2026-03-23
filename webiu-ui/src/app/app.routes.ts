@@ -1,4 +1,7 @@
 import { Routes, RouterModule } from '@angular/router';
+import { AuthGuard } from './guards/auth.guard';
+import { RoleGuard } from './guards/role.guard';
+import { UserRole } from './services/auth.service';
 
 export const routes: Routes = [
   {
@@ -7,6 +10,74 @@ export const routes: Routes = [
       import('./page/homepage/homepage.component').then(
         (m) => m.HomepageComponent,
       ),
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./page/login/login.component').then(
+        (m) => m.LoginComponent,
+      ),
+  },
+  {
+    path: 'unauthorized',
+    loadComponent: () =>
+      import('./page/unauthorized/unauthorized.component').then(
+        (m) => m.UnauthorizedComponent,
+      ),
+  },
+  {
+    path: 'admin',
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: [UserRole.ADMIN] },
+    children: [
+      {
+        path: 'dashboard',
+        loadComponent: () =>
+          import('./page/admin/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent,
+          ),
+      },
+      {
+        path: 'overview',
+        loadComponent: () =>
+          import('./page/admin/admin-overview/admin-overview.component').then(
+            (m) => m.AdminOverviewComponent,
+          ),
+      },
+      {
+        path: 'users',
+        loadComponent: () =>
+          import('./page/admin/admin-users/admin-users.component').then(
+            (m) => m.AdminUsersComponent,
+          ),
+      },
+      {
+        path: 'content',
+        loadComponent: () =>
+          import('./page/admin/admin-content/admin-content.component').then(
+            (m) => m.AdminContentComponent,
+          ),
+      },
+      {
+        path: 'settings',
+        loadComponent: () =>
+          import('./page/admin/admin-settings/admin-settings.component').then(
+            (m) => m.AdminSettingsComponent,
+          ),
+      },
+      {
+        path: 'analytics',
+        loadComponent: () =>
+          import('./page/admin/admin-analytics/admin-analytics.component').then(
+            (m) => m.AdminAnalyticsComponent,
+          ),
+      },
+      {
+        path: '',
+        redirectTo: 'dashboard',
+        pathMatch: 'full',
+      },
+    ],
   },
   {
     path: 'projects',
