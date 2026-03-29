@@ -22,8 +22,12 @@ export class JwtAuthGuard implements CanActivate {
 
     try {
       const decoded = this.jwtService.verify(token);
-      // TODO: Look up user from DB when MongoDB is connected
-      request.user = { id: decoded.id };
+      request.user = {
+        id: decoded.sub,
+        email: decoded.email,
+        name: decoded.name,
+        role: decoded.role,
+      };
       return true;
     } catch {
       throw new UnauthorizedException('Token is not valid');
