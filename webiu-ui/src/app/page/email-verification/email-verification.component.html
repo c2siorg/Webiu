@@ -1,0 +1,14 @@
+<main class="verification-page">
+  <section class="verification-card">
+    <h1>Email verification</h1>
+
+    @if (loading) {
+      <p class="status neutral">{{ message }}</p>
+    } @else if (success) {
+      <p class="status success">{{ message }}</p>
+    } @else {
+      <p class="status error">{{ message }}</p>
+      <a routerLink="/login" class="retry-link">Go to login</a>
+    }
+  </section>
+</main>
