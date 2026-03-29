@@ -128,11 +128,17 @@ describe('ProjectService', () => {
 
     it('should cache the result', async () => {
       mockGithubService.getRepoIssues.mockResolvedValue([]);
+      const cacheSetSpy = jest.spyOn(cacheService, 'set');
 
       await service.getIssuesAndPr('c2siorg', 'repo1');
       await service.getIssuesAndPr('c2siorg', 'repo1');
 
       expect(mockGithubService.getRepoIssues).toHaveBeenCalledTimes(1);
+      expect(cacheSetSpy).toHaveBeenCalledWith(
+        'issues_pr_count_c2siorg_repo1',
+        { issues: 0, pullRequests: 0 },
+        300,
+      );
     });
 
     it('should throw BadRequestException when org is missing', async () => {
