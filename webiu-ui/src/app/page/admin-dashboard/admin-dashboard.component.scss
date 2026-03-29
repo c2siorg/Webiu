@@ -1,0 +1,124 @@
+.admin-page {
+  padding: 40px 20px 70px;
+  background: linear-gradient(180deg, #f4fbff 0%, transparent 32%),
+    radial-gradient(circle at 80% 20%, #cae9ff 0%, transparent 36%);
+  min-height: calc(100vh - 140px);
+}
+
+.admin-header {
+  max-width: 1100px;
+  margin: 0 auto 28px;
+
+  .eyebrow {
+    margin: 0;
+    color: #0d7bdc;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    font-weight: 700;
+    font-size: 12px;
+  }
+
+  h1 {
+    margin: 8px 0 10px;
+    color: var(--primary-dark);
+    font-size: clamp(30px, 4vw, 42px);
+  }
+
+  .subtitle {
+    margin: 0;
+    color: var(--font-light);
+    max-width: 760px;
+    line-height: 1.6;
+  }
+}
+
+.admin-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.admin-card {
+  border: 1px solid var(--border-color);
+  background: var(--navbar-bg);
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.07);
+
+  .status {
+    margin: 0;
+    color: #0d7bdc;
+    font-weight: 600;
+    font-size: 13px;
+  }
+
+  h2 {
+    margin: 10px 0 10px;
+    color: var(--primary-dark);
+    font-size: 22px;
+  }
+
+  p {
+    margin: 0;
+    color: var(--font-light);
+    line-height: 1.55;
+  }
+}
+
+.state-panel {
+  max-width: 1100px;
+  margin: 0 auto;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  background: var(--navbar-bg);
+  padding: 20px;
+  color: var(--font-light);
+
+  &.error {
+    border-color: #cf8f88;
+    color: #8a1e18;
+    background: #fdeeee;
+  }
+}
+
+.activity-section {
+  max-width: 1100px;
+  margin: 24px auto 0;
+
+  h2 {
+    color: var(--primary-dark);
+    margin: 0 0 12px;
+  }
+}
+
+.activity-list {
+  display: grid;
+  gap: 10px;
+}
+
+.activity-item {
+  border: 1px solid var(--border-color);
+  background: var(--navbar-bg);
+  border-radius: 10px;
+  padding: 12px;
+
+  .activity-meta {
+    margin: 0 0 6px;
+    color: var(--font-light);
+    font-size: 13px;
+    text-transform: capitalize;
+  }
+
+  a {
+    color: #0d7bdc;
+    text-decoration: none;
+    font-weight: 600;
+  }
+}
+
+.empty-message {
+  margin: 0;
+  color: var(--font-light);
+}

@@ -1,0 +1,49 @@
+<main class="register-page">
+  <section class="register-card">
+    <h1>Create your account</h1>
+    <p class="subtitle">Register with your email to access contributor and admin features.</p>
+
+    @if (errorMessage) {
+      <p class="error-banner">{{ errorMessage }}</p>
+    }
+
+    @if (successMessage) {
+      <p class="success-banner">{{ successMessage }}</p>
+    }
+
+    <form [formGroup]="registerForm" (ngSubmit)="submitRegister()" novalidate>
+      <label for="name">Name</label>
+      <input id="name" type="text" formControlName="name" placeholder="Your full name" />
+      @if (registerForm.controls.name.touched && registerForm.controls.name.invalid) {
+        <p class="field-error">Name must be at least 2 characters long.</p>
+      }
+
+      <label for="email">Email</label>
+      <input id="email" type="email" formControlName="email" placeholder="you@example.com" />
+      @if (registerForm.controls.email.touched && registerForm.controls.email.invalid) {
+        <p class="field-error">Enter a valid email address.</p>
+      }
+
+      <label for="password">Password</label>
+      <input id="password" type="password" formControlName="password" placeholder="Create a password" />
+      @if (registerForm.controls.password.touched && registerForm.controls.password.invalid) {
+        <p class="field-error">Password must be at least 6 characters long.</p>
+      }
+
+      <label for="confirmPassword">Confirm Password</label>
+      <input id="confirmPassword" type="password" formControlName="confirmPassword" placeholder="Re-enter your password" />
+      @if (registerForm.touched && registerForm.errors?.['passwordMismatch']) {
+        <p class="field-error">Passwords do not match.</p>
+      }
+
+      <button type="submit" [disabled]="loading">
+        {{ loading ? 'Creating account...' : 'Create account' }}
+      </button>
+    </form>
+
+    <p class="login-link">
+      Already have an account?
+      <a routerLink="/login">Sign in</a>
+    </p>
+  </section>
+</main>

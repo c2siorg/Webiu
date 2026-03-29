@@ -1,9 +1,18 @@
-import { Component, HostListener, OnInit, inject, PLATFORM_ID } from '@angular/core';
+import {
+  Component,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  inject,
+  PLATFORM_ID,
+} from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
 import { environment } from '../../../environments/environment';
+import { AuthService, AuthUser } from '../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
@@ -16,42 +25,53 @@ export class NavbarComponent implements OnInit {
   private router = inject(Router);
   private themeService = inject(ThemeService);
   private platformId = inject(PLATFORM_ID);
+  private authService = inject(AuthService);
+  private subscriptions = new Subscription();
 
   isMenuOpen = false;
   isSunVisible = true;
   isLoggedIn = false;
+  isAdmin = false;
   showLoginOptions = false;
-  user: any;
+  user: AuthUser | null = null;
   currentRoute = '/';
 
   ngOnInit(): void {
     this.isSunVisible = !this.themeService.isDarkMode();
-    this.router.events
-      .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd,
-        ),
-      )
-      .subscribe((event: NavigationEnd) => {
-        this.currentRoute = event.url;
-        this.isMenuOpen = false;
-      });
+    this.subscriptions.add(
+      this.router.events
+        .pipe(
+          filter(
+            (event): event is NavigationEnd => event instanceof NavigationEnd,
+          ),
+        )
+        .subscribe((event: NavigationEnd) => {
+          this.currentRoute = event.url;
+          this.isMenuOpen = false;
+          this.showLoginOptions = false;
+        }),
+    );
+
+    this.subscriptions.add(
+      this.authService.authSession$.subscribe((session) => {
+        this.user = session?.user ?? null;
+        this.isLoggedIn = !!session;
+        this.isAdmin = this.authService.isAdmin;
+      }),
+    );
 
     if (isPlatformBrowser(this.platformId)) {
-      const queryParams = new URLSearchParams(window.location.search);
-      const user = queryParams.get('user');
-      if (user) {
-        try {
-          this.user = JSON.parse(decodeURIComponent(user));
-          this.isLoggedIn = true;
-        } catch (e) {
-          console.warn('Failed to parse user query param:', e);
-          this.user = null;
-          this.isLoggedIn = false;
-        }
+      const didConsumeOAuthQuery = this.authService.consumeOAuthUserFromUrl(
+        window.location.search,
+      );
+      if (didConsumeOAuthQuery) {
         window.history.replaceState({}, document.title, window.location.pathname);
       }
     }
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 
   toggleLoginOptions(): void {
@@ -80,8 +100,23 @@ export class NavbarComponent implements OnInit {
   }
 
   logout(): void {
-    this.isLoggedIn = false;
-    this.user = null;
+    this.authService.logout();
+    this.showLoginOptions = false;
+  }
+
+  navigateToLogin(): void {
+    this.showLoginOptions = false;
+    this.router.navigate(['/login']);
+  }
+
+  navigateToRegister(): void {
+    this.showLoginOptions = false;
+    this.router.navigate(['/register']);
+  }
+
+  navigateToAdmin(): void {
+    this.router.navigate(['/admin']);
+    this.closeMenu();
   }
 
   loginWithGoogle(): void {
@@ -134,7 +169,7 @@ export class NavbarComponent implements OnInit {
   }
 
   isRouteActive(route: string): boolean {
-    return this.currentRoute === route;
+    return this.currentRoute.split('?')[0] === route;
   }
 
   navigateTo(route: string): void {

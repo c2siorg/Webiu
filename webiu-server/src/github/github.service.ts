@@ -293,4 +293,40 @@ export class GithubService {
     this.cacheService.set(cacheKey, repos);
     return repos;
   }
+
+  async searchOrgIssues(): Promise<any[]> {
+    const cacheKey = `org_issues:${this.orgName}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    const issues = await this.fetchAllSearchPages(
+      `${this.baseUrl}/search/issues?q=org:${this.orgName}+type:issue`,
+    );
+
+    issues.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+
+    this.cacheService.set(cacheKey, issues);
+    return issues;
+  }
+
+  async searchOrgPullRequests(): Promise<any[]> {
+    const cacheKey = `org_prs:${this.orgName}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    const prs = await this.fetchAllSearchPages(
+      `${this.baseUrl}/search/issues?q=org:${this.orgName}+type:pr`,
+    );
+
+    prs.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+
+    this.cacheService.set(cacheKey, prs);
+    return prs;
+  }
 }
