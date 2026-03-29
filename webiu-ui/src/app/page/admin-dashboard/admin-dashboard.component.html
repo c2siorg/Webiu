@@ -1,0 +1,46 @@
+<main class="admin-page">
+  <header class="admin-header">
+    <p class="eyebrow">Admin Console</p>
+    <h1>WebIU Control Center</h1>
+    <p class="subtitle">
+      Signed in as {{ user?.name }} ({{ user?.email }}). This page is protected and only available to admins.
+    </p>
+  </header>
+
+  @if (loading) {
+    <section class="state-panel">
+      <p>Loading dashboard data...</p>
+    </section>
+  } @else if (errorMessage) {
+    <section class="state-panel error">
+      <p>{{ errorMessage }}</p>
+    </section>
+  } @else {
+    <section class="admin-grid">
+      @for (stat of dashboard?.stats; track stat.label) {
+        <article class="admin-card">
+          <p class="status">Live Metric</p>
+          <h2>{{ stat.value }}</h2>
+          <p>{{ stat.label }}</p>
+        </article>
+      }
+    </section>
+
+    <section class="activity-section">
+      <h2>Recent Activity</h2>
+
+      @if (dashboard?.recentActivity?.length) {
+        <div class="activity-list">
+          @for (item of dashboard?.recentActivity; track item.url) {
+            <article class="activity-item">
+              <p class="activity-meta">{{ item.type }} by {{ item.author }} - {{ item.state }}</p>
+              <a [href]="item.url" target="_blank" rel="noopener noreferrer">{{ item.title }}</a>
+            </article>
+          }
+        </div>
+      } @else {
+        <p class="empty-message">No recent activity available.</p>
+      }
+    </section>
+  }
+</main>
