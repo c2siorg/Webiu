@@ -87,7 +87,7 @@ export class ProjectService {
       const pullRequests = data.filter((item) => item.pull_request).length;
 
       const result = { issues, pullRequests };
-      this.cacheService.set(cacheKey, result);
+      this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
     } catch (error) {
       this.logger.error(
