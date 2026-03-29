@@ -1,0 +1,21 @@
+app = "webiu-analyzer"
+primary_region = "sin"
+
+[build]
+
+[env]
+  PORT = "5050"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 5050
+  force_https = true
+  auto_stop_machines = "suspend"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1
