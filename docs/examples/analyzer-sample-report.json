@@ -1,0 +1,177 @@
+{
+  "reports": [
+    {
+      "owner": "nestjs",
+      "repo": "nest",
+      "fullName": "nestjs/nest",
+      "url": "https://github.com/nestjs/nest",
+      "generatedAt": "2026-03-29T12:10:50.262Z",
+      "status": "partial",
+      "metrics": {
+        "activityScore": 94,
+        "complexityScore": 77,
+        "learningDifficulty": "Advanced"
+      },
+      "breakdown": {
+        "stars": 74996,
+        "forks": 8266,
+        "contributors": 658,
+        "recentCommits30d": 239,
+        "recentIssues30d": 12,
+        "recentPrs30d": 179,
+        "languages": [
+          "TypeScript",
+          "JavaScript",
+          "Shell"
+        ],
+        "fileCount": 2108,
+        "dependencyFiles": [
+          "package.json",
+          "package-lock.json"
+        ]
+      },
+      "limitations": [
+        "No GITHUB_ACCESS_TOKEN configured. Unauthenticated requests have lower rate limits."
+      ]
+    },
+    {
+      "owner": "angular",
+      "repo": "angular",
+      "fullName": "angular/angular",
+      "url": "https://github.com/angular/angular",
+      "generatedAt": "2026-03-29T12:10:52.488Z",
+      "status": "failed",
+      "metrics": {
+        "activityScore": 0,
+        "complexityScore": 0,
+        "learningDifficulty": "Beginner"
+      },
+      "breakdown": {
+        "stars": 0,
+        "forks": 0,
+        "contributors": 0,
+        "recentCommits30d": 0,
+        "recentIssues30d": 0,
+        "recentPrs30d": 0,
+        "languages": [],
+        "fileCount": 0,
+        "dependencyFiles": []
+      },
+      "limitations": [
+        "Repository data could not be retrieved."
+      ],
+      "errorMessage": "GitHub rate limit exhausted. Reset at 2026-03-29T12:38:53.000Z"
+    },
+    {
+      "owner": "vercel",
+      "repo": "next.js",
+      "fullName": "vercel/next.js",
+      "url": "https://github.com/vercel/next.js",
+      "generatedAt": "2026-03-29T12:10:52.587Z",
+      "status": "failed",
+      "metrics": {
+        "activityScore": 0,
+        "complexityScore": 0,
+        "learningDifficulty": "Beginner"
+      },
+      "breakdown": {
+        "stars": 0,
+        "forks": 0,
+        "contributors": 0,
+        "recentCommits30d": 0,
+        "recentIssues30d": 0,
+        "recentPrs30d": 0,
+        "languages": [],
+        "fileCount": 0,
+        "dependencyFiles": []
+      },
+      "limitations": [
+        "Repository data could not be retrieved."
+      ],
+      "errorMessage": "GitHub rate limit exhausted. Reset at 2026-03-29T12:38:53.000Z"
+    },
+    {
+      "owner": "facebook",
+      "repo": "react",
+      "fullName": "facebook/react",
+      "url": "https://github.com/facebook/react",
+      "generatedAt": "2026-03-29T12:10:52.694Z",
+      "status": "failed",
+      "metrics": {
+        "activityScore": 0,
+        "complexityScore": 0,
+        "learningDifficulty": "Beginner"
+      },
+      "breakdown": {
+        "stars": 0,
+        "forks": 0,
+        "contributors": 0,
+        "recentCommits30d": 0,
+        "recentIssues30d": 0,
+        "recentPrs30d": 0,
+        "languages": [],
+        "fileCount": 0,
+        "dependencyFiles": []
+      },
+      "limitations": [
+        "Repository data could not be retrieved."
+      ],
+      "errorMessage": "GitHub rate limit exhausted. Reset at 2026-03-29T12:38:53.000Z"
+    },
+    {
+      "owner": "microsoft",
+      "repo": "TypeScript",
+      "fullName": "microsoft/TypeScript",
+      "url": "https://github.com/microsoft/TypeScript",
+      "generatedAt": "2026-03-29T12:10:52.789Z",
+      "status": "failed",
+      "metrics": {
+        "activityScore": 0,
+        "complexityScore": 0,
+        "learningDifficulty": "Beginner"
+      },
+      "breakdown": {
+        "stars": 0,
+        "forks": 0,
+        "contributors": 0,
+        "recentCommits30d": 0,
+        "recentIssues30d": 0,
+        "recentPrs30d": 0,
+        "languages": [],
+        "fileCount": 0,
+        "dependencyFiles": []
+      },
+      "limitations": [
+        "Repository data could not be retrieved."
+      ],
+      "errorMessage": "GitHub rate limit exhausted. Reset at 2026-03-29T12:38:53.000Z"
+    }
+  ],
+  "syncRun": {
+    "id": "1774786247051-j7pzd216",
+    "startedAt": "2026-03-29T12:10:47.051Z",
+    "status": "partial",
+    "repositoriesTotal": 5,
+    "repositoriesSucceeded": 1,
+    "repositoriesFailed": 4,
+    "errors": [
+      {
+        "repository": "angular/angular",
+        "message": "GitHub rate limit exhausted. Reset at 2026-03-29T12:38:53.000Z"
+      },
+      {
+        "repository": "vercel/next.js",
+        "message": "GitHub rate limit exhausted. Reset at 2026-03-29T12:38:53.000Z"
+      },
+      {
+        "repository": "facebook/react",
+        "message": "GitHub rate limit exhausted. Reset at 2026-03-29T12:38:53.000Z"
+      },
+      {
+        "repository": "microsoft/TypeScript",
+        "message": "GitHub rate limit exhausted. Reset at 2026-03-29T12:38:53.000Z"
+      }
+    ],
+    "endedAt": "2026-03-29T12:10:52.789Z"
+  }
+}

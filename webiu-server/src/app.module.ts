@@ -14,6 +14,7 @@ import { ProjectModule } from './project/project.module';
 import { ContributorModule } from './contributor/contributor.module';
 import { UserModule } from './user/user.module';
 import { GraphqlResolversModule } from './graphql/graphql.module';
+import { AnalyzerModule } from './analyzer/analyzer.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { GraphqlResolversModule } from './graphql/graphql.module';
     ProjectModule,
     ContributorModule,
     UserModule,
+    AnalyzerModule,
   ],
   controllers: [AppController],
   providers: [

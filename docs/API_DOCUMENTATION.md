@@ -624,7 +624,178 @@ GET http://localhost:5050/api/user/followersAndFollowing/octocat
 
 ---
 
-## 6. Error Reference
+## 6. Analyzer
+
+### `POST /api/analyzer/analyze`
+
+Accepts a list of GitHub repository URLs and returns an intelligence report per repository.
+
+**Request**
+
+```
+POST http://localhost:5050/api/analyzer/analyze
+Content-Type: application/json
+```
+
+**Request Body**
+
+```json
+{
+  "repositories": [
+    "https://github.com/nestjs/nest",
+    "https://github.com/angular/angular"
+  ],
+  "forceRefresh": true
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `repositories` | `string[]` | ✅ Yes | GitHub repository URLs |
+| `forceRefresh` | `boolean` | ❌ No | Ignore in-memory cache if `true` |
+
+**Success Response — `201 Created`**
+
+```json
+{
+  "reports": [
+    {
+      "owner": "nestjs",
+      "repo": "nest",
+      "fullName": "nestjs/nest",
+      "url": "https://github.com/nestjs/nest",
+      "generatedAt": "2026-03-29T12:10:50.262Z",
+      "status": "partial",
+      "metrics": {
+        "activityScore": 94,
+        "complexityScore": 77,
+        "learningDifficulty": "Advanced"
+      },
+      "breakdown": {
+        "stars": 74996,
+        "forks": 8266,
+        "contributors": 658,
+        "recentCommits30d": 239,
+        "recentIssues30d": 12,
+        "recentPrs30d": 179,
+        "languages": ["TypeScript", "JavaScript", "Shell"],
+        "fileCount": 2108,
+        "dependencyFiles": ["package.json", "package-lock.json"]
+      },
+      "limitations": [
+        "No GITHUB_ACCESS_TOKEN configured. Unauthenticated requests have lower rate limits."
+      ]
+    }
+  ],
+  "syncRun": {
+    "id": "1774786247051-j7pzd216",
+    "startedAt": "2026-03-29T12:10:47.051Z",
+    "endedAt": "2026-03-29T12:10:52.789Z",
+    "status": "partial",
+    "repositoriesTotal": 2,
+    "repositoriesSucceeded": 1,
+    "repositoriesFailed": 1,
+    "errors": []
+  }
+}
+```
+
+### `POST /api/analyzer/sync`
+
+Triggers a refresh. If `repositories` is provided, that list is analyzed immediately. Otherwise, all previously stored repositories are re-analyzed.
+
+**Request**
+
+```
+POST http://localhost:5050/api/analyzer/sync
+Content-Type: application/json
+```
+
+**Request Body (optional)**
+
+```json
+{
+  "repositories": [
+    "https://github.com/facebook/react"
+  ]
+}
+```
+
+### `GET /api/analyzer/reports`
+
+Returns paginated stored analyzer reports.
+
+**Request**
+
+```
+GET http://localhost:5050/api/analyzer/reports?page=1&limit=20
+```
+
+### `GET /api/analyzer/reports/:owner/:repo`
+
+Returns the latest stored analyzer report for a single repository.
+
+**Request**
+
+```
+GET http://localhost:5050/api/analyzer/reports/nestjs/nest
+```
+
+### `GET /api/analyzer/sync-history`
+
+Returns recent sync runs and partial-failure details.
+
+**Request**
+
+```
+GET http://localhost:5050/api/analyzer/sync-history?limit=20
+```
+
+### Scoring Formula
+
+`activityScore` (0-100) combines recent commits, contributors, issues, and pull requests:
+
+```
+activityScore = round(
+  min(35, recentCommits30d * 0.9) +
+  min(20, contributors * 2.2) +
+  min(20, recentIssues30d * 1.2) +
+  min(25, recentPrs30d * 1.4)
+)
+```
+
+`complexityScore` (0-100) combines repository breadth and dependency surface:
+
+```
+complexityScore = round(
+  min(40, log10(fileCount + 1) * 14) +
+  min(25, languageCount * 5) +
+  min(25, dependencyFileCount * 6) +
+  min(10, log10(stars + 1) * 4)
+)
+```
+
+Difficulty classification uses weighted score:
+
+```
+weighted = activityScore * 0.45 + complexityScore * 0.55
+```
+
+| Weighted Score | Difficulty |
+|---------------|------------|
+| `< 35` | `Beginner` |
+| `>= 35` and `< 65` | `Intermediate` |
+| `>= 65` | `Advanced` |
+
+### Notes
+
+- The analyzer stores reports in a JSON-backed persistence file configured by `ANALYZER_STORE_PATH`.
+- When GitHub rate limits are reached, reports are still returned with `status: "failed"` and explicit error messages.
+- Without `GITHUB_ACCESS_TOKEN`, GitHub applies stricter limits and sample runs may produce partial results.
+
+---
+
+## 7. Error Reference
 
 All error responses follow NestJS's default exception format:
 

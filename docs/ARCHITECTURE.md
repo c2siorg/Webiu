@@ -27,6 +27,8 @@ This document explains how WebiU 2.0 is built, how the pieces fit together, and 
 
 WebiU 2.0 is a full-stack application that showcases C2SI/SCoRe Lab's open-source projects and contributors. It pulls data from the GitHub API, processes and caches it on the backend, and presents it through a responsive Angular frontend.
 
+The backend now also includes a **Repository Intelligence Analyzer** that scores repositories by activity and complexity, classifies learning difficulty, and persists generated reports for scheduled refreshes.
+
 ```
 ┌──────────────────┐         REST API         ┌──────────────────┐
 │                  │  ──────────────────────►  │                  │
@@ -112,6 +114,7 @@ AppModule (root)
 ├── AuthModule            — JWT auth, Google/GitHub OAuth
 ├── ProjectModule         — Project listing and issue/PR counts
 ├── ContributorModule     — Contributor leaderboards and per-user stats
+├── AnalyzerModule        — Repository intelligence scoring + sync
 └── UserModule            — User management
 ```
 
@@ -187,6 +190,24 @@ A **Postman collection** with all endpoints pre-configured is available at **[`w
 | `GET` | `/auth/github` | Initiate GitHub OAuth |
 | `GET` | `/auth/github/callback` | GitHub OAuth callback |
 | `GET` | `/api/user/followersAndFollowing/:username` | User followers/following (stub) |
+
+### Repository Intelligence Analyzer
+
+The analyzer is implemented in `webiu-server/src/analyzer` and has five responsibilities:
+
+1. Parse and validate GitHub repository URLs from API/CLI input.
+2. Ingest repository metadata from GitHub (stars, forks, contributors, commits, issues/PRs, languages, tree files).
+3. Compute activity and complexity scores, then classify difficulty (`Beginner`, `Intermediate`, `Advanced`).
+4. Persist reports and sync history to a JSON store (path configurable via `ANALYZER_STORE_PATH`).
+5. Run scheduled refreshes at fixed intervals (`ANALYZER_SYNC_INTERVAL_MINUTES`) with manual sync triggers available via API.
+
+Analyzer API endpoints:
+
+- `POST /api/analyzer/analyze`
+- `POST /api/analyzer/sync`
+- `GET /api/analyzer/reports`
+- `GET /api/analyzer/reports/:owner/:repo`
+- `GET /api/analyzer/sync-history`
 
 ---
 
