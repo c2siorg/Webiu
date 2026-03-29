@@ -1,0 +1,49 @@
+.verification-page {
+  min-height: calc(100vh - 140px);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: radial-gradient(circle at 20% 20%, #d6efff 0%, transparent 40%),
+    radial-gradient(circle at 80% 80%, #d8f9df 0%, transparent 40%),
+    var(--cards-container);
+}
+
+.verification-card {
+  width: min(100%, 560px);
+  border-radius: 14px;
+  padding: 30px;
+  border: 1px solid var(--border-color);
+  background: var(--navbar-bg);
+  box-shadow: 0 16px 36px rgba(11, 26, 45, 0.13);
+
+  h1 {
+    margin: 0 0 16px;
+    color: var(--primary-dark);
+  }
+}
+
+.status {
+  margin: 0;
+  line-height: 1.6;
+  font-size: 16px;
+
+  &.neutral {
+    color: var(--font-light);
+  }
+
+  &.success {
+    color: #13672f;
+  }
+
+  &.error {
+    color: #8a1e18;
+  }
+}
+
+.retry-link {
+  display: inline-block;
+  margin-top: 12px;
+  color: #0d7bdc;
+  text-decoration: none;
+  font-weight: 600;
+}

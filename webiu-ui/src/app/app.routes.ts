@@ -1,4 +1,5 @@
 import { Routes, RouterModule } from '@angular/router';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -67,6 +68,33 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./page/contributor-search/contributor-search.component').then(
         (m) => m.ContributorSearchComponent,
+      ),
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./page/login/login.component').then((m) => m.LoginComponent),
+  },
+  {
+    path: 'register',
+    loadComponent: () =>
+      import('./page/register/register.component').then(
+        (m) => m.RegisterComponent,
+      ),
+  },
+  {
+    path: 'auth/verify-email',
+    loadComponent: () =>
+      import('./page/email-verification/email-verification.component').then(
+        (m) => m.EmailVerificationComponent,
+      ),
+  },
+  {
+    path: 'admin',
+    canActivate: [adminGuard],
+    loadComponent: () =>
+      import('./page/admin-dashboard/admin-dashboard.component').then(
+        (m) => m.AdminDashboardComponent,
       ),
   },
   {

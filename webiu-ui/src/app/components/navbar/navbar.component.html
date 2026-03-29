@@ -115,6 +115,22 @@
       <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
       <p>Community</p>
     </div>
+    @if (isAdmin) {
+      <div
+        class="navbar__menu__items"
+        routerLink="/admin"
+        [class.active]="isRouteActive('/admin')"
+        (click)="navigateToAdmin()"
+        (keydown.enter)="navigateToAdmin()"
+        (keydown.space)="navigateToAdmin(); $event.preventDefault()"
+        tabindex="0"
+        role="link"
+        [attr.aria-label]="'Admin Dashboard'"
+      >
+        <img src="../../../assets/projects.svg" alt="Admin Icon" class="menu-icon" />
+        <p>Admin</p>
+      </div>
+    }
     <div
       class="navbar__menu__items"
       routerLink="/gsoc"
@@ -149,12 +165,20 @@
     @if (isLoggedIn) {
       <p class="welcome-text">
         Welcome,<br />
-        {{ user.name }}!
+        {{ user?.name }}!
       </p>
     }
 
     @if (showLoginOptions && !isLoggedIn) {
       <div class="login-options">
+        <button type="button" (click)="navigateToLogin()">
+          <img src="../../../assets/login.svg" alt="Login Icon" />
+          <p>Login with Email</p>
+        </button>
+        <button type="button" (click)="navigateToRegister()">
+          <img src="../../../assets/login.svg" alt="Register Icon" />
+          <p>Create Account</p>
+        </button>
         <button type="button" (click)="loginWithGoogle()">
           <img src="../../../assets/google.webp" alt="Google Icon" />
           <p>Login with Google</p>
