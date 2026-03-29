@@ -252,7 +252,7 @@ cd webiu-server && npm test
 cd webiu-ui && ng test
 ```
 
-## Deployment (Fly.io)
+## Deployment (Fly.io / Railway)
 
 Backend deployment is prepared via [`webiu-server/fly.toml`](webiu-server/fly.toml).
 
@@ -291,6 +291,37 @@ curl -X POST https://<your-fly-app>.fly.dev/api/analyzer/analyze \
 Deployment URL for PR submission:
 
 - Backend URL: `https://<your-fly-app>.fly.dev`
+
+### Deploy on Railway (fallback)
+
+If Fly.io account billing is not ready, you can deploy the same backend on Railway.
+
+```bash
+cd webiu-server
+railway login
+railway init
+railway up
+```
+
+Set environment variables in Railway dashboard for the service:
+
+- `PORT=5050`
+- `NODE_ENV=production`
+- `JWT_SECRET=your_jwt_secret`
+- `GITHUB_ACCESS_TOKEN=your_github_token`
+- `FRONTEND_BASE_URL=https://your-frontend-url`
+
+After deployment, verify analyzer endpoint:
+
+```bash
+curl -X POST https://<your-railway-domain>/api/analyzer/analyze \
+  -H "content-type: application/json" \
+  -d '{"repositories":["https://github.com/nestjs/nest"]}'
+```
+
+Deployment URL for PR submission:
+
+- Railway URL: `https://<your-railway-domain>`
 
 ## Contributing
 
