@@ -20,6 +20,7 @@
 - **Real-time Project Data** — Fetches repository stats (stars, forks, language, issues, PRs) directly from GitHub.
 - **Contributor Leaderboards** — Aggregates contributions across all repositories to rank contributors.
 - **Contributor Search** — Look up any contributor to see their issues and pull requests within the organization.
+- **Repository Intelligence Analyzer** — Analyze multiple GitHub repositories for activity, complexity, and learning difficulty.
 - **Dark Mode** — Toggle between light and dark themes with persistent preference.
 - **OAuth Sign-in** — Sign in with Google or GitHub accounts.
 - **Modern Stack** — Built with Angular 17+ (standalone components) and NestJS.
@@ -37,9 +38,10 @@
 6. [API Endpoints](#api-endpoints)
 7. [Linting & Code Quality](#linting--code-quality)
 8. [Testing](#testing)
-9. [Contributing](#contributing)
-10. [Documentation](#documentation)
-11. [License](#license)
+9. [Deployment (Fly.io)](#deployment-flyio)
+10. [Contributing](#contributing)
+11. [Documentation](#documentation)
+12. [License](#license)
 
 ## Features
 
@@ -198,10 +200,31 @@ For a deep dive into the architecture, module system, data flow, and caching str
 | `GET` | `/api/v1/auth/verify-email?token=...` | Verify email address |
 | `GET` | `/auth/google` | Google OAuth sign-in |
 | `GET` | `/auth/github` | GitHub OAuth sign-in |
+| `POST` | `/api/analyzer/analyze` | Analyze a list of GitHub repository URLs |
+| `POST` | `/api/analyzer/sync` | Trigger analyzer sync for stored repositories |
+| `GET` | `/api/analyzer/reports` | List stored analyzer reports |
+| `GET` | `/api/analyzer/reports/:owner/:repo` | Fetch latest report for one repository |
 
 Full API documentation (request/response schemas, validation, error codes) is in [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md).
 
 A **Postman collection** for all endpoints is available at [`docs/webiu.postman_collection.json`](docs/webiu.postman_collection.json) — import it via **Postman → Import → File** to start testing immediately.
+
+### Analyzer CLI
+
+Run batch analysis directly from the backend package and write a structured report JSON file:
+
+```bash
+cd webiu-server
+npm run analyzer:run -- \
+  --repos https://github.com/nestjs/nest,https://github.com/angular/angular,https://github.com/vercel/next.js,https://github.com/facebook/react,https://github.com/microsoft/TypeScript \
+  --output ../docs/examples/analyzer-sample-report.json
+```
+
+Environment variables for analyzer behavior are documented in [`webiu-server/.env.example`](webiu-server/.env.example):
+
+- `ANALYZER_SYNC_ENABLED`
+- `ANALYZER_SYNC_INTERVAL_MINUTES`
+- `ANALYZER_STORE_PATH`
 
 ## Linting & Code Quality
 
@@ -228,6 +251,46 @@ cd webiu-server && npm test
 # Frontend (Karma + Jasmine)
 cd webiu-ui && ng test
 ```
+
+## Deployment (Fly.io)
+
+Backend deployment is prepared via [`webiu-server/fly.toml`](webiu-server/fly.toml).
+
+### Prerequisites
+
+- Install Fly CLI: `brew install flyctl`
+- Login: `fly auth login`
+
+### Deploy Backend
+
+```bash
+cd webiu-server
+fly launch --no-deploy
+fly secrets set \
+  JWT_SECRET=your_jwt_secret \
+  GITHUB_ACCESS_TOKEN=your_github_token \
+  FRONTEND_BASE_URL=https://your-frontend-url
+fly deploy
+```
+
+### Verify
+
+```bash
+fly status
+fly logs
+```
+
+After deployment, test analyzer endpoint:
+
+```bash
+curl -X POST https://<your-fly-app>.fly.dev/api/analyzer/analyze \
+  -H "content-type: application/json" \
+  -d '{"repositories":["https://github.com/nestjs/nest"]}'
+```
+
+Deployment URL for PR submission:
+
+- Backend URL: `https://<your-fly-app>.fly.dev`
 
 ## Contributing
 
