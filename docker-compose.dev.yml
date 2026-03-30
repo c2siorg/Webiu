@@ -13,6 +13,14 @@ services:
       - ./webiu-server:/usr/src/app
       - server_node_modules:/usr/src/app/node_modules
     command: [ "sh", "-c", "npm install && npm run start:dev" ]
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+          cpus: '0.50'
+        reservations:
+          memory: 256m
+          cpus: '0.10'
 
   webiu-ui:
     image: node:18-alpine
@@ -26,6 +34,14 @@ services:
     command: [ "sh", "-c", "npm install && npx ng serve --host 0.0.0.0" ]
     depends_on:
       - webiu-server
+    deploy:
+      resources:
+        limits:
+          memory: 2g
+          cpus: '1.50'
+        reservations:
+          memory: 512m
+          cpus: '0.25'
 
 volumes:
   server_node_modules:

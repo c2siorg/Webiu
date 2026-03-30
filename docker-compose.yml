@@ -10,6 +10,14 @@ services:
     environment:
       - NODE_ENV=production
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+          cpus: '0.50'
+        reservations:
+          memory: 128m
+          cpus: '0.10'
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:5050/health"]
       interval: 30s
@@ -26,6 +34,14 @@ services:
     environment:
       - PORT=4000
     restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+          cpus: '0.25'
+        reservations:
+          memory: 64m
+          cpus: '0.05'
     healthcheck:
       test: ["CMD", "wget", "--spider", "-q", "http://localhost:4000"]
       interval: 30s
