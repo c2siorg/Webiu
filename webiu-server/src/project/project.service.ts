@@ -1,13 +1,13 @@
 import {
   Injectable,
   Logger,
-  InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
+import { handleGithubError } from '../github/github-error.handler';
 
-const CACHE_TTL = 300; // 5 minutes
+const CACHE_TTL = 300;
 
 @Injectable()
 export class ProjectService {
@@ -20,12 +20,7 @@ export class ProjectService {
 
   async getAllProjects(page = 1, limit = 10) {
     const cacheKey = `projects_p${page}_pp${limit}`;
-    const cached = this.cacheService.get<{
-      total: number;
-      page: number;
-      limit: number;
-      repositories: any[];
-    }>(cacheKey);
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -33,8 +28,10 @@ export class ProjectService {
 
       const BATCH_SIZE = 10;
       const repositoriesWithPRs = [];
+
       for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
         const batch = repositories.slice(i, i + BATCH_SIZE);
+
         const batchResults = await Promise.all(
           batch.map(async (repo) => {
             try {
@@ -45,16 +42,16 @@ export class ProjectService {
             }
           }),
         );
+
         repositoriesWithPRs.push(...batchResults);
       }
 
       const orgInfo = await this.githubService.getPublicUserProfile(
         this.githubService.org,
       );
-      const total = orgInfo.public_repos || 0;
 
       const result = {
-        total,
+        total: orgInfo.public_repos || 0,
         page,
         limit,
         repositories: repositoriesWithPRs,
@@ -62,12 +59,14 @@ export class ProjectService {
 
       this.cacheService.set(cacheKey, result, CACHE_TTL);
       return result;
+
     } catch (error) {
       this.logger.error(
-        'Error fetching repositories or pull requests:',
-        error.response ? error.response.data : error.message,
+        'Error fetching repositories:',
+        error.response?.data || error.message,
       );
-      throw new InternalServerErrorException('Internal server error');
+
+      handleGithubError(error); // ✅ FIX
     }
   }
 
@@ -83,18 +82,20 @@ export class ProjectService {
     try {
       const data = await this.githubService.getRepoIssues(org, repo);
 
-      const issues = data.filter((item) => !item.pull_request).length;
-      const pullRequests = data.filter((item) => item.pull_request).length;
+      const issues = data.filter((i) => !i.pull_request).length;
+      const pullRequests = data.filter((i) => i.pull_request).length;
 
       const result = { issues, pullRequests };
       this.cacheService.set(cacheKey, result);
       return result;
+
     } catch (error) {
       this.logger.error(
         'Error fetching issues and PRs:',
         error.response?.data || error.message,
       );
-      throw new InternalServerErrorException('Failed to fetch issues and PRs');
+
+      handleGithubError(error); // ✅ FIX
     }
   }
 
@@ -104,7 +105,7 @@ export class ProjectService {
     }
 
     const cacheKey = `projects_search_${query}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cached = this.cacheService.get(cacheKey);
     if (cached) return cached;
 
     try {
@@ -127,12 +128,14 @@ export class ProjectService {
         total: repositoriesWithPRs.length,
         repositories: repositoriesWithPRs,
       };
+
     } catch (error) {
       this.logger.error(
         'Error searching repositories:',
         error.response?.data || error.message,
       );
-      throw new InternalServerErrorException('Failed to search projects');
+
+      handleGithubError(error); // ✅ FIX
     }
   }
 }
