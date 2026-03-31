@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
+import { handleGithubError } from './github-error.handler';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -242,10 +243,7 @@ export class GithubService {
     return response.data;
   }
 
-  async getUserFollowersAndFollowing(username: string): Promise<{
-    followers: number;
-    following: number;
-  }> {
+  async getUserFollowersAndFollowing(username: string) {
     const normalizedUsername = username.toLowerCase();
     const cacheKey = `user_social:${normalizedUsername}`;
     const cached = this.cacheService.get<{
@@ -276,7 +274,8 @@ export class GithubService {
         `Error fetching GitHub social data for ${username}:`,
         error.message,
       );
-      throw error;
+
+      handleGithubError(error); // ✅ FIX
     }
   }
 
