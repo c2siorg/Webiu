@@ -1,6 +1,9 @@
 import { ProjectResponse } from './project.model';
 
 export const projectsData: ProjectResponse = {
+  total: 10,
+  page: 1,
+  limit: 10,
   repositories: [
     {
       id: 341074536,
