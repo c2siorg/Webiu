@@ -6,12 +6,14 @@ import {
   Res,
   BadRequestException,
   InternalServerErrorException,
+  Req,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Response, Request } from 'express';
 import axios from 'axios';
 import { OAuth2Client } from 'google-auth-library';
 import { GithubService } from '../github/github.service';
+import * as crypto from 'crypto';
 
 @Controller('auth')
 export class OAuthController {
@@ -31,18 +33,40 @@ export class OAuthController {
   // ─── Google OAuth ───
 
   @Get('google')
-  googleAuth(@Res() res: Response) {
+  googleAuth(@Req() req: Request, @Res() res: Response) {
     const clientId = this.configService.get<string>('GOOGLE_CLIENT_ID');
     const redirectUri = this.configService.get<string>('GOOGLE_REDIRECT_URI');
-    const googleAuthURL = `https://accounts.google.com/o/oauth2/v2/auth?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=email%20profile`;
+
+    const state = crypto.randomBytes(16).toString('hex');
+    req.session['oauthState'] = state;
+
+    const googleAuthURL =
+      `https://accounts.google.com/o/oauth2/v2/auth?response_type=code` +
+      `&client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&scope=email%20profile` +
+      `&state=${state}`;
+
     res.redirect(googleAuthURL);
   }
 
   @Get('google/callback')
-  async googleCallback(@Query('code') code: string, @Res() res: Response) {
+  async googleCallback(
+    @Req() req: Request,
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
     if (!code) {
       throw new BadRequestException('Authorization code missing');
     }
+
+    // 🔒 Validate OAuth state
+    if (!state || state !== req.session['oauthState']) {
+      throw new BadRequestException('Invalid OAuth state');
+    }
+
+    delete req.session['oauthState'];
 
     try {
       const tokenResponse = await axios.post(
@@ -63,23 +87,26 @@ export class OAuthController {
       const accessToken = tokenResponse.data.access_token;
       const idToken = tokenResponse.data.id_token;
 
-      // Get user info
       const userResponse = await axios.get(
         `https://www.googleapis.com/oauth2/v2/userinfo?access_token=${accessToken}`,
       );
 
-      // Verify ID token
       await this.googleClient.verifyIdToken({
         idToken,
         audience: this.configService.get<string>('GOOGLE_CLIENT_ID'),
       });
 
       const user = userResponse.data;
+
       const frontendUrl = this.configService.get<string>(
         'FRONTEND_BASE_URL',
         'http://localhost:4200',
       );
-      const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(JSON.stringify(user))}`;
+
+      const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(
+        JSON.stringify(user),
+      )}`;
+
       res.redirect(redirectUrl);
     } catch (error) {
       this.logger.error('Error during Google OAuth:', error);
@@ -93,18 +120,40 @@ export class OAuthController {
   // ─── GitHub OAuth ───
 
   @Get('github')
-  githubAuth(@Res() res: Response) {
+  githubAuth(@Req() req: Request, @Res() res: Response) {
     const clientId = this.configService.get<string>('GITHUB_CLIENT_ID');
     const redirectUri = this.configService.get<string>('GITHUB_REDIRECT_URI');
-    const githubAuthURL = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user`;
+
+    const state = crypto.randomBytes(16).toString('hex');
+    req.session['oauthState'] = state;
+
+    const githubAuthURL =
+      `https://github.com/login/oauth/authorize` +
+      `?client_id=${clientId}` +
+      `&redirect_uri=${redirectUri}` +
+      `&scope=user` +
+      `&state=${state}`;
+
     res.redirect(githubAuthURL);
   }
 
   @Get('github/callback')
-  async githubCallback(@Query('code') code: string, @Res() res: Response) {
+  async githubCallback(
+    @Req() req: Request,
+    @Query('code') code: string,
+    @Query('state') state: string,
+    @Res() res: Response,
+  ) {
     if (!code) {
       throw new BadRequestException('Authorization code missing');
     }
+
+    // 🔒 Validate OAuth state
+    if (!state || state !== req.session['oauthState']) {
+      throw new BadRequestException('Invalid OAuth state');
+    }
+
+    delete req.session['oauthState'];
 
     try {
       const tokenData = await this.githubService.exchangeGithubCode(
@@ -124,7 +173,11 @@ export class OAuthController {
         'FRONTEND_BASE_URL',
         'http://localhost:4200',
       );
-      const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(JSON.stringify(user))}`;
+
+      const redirectUrl = `${frontendUrl}?user=${encodeURIComponent(
+        JSON.stringify(user),
+      )}`;
+
       res.redirect(redirectUrl);
     } catch (error) {
       this.logger.error('Error during GitHub OAuth:', error);

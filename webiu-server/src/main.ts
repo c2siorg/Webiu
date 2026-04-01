@@ -4,6 +4,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import * as session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -27,7 +28,13 @@ async function bootstrap() {
       transform: true,
     }),
   );
-
+  app.use(
+    session({
+      secret: 'oauth-secret',
+      resave: false,
+      saveUninitialized: false,
+    }),
+  );
   const port = configService.get<number>('PORT', 5050);
   await app.listen(port);
   console.log(`Server is listening at port ${port}`);
