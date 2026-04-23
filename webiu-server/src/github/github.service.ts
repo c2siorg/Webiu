@@ -516,9 +516,13 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
+
     const encoded = encodeURIComponent(query);
     const repos = await this.fetchAllSearchPages(
       `${this.baseUrl}/search/repositories?q=${encoded}+org:${this.orgName}`,
+    const repos = await this.fetchAllSearchPages(
+      `${this.baseUrl}/search/repositories?q=${query}+org:${this.orgName}`,
+
     );
 
     this.cacheService.set(cacheKey, repos);

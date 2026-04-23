@@ -42,11 +42,36 @@ export class ProjectService {
     if (cached) return cached;
 
     try {
+
       const allRepos = await this.githubService.getAllOrgReposSorted();
       const total = allRepos.length;
 
       const startIndex = (page - 1) * limit;
       const pageRepos = allRepos.slice(startIndex, startIndex + limit);
+      const repositories = await this.githubService.getOrgRepos(page, limit);
+
+      const BATCH_SIZE = 10;
+      const repositoriesWithPRs = [];
+      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
+        const batch = repositories.slice(i, i + BATCH_SIZE);
+        const batchResults = await Promise.all(
+          batch.map(async (repo) => {
+            try {
+              const pulls = await this.githubService.getRepoPulls(repo.name);
+              return { ...repo, pull_requests: pulls.length };
+            } catch {
+              return { ...repo, pull_requests: 0 };
+            }
+          }),
+        );
+        repositoriesWithPRs.push(...batchResults);
+      }
+
+      const orgInfo = await this.githubService.getPublicUserProfile(
+        this.githubService.org,
+      );
+      const total = orgInfo.public_repos || 0;
+
 
       const enriched = await this.enrichWithPullCounts(pageRepos);
 
@@ -88,6 +113,7 @@ export class ProjectService {
       throw new InternalServerErrorException('Failed to fetch issues and PRs');
     }
   }
+
 
   /**
    * Retrieves enriched metadata for a single project by name.
@@ -333,9 +359,13 @@ export class ProjectService {
    * Matches against name and description, avoiding extra GitHub Search API calls.
    */
   async searchProjects(query: string, page = 1, limit = 10) {
+
+  async searchProjects(query: string) {
+
     if (!query) {
       throw new BadRequestException('Search query is required');
     }
+
 
     const normalizedQuery = query.toLowerCase();
     const cacheKey = `projects_search_${normalizedQuery}_p${page}_pp${limit}`;
@@ -369,10 +399,41 @@ export class ProjectService {
       this.logger.error(
         'Error searching repositories:',
         (error as Error).message,
+
+    const cacheKey = `projects_search_${query}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const repositories = await this.githubService.searchOrgRepos(query);
+
+      const repositoriesWithPRs = await Promise.all(
+        repositories.map(async (repo) => {
+          try {
+            const pulls = await this.githubService.getRepoPulls(repo.name);
+            return { ...repo, pull_requests: pulls.length };
+          } catch {
+            return { ...repo, pull_requests: 0 };
+          }
+        }),
+      );
+
+      this.cacheService.set(cacheKey, repositoriesWithPRs, CACHE_TTL);
+
+      return {
+        total: repositoriesWithPRs.length,
+        repositories: repositoriesWithPRs,
+      };
+    } catch (error) {
+      this.logger.error(
+        'Error searching repositories:',
+        error.response?.data || error.message,
+
       );
       throw new InternalServerErrorException('Failed to search projects');
     }
   }
+
 
   private async enrichWithPullCounts(repos: any[]): Promise<any[]> {
     const BATCH_SIZE = 10;
@@ -393,4 +454,5 @@ export class ProjectService {
     }
     return enriched;
   }
+
 }

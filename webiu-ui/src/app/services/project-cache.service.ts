@@ -15,6 +15,7 @@ import {
 export class ProjectCacheService {
   private http = inject(HttpClient);
 
+
   /**
    * Fetches a paginated list of projects from the backend.
    */
@@ -63,5 +64,17 @@ export class ProjectCacheService {
     return this.http.get<ProjectResponse>(
       `${environment.serverUrl}/api/v1/projects/search?q=${encodeURIComponent(query)}&page=${page}&limit=${limit}`,
     );
+
+    getProjects(page = 1, limit = 10): Observable<ProjectResponse> {
+      return this.http.get<ProjectResponse>(
+        `${environment.serverUrl}/api/projects/projects?page=${page}&limit=${limit}`
+      );
+    }
+
+    searchProjects(query: string): Observable<ProjectResponse> {
+  return this.http.get<ProjectResponse>(
+    `${environment.serverUrl}/api/projects/search?q=${encodeURIComponent(query)}`
+  );
+
   }
 }
