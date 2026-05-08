@@ -5,6 +5,7 @@ import {
   ApiParam,
   ApiResponse,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import { UserService } from './user.service';
