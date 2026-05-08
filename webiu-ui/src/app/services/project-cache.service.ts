@@ -16,4 +16,10 @@ export class ProjectCacheService {
         `${environment.serverUrl}/api/projects/projects?page=${page}&limit=${limit}`
       );
     }
+
+    searchProjects(query: string): Observable<ProjectResponse> {
+  return this.http.get<ProjectResponse>(
+    `${environment.serverUrl}/api/projects/search?q=${encodeURIComponent(query)}`
+  );
+  }
 }

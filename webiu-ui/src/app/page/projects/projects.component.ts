@@ -78,20 +78,36 @@ export class ProjectsComponent implements OnInit {
   }
 
   performSearch(searchTerm: string): void {
-    this.currentPage = 1;
-    if (!searchTerm) {
-      // Search cleared — re-fetch the first server page
-      this.fetchProjects();
-      return;
-    }
-    const lowerCaseSearchTerm = searchTerm.toLowerCase();
-    this.filteredProjects = this.sortProjects(
-      this.projectsData.filter((project) =>
-        project.name.toLowerCase().includes(lowerCaseSearchTerm),
-      ),
-    );
-    this.updateDisplayProjects();
+  this.currentPage = 1;
+
+  if (!searchTerm) {
+    this.fetchProjects();
+    return;
   }
+
+  this.isLoading = true;
+
+  this.projectCacheService.searchProjects(searchTerm)
+    .subscribe({
+      next: (response) => {
+        this.serverTotal = response.total;
+        this.projectsData = this.sortProjects(response.repositories);
+        this.filteredProjects = [...this.projectsData];
+
+        
+        this.totalPages = Math.max(
+          1,
+          Math.ceil(this.filteredProjects.length / this.projectsPerPage),
+        );
+
+        this.updateDisplayProjects();
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      }
+    });
+}
 
   fetchProjects(): void {
     this.isLoading = true;

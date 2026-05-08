@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
@@ -7,6 +7,7 @@ const CACHE_TTL = 300; // 5 minutes
 
 @Injectable()
 export class GithubService {
+  private readonly logger = new Logger(GithubService.name);
   private readonly baseUrl = 'https://api.github.com';
   private readonly accessToken: string;
   private readonly orgName = 'c2siorg';
@@ -271,11 +272,25 @@ export class GithubService {
       this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
-      console.error(
+      this.logger.error(
         `Error fetching GitHub social data for ${username}:`,
         error.message,
       );
       throw error;
     }
+  }
+
+  async searchOrgRepos(query: string): Promise<any[]> {
+    const normalizedQuery = query.toLowerCase();
+    const cacheKey = `search_repos:${normalizedQuery}:${this.orgName}`;
+    const cached = this.cacheService.get<any[]>(cacheKey);
+    if (cached) return cached;
+
+    const repos = await this.fetchAllSearchPages(
+      `${this.baseUrl}/search/repositories?q=${query}+org:${this.orgName}`,
+    );
+
+    this.cacheService.set(cacheKey, repos);
+    return repos;
   }
 }

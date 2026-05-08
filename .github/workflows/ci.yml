@@ -3,7 +3,7 @@ name: CI Pipeline
 on:
   pull_request:
     branches:
-      - master
+      - '**'
     types:
       - opened        # PR is first opened
       - synchronize   # new commit pushed to the PR branch
