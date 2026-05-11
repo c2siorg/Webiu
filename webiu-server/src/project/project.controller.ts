@@ -43,6 +43,12 @@ export class ProjectController {
     return this.projectService.searchProjects(query, pageNum, limitNum);
   }
 
+  @Get('tech-stack/:repo')
+  @Header('Cache-Control', 'public, max-age=300')
+  async getRepoTechStack(@Param('repo') repo: string) {
+    return this.projectService.getRepoTechStack(repo);
+  }
+
   /**
    * GET /api/v1/projects/:name
    * Returns metadata and tech stack for a specific project.
