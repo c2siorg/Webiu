@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { GithubService } from './github.service';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
+import { ServiceUnavailableException } from '@nestjs/common';
 
 jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
@@ -73,8 +74,13 @@ describe('GithubService', () => {
     });
 
     it('should propagate errors', async () => {
-      mockedAxios.get.mockRejectedValue(new Error('API error'));
-      await expect(service.getOrgRepos()).rejects.toThrow('API error');
+      mockedAxios.get.mockRejectedValue({
+        isAxiosError: true,
+        message: 'Network Error',
+      });
+      await expect(service.getOrgRepos()).rejects.toThrow(
+        ServiceUnavailableException,
+      );
     });
   });
 
@@ -123,7 +129,10 @@ describe('GithubService', () => {
     });
 
     it('should return null on error', async () => {
-      mockedAxios.get.mockRejectedValue(new Error('API error'));
+      mockedAxios.get.mockRejectedValue({
+        isAxiosError: true,
+        message: 'Network Error',
+      });
       const result = await service.getRepoContributors('c2siorg', 'repo1');
       expect(result).toBeNull();
     });
