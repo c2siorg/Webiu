@@ -6,8 +6,6 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
-const CACHE_TTL = 300; // 5 minutes
-
 @Injectable()
 export class ContributorService {
   private readonly logger = new Logger(ContributorService.name);
@@ -75,7 +73,7 @@ export class ContributorService {
         }),
       );
 
-      this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
+      this.cacheService.set(cacheKey, allContributors);
       return allContributors;
     } catch (error) {
       this.logger.error('Error in getAllContributors:', error);

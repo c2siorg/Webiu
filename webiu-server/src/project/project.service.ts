@@ -7,8 +7,6 @@ import {
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
 
-const CACHE_TTL = 300; // 5 minutes
-
 @Injectable()
 export class ProjectService {
   private readonly logger = new Logger(ProjectService.name);
@@ -60,7 +58,7 @@ export class ProjectService {
         repositories: repositoriesWithPRs,
       };
 
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
       this.logger.error(
@@ -87,7 +85,7 @@ export class ProjectService {
       const pullRequests = data.filter((item) => item.pull_request).length;
 
       const result = { issues, pullRequests };
-      this.cacheService.set(cacheKey, result, CACHE_TTL);
+      this.cacheService.set(cacheKey, result);
       return result;
     } catch (error) {
       this.logger.error(
@@ -121,7 +119,7 @@ export class ProjectService {
         }),
       );
 
-      this.cacheService.set(cacheKey, repositoriesWithPRs, CACHE_TTL);
+      this.cacheService.set(cacheKey, repositoriesWithPRs);
 
       return {
         total: repositoriesWithPRs.length,

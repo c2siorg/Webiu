@@ -1,4 +1,5 @@
 import { CacheService } from './cache.service';
+import { DEFAULT_CACHE_TTL_SECONDS } from './cache.constants';
 
 function mockConfig(ttl?: string) {
   return { get: jest.fn().mockReturnValue(ttl) } as any;
@@ -71,41 +72,50 @@ describe('CacheService', () => {
       expect(s.get('key2')).toBeNull();
     });
 
-    it('should fall back to 300s when CACHE_TTL_SECONDS is missing', () => {
-      const now = 1_000_000;
-      jest
-        .spyOn(Date, 'now')
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 301_000);
+    it(
+      `should fall back to ${DEFAULT_CACHE_TTL_SECONDS}s when CACHE_TTL_SECONDS is missing`,
+      () => {
+        const now = 1_000_000;
+        jest
+          .spyOn(Date, 'now')
+          .mockReturnValueOnce(now)
+          .mockReturnValueOnce(now + DEFAULT_CACHE_TTL_SECONDS * 1000 + 1000);
 
-      const s = new CacheService(mockConfig(undefined));
-      s.set('key', 'value');
-      expect(s.get('key')).toBeNull();
-    });
+        const s = new CacheService(mockConfig(undefined));
+        s.set('key', 'value');
+        expect(s.get('key')).toBeNull();
+      },
+    );
 
-    it('should fall back to 300s when CACHE_TTL_SECONDS is invalid (NaN)', () => {
-      const now = 1_000_000;
-      jest
-        .spyOn(Date, 'now')
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 301_000);
+    it(
+      `should fall back to ${DEFAULT_CACHE_TTL_SECONDS}s when CACHE_TTL_SECONDS is invalid (NaN)`,
+      () => {
+        const now = 1_000_000;
+        jest
+          .spyOn(Date, 'now')
+          .mockReturnValueOnce(now)
+          .mockReturnValueOnce(now + DEFAULT_CACHE_TTL_SECONDS * 1000 + 1000);
 
-      const s = new CacheService(mockConfig('abc'));
-      s.set('key', 'value');
-      expect(s.get('key')).toBeNull();
-    });
+        const s = new CacheService(mockConfig('abc'));
+        s.set('key', 'value');
+        expect(s.get('key')).toBeNull();
+      },
+    );
 
-    it('should fall back to 300s when CACHE_TTL_SECONDS is zero or negative', () => {
-      const now = 1_000_000;
-      jest
-        .spyOn(Date, 'now')
-        .mockReturnValueOnce(now)
-        .mockReturnValueOnce(now + 301_000);
+    it(
+      `should fall back to ${DEFAULT_CACHE_TTL_SECONDS}s when CACHE_TTL_SECONDS is zero or negative`,
+      () => {
+        const now = 1_000_000;
+        jest
+          .spyOn(Date, 'now')
+          .mockReturnValueOnce(now)
+          .mockReturnValueOnce(now + DEFAULT_CACHE_TTL_SECONDS * 1000 + 1000);
 
-      const s = new CacheService(mockConfig('0'));
-      s.set('key', 'value');
-      expect(s.get('key')).toBeNull();
-    });
+        const s = new CacheService(mockConfig('0'));
+        s.set('key', 'value');
+        expect(s.get('key')).toBeNull();
+      },
+    );
 
     it('should use defaultTtl when set() is called without explicit ttlSeconds', () => {
       const now = 1_000_000;

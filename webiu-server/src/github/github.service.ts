@@ -3,8 +3,6 @@ import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios from 'axios';
 
-const CACHE_TTL = 300; // 5 minutes
-
 @Injectable()
 export class GithubService {
   private readonly logger = new Logger(GithubService.name);
@@ -88,7 +86,7 @@ export class GithubService {
         { headers: this.headers },
       );
       const repos = response.data;
-      this.cacheService.set(cacheKey, repos, CACHE_TTL);
+      this.cacheService.set(cacheKey, repos);
       return repos;
     }
 

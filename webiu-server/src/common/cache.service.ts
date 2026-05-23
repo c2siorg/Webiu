@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { DEFAULT_CACHE_TTL_SECONDS } from './cache.constants';
 
 interface CacheEntry<T> {
   data: T;
@@ -23,7 +24,7 @@ export class CacheService {
       }
       this.defaultTtl = parsed;
     } else {
-      this.defaultTtl = 300;
+      this.defaultTtl = DEFAULT_CACHE_TTL_SECONDS;
     }
   }
 

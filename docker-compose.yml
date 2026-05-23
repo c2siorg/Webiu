@@ -8,7 +8,8 @@ services:
     ports:
       - 5050:5050
     env_file:
-      - ./webiu-server/.env
+      # Use the example file as a safe default; override via env vars when needed.
+      - ./webiu-server/.env.example
     environment:
       - NODE_ENV=development
     volumes:
