@@ -1,7 +1,7 @@
 import { publicationsData } from '../../page/publications/publications-data';
-import { projectsData } from '../../page/projects/projects-data';
+import { ProjectResponse, Project } from '../../page/projects/project.model';
 
-export const HomepageDetails = {
+export const getHomepageDetails = (projectsData?: ProjectResponse) => ({
   hero: {
     title: 'Welcome to C2SI',
     subtitle: 'Ceylon Computer Science Institute',
@@ -26,7 +26,7 @@ export const HomepageDetails = {
   stats: [
     {
       label: 'Active Projects',
-      value: projectsData.repositories.length.toString(),
+      value: projectsData ? projectsData.repositories.length.toString() : '0',
       icon: 'projects',
     },
     {
@@ -49,56 +49,56 @@ export const HomepageDetails = {
   featuredProjects: [
     {
       name:
-        projectsData.repositories.find((repo) => repo.name === 'Scan8')?.name ||
+        projectsData?.repositories.find((repo: Project) => repo.name === 'Scan8')?.name ||
         'Scan8',
       description:
-        projectsData.repositories.find((repo) => repo.name === 'Scan8')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'Scan8')
           ?.description || '',
       language:
-        projectsData.repositories.find((repo) => repo.name === 'Scan8')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'Scan8')
           ?.language || 'Python',
       topics:
-        projectsData.repositories
-          .find((repo) => repo.name === 'Scan8')
+        projectsData?.repositories
+          .find((repo: Project) => repo.name === 'Scan8')
           ?.topics.slice(0, 3) || [],
       stars:
-        projectsData.repositories.find((repo) => repo.name === 'Scan8')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'Scan8')
           ?.stargazers_count || 0,
       link:
-        projectsData.repositories.find((repo) => repo.name === 'Scan8')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'Scan8')
           ?.html_url || 'https://github.com/c2siorg/Scan8',
     },
     {
       name:
-        projectsData.repositories.find((repo) => repo.name === 'Webiu')?.name ||
+        projectsData?.repositories.find((repo: Project) => repo.name === 'Webiu')?.name ||
         'Webiu',
       description:
         'A modern web platform for managing and showcasing open-source projects, contributors, and publications.',
       language: 'TypeScript',
       topics: ['angular', 'nestjs', 'web-platform'],
       stars:
-        projectsData.repositories.find((repo) => repo.name === 'Webiu')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'Webiu')
           ?.stargazers_count || 0,
       link:
-        projectsData.repositories.find((repo) => repo.name === 'Webiu')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'Webiu')
           ?.html_url || 'https://github.com/c2siorg/Webiu',
     },
     {
       name:
-        projectsData.repositories.find((repo) => repo.name === 'OpenMF')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'OpenMF')
           ?.name || 'OpenMF',
       description:
-        projectsData.repositories.find((repo) => repo.name === 'OpenMF')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'OpenMF')
           ?.description || '',
       language:
-        projectsData.repositories.find((repo) => repo.name === 'OpenMF')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'OpenMF')
           ?.language || 'JavaScript',
       topics: ['forensics', 'mobile', 'android'],
       stars:
-        projectsData.repositories.find((repo) => repo.name === 'OpenMF')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'OpenMF')
           ?.stargazers_count || 0,
       link:
-        projectsData.repositories.find((repo) => repo.name === 'OpenMF')
+        projectsData?.repositories.find((repo: Project) => repo.name === 'OpenMF')
           ?.html_url || 'https://github.com/c2siorg/OpenMF',
     },
   ],
@@ -117,7 +117,7 @@ export const HomepageDetails = {
         'Explore our innovative open-source projects spanning cybersecurity, AI, and more.',
       icon: 'code',
       link: '/projects',
-      count: projectsData.repositories.length.toString() + '+',
+      count: projectsData ? projectsData.repositories.length.toString() + '+' : '0+',
     },
     {
       title: 'Publications',
@@ -181,4 +181,4 @@ export const HomepageDetails = {
       color: '#f39c12',
     },
   ],
-};
+});

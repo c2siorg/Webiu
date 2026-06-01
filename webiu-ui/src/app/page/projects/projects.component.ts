@@ -2,12 +2,10 @@
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Title, Meta } from '@angular/platform-browser';
 
-import { HttpClientModule } from '@angular/common/http';
+import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
-import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
-import { projectsData } from './projects-data';
-import { Project } from './project.model';
+import { Project, ProjectResponse } from './project.model';
 import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
@@ -19,7 +17,6 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
   imports: [
     HttpClientModule,
     FormsModule,
-    NavbarComponent,
     ProjectsCardComponent,
     LoadingSpinnerComponent,
   ],
@@ -42,7 +39,7 @@ export class ProjectsComponent implements OnInit {
   private toastr = inject(ToastrService);
   private destroyRef = inject(DestroyRef);
   private projectCacheService = inject(ProjectCacheService);
-
+  private http = inject(HttpClient);
 
   ngOnInit(): void {
     this.titleService.setTitle('Projects | Webiu 2.0');
@@ -103,23 +100,34 @@ export class ProjectsComponent implements OnInit {
       },
       error: () => {
         if (!this.searchTerm) {
-          this.serverTotal = projectsData.total;
-          const start = (this.currentPage - 1) * this.projectsPerPage;
-          this.displayProjects = projectsData.repositories.slice(
-            start,
-            start + this.projectsPerPage,
-          );
-          this.totalPages = Math.max(
-            1,
-            Math.ceil(this.serverTotal / this.projectsPerPage),
-          );
+          this.http.get<ProjectResponse>('assets/data/projects.json').subscribe({
+            next: (data: ProjectResponse) => {
+              this.serverTotal = data.total;
+              const start = (this.currentPage - 1) * this.projectsPerPage;
+              this.displayProjects = data.repositories.slice(
+                start,
+                start + this.projectsPerPage,
+              );
+              this.totalPages = Math.max(
+                1,
+                Math.ceil(this.serverTotal / this.projectsPerPage),
+              );
+              this.isLoading = false;
+            },
+            error: () => {
+              this.displayProjects = [];
+              this.serverTotal = 0;
+              this.totalPages = 1;
+              this.isLoading = false;
+            }
+          });
         } else {
           // Global error interceptor will handle the notification
           this.displayProjects = [];
           this.serverTotal = 0;
           this.totalPages = 1;
+          this.isLoading = false;
         }
-        this.isLoading = false;
       },
     });
   }
