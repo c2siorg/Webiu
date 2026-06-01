@@ -3,6 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { of } from 'rxjs'; 
 import { ContributorSearchComponent } from './contributor-search.component';
 
+import { provideHttpClient } from '@angular/common/http';
+import { provideToastr } from 'ngx-toastr';
+
 describe('ContributorSearchComponent', () => {
   let component: ContributorSearchComponent;
   let fixture: ComponentFixture<ContributorSearchComponent>;
@@ -16,7 +19,9 @@ describe('ContributorSearchComponent', () => {
     await TestBed.configureTestingModule({
       imports: [ContributorSearchComponent],
       providers: [
-        { provide: ActivatedRoute, useValue: mockActivatedRoute } 
+        { provide: ActivatedRoute, useValue: mockActivatedRoute },
+        provideHttpClient(),
+        provideToastr()
       ]
     })
     .compileComponents();

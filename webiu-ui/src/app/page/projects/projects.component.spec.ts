@@ -2,13 +2,17 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { ProjectsComponent } from './projects.component';
 
+import { provideHttpClient } from '@angular/common/http';
+import { provideToastr } from 'ngx-toastr';
+
 describe('ProjectsComponent', () => {
   let component: ProjectsComponent;
   let fixture: ComponentFixture<ProjectsComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [ProjectsComponent]
+      imports: [ProjectsComponent],
+      providers: [provideHttpClient(), provideToastr()]
     })
     .compileComponents();
     
