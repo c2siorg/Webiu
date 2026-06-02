@@ -73,7 +73,12 @@ export class CacheService {
     return entry.etag;
   }
 
-  set<T = unknown>(key: string, data: T, ttlSeconds?: number, etag?: string): void {
+  set<T = unknown>(
+    key: string,
+    data: T,
+    ttlSeconds?: number,
+    etag?: string,
+  ): void {
     const ttl = ttlSeconds ?? this.defaultTtl;
     this.cache.set(key, {
       data,

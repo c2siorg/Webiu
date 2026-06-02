@@ -350,10 +350,7 @@ export class GithubService {
     }
   }
 
-  async getRepoContributors(
-    orgName: string,
-    repoName: string,
-  ): Promise<any[]> {
+  async getRepoContributors(orgName: string, repoName: string): Promise<any[]> {
     const normalizedOrgName = orgName.toLowerCase();
     const normalizedRepoName = repoName.toLowerCase();
     const cacheKey = `contributors_${normalizedOrgName}_${normalizedRepoName}`;
