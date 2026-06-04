@@ -1,0 +1,58 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - webiu-2026-gsoc
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+          cache-dependency-path: webiu-ui/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: webiu-ui
+
+      - name: Build Angular Application
+        run: npx ng build --configuration production --base-href=/Webiu/
+        working-directory: webiu-ui
+
+      # Workaround for GitHub Pages routing of single-page apps (SPA).
+      # Replicating index.html as 404.html ensures direct visits/refreshes to sub-routes do not fail.
+      - name: Copy index.html to 404.html
+        run: cp dist/webiu/browser/index.html dist/webiu/browser/404.html
+        working-directory: webiu-ui
+
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: webiu-ui/dist/webiu/browser
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
