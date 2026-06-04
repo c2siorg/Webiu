@@ -1,3 +1,4 @@
+# Stage 1: Build the Angular application
 FROM node:18-alpine AS build
 
 WORKDIR /usr/src/app
@@ -10,18 +11,15 @@ COPY . .
 
 RUN npm run build
 
-FROM node:18-alpine
+# Stage 2: Serve the application using Nginx
+FROM nginx:alpine
 
-WORKDIR /usr/src/app
+# Copy custom Nginx configuration
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-COPY --chown=node:node --from=build /usr/src/app/package*.json ./
-
-RUN npm install --omit=dev && chown -R node:node node_modules
-
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-
-USER node
+# Copy build files from the build stage to Nginx directory
+COPY --from=build /usr/src/app/dist/webiu/browser /usr/share/nginx/html
 
 EXPOSE 4000
 
-CMD ["node", "dist/webiu/server/server.mjs"]
+CMD ["nginx", "-g", "daemon off;"]
