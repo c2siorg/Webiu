@@ -1,18 +1,28 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { HomepageDetails } from '../../common/data/homepage';
+import { getHomepageDetails } from '../../common/data/homepage';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [NavbarComponent, CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.scss',
 })
-export class HomepageComponent {
-  homepageData = HomepageDetails;
+export class HomepageComponent implements OnInit {
+  homepageData = getHomepageDetails();
+  private http = inject(HttpClient);
+
+  ngOnInit() {
+    this.http.get<any>('assets/data/projects.json').subscribe({
+      next: (data) => {
+        this.homepageData = getHomepageDetails(data);
+      },
+      error: (err) => console.error('Failed to load projects', err)
+    });
+  }
 
   // Get language color for projects
   getLanguageColor(language: string): string {
