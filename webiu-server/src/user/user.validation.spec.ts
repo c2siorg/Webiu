@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import * as request from 'supertest';
-import { UserModule } from './user.module';
+import { UserController } from './user.controller';
 import { UserService } from './user.service';
-import { GithubService } from '../github/github.service';
 
 describe('UserController (Validation)', () => {
   let app: INestApplication;
@@ -11,17 +10,12 @@ describe('UserController (Validation)', () => {
     getFollowersAndFollowing: jest.fn(),
     getUserProfile: jest.fn(),
   };
-  const mockGithubService = {};
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
-      imports: [UserModule],
-    })
-      .overrideProvider(UserService)
-      .useValue(mockUserService)
-      .overrideProvider(GithubService)
-      .useValue(mockGithubService)
-      .compile();
+      controllers: [UserController],
+      providers: [{ provide: UserService, useValue: mockUserService }],
+    }).compile();
 
     app = moduleFixture.createNestApplication();
     app.useGlobalPipes(
