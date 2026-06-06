@@ -149,20 +149,4 @@ export class ContributorService {
       throw new InternalServerErrorException('Internal server error');
     }
   }
-
-  async getUserFollowersAndFollowing(username: string) {
-    try {
-      const result =
-        await this.githubService.getUserFollowersAndFollowing(username);
-      return result;
-    } catch (error) {
-      this.logger.error(
-        'Error fetching user followers and following:',
-        error.response?.data || error.message,
-      );
-      throw new InternalServerErrorException(
-        'Failed to fetch followers and following data',
-      );
-    }
-  }
 }

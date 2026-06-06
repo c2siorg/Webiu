@@ -12,7 +12,6 @@ describe('ContributorController', () => {
     getUserCreatedIssues: jest.fn(),
     getUserCreatedPullRequests: jest.fn(),
     getUserStats: jest.fn(),
-    getUserFollowersAndFollowing: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -100,22 +99,6 @@ describe('ContributorController', () => {
       const result = await controller.getUserStats(params);
       expect(result).toEqual(mockResult);
       expect(mockContributorService.getUserStats).toHaveBeenCalledWith(
-        'testuser',
-      );
-    });
-  });
-
-  describe('getUserFollowersAndFollowing', () => {
-    it('should return followers and following for a valid username', async () => {
-      const mockResult = { followers: 100, following: 50 };
-      const params: UsernameDto = { username: 'testuser' };
-      mockContributorService.getUserFollowersAndFollowing.mockResolvedValue(
-        mockResult,
-      );
-
-      const result = await controller.getUserFollowersAndFollowing(params);
-      expect(result).toEqual(mockResult);
-      expect(service.getUserFollowersAndFollowing).toHaveBeenCalledWith(
         'testuser',
       );
     });
