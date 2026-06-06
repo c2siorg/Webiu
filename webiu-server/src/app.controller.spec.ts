@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
+import { ConfigService } from '@nestjs/config';
 
 describe('AppController', () => {
   let controller: AppController;
@@ -7,6 +8,14 @@ describe('AppController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AppController],
+      providers: [
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('development'),
+          },
+        },
+      ],
     }).compile();
 
     controller = module.get<AppController>(AppController);

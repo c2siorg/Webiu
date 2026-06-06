@@ -1,7 +1,10 @@
 import { Controller, Get, Header } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 
 @Controller()
 export class AppController {
+  constructor(private readonly configService: ConfigService) {}
+
   @Get()
   getRoot() {
     return 'Welcome to the Webiu API';
@@ -15,7 +18,11 @@ export class AppController {
   @Get('health')
   @Header('Cache-Control', 'no-cache')
   healthCheck() {
-    return { status: 'ok', timestamp: new Date().toISOString() };
+    return {
+      status: 'ok',
+      timestamp: new Date().toISOString(),
+      environment: this.configService.get<string>('NODE_ENV', 'development'),
+    };
   }
 
   @Get('ready')

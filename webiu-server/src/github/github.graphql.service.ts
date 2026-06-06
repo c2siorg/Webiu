@@ -23,7 +23,8 @@ export class GithubGraphqlService {
     private readonly configService: ConfigService,
   ) {
     this.accessToken = this.configService.get<string>('GITHUB_ACCESS_TOKEN')!;
-    this.orgName = this.configService.get<string>('GITHUB_ORG') || 'c2siorg';
+    this.orgName =
+      this.configService.get<string>('GITHUB_ORG_NAME') || 'c2siorg';
   }
 
   private get headers() {
