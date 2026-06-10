@@ -1,4 +1,5 @@
 import { Routes, RouterModule } from '@angular/router';
+import { adminAuthGuard } from './common/guards/admin-auth.guard';
 
 export const routes: Routes = [
   {
@@ -75,6 +76,19 @@ export const routes: Routes = [
       import('./page/contributor-search/contributor-search.component').then(
         (m) => m.ContributorSearchComponent,
       ),
+  },
+  {
+    path: 'admin',
+    loadComponent: () =>
+      import('./page/admin/admin.component').then((m) => m.AdminComponent),
+  },
+  {
+    path: 'admin/dashboard',
+    loadComponent: () =>
+      import('./page/admin-dashboard/admin-dashboard.component').then(
+        (m) => m.AdminDashboardComponent,
+      ),
+    canActivate: [adminAuthGuard],
   },
   {
     path: '**',
