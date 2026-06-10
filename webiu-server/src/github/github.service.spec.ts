@@ -242,35 +242,6 @@ describe('GithubService', () => {
     });
   });
 
-  describe('getUserInfo', () => {
-    it('should fetch user info with provided access token', async () => {
-      mockedAxios.get.mockResolvedValue({ data: { login: 'testuser' } });
-
-      const result = await service.getUserInfo('user-access-token');
-      expect(result).toEqual({ login: 'testuser' });
-      expect(mockedAxios.get).toHaveBeenCalledWith(
-        'https://api.github.com/user',
-        { headers: { Authorization: 'Bearer user-access-token' } },
-      );
-    });
-  });
-
-  describe('exchangeGithubCode', () => {
-    it('should exchange authorization code for access token', async () => {
-      mockedAxios.post.mockResolvedValue({
-        data: { access_token: 'gh-token' },
-      });
-
-      const result = await service.exchangeGithubCode(
-        'client-id',
-        'client-secret',
-        'auth-code',
-        'http://redirect',
-      );
-      expect(result).toEqual({ access_token: 'gh-token' });
-    });
-  });
-
   describe('getUserFollowersAndFollowing', () => {
     it('should use the user profile endpoint to return correct follower/following counts and cache them', async () => {
       mockedAxios.get.mockResolvedValueOnce({

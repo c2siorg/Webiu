@@ -10,7 +10,12 @@ async function bootstrap() {
   const configService = app.get(ConfigService);
 
   // 1. Startup Validation
-  const criticalEnvVars = ['GITHUB_ACCESS_TOKEN', 'JWT_SECRET'];
+  const criticalEnvVars = [
+    'GITHUB_ACCESS_TOKEN',
+    'JWT_SECRET',
+    'ADMIN_USERNAME',
+    'ADMIN_PASSWORD',
+  ];
   const missing = criticalEnvVars.filter(
     (varName) => !configService.get(varName),
   );
