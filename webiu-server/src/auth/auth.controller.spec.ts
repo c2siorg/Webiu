@@ -63,8 +63,11 @@ describe('AuthController', () => {
         password: 'secure-password',
       };
       const res = mockResponse();
+      const req = {
+        get: jest.fn().mockReturnValue('localhost:5050'),
+      } as unknown as Request;
 
-      const result = await controller.login(loginDto, res);
+      const result = await controller.login(req, loginDto, res);
 
       expect(authService.login).toHaveBeenCalledWith(loginDto);
       expect(res.cookie).toHaveBeenCalledWith(
@@ -85,8 +88,11 @@ describe('AuthController', () => {
   describe('logout', () => {
     it('should clear httpOnly session cookie and return success', async () => {
       const res = mockResponse();
+      const req = {
+        get: jest.fn().mockReturnValue('localhost:5050'),
+      } as unknown as Request;
 
-      const result = await controller.logout(res);
+      const result = await controller.logout(req, res);
 
       expect(res.clearCookie).toHaveBeenCalledWith('admin_session', {
         httpOnly: true,

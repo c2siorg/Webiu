@@ -24,14 +24,20 @@ export class AuthController {
   @Post('login')
   @HttpCode(200)
   async login(
+    @Req() request: Request,
     @Body() loginDto: LoginDto,
     @Res({ passthrough: true }) response: Response,
   ) {
     const token = await this.authService.login(loginDto);
+    const host = request.get('host') || '';
+    const isLocalhost =
+      host.includes('localhost') || host.includes('127.0.0.1');
 
     response.cookie('admin_session', token, {
       httpOnly: true,
-      secure: this.configService.get<string>('NODE_ENV') === 'production',
+      secure: isLocalhost
+        ? false
+        : this.configService.get<string>('NODE_ENV') === 'production',
       sameSite: 'lax',
       path: '/',
       maxAge: 3600 * 1000, // 1 hour
@@ -42,10 +48,19 @@ export class AuthController {
 
   @Post('logout')
   @HttpCode(200)
-  async logout(@Res({ passthrough: true }) response: Response) {
+  async logout(
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const host = request.get('host') || '';
+    const isLocalhost =
+      host.includes('localhost') || host.includes('127.0.0.1');
+
     response.clearCookie('admin_session', {
       httpOnly: true,
-      secure: this.configService.get<string>('NODE_ENV') === 'production',
+      secure: isLocalhost
+        ? false
+        : this.configService.get<string>('NODE_ENV') === 'production',
       sameSite: 'lax',
       path: '/',
     });
