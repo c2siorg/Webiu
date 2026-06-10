@@ -159,45 +159,6 @@
     >
       <img src="../../../assets/gsoc.svg" alt="GSoC Icon" class="menu-icon" />
       <p>GSoC 26</p>
-    </div>
-    <div class="login-wrapper">
-    <button
-      class="navbar__menu__items Login_Logout"
-      type="button"
-      (click)="toggleLoginOptions()"
-    >
-      <img
-        [src]="
-          isLoggedIn
-            ? '../../../assets/logout.svg'
-            : '../../../assets/login.svg'
-        "
-        alt="{{ isLoggedIn ? 'Logout Icon' : 'Login Icon' }}"
-        class="login-logout-icon menu-icon"
-      />
-      <p>{{ isLoggedIn ? "Logout" : "Login" }}</p>
-    </button>
-
-    @if (isLoggedIn) {
-      <p class="welcome-text">
-        Welcome,<br />
-        {{ user.name }}!
-      </p>
-    }
-
-    @if (showLoginOptions && !isLoggedIn) {
-      <div class="login-options">
-        <button type="button" (click)="loginWithGoogle()">
-          <img src="../../../assets/google.webp" alt="Google Icon" />
-          <p>Login with Google</p>
-        </button>
-        <button type="button" (click)="loginWithGitHub()">
-          <img src="../../../assets/community/github.png" alt="GitHub Icon" />
-          <p>Login with GitHub</p>
-        </button>
-      </div>
-    }
-    </div>
   </div>
 
   <div class="navbar__right-actions">

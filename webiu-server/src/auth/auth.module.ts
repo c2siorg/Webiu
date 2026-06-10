@@ -2,14 +2,11 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthController } from './auth.controller';
-import { OAuthController } from './oauth.controller';
 import { AuthService } from './auth.service';
-import { GithubModule } from '../github/github.module';
-import { EmailModule } from '../email/email.module';
+import { CredentialService } from './credential.service';
 
 @Module({
   imports: [
-    // MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -18,10 +15,9 @@ import { EmailModule } from '../email/email.module';
       }),
       inject: [ConfigService],
     }),
-    GithubModule,
-    EmailModule,
   ],
-  controllers: [AuthController, OAuthController],
-  providers: [AuthService],
+  controllers: [AuthController],
+  providers: [AuthService, CredentialService],
+  exports: [AuthService, JwtModule],
 })
 export class AuthModule {}

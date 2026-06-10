@@ -1,32 +1,26 @@
-import { Injectable, NotImplementedException } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { EmailService } from '../email/email.service';
-import { RegisterDto } from './dto/register.dto';
+import { CredentialService } from './credential.service';
 import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
   constructor(
-    private _jwtService: JwtService,
-    private _emailService: EmailService,
+    private readonly jwtService: JwtService,
+    private readonly credentialService: CredentialService,
   ) {}
 
-  // TODO: Re-enable when MongoDB is connected
-  async register(_registerDto: RegisterDto) {
-    throw new NotImplementedException(
-      'Registration requires MongoDB. Connect a database to enable this feature.',
+  async login(loginDto: LoginDto): Promise<string> {
+    const isValid = await this.credentialService.validateCredentials(
+      loginDto.username,
+      loginDto.password,
     );
-  }
 
-  async login(_loginDto: LoginDto) {
-    throw new NotImplementedException(
-      'Login requires MongoDB. Connect a database to enable this feature.',
-    );
-  }
+    if (!isValid) {
+      throw new UnauthorizedException('Invalid administrator credentials');
+    }
 
-  async verifyEmail(_token: string) {
-    throw new NotImplementedException(
-      'Email verification requires MongoDB. Connect a database to enable this feature.',
-    );
+    const payload = { username: loginDto.username, role: 'admin' };
+    return this.jwtService.sign(payload);
   }
 }

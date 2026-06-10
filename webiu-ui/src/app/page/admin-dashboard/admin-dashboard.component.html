@@ -1,0 +1,64 @@
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      <span>WebiU Admin</span>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a class="nav-link active">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a class="nav-link disabled">
+        <span class="icon">📅</span> GSoC Years
+      </a>
+      <a class="nav-link disabled">
+        <span class="icon">💡</span> Project Ideas
+      </a>
+      <a class="nav-link disabled">
+        <span class="icon">⚙️</span> Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button (click)="onLogout()" class="btn-logout">
+        <span class="icon">🚪</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="content-header">
+      <h1>Dashboard Overview</h1>
+      <div class="user-profile">
+        <span class="avatar">👑</span>
+        <span class="username">Administrator</span>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div class="welcome-card">
+        <h2>Welcome to the WebiU Administration Panel!</h2>
+        <p>This is a secure dashboard area reserved for future administrative tasks, including GSoC configuration and project idea management.</p>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <h3>Active GSoC Year</h3>
+          <p class="stat-value">2026</p>
+          <span class="stat-desc">Configured dynamically</span>
+        </div>
+        <div class="stat-card">
+          <h3>Database Engine</h3>
+          <p class="stat-value">PostgreSQL</p>
+          <span class="stat-desc">PR #3 Migration target</span>
+        </div>
+        <div class="stat-card">
+          <h3>Webhook Sync</h3>
+          <p class="stat-value">Disabled</p>
+          <span class="stat-desc">PR #6 Target</span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

@@ -429,13 +429,6 @@ export class GithubService {
     return enrichedPrs;
   }
 
-  async getUserInfo(accessToken: string): Promise<any> {
-    const response = await axios.get(`${this.baseUrl}/user`, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    return response.data;
-  }
-
   async getPublicUserProfile(username: string): Promise<any> {
     const cacheKey = `user_profile_${username}`;
     const cached = this.cacheService.get<any>(cacheKey);
@@ -445,29 +438,6 @@ export class GithubService {
       headers: this.headers,
     });
     this.cacheService.set(cacheKey, response.data);
-    return response.data;
-  }
-
-  async exchangeGithubCode(
-    clientId: string,
-    clientSecret: string,
-    code: string,
-    redirectUri: string,
-  ): Promise<any> {
-    const response = await axios.post(
-      'https://github.com/login/oauth/access_token',
-      new URLSearchParams({
-        client_id: clientId,
-        client_secret: clientSecret,
-        code,
-        redirect_uri: redirectUri,
-      }).toString(),
-      {
-        headers: {
-          Accept: 'application/json',
-        },
-      },
-    );
     return response.data;
   }
 

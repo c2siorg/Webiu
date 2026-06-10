@@ -138,12 +138,23 @@ The server will run on **http://localhost:5050**.
 
 ### 5. Running with Docker
 
-From the repository root:
+You can run the application containerized in either development mode or production preview mode.
+
+#### Development Mode (Recommended for testing local changes)
+This runs the NestJS backend in watch mode and serves the Angular frontend via the local dev server. The frontend will dynamically connect to your local backend server at `http://localhost:5050`.
 
 ```bash
-docker-compose up --build
+docker compose -f docker-compose.dev.yml up --build
 ```
 
+#### Production Preview Mode
+This builds production-ready assets and serves the frontend via Nginx. Note that the frontend in this configuration is compiled to target the production API endpoint (`https://api.c2si.org`).
+
+```bash
+docker compose up --build
+```
+
+#### Docker Service URL Mapping
 | Service | URL |
 |---------|-----|
 | Frontend | http://localhost:4200 |

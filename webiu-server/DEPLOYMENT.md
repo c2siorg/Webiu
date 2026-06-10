@@ -39,6 +39,8 @@ The backend relies on the following environment variables. Ensure these are defi
 | `NODE_ENV` | Yes | App environment (`development`, `production`, `test`) |
 | `PORT` | No | Server port (defaults to `5050` if omitted) |
 | `JWT_SECRET` | **Yes (Critical)** | Secret key used to sign session/admin JWTs |
+| `ADMIN_USERNAME` | **Yes (Critical)** | Administrator login username |
+| `ADMIN_PASSWORD` | **Yes (Critical)** | Administrator login password |
 | `GITHUB_ACCESS_TOKEN` | **Yes (Critical)** | Personal Access Token to query GitHub API rates without limits |
 | `GITHUB_ORG_NAME` | No | GitHub Organization to query (defaults to `c2siorg` if omitted) |
 | `FRONTEND_BASE_URL` | Yes | Comma-separated list of allowed CORS origins (e.g. `http://localhost:4200,https://c2siorg.github.io`) |
@@ -52,9 +54,9 @@ The backend relies on the following environment variables. Ensure these are defi
 ## 3. Startup Validation
 
 The backend performs validation of **critical** environment variables upon startup. 
-If `GITHUB_ACCESS_TOKEN` or `JWT_SECRET` is missing, the bootstrap process will log a clear error message:
+If `GITHUB_ACCESS_TOKEN`, `JWT_SECRET`, `ADMIN_USERNAME`, or `ADMIN_PASSWORD` is missing, the bootstrap process will log a clear error message:
 ```
-[Startup Failure] Critical environment variables are missing: GITHUB_ACCESS_TOKEN, JWT_SECRET
+[Startup Failure] Critical environment variables are missing: GITHUB_ACCESS_TOKEN, JWT_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD
 ```
 And the process will exit immediately with code `1` to prevent running in an unauthenticated or non-functional state.
 

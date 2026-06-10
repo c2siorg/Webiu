@@ -4,7 +4,6 @@ import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-navbar',
@@ -21,10 +20,7 @@ export class NavbarComponent implements OnInit {
 
   isMenuOpen = false;
   isSunVisible = true;
-  isLoggedIn = false;
-  showLoginOptions = false;
   isCommunityDropdownOpen = false;
-  user: any;
   currentRoute = '/';
 
   ngOnInit(): void {
@@ -41,40 +37,10 @@ export class NavbarComponent implements OnInit {
         this.isMenuOpen = false;
         this.isCommunityDropdownOpen = false;
       });
-
-    if (isPlatformBrowser(this.platformId)) {
-      const queryParams = new URLSearchParams(window.location.search);
-      const user = queryParams.get('user');
-      if (user) {
-        try {
-          this.user = JSON.parse(decodeURIComponent(user));
-          this.isLoggedIn = true;
-        } catch (e) {
-          console.warn('Failed to parse user query param:', e);
-          this.user = null;
-          this.isLoggedIn = false;
-        }
-        window.history.replaceState({}, document.title, window.location.pathname);
-      }
-    }
-  }
-
-  toggleLoginOptions(): void {
-    if (this.isLoggedIn) {
-      this.logout();
-    } else {
-      this.showLoginOptions = !this.showLoginOptions;
-      if (this.showLoginOptions) {
-        this.isCommunityDropdownOpen = false;
-      }
-    }
   }
 
   toggleCommunityDropdown(): void {
     this.isCommunityDropdownOpen = !this.isCommunityDropdownOpen;
-    if (this.isCommunityDropdownOpen) {
-      this.showLoginOptions = false;
-    }
   }
 
   closeCommunityDropdown(): void {
@@ -102,23 +68,6 @@ export class NavbarComponent implements OnInit {
     this.toggleTheme();
   }
 
-  logout(): void {
-    this.isLoggedIn = false;
-    this.user = null;
-  }
-
-  loginWithGoogle(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      window.location.href = `${environment.serverUrl}/auth/google`;
-    }
-  }
-
-  loginWithGitHub(): void {
-    if (isPlatformBrowser(this.platformId)) {
-      window.location.href = `${environment.serverUrl}/auth/github`;
-    }
-  }
-
   preventReload(event: Event): void {
     if (this.router.url === '/') {
       event.preventDefault();
@@ -131,21 +80,10 @@ export class NavbarComponent implements OnInit {
   onClickOutside(event: MouseEvent): void {
     if (!isPlatformBrowser(this.platformId)) return;
 
-    const loginOptionsElement = document.querySelector('.login-options');
-    const loginButton = document.querySelector('.Login_Logout');
     const navbarMenu = document.querySelector('#navbarMenu');
     const navigationButtons = document.querySelector('.navigation__buttons');
     const communityDropdown = document.querySelector('.community-dropdown');
     const communityButton = document.querySelector('.community-toggle');
-
-    // Handle login options closing
-    if (
-      this.showLoginOptions &&
-      !loginOptionsElement?.contains(event.target as Node) &&
-      !loginButton?.contains(event.target as Node)
-    ) {
-      this.showLoginOptions = false;
-    }
 
     // Handle community dropdown closing
     if (
