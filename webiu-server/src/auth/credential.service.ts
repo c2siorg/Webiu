@@ -1,26 +1,38 @@
 import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcryptjs';
+import { Admin } from '../database/entities/admin.entity';
 
 @Injectable()
 export class CredentialService {
-  constructor(private readonly configService: ConfigService) {}
+  constructor(
+    @InjectRepository(Admin)
+    private readonly adminRepository: Repository<Admin>,
+  ) {}
 
   /**
-   * Validates administrator credentials against ConfigService (env variables).
-   * Decoupled to allow drop-in replacement when migrating to a database later.
+   * Validates administrator credentials against the database.
    */
   async validateCredentials(
     username: string,
     password: string,
   ): Promise<boolean> {
-    const adminUser = this.configService.get<string>('ADMIN_USERNAME');
-    const adminPass = this.configService.get<string>('ADMIN_PASSWORD');
+    const admin = await this.adminRepository.findOne({
+      where: { username },
+    });
 
-    // Return false if either environment variable is unconfigured
-    if (!adminUser || !adminPass) {
+    if (!admin) {
       return false;
     }
 
-    return username === adminUser && password === adminPass;
+    const isMatch = await bcrypt.compare(password, admin.passwordHash);
+
+    if (isMatch) {
+      admin.lastLoginAt = new Date();
+      await this.adminRepository.save(admin);
+    }
+
+    return isMatch;
   }
 }

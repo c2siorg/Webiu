@@ -4,10 +4,7 @@ import { UserService } from './user.service';
 import { GithubModule } from '../github/github.module';
 
 @Module({
-  imports: [
-    GithubModule,
-    // MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
-  ],
+  imports: [GithubModule],
   controllers: [UserController],
   providers: [UserService],
 })

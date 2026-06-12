@@ -1,15 +1,18 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { Response, Request } from 'express';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { Admin } from '../database/entities/admin.entity';
 import { LoginDto } from './dto/login.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
   let jwtService: JwtService;
+  let adminRepositoryMock: any;
 
   const mockResponse = () => {
     const res = {} as Response;
@@ -19,6 +22,15 @@ describe('AuthController', () => {
   };
 
   beforeEach(async () => {
+    adminRepositoryMock = {
+      findOne: jest.fn().mockImplementation(({ where }) => {
+        if (where.username === 'admin') {
+          return { username: 'admin' } as Admin;
+        }
+        return null;
+      }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AuthController],
       providers: [
@@ -38,11 +50,14 @@ describe('AuthController', () => {
           provide: ConfigService,
           useValue: {
             get: jest.fn((key: string) => {
-              if (key === 'ADMIN_USERNAME') return 'admin';
               if (key === 'NODE_ENV') return 'development';
               return null;
             }),
           },
+        },
+        {
+          provide: getRepositoryToken(Admin),
+          useValue: adminRepositoryMock,
         },
       ],
     }).compile();
@@ -105,7 +120,7 @@ describe('AuthController', () => {
   });
 
   describe('checkSession', () => {
-    it('should return authenticated true if cookie contains valid token matching ADMIN_USERNAME', async () => {
+    it('should return authenticated true if cookie contains valid token matching admin in db', async () => {
       const req = {
         headers: {
           cookie: 'admin_session=valid-jwt-token',
@@ -115,6 +130,9 @@ describe('AuthController', () => {
       const result = await controller.checkSession(req);
 
       expect(jwtService.verify).toHaveBeenCalledWith('valid-jwt-token');
+      expect(adminRepositoryMock.findOne).toHaveBeenCalledWith({
+        where: { username: 'admin' },
+      });
       expect(result).toEqual({ authenticated: true });
     });
 
