@@ -16,6 +16,8 @@ services:
       timeout: 5s
       retries: 3
       start_period: 10s
+    depends_on:
+      - postgres
 
   webiu-ui:
     build:
@@ -35,3 +37,19 @@ services:
     depends_on:
       webiu-server:
         condition: service_healthy
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: webiu-postgres
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: webiu
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

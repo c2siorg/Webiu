@@ -27,6 +27,20 @@ services:
     depends_on:
       - webiu-server
 
+  postgres:
+    image: postgres:15-alpine
+    container_name: webiu-postgres-dev
+    ports:
+      - 5433:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: webiu
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
 volumes:
   server_node_modules:
   ui_node_modules:
+  postgres_data:

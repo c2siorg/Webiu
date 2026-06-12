@@ -10,8 +10,11 @@ import {
 import { Request, Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { Admin } from '../database/entities/admin.entity';
 
 @Controller('auth')
 export class AuthController {
@@ -19,6 +22,8 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    @InjectRepository(Admin)
+    private readonly adminRepository: Repository<Admin>,
   ) {}
 
   @Post('login')
@@ -79,9 +84,11 @@ export class AuthController {
 
     try {
       const decoded = this.jwtService.verify(token);
-      const adminUser = this.configService.get<string>('ADMIN_USERNAME');
+      const adminExists = await this.adminRepository.findOne({
+        where: { username: decoded.username },
+      });
 
-      if (adminUser && decoded.username === adminUser) {
+      if (adminExists) {
         return { authenticated: true };
       }
     } catch {}

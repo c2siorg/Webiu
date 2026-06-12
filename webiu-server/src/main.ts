@@ -15,6 +15,7 @@ async function bootstrap() {
     'JWT_SECRET',
     'ADMIN_USERNAME',
     'ADMIN_PASSWORD',
+    'DATABASE_URL',
   ];
   const missing = criticalEnvVars.filter(
     (varName) => !configService.get(varName),

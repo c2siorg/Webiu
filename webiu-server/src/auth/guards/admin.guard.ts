@@ -5,13 +5,16 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { ConfigService } from '@nestjs/config';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Admin } from '../../database/entities/admin.entity';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService,
+    @InjectRepository(Admin)
+    private readonly adminRepository: Repository<Admin>,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -25,9 +28,12 @@ export class AdminGuard implements CanActivate {
 
     try {
       const decoded = this.jwtService.verify(token);
-      const adminUser = this.configService.get<string>('ADMIN_USERNAME');
 
-      if (!adminUser || decoded.username !== adminUser) {
+      const adminExists = await this.adminRepository.findOne({
+        where: { username: decoded.username },
+      });
+
+      if (!adminExists) {
         throw new UnauthorizedException('Not authorized as administrator');
       }
 
