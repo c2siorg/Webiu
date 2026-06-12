@@ -3,6 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Admin } from './entities/admin.entity';
 import { SystemSetting } from './entities/system-setting.entity';
+import { Repository as RepositoryEntity } from './entities/repository.entity';
 import { AdminSeedService } from './admin-seed.service';
 
 @Global()
@@ -18,12 +19,12 @@ import { AdminSeedService } from './admin-seed.service';
           configService.get<string>('NODE_ENV') === 'production'
             ? { rejectUnauthorized: false }
             : false,
-        entities: [Admin, SystemSetting],
+        entities: [Admin, SystemSetting, RepositoryEntity],
         synchronize: false,
       }),
       inject: [ConfigService],
     }),
-    TypeOrmModule.forFeature([Admin, SystemSetting]),
+    TypeOrmModule.forFeature([Admin, SystemSetting, RepositoryEntity]),
   ],
   providers: [AdminSeedService],
   exports: [TypeOrmModule],

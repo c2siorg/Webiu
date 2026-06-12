@@ -1,0 +1,46 @@
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  Index,
+} from 'typeorm';
+
+@Entity('repositories')
+export class Repository {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Index({ unique: true })
+  @Column({ type: 'bigint', unique: true })
+  githubRepoId: string;
+
+  @Index({ unique: true })
+  @Column({ unique: true })
+  name: string;
+
+  @Column({ type: 'text', nullable: true })
+  description: string | null;
+
+  @Column({ nullable: true })
+  homepage: string | null;
+
+  @Column({ type: 'simple-array', nullable: true })
+  topics: string[] | null;
+
+  @Column({ default: 0 })
+  stars: number;
+
+  @Column({ default: 0 })
+  forks: number;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastSyncedAt: Date | null;
+}
