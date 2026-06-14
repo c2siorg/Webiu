@@ -43,4 +43,16 @@ export class Repository {
 
   @Column({ type: 'timestamp', nullable: true })
   lastSyncedAt: Date | null;
+
+  @Column({ default: true })
+  isActive: boolean;
+
+  @Column({ default: 'pending' })
+  syncStatus: string;
+
+  @Column({ type: 'text', nullable: true })
+  syncError: string | null;
+
+  @Column({ nullable: true })
+  reconciliationSource: string | null;
 }
