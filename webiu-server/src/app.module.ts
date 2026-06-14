@@ -15,6 +15,7 @@ import { ContributorModule } from './contributor/contributor.module';
 import { UserModule } from './user/user.module';
 import { GraphqlResolversModule } from './graphql/graphql.module';
 import { DatabaseModule } from './database/database.module';
+import { GithubWebhookModule } from './github-webhook/github-webhook.module';
 
 @Module({
   imports: [
@@ -47,6 +48,7 @@ import { DatabaseModule } from './database/database.module';
     ProjectModule,
     ContributorModule,
     UserModule,
+    GithubWebhookModule,
   ],
   controllers: [AppController],
   providers: [
