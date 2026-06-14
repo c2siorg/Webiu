@@ -1,9 +1,15 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { JwtService } from '@nestjs/jwt';
 import { ProjectController, IssuesController } from './project.controller';
 import { ProjectService } from './project.service';
+import { RepositorySyncService } from './repository-sync.service';
+import { AdminGuard } from '../auth/guards/admin.guard';
+import { Admin } from '../database/entities/admin.entity';
 
 describe('ProjectController', () => {
   let controller: ProjectController;
+  let syncService: RepositorySyncService;
 
   const mockProjectService = {
     getAllProjects: jest.fn(),
@@ -15,13 +21,33 @@ describe('ProjectController', () => {
     getProjectContributors: jest.fn(),
   };
 
+  const mockRepositorySyncService = {
+    syncRepositories: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ProjectController],
-      providers: [{ provide: ProjectService, useValue: mockProjectService }],
+      providers: [
+        { provide: ProjectService, useValue: mockProjectService },
+        { provide: RepositorySyncService, useValue: mockRepositorySyncService },
+        {
+          provide: AdminGuard,
+          useValue: { canActivate: jest.fn().mockReturnValue(true) },
+        },
+        {
+          provide: JwtService,
+          useValue: { verify: jest.fn() },
+        },
+        {
+          provide: getRepositoryToken(Admin),
+          useValue: {},
+        },
+      ],
     }).compile();
 
     controller = module.get<ProjectController>(ProjectController);
+    syncService = module.get<RepositorySyncService>(RepositorySyncService);
   });
 
   afterEach(() => {
@@ -30,6 +56,20 @@ describe('ProjectController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
+  });
+
+  describe('syncRepositories', () => {
+    it('should call syncService.syncRepositories and return success', async () => {
+      mockRepositorySyncService.syncRepositories.mockResolvedValue(undefined);
+
+      const result = await controller.syncRepositories();
+
+      expect(result).toEqual({
+        success: true,
+        message: 'Repositories synchronized successfully',
+      });
+      expect(syncService.syncRepositories).toHaveBeenCalled();
+    });
   });
 
   describe('getAllProjects', () => {

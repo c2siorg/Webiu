@@ -1,9 +1,29 @@
-import { Controller, Get, Query, Header, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Query,
+  Header,
+  Param,
+  UseGuards,
+} from '@nestjs/common';
 import { ProjectService } from './project.service';
+import { RepositorySyncService } from './repository-sync.service';
+import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('api/v1/projects')
 export class ProjectController {
-  constructor(private projectService: ProjectService) {}
+  constructor(
+    private projectService: ProjectService,
+    private repositorySyncService: RepositorySyncService,
+  ) {}
+
+  @Post('sync')
+  @UseGuards(AdminGuard)
+  async syncRepositories() {
+    await this.repositorySyncService.syncRepositories();
+    return { success: true, message: 'Repositories synchronized successfully' };
+  }
 
   @Get()
   @Header('Cache-Control', 'public, max-age=300')
