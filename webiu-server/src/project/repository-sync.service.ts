@@ -40,6 +40,26 @@ export class RepositorySyncService implements OnApplicationBootstrap {
     }
   }
 
+  async saveRepositoryData(
+    repo: RepositoryEntity,
+    gitRepo: any,
+    source: string,
+  ): Promise<RepositoryEntity> {
+    repo.name = gitRepo.name;
+    repo.description = gitRepo.description;
+    repo.homepage = gitRepo.homepage;
+    repo.topics = gitRepo.topics || [];
+    repo.stars = gitRepo.stargazers_count;
+    repo.forks = gitRepo.forks_count;
+    repo.lastSyncedAt = new Date();
+    repo.isActive = !gitRepo.archived;
+    repo.syncStatus = 'success';
+    repo.syncError = null;
+    repo.reconciliationSource = source;
+
+    return this.repoRepository.save(repo);
+  }
+
   async syncRepositories(source: string = 'manual'): Promise<void> {
     this.logger.log('Starting repository synchronization with GitHub...');
     const githubRepos = await this.githubService.getAllOrgReposSorted();
@@ -55,19 +75,7 @@ export class RepositorySyncService implements OnApplicationBootstrap {
         repo = this.repoRepository.create({ githubRepoId });
       }
 
-      repo.name = gitRepo.name;
-      repo.description = gitRepo.description;
-      repo.homepage = gitRepo.homepage;
-      repo.topics = gitRepo.topics || [];
-      repo.stars = gitRepo.stargazers_count;
-      repo.forks = gitRepo.forks_count;
-      repo.lastSyncedAt = new Date();
-      repo.isActive = true;
-      repo.syncStatus = 'success';
-      repo.syncError = null;
-      repo.reconciliationSource = source;
-
-      await this.repoRepository.save(repo);
+      await this.saveRepositoryData(repo, gitRepo, source);
     }
 
     this.logger.log(`Synchronized ${githubRepos.length} repositories.`);
@@ -97,19 +105,7 @@ export class RepositorySyncService implements OnApplicationBootstrap {
         repo = this.repoRepository.create({ githubRepoId });
       }
 
-      repo.name = gitRepo.name;
-      repo.description = gitRepo.description;
-      repo.homepage = gitRepo.homepage;
-      repo.topics = gitRepo.topics || [];
-      repo.stars = gitRepo.stargazers_count;
-      repo.forks = gitRepo.forks_count;
-      repo.lastSyncedAt = new Date();
-      repo.isActive = true;
-      repo.syncStatus = 'success';
-      repo.syncError = null;
-      repo.reconciliationSource = source;
-
-      await this.repoRepository.save(repo);
+      await this.saveRepositoryData(repo, gitRepo, source);
       this.logger.log(`Synchronized repository ${repoName} successfully.`);
     } catch (error) {
       this.logger.error(

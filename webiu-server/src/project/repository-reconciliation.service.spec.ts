@@ -3,11 +3,13 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RepositoryReconciliationService } from './repository-reconciliation.service';
 import { GithubService } from '../github/github.service';
+import { RepositorySyncService } from './repository-sync.service';
 import { Repository as RepositoryEntity } from '../database/entities/repository.entity';
 
 describe('RepositoryReconciliationService', () => {
   let service: RepositoryReconciliationService;
   let repoRepository: Repository<RepositoryEntity>;
+  let syncService: RepositorySyncService;
 
   const mockGithubService = {
     getAllOrgReposSorted: jest.fn(),
@@ -23,11 +25,29 @@ describe('RepositoryReconciliationService', () => {
     save: jest.fn((entity) => Promise.resolve(entity)),
   };
 
+  const mockRepositorySyncService = {
+    saveRepositoryData: jest.fn((repo, gitRepo, source) => {
+      repo.name = gitRepo.name;
+      repo.description = gitRepo.description;
+      repo.homepage = gitRepo.homepage;
+      repo.topics = gitRepo.topics || [];
+      repo.stars = gitRepo.stargazers_count;
+      repo.forks = gitRepo.forks_count;
+      repo.lastSyncedAt = new Date();
+      repo.isActive = !gitRepo.archived;
+      repo.syncStatus = 'success';
+      repo.syncError = null;
+      repo.reconciliationSource = source;
+      return Promise.resolve(repo);
+    }),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         RepositoryReconciliationService,
         { provide: GithubService, useValue: mockGithubService },
+        { provide: RepositorySyncService, useValue: mockRepositorySyncService },
         {
           provide: getRepositoryToken(RepositoryEntity),
           useValue: mockRepoRepository,
@@ -41,6 +61,7 @@ describe('RepositoryReconciliationService', () => {
     repoRepository = module.get<Repository<RepositoryEntity>>(
       getRepositoryToken(RepositoryEntity),
     );
+    syncService = module.get<RepositorySyncService>(RepositorySyncService);
   });
 
   afterEach(() => {
@@ -72,19 +93,15 @@ describe('RepositoryReconciliationService', () => {
     expect(repoRepository.create).toHaveBeenCalledWith({
       githubRepoId: '12345',
     });
-    expect(repoRepository.save).toHaveBeenCalledWith(
+    expect(syncService.saveRepositoryData).toHaveBeenCalledWith(
       expect.objectContaining({
         githubRepoId: '12345',
-        name: 'new-repo',
-        description: 'New Description',
-        homepage: 'http://new.com',
-        topics: ['new'],
-        stars: 5,
-        forks: 2,
-        isActive: true,
-        syncStatus: 'success',
-        reconciliationSource: 'cron',
       }),
+      expect.objectContaining({
+        id: 12345,
+        name: 'new-repo',
+      }),
+      'cron',
     );
   });
 
@@ -117,19 +134,15 @@ describe('RepositoryReconciliationService', () => {
 
     await service.reconcileRepositories();
 
-    expect(repoRepository.save).toHaveBeenCalledWith(
+    expect(syncService.saveRepositoryData).toHaveBeenCalledWith(
       expect.objectContaining({
         githubRepoId: '12345',
-        name: 'drift-repo',
-        description: 'Updated Description',
-        homepage: 'http://updated.com',
-        topics: ['updated'],
-        stars: 10,
-        forks: 4,
-        isActive: true,
-        syncStatus: 'success',
-        reconciliationSource: 'cron',
       }),
+      expect.objectContaining({
+        id: 12345,
+        name: 'drift-repo',
+      }),
+      'cron',
     );
   });
 
@@ -187,6 +200,7 @@ describe('RepositoryReconciliationService', () => {
 
     await service.reconcileRepositories();
 
+    expect(syncService.saveRepositoryData).not.toHaveBeenCalled();
     expect(repoRepository.save).not.toHaveBeenCalled();
   });
 });

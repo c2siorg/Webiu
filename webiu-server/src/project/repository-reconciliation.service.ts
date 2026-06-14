@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Cron } from '@nestjs/schedule';
 import { GithubService } from '../github/github.service';
+import { RepositorySyncService } from './repository-sync.service';
 import { Repository as RepositoryEntity } from '../database/entities/repository.entity';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class RepositoryReconciliationService {
     @InjectRepository(RepositoryEntity)
     private readonly repoRepository: Repository<RepositoryEntity>,
     private readonly githubService: GithubService,
+    private readonly repositorySyncService: RepositorySyncService,
   ) {}
 
   @Cron('0 */12 * * *')
@@ -52,6 +54,7 @@ export class RepositoryReconciliationService {
           const dbTopics = dbRepo.topics || [];
           const sortedGitTopics = [...gitTopics].sort().join(',');
           const sortedDbTopics = [...dbTopics].sort().join(',');
+          const expectedActive = !gitRepo.archived;
 
           if (
             dbRepo.name !== gitRepo.name ||
@@ -60,7 +63,7 @@ export class RepositoryReconciliationService {
             sortedDbTopics !== sortedGitTopics ||
             dbRepo.stars !== gitRepo.stargazers_count ||
             dbRepo.forks !== gitRepo.forks_count ||
-            dbRepo.isActive !== true
+            dbRepo.isActive !== expectedActive
           ) {
             isDrifted = true;
           }
@@ -69,19 +72,11 @@ export class RepositoryReconciliationService {
             this.logger.log(
               `Reconciliation: Drift detected or repository is new for ${gitRepo.name}. Updating...`,
             );
-            dbRepo.name = gitRepo.name;
-            dbRepo.description = gitRepo.description;
-            dbRepo.homepage = gitRepo.homepage;
-            dbRepo.topics = gitRepo.topics || [];
-            dbRepo.stars = gitRepo.stargazers_count;
-            dbRepo.forks = gitRepo.forks_count;
-            dbRepo.isActive = true;
-            dbRepo.syncStatus = 'success';
-            dbRepo.syncError = null;
-            dbRepo.reconciliationSource = 'cron';
-            dbRepo.lastSyncedAt = new Date();
-
-            await this.repoRepository.save(dbRepo);
+            await this.repositorySyncService.saveRepositoryData(
+              dbRepo,
+              gitRepo,
+              'cron',
+            );
           }
         } catch (error) {
           this.logger.error(
