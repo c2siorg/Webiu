@@ -68,4 +68,42 @@ export class RepositorySyncService implements OnApplicationBootstrap {
 
     this.logger.log(`Synchronized ${githubRepos.length} repositories.`);
   }
+
+  async syncSingleRepository(repoName: string): Promise<void> {
+    this.logger.log(`Starting synchronization for repository: ${repoName}`);
+    const gitRepo = await this.githubService.getRepo(repoName);
+    if (!gitRepo) {
+      this.logger.warn(
+        `Repository ${repoName} not found on GitHub. Deleting from local DB if exists.`,
+      );
+      await this.deleteRepository(repoName);
+      return;
+    }
+
+    const githubRepoId = String(gitRepo.id);
+    let repo = await this.repoRepository.findOne({
+      where: { githubRepoId },
+    });
+
+    if (!repo) {
+      repo = this.repoRepository.create({ githubRepoId });
+    }
+
+    repo.name = gitRepo.name;
+    repo.description = gitRepo.description;
+    repo.homepage = gitRepo.homepage;
+    repo.topics = gitRepo.topics || [];
+    repo.stars = gitRepo.stargazers_count;
+    repo.forks = gitRepo.forks_count;
+    repo.lastSyncedAt = new Date();
+
+    await this.repoRepository.save(repo);
+    this.logger.log(`Synchronized repository ${repoName} successfully.`);
+  }
+
+  async deleteRepository(repoName: string): Promise<void> {
+    this.logger.log(`Deleting repository: ${repoName}`);
+    await this.repoRepository.delete({ name: repoName });
+    this.logger.log(`Deleted repository ${repoName} from database.`);
+  }
 }

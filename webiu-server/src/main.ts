@@ -6,7 +6,7 @@ import helmet from 'helmet';
 import * as compression from 'compression';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { rawBody: true });
   const configService = app.get(ConfigService);
 
   // 1. Startup Validation
@@ -16,6 +16,7 @@ async function bootstrap() {
     'ADMIN_USERNAME',
     'ADMIN_PASSWORD',
     'DATABASE_URL',
+    'GITHUB_WEBHOOK_SECRET',
   ];
   const missing = criticalEnvVars.filter(
     (varName) => !configService.get(varName),
