@@ -57,6 +57,12 @@ export class RepositorySyncService implements OnApplicationBootstrap {
     repo.syncError = null;
     repo.reconciliationSource = source;
 
+    if (source === 'webhook') {
+      repo.lastWebhookAt = new Date();
+    } else if (source === 'cron') {
+      repo.lastReconciliationAt = new Date();
+    }
+
     return this.repoRepository.save(repo);
   }
 
@@ -139,6 +145,13 @@ export class RepositorySyncService implements OnApplicationBootstrap {
       repo.syncError = null;
       repo.reconciliationSource = source;
       repo.lastSyncedAt = new Date();
+
+      if (source === 'webhook') {
+        repo.lastWebhookAt = new Date();
+      } else if (source === 'cron') {
+        repo.lastReconciliationAt = new Date();
+      }
+
       await this.repoRepository.save(repo);
       this.logger.log(`Marked repository ${repoName} as inactive.`);
     } else {

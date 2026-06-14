@@ -106,6 +106,7 @@ export class RepositoryReconciliationService {
           dbRepo.syncError = null;
           dbRepo.reconciliationSource = 'cron';
           dbRepo.lastSyncedAt = new Date();
+          dbRepo.lastReconciliationAt = new Date();
 
           await this.repoRepository.save(dbRepo);
         }

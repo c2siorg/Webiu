@@ -55,4 +55,10 @@ export class Repository {
 
   @Column({ nullable: true })
   reconciliationSource: string | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastWebhookAt: Date | null;
+
+  @Column({ type: 'timestamp', nullable: true })
+  lastReconciliationAt: Date | null;
 }

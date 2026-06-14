@@ -38,6 +38,11 @@ describe('RepositoryReconciliationService', () => {
       repo.syncStatus = 'success';
       repo.syncError = null;
       repo.reconciliationSource = source;
+      if (source === 'webhook') {
+        repo.lastWebhookAt = new Date();
+      } else if (source === 'cron') {
+        repo.lastReconciliationAt = new Date();
+      }
       return Promise.resolve(repo);
     }),
   };
@@ -167,6 +172,7 @@ describe('RepositoryReconciliationService', () => {
         isActive: false,
         syncStatus: 'success',
         reconciliationSource: 'cron',
+        lastReconciliationAt: expect.any(Date),
       }),
     );
   });
