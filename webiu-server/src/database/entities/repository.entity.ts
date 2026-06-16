@@ -5,7 +5,9 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   Index,
+  OneToMany,
 } from 'typeorm';
+import { RepositoryContributor } from './repository-contributor.entity';
 
 @Entity('repositories')
 export class Repository {
@@ -61,4 +63,7 @@ export class Repository {
 
   @Column({ type: 'timestamp', nullable: true })
   lastReconciliationAt: Date | null;
+
+  @OneToMany(() => RepositoryContributor, (rc) => rc.repository)
+  repositoryContributors: RepositoryContributor[];
 }

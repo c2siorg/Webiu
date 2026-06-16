@@ -33,19 +33,19 @@ WebiU 2.0 is a full-stack application that showcases C2SI/SCoRe Lab's open-sourc
 │   Angular 17+    │  http://localhost:5050    │     NestJS       │
 │   Frontend       │  ◄──────────────────────  │     Backend      │
 │   :4200          │                           │     :5050        │
-└──────────────────┘                           └────────┬─────────┘
-                                                        │
-                                                        │ GitHub API
-                                                        ▼
-                                               ┌──────────────────┐
-                                               │  api.github.com  │
-                                               │  (c2siorg org)   │
-                                               └──────────────────┘
+└──────────────────┘                           └────┬──────────┬──┘
+                                                    │          │
+                                         GitHub API │          │ TypeORM
+                                                    ▼          ▼
+                                           ┌──────────────┐ ┌──────────────┐
+                                           │api.github.com│ │  PostgreSQL  │
+                                           │ (c2siorg org)│ │   Database   │
+                                           └──────────────┘ └──────────────┘
 ```
 
 - **Frontend** (`webiu-ui`) — Angular 17+ with standalone components, SCSS, and RxJS.
-- **Backend** (`webiu-server`) — NestJS with modular architecture, in-memory caching, and GitHub API integration.
-- **No database required** — MongoDB support is scaffolded but commented out. All runtime data comes from the GitHub API and is cached in memory.
+- **Backend** (`webiu-server`) — NestJS with modular architecture, caching, PostgreSQL persistence, and GitHub integration.
+- **Database persistence** — PostgreSQL (via TypeORM) stores repository metadata, webhook event states, and contributor profile/relationship mappings to reduce GitHub API usage and enable low-latency queries.
 
 ---
 

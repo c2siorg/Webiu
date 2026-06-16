@@ -1,8 +1,10 @@
 import { Injectable, OnApplicationBootstrap, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, In, Not } from 'typeorm';
 import { GithubService } from '../github/github.service';
 import { Repository as RepositoryEntity } from '../database/entities/repository.entity';
+import { Contributor } from '../database/entities/contributor.entity';
+import { RepositoryContributor } from '../database/entities/repository-contributor.entity';
 
 @Injectable()
 export class RepositorySyncService implements OnApplicationBootstrap {
@@ -11,6 +13,10 @@ export class RepositorySyncService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(RepositoryEntity)
     private readonly repoRepository: Repository<RepositoryEntity>,
+    @InjectRepository(Contributor)
+    private readonly contributorRepository: Repository<Contributor>,
+    @InjectRepository(RepositoryContributor)
+    private readonly repoContributorRepository: Repository<RepositoryContributor>,
     private readonly githubService: GithubService,
   ) {}
 
@@ -63,7 +69,110 @@ export class RepositorySyncService implements OnApplicationBootstrap {
       repo.lastReconciliationAt = new Date();
     }
 
-    return this.repoRepository.save(repo);
+    const savedRepo = await this.repoRepository.save(repo);
+    await this.syncContributorsForRepository(savedRepo);
+    return savedRepo;
+  }
+
+  async syncContributorsForRepository(repo: RepositoryEntity): Promise<void> {
+    this.logger.log(`Syncing contributors for repository ${repo.name}...`);
+    try {
+      const gitContributors = await this.githubService.getRepoContributors(
+        this.githubService.org,
+        repo.name,
+      );
+
+      if (!gitContributors) {
+        this.logger.warn(
+          `No contributors returned for repository ${repo.name}`,
+        );
+        return;
+      }
+
+      const activeContributorIds: string[] = [];
+
+      for (const gitContributor of gitContributors) {
+        if (!gitContributor.id) continue;
+
+        const githubUserId = String(gitContributor.id);
+        const username = gitContributor.login;
+        const avatarUrl = gitContributor.avatar_url;
+        const profileUrl =
+          gitContributor.html_url || `https://github.com/${username}`;
+
+        let contributor = await this.contributorRepository.findOne({
+          where: { githubUserId },
+        });
+
+        if (!contributor) {
+          contributor = this.contributorRepository.create({
+            githubUserId,
+            username,
+            avatarUrl,
+            profileUrl,
+          });
+
+          // Fetch detailed profile for new contributors to populate bio and displayName
+          try {
+            const profile =
+              await this.githubService.getPublicUserProfile(username);
+            contributor.displayName = profile.name || null;
+            contributor.bio = profile.bio || null;
+          } catch (err) {
+            this.logger.warn(
+              `Failed to fetch public profile for new contributor ${username}: ${err.message}`,
+            );
+          }
+        } else {
+          // Update basic metadata for existing contributors
+          contributor.username = username;
+          contributor.avatarUrl = avatarUrl;
+          contributor.profileUrl = profileUrl;
+        }
+
+        const savedContributor =
+          await this.contributorRepository.save(contributor);
+        activeContributorIds.push(savedContributor.id);
+
+        // Upsert repository-contributor relation
+        let repoContributor = await this.repoContributorRepository.findOne({
+          where: {
+            repositoryId: repo.id,
+            contributorId: savedContributor.id,
+          },
+        });
+
+        if (!repoContributor) {
+          repoContributor = this.repoContributorRepository.create({
+            repositoryId: repo.id,
+            contributorId: savedContributor.id,
+          });
+        }
+
+        repoContributor.contributionCount = gitContributor.contributions || 0;
+        await this.repoContributorRepository.save(repoContributor);
+      }
+
+      // Clean up drift (removed contributor relationships)
+      if (activeContributorIds.length > 0) {
+        await this.repoContributorRepository.delete({
+          repositoryId: repo.id,
+          contributorId: Not(In(activeContributorIds)),
+        });
+      } else {
+        await this.repoContributorRepository.delete({
+          repositoryId: repo.id,
+        });
+      }
+      this.logger.log(
+        `Successfully synced ${activeContributorIds.length} contributors for repo ${repo.name}.`,
+      );
+    } catch (error) {
+      this.logger.error(
+        `Failed to sync contributors for repository ${repo.name}:`,
+        error.message,
+      );
+    }
   }
 
   async syncRepositories(source: string = 'manual'): Promise<void> {
