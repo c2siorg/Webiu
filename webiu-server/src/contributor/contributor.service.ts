@@ -3,8 +3,11 @@ import {
   Logger,
   InternalServerErrorException,
 } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { GithubService } from '../github/github.service';
 import { CacheService } from '../common/cache.service';
+import { Contributor } from '../database/entities/contributor.entity';
 
 const CACHE_TTL = 300; // 5 minutes
 
@@ -13,6 +16,8 @@ export class ContributorService {
   private readonly logger = new Logger(ContributorService.name);
 
   constructor(
+    @InjectRepository(Contributor)
+    private readonly contributorRepository: Repository<Contributor>,
     private githubService: GithubService,
     private cacheService: CacheService,
   ) {}
@@ -23,57 +28,32 @@ export class ContributorService {
     if (cached) return cached;
 
     try {
-      const orgName = this.githubService.org;
-      const contributorsMap = new Map();
+      const contributors = await this.contributorRepository
+        .createQueryBuilder('contributor')
+        .leftJoinAndSelect('contributor.repositoryContributors', 'rc')
+        .leftJoinAndSelect('rc.repository', 'repository')
+        .getMany();
 
-      const repositories = await this.githubService.getOrgRepos();
-
-      if (repositories.length === 0) {
-        return [];
-      }
-
-      const BATCH_SIZE = 10;
-      for (let i = 0; i < repositories.length; i += BATCH_SIZE) {
-        const batch = repositories.slice(i, i + BATCH_SIZE);
-
-        await Promise.all(
-          batch.map(async (repo) => {
-            try {
-              const contributors = await this.githubService.getRepoContributors(
-                orgName,
-                repo.name,
-              );
-              if (!contributors?.length) return;
-
-              contributors.forEach((contributor) => {
-                const login = contributor.login.toLowerCase();
-
-                if (!contributorsMap.has(login)) {
-                  contributorsMap.set(login, {
-                    login: contributor.login,
-                    contributions: contributor.contributions,
-                    repos: new Set([repo.name]),
-                    avatar_url: contributor.avatar_url,
-                  });
-                } else {
-                  const userData = contributorsMap.get(login);
-                  userData.contributions += contributor.contributions;
-                  userData.repos.add(repo.name);
-                }
-              });
-            } catch (err) {
-              this.logger.error(`Error processing repo ${repo.name}:`, err);
+      const allContributors = contributors
+        .map((c) => {
+          const repos = [];
+          let totalContributions = 0;
+          if (c.repositoryContributors) {
+            for (const rc of c.repositoryContributors) {
+              if (rc.repository && rc.repository.isActive) {
+                totalContributions += rc.contributionCount;
+                repos.push(rc.repository.name);
+              }
             }
-          }),
-        );
-      }
-
-      const allContributors = Array.from(contributorsMap.values()).map(
-        (contributor) => ({
-          ...contributor,
-          repos: Array.from(contributor.repos),
-        }),
-      );
+          }
+          return {
+            login: c.username,
+            contributions: totalContributions,
+            repos,
+            avatar_url: c.avatarUrl,
+          };
+        })
+        .filter((c) => c.repos.length > 0);
 
       this.cacheService.set(cacheKey, allContributors, CACHE_TTL);
       return allContributors;
