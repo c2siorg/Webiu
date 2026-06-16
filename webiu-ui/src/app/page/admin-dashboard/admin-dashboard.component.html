@@ -1,156 +1,165 @@
-<div class="dashboard-container">
-  <aside class="sidebar">
-    <div class="sidebar-brand">
+<div class="admin-panel-container">
+  <!-- Top Navigation Bar -->
+  <header class="admin-navbar">
+    <div class="navbar-left">
       <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
-      <span>WebiU Admin</span>
+      <span class="brand-name">WebiU Admin</span>
     </div>
     
-    <nav class="sidebar-nav">
-      <a routerLink="/admin/dashboard" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <i class="fa-solid fa-chart-pie icon"></i> Dashboard
+    <nav class="navbar-center">
+      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
       </a>
-      <a class="nav-link disabled">
-        <i class="fa-solid fa-calendar-days icon"></i> GSoC Years
+      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <i class="fa-solid fa-gears"></i> Settings
       </a>
-      <a class="nav-link disabled">
-        <i class="fa-solid fa-lightbulb icon"></i> Project Ideas
+      <a class="nav-tab disabled" title="Locked - Coming Soon">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Years <i class="fa-solid fa-lock badge-locked"></i>
       </a>
-      <a routerLink="/admin/settings" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <i class="fa-solid fa-gears icon"></i> Settings
+      <a class="nav-tab disabled" title="Locked - Coming Soon">
+        <i class="fa-solid fa-lightbulb"></i> Ideas <i class="fa-solid fa-lock badge-locked"></i>
       </a>
     </nav>
-
-    <div class="sidebar-footer">
-      <button (click)="onLogout()" class="btn-logout">
-        <i class="fa-solid fa-right-from-bracket icon"></i> Logout
+    
+    <div class="navbar-right">
+      <div class="user-badge">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Administrator</span>
+      </div>
+      <button (click)="onLogout()" class="btn-navbar-logout" title="Log out of panel">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
       </button>
     </div>
-  </aside>
+  </header>
 
-  <main class="main-content">
-    <header class="content-header">
-      <h1>Dashboard Overview</h1>
-      <div class="user-profile">
-        <i class="fa-solid fa-user-shield avatar-icon"></i>
-        <span class="username">Administrator</span>
-      </div>
-    </header>
-
-    <div class="content-body">
-      <div class="welcome-card">
+  <!-- Main Content Area -->
+  <main class="admin-main-wrapper">
+    <div class="welcome-card">
+      <div class="welcome-text">
         <h2>Welcome to the WebiU Administration Panel!</h2>
         <p>Manage platform configurations, synchronize external project sources, and monitor runtime platform settings dynamically.</p>
       </div>
-
-      <!-- Statistics Section with Live Metrics -->
-      <div class="stats-section">
-        <h2>Live Configuration Metrics</h2>
-        <p class="section-desc">Real-time parameters loaded from WebiU's database settings.</p>
-        
-        <div class="stats-grid">
-          <!-- Active Year Card -->
-          <div class="stat-card">
-            <div class="stat-icon-wrapper active">
-              <i class="fa-solid fa-calendar-check"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Active GSoC Year</h3>
-              <p class="stat-value">{{ currentYear }}</p>
-              <span class="stat-desc">Primary cycle identifier</span>
-            </div>
-          </div>
-
-          <!-- Ideas Page Card -->
-          <div class="stat-card">
-            <div class="stat-icon-wrapper" [class.active]="showIdeasPage" [class.inactive]="!showIdeasPage">
-              <i class="fa-solid fa-lightbulb"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Ideas Page Status</h3>
-              <p class="stat-value" [class.text-success]="showIdeasPage" [class.text-muted]="!showIdeasPage">
-                {{ showIdeasPage ? 'Visible' : 'Hidden' }}
-              </p>
-              <span class="stat-desc">Public visibility status</span>
-            </div>
-          </div>
-
-          <!-- Registration Card -->
-          <div class="stat-card">
-            <div class="stat-icon-wrapper" [class.active]="registrationOpen" [class.inactive]="!registrationOpen">
-              <i class="fa-solid fa-user-plus"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Registration Status</h3>
-              <p class="stat-value" [class.text-success]="registrationOpen" [class.text-muted]="!registrationOpen">
-                {{ registrationOpen ? 'Open' : 'Closed' }}
-              </p>
-              <span class="stat-desc">Accepting new participants</span>
-            </div>
-          </div>
-
-          <!-- Platform Status Card -->
-          <div class="stat-card">
-            <div class="stat-icon-wrapper" [class.warning]="maintenanceMode" [class.active]="!maintenanceMode">
-              <i class="fa-solid fa-screwdriver-wrench"></i>
-            </div>
-            <div class="stat-info">
-              <h3>Platform Status</h3>
-              <p class="stat-value" [class.text-warning]="maintenanceMode" [class.text-success]="!maintenanceMode">
-                {{ maintenanceMode ? 'Maintenance' : 'Normal' }}
-              </p>
-              <span class="stat-desc">System operational mode</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Quick Actions Deck -->
-      <div class="quick-actions-section">
-        <h2>Quick Actions</h2>
-        <p class="section-desc">Common administrative operations to manage WebiU behavior.</p>
-        
-        <div class="actions-grid">
-          <!-- Manual Repository Sync -->
-          <div class="action-card">
-            <div class="action-details">
-              <div class="action-title-wrapper">
-                <i class="fa-solid fa-rotate icon-accent animate-spin-hover"></i>
-                <h3>Sync GitHub Repositories</h3>
-              </div>
-              <p class="action-description">
-                Triggers an on-demand synchronization cycle. This connects to GitHub API, pulls the latest repository metadata, contributor contribution statistics, and updates local database entities.
-              </p>
-            </div>
-            <div class="action-btn-wrapper">
-              <button (click)="onSync()" [disabled]="isSyncing" class="btn-action btn-primary-action">
-                @if (isSyncing) {
-                  <i class="fa-solid fa-circle-notch fa-spin"></i> Syncing...
-                } @else {
-                  <i class="fa-solid fa-rotate"></i> Sync Now
-                }
-              </button>
-            </div>
-          </div>
-
-          <!-- Configure Platform Settings -->
-          <div class="action-card">
-            <div class="action-details">
-              <div class="action-title-wrapper">
-                <i class="fa-solid fa-sliders icon-accent"></i>
-                <h3>Configure Settings</h3>
-              </div>
-              <p class="action-description">
-                Edit platform metadata, configure SEO meta fields, toggle ideas pages visibility, open/close registrations, customize branding parameters, or enable maintenance page banners.
-              </p>
-            </div>
-            <div class="action-btn-wrapper">
-              <a routerLink="/admin/settings" class="btn-action btn-secondary-action">
-                <i class="fa-solid fa-gears"></i> Edit Settings
-              </a>
-            </div>
-          </div>
-        </div>
+      <div class="welcome-badge">
+        <i class="fa-solid fa-shield-halved"></i> Control Center
       </div>
     </div>
+
+    <!-- Statistics Section with Live Metrics -->
+    <section class="stats-section">
+      <div class="section-header">
+        <div>
+          <h2>Live Configuration Metrics</h2>
+          <p class="section-desc">Real-time parameters loaded from WebiU's database settings.</p>
+        </div>
+      </div>
+      
+      <div class="stats-grid">
+        <!-- Active Year Card -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper active">
+            <i class="fa-solid fa-calendar-check"></i>
+          </div>
+          <div class="stat-info">
+            <h3>Active GSoC Year</h3>
+            <p class="stat-value">{{ currentYear }}</p>
+            <span class="stat-desc">Primary cycle identifier</span>
+          </div>
+        </div>
+
+        <!-- Ideas Page Card -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper" [class.active]="showIdeasPage" [class.inactive]="!showIdeasPage">
+            <i class="fa-solid fa-lightbulb"></i>
+          </div>
+          <div class="stat-info">
+            <h3>Ideas Page Status</h3>
+            <p class="stat-value" [class.text-success]="showIdeasPage" [class.text-muted]="!showIdeasPage">
+              {{ showIdeasPage ? 'Visible' : 'Hidden' }}
+            </p>
+            <span class="stat-desc">Public visibility status</span>
+          </div>
+        </div>
+
+        <!-- Registration Card -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper" [class.active]="registrationOpen" [class.inactive]="!registrationOpen">
+            <i class="fa-solid fa-user-plus"></i>
+          </div>
+          <div class="stat-info">
+            <h3>Registration Status</h3>
+            <p class="stat-value" [class.text-success]="registrationOpen" [class.text-muted]="!registrationOpen">
+              {{ registrationOpen ? 'Open' : 'Closed' }}
+            </p>
+            <span class="stat-desc">Accepting new participants</span>
+          </div>
+        </div>
+
+        <!-- Platform Status Card -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper" [class.warning]="maintenanceMode" [class.active]="!maintenanceMode">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+          </div>
+          <div class="stat-info">
+            <h3>Platform Status</h3>
+            <p class="stat-value" [class.text-warning]="maintenanceMode" [class.text-success]="!maintenanceMode">
+              {{ maintenanceMode ? 'Maintenance' : 'Normal' }}
+            </p>
+            <span class="stat-desc">System operational mode</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quick Actions Deck -->
+    <section class="quick-actions-section">
+      <div class="section-header">
+        <div>
+          <h2>Quick Actions</h2>
+          <p class="section-desc">Common administrative operations to manage WebiU behavior.</p>
+        </div>
+      </div>
+      
+      <div class="actions-grid">
+        <!-- Manual Repository Sync -->
+        <div class="action-card">
+          <div class="action-card-header">
+            <div class="action-icon-wrapper">
+              <i class="fa-solid fa-rotate icon-accent"></i>
+            </div>
+            <h3>Sync GitHub Repositories</h3>
+          </div>
+          <p class="action-description">
+            Triggers an on-demand synchronization cycle. This connects to GitHub API, pulls the latest repository metadata, contributor contribution statistics, and updates local database entities.
+          </p>
+          <div class="action-btn-wrapper">
+            <button (click)="onSync()" [disabled]="isSyncing" class="btn-action btn-primary-action">
+              @if (isSyncing) {
+                <i class="fa-solid fa-circle-notch fa-spin"></i> Syncing...
+              } @else {
+                <i class="fa-solid fa-rotate"></i> Sync Now
+              }
+            </button>
+          </div>
+        </div>
+
+        <!-- Configure Platform Settings -->
+        <div class="action-card">
+          <div class="action-card-header">
+            <div class="action-icon-wrapper">
+              <i class="fa-solid fa-sliders icon-accent"></i>
+            </div>
+            <h3>Configure Settings</h3>
+          </div>
+          <p class="action-description">
+            Edit platform metadata, configure SEO meta fields, toggle ideas pages visibility, open/close registrations, customize branding parameters, or enable maintenance page banners.
+          </p>
+          <div class="action-btn-wrapper">
+            <a routerLink="/admin/settings" class="btn-action btn-secondary-action">
+              <i class="fa-solid fa-gears"></i> Edit Settings
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
   </main>
 </div>
