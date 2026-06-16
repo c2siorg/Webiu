@@ -9,6 +9,7 @@ services:
       - ./webiu-server/.env
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/webiu
     volumes:
       - ./webiu-server:/usr/src/app
       - server_node_modules:/usr/src/app/node_modules
