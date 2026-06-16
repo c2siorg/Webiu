@@ -40,6 +40,6 @@ export class Contributor {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @OneToMany(() => RepositoryContributor, (rc: any) => rc.contributor)
+  @OneToMany(() => RepositoryContributor, (rc) => rc.contributor)
   repositoryContributors: RepositoryContributor[];
 }

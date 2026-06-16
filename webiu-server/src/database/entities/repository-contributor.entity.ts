@@ -18,7 +18,7 @@ export class RepositoryContributor {
 
   @ManyToOne(
     () => Repository,
-    (repository: any) => repository.repositoryContributors,
+    (repository) => repository.repositoryContributors,
     {
       onDelete: 'CASCADE',
     },
@@ -28,7 +28,7 @@ export class RepositoryContributor {
 
   @ManyToOne(
     () => Contributor,
-    (contributor: any) => contributor.repositoryContributors,
+    (contributor) => contributor.repositoryContributors,
     {
       onDelete: 'CASCADE',
     },
