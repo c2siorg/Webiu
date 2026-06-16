@@ -1,4 +1,25 @@
-<app-navbar></app-navbar>
-<router-outlet></router-outlet>
-<app-footer></app-footer>
-<app-back-to-top></app-back-to-top>
+@if (isMaintenanceMode && !isAdminRoute) {
+  <div class="maintenance-container">
+    <div class="maintenance-card">
+      <div class="logo-wrapper">
+        <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      </div>
+      <h1>Under Scheduled Maintenance</h1>
+      <p>We are currently performing essential system upgrades. Please check back shortly.</p>
+      <div class="status-indicator">
+        <span class="pulse-dot"></span> Offline for upgrades
+      </div>
+    </div>
+  </div>
+} @else {
+  @if (showLayout) {
+    <app-navbar></app-navbar>
+  }
+
+  <router-outlet></router-outlet>
+
+  @if (showLayout) {
+    <app-footer></app-footer>
+    <app-back-to-top></app-back-to-top>
+  }
+}

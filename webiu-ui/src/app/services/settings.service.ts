@@ -10,6 +10,10 @@ export class SettingsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.serverUrl}/admin/settings`;
 
+  getPublicSettings(): Observable<any> {
+    return this.http.get<any>(`${environment.serverUrl}/admin/settings/public`);
+  }
+
   getSettings(): Observable<any> {
     return this.http.get<any>(this.apiUrl, {
       withCredentials: true,

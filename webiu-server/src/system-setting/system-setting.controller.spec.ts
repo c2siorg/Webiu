@@ -79,4 +79,22 @@ describe('SystemSettingController', () => {
       expect(service.updateSettings).toHaveBeenCalledWith(updates);
     });
   });
+
+  describe('getPublicSettings', () => {
+    it('should return all settings successfully to public users', async () => {
+      const mockSettings = {
+        'gsoc.current_year': 2026,
+        'site.title': 'WebiU',
+      };
+      mockSystemSettingService.getAllSettings.mockResolvedValue(mockSettings);
+
+      const result = await controller.getPublicSettings();
+
+      expect(result).toEqual({
+        success: true,
+        settings: mockSettings,
+      });
+      expect(service.getAllSettings).toHaveBeenCalled();
+    });
+  });
 });

@@ -6,22 +6,25 @@
       <span class="brand-name">WebiU Admin</span>
     </div>
     
-    <nav class="navbar-center">
-      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+    <div class="navbar-center" role="tablist">
+      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
         <i class="fa-solid fa-chart-pie"></i> Dashboard
       </a>
-      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
         <i class="fa-solid fa-gears"></i> Settings
       </a>
-      <a class="nav-tab disabled" title="Locked - Coming Soon">
+      <a class="nav-tab disabled" title="Locked - Coming Soon" role="tab" aria-disabled="true">
         <i class="fa-solid fa-calendar-days"></i> GSoC Years <i class="fa-solid fa-lock badge-locked"></i>
       </a>
-      <a class="nav-tab disabled" title="Locked - Coming Soon">
+      <a class="nav-tab disabled" title="Locked - Coming Soon" role="tab" aria-disabled="true">
         <i class="fa-solid fa-lightbulb"></i> Ideas <i class="fa-solid fa-lock badge-locked"></i>
       </a>
-    </nav>
+    </div>
     
     <div class="navbar-right">
+      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
+      </button>
       <div class="user-badge">
         <i class="fa-solid fa-user-shield"></i>
         <span>Administrator</span>

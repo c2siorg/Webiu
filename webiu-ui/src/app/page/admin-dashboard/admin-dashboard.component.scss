@@ -113,35 +113,38 @@
 
 .navbar-center {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  align-items: stretch;
+  height: 100%;
+  gap: 4px;
 }
 
 .nav-tab {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 18px;
+  padding: 0 20px;
   color: var(--admin-nav-text);
   text-decoration: none;
   font-size: 14px;
   font-weight: 600;
-  border-radius: 10px;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 3px solid transparent;
+  margin-bottom: -1px; /* Overlaps header's border-bottom perfectly */
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  box-sizing: border-box;
 
   i {
     font-size: 14px;
   }
 
   &:hover:not(.disabled) {
-    background-color: var(--admin-nav-hover);
     color: var(--admin-text);
+    border-bottom-color: var(--admin-navbar-border);
   }
 
   &.active {
-    background-color: var(--admin-nav-active-bg);
     color: var(--admin-nav-active-text);
+    border-bottom-color: var(--admin-nav-active-text);
   }
 
   &.disabled {
@@ -159,7 +162,31 @@
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
+}
+
+.btn-theme-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background-color: var(--admin-badge-bg);
+  border: 1px solid var(--admin-card-border);
+  color: var(--admin-text);
+  border-radius: 50%;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+
+  &:hover {
+    background-color: var(--admin-nav-hover);
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .user-badge {

@@ -146,20 +146,22 @@
         </div>
       }
     </div>
-    <div
-      class="navbar__menu__items"
-      routerLink="/gsoc"
-      [class.active]="isRouteActive('/gsoc')"
-      (click)="navigateTo('/gsoc')"
-      (keydown.enter)="navigateTo('/gsoc')"
-      (keydown.space)="navigateTo('/gsoc'); $event.preventDefault()"
-      tabindex="0"
-      role="link"
-      [attr.aria-label]="'Google Summer of Code'"
-    >
-      <img src="../../../assets/gsoc.svg" alt="GSoC Icon" class="menu-icon" />
-      <p>GSoC 26</p>
-  </div>
+    @if (showIdeasPage) {
+      <div
+        class="navbar__menu__items"
+        routerLink="/gsoc"
+        [class.active]="isRouteActive('/gsoc')"
+        (click)="navigateTo('/gsoc')"
+        (keydown.enter)="navigateTo('/gsoc')"
+        (keydown.space)="navigateTo('/gsoc'); $event.preventDefault()"
+        tabindex="0"
+        role="link"
+        [attr.aria-label]="'Google Summer of Code'"
+      >
+        <img src="../../../assets/gsoc.svg" alt="GSoC Icon" class="menu-icon" />
+        <p>GSoC {{ currentYearShort }}</p>
+      </div>
+    }
 
   <div class="navbar__right-actions">
     <button

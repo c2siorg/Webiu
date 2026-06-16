@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../services/settings.service';
 import { AuthService } from '../../services/auth.service';
+import { ThemeService } from '../../services/theme.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -16,6 +17,7 @@ import { ToastrService } from 'ngx-toastr';
 export class AdminSettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);
   private authService = inject(AuthService);
+  private themeService = inject(ThemeService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
 
@@ -26,8 +28,10 @@ export class AdminSettingsComponent implements OnInit {
   siteDescription = '';
   maintenanceMode = false;
   isSaving = false;
+  isSunVisible = true;
 
   ngOnInit(): void {
+    this.isSunVisible = !this.themeService.isDarkMode();
     this.loadSettings();
   }
 
@@ -94,5 +98,10 @@ export class AdminSettingsComponent implements OnInit {
         this.toastr.error('Logout failed, please try again');
       },
     });
+  }
+
+  toggleMode(): void {
+    this.themeService.toggleDarkMode();
+    this.isSunVisible = !this.themeService.isDarkMode();
   }
 }

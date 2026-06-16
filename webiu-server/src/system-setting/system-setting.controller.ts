@@ -3,17 +3,18 @@ import { SystemSettingService } from './system-setting.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('admin/settings')
-@UseGuards(AdminGuard)
 export class SystemSettingController {
   constructor(private readonly settingService: SystemSettingService) {}
 
   @Get()
+  @UseGuards(AdminGuard)
   async getSettings() {
     const settings = await this.settingService.getAllSettings();
     return { success: true, settings };
   }
 
   @Patch()
+  @UseGuards(AdminGuard)
   async updateSettings(@Body() updates: Record<string, any>) {
     const settings = await this.settingService.updateSettings(updates);
     return {
@@ -21,5 +22,11 @@ export class SystemSettingController {
       message: 'Settings updated successfully.',
       settings,
     };
+  }
+
+  @Get('public')
+  async getPublicSettings() {
+    const settings = await this.settingService.getAllSettings();
+    return { success: true, settings };
   }
 }
