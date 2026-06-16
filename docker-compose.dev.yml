@@ -1,6 +1,6 @@
 services:
   webiu-server:
-    image: node:18-alpine
+    image: node:20-alpine
     container_name: webiu-server-dev
     working_dir: /usr/src/app
     ports:
@@ -9,13 +9,14 @@ services:
       - ./webiu-server/.env
     environment:
       - NODE_ENV=development
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/webiu
     volumes:
       - ./webiu-server:/usr/src/app
       - server_node_modules:/usr/src/app/node_modules
     command: [ "sh", "-c", "npm install && npm run start:dev" ]
 
   webiu-ui:
-    image: node:18-alpine
+    image: node:20-alpine
     container_name: webiu-ui-dev
     working_dir: /usr/src/app
     volumes:

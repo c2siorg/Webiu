@@ -18,7 +18,7 @@ import { AdminSeedService } from './admin-seed.service';
         url: configService.get<string>('DATABASE_URL'),
         ssl:
           configService.get<string>('DATABASE_URL')?.includes('render.com') ||
-          configService.get<string>('NODE_ENV') === 'production'
+          configService.get<string>('DATABASE_SSL') === 'true'
             ? { rejectUnauthorized: false }
             : false,
         entities: [
