@@ -17,6 +17,7 @@ import { UserModule } from './user/user.module';
 import { GraphqlResolversModule } from './graphql/graphql.module';
 import { DatabaseModule } from './database/database.module';
 import { GithubWebhookModule } from './github-webhook/github-webhook.module';
+import { SystemSettingModule } from './system-setting/system-setting.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { GithubWebhookModule } from './github-webhook/github-webhook.module';
     ContributorModule,
     UserModule,
     GithubWebhookModule,
+    SystemSettingModule,
   ],
   controllers: [AppController],
   providers: [

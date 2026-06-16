@@ -1,0 +1,124 @@
+<div class="dashboard-container">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      <span>WebiU Admin</span>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a routerLink="/admin/dashboard" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <span class="icon">📊</span> Dashboard
+      </a>
+      <a class="nav-link disabled">
+        <span class="icon">📅</span> GSoC Years
+      </a>
+      <a class="nav-link disabled">
+        <span class="icon">💡</span> Project Ideas
+      </a>
+      <a routerLink="/admin/settings" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <span class="icon">⚙️</span> Settings
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button (click)="onLogout()" class="btn-logout">
+        <span class="icon">🚪</span> Logout
+      </button>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="content-header">
+      <h1>System Settings</h1>
+      <div class="user-profile">
+        <span class="avatar">👑</span>
+        <span class="username">Administrator</span>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <div class="settings-grid">
+        <!-- Section 1 — GSoC Configuration -->
+        <div class="settings-section">
+          <h2>GSoC Configuration</h2>
+          <div class="settings-card">
+            <div class="form-group">
+              <label for="currentYear">Current GSoC Year</label>
+              <input type="number" id="currentYear" [(ngModel)]="currentYear" name="currentYear" class="form-control" min="2000" max="2100" />
+              <span class="help-text">Controls which GSoC program year is considered active.</span>
+            </div>
+
+            <div class="form-group toggle-group">
+              <div class="toggle-label-container">
+                <label for="showIdeasPage">Show Ideas Page</label>
+                <span class="help-text">Show or hide the GSoC project ideas page for visitors.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="showIdeasPage" [(ngModel)]="showIdeasPage" name="showIdeasPage" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+
+            <div class="form-group toggle-group">
+              <div class="toggle-label-container">
+                <label for="registrationOpen">Registration Open</label>
+                <span class="help-text">Controls whether registration-related options and buttons appear.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="registrationOpen" [(ngModel)]="registrationOpen" name="registrationOpen" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2 — Site Settings -->
+        <div class="settings-section">
+          <h2>Site Settings</h2>
+          <div class="settings-card">
+            <div class="form-group">
+              <label for="siteTitle">Site Title</label>
+              <input type="text" id="siteTitle" [(ngModel)]="siteTitle" name="siteTitle" class="form-control" placeholder="Site branding title" />
+              <span class="help-text">Primary title used for site branding.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="siteDescription">Site Description</label>
+              <textarea id="siteDescription" [(ngModel)]="siteDescription" name="siteDescription" class="form-control" rows="3" placeholder="Branding and SEO description..."></textarea>
+              <span class="help-text">Site-wide metadata and description text.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3 — Platform Settings -->
+        <div class="settings-section">
+          <h2>Platform Settings</h2>
+          <div class="settings-card">
+            <div class="form-group toggle-group">
+              <div class="toggle-label-container">
+                <label for="maintenanceMode">Maintenance Mode</label>
+                <span class="help-text">Puts the application into maintenance state, showing a banner to users.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="maintenanceMode" [(ngModel)]="maintenanceMode" name="maintenanceMode" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-footer">
+        <button (click)="onSave()" class="btn-save" [disabled]="isSaving">
+          @if (!isSaving) {
+            <span class="icon">💾</span>
+          }
+          @if (isSaving) {
+            <span class="loader"></span>
+          }
+          {{ isSaving ? 'Saving...' : 'Save Settings' }}
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

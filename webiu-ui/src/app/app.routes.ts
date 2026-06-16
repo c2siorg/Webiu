@@ -91,6 +91,14 @@ export const routes: Routes = [
     canActivate: [adminAuthGuard],
   },
   {
+    path: 'admin/settings',
+    loadComponent: () =>
+      import('./page/admin-settings/admin-settings.component').then(
+        (m) => m.AdminSettingsComponent,
+      ),
+    canActivate: [adminAuthGuard],
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./page/not-found/not-found.component').then(

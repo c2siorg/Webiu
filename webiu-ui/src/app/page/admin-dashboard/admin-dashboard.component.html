@@ -6,7 +6,7 @@
     </div>
     
     <nav class="sidebar-nav">
-      <a class="nav-link active">
+      <a routerLink="/admin/dashboard" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <span class="icon">📊</span> Dashboard
       </a>
       <a class="nav-link disabled">
@@ -15,7 +15,7 @@
       <a class="nav-link disabled">
         <span class="icon">💡</span> Project Ideas
       </a>
-      <a class="nav-link disabled">
+      <a routerLink="/admin/settings" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
         <span class="icon">⚙️</span> Settings
       </a>
     </nav>
