@@ -21,4 +21,10 @@ export class SettingsService {
       withCredentials: true,
     });
   }
+
+  syncRepositories(): Observable<any> {
+    return this.http.post<any>(`${environment.serverUrl}/api/v1/projects/sync`, {}, {
+      withCredentials: true,
+    });
+  }
 }

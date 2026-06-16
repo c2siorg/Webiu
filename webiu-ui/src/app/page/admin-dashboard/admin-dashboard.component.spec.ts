@@ -1,20 +1,23 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { of, throwError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
 import { AdminDashboardComponent } from './admin-dashboard.component';
 import { AuthService } from '../../services/auth.service';
+import { SettingsService } from '../../services/settings.service';
 
 describe('AdminDashboardComponent', () => {
   let component: AdminDashboardComponent;
   let fixture: ComponentFixture<AdminDashboardComponent>;
   let authService: AuthService;
+  let settingsService: SettingsService;
   let router: Router;
   let toastr: ToastrService;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AdminDashboardComponent],
+      imports: [AdminDashboardComponent, RouterTestingModule],
       providers: [
         {
           provide: AuthService,
@@ -23,15 +26,27 @@ describe('AdminDashboardComponent', () => {
           },
         },
         {
-          provide: Router,
+          provide: SettingsService,
           useValue: {
-            navigate: jasmine.createSpy(),
+            getSettings: jasmine.createSpy().and.returnValue(of({
+              success: true,
+              settings: {
+                'gsoc.current_year': '2026',
+                'gsoc.show_ideas_page': 'true',
+                'gsoc.registration_open': 'true',
+                'site.maintenance_mode': 'false',
+              },
+            })),
+            syncRepositories: jasmine.createSpy().and.returnValue(of({
+              message: 'Repositories synchronized successfully.',
+            })),
           },
         },
         {
           provide: ToastrService,
           useValue: {
             success: jasmine.createSpy(),
+            info: jasmine.createSpy(),
             error: jasmine.createSpy(),
           },
         },
@@ -41,13 +56,23 @@ describe('AdminDashboardComponent', () => {
     fixture = TestBed.createComponent(AdminDashboardComponent);
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService);
+    settingsService = TestBed.inject(SettingsService);
     router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
     toastr = TestBed.inject(ToastrService);
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('should load settings on init', () => {
+    expect(settingsService.getSettings).toHaveBeenCalled();
+    expect(component.currentYear).toBe(2026);
+    expect(component.showIdeasPage).toBe(true);
+    expect(component.registrationOpen).toBe(true);
+    expect(component.maintenanceMode).toBe(false);
   });
 
   it('should call authService.logout and navigate on logout success', () => {
@@ -62,4 +87,22 @@ describe('AdminDashboardComponent', () => {
     component.onLogout();
     expect(toastr.error).toHaveBeenCalledWith('Logout failed, please try again');
   });
+
+  it('should call onSync and handle sync success', () => {
+    component.onSync();
+    expect(toastr.info).toHaveBeenCalledWith('Starting manual repository synchronization...', 'Sync Started');
+    expect(settingsService.syncRepositories).toHaveBeenCalled();
+    expect(toastr.success).toHaveBeenCalledWith('Repositories synchronized successfully.');
+    expect(component.isSyncing).toBe(false);
+  });
+
+  it('should handle sync errors gracefully', () => {
+    (settingsService.syncRepositories as jasmine.Spy).and.returnValue(throwError(() => ({
+      error: { message: 'Failed to sync' },
+    })));
+    component.onSync();
+    expect(toastr.error).toHaveBeenCalledWith('Failed to sync');
+    expect(component.isSyncing).toBe(false);
+  });
 });
+

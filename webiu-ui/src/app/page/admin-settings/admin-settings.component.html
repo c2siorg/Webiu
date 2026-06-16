@@ -7,22 +7,22 @@
     
     <nav class="sidebar-nav">
       <a routerLink="/admin/dashboard" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <span class="icon">📊</span> Dashboard
+        <i class="fa-solid fa-chart-pie icon"></i> Dashboard
       </a>
       <a class="nav-link disabled">
-        <span class="icon">📅</span> GSoC Years
+        <i class="fa-solid fa-calendar-days icon"></i> GSoC Years
       </a>
       <a class="nav-link disabled">
-        <span class="icon">💡</span> Project Ideas
+        <i class="fa-solid fa-lightbulb icon"></i> Project Ideas
       </a>
       <a routerLink="/admin/settings" class="nav-link" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
-        <span class="icon">⚙️</span> Settings
+        <i class="fa-solid fa-gears icon"></i> Settings
       </a>
     </nav>
 
     <div class="sidebar-footer">
       <button (click)="onLogout()" class="btn-logout">
-        <span class="icon">🚪</span> Logout
+        <i class="fa-solid fa-right-from-bracket icon"></i> Logout
       </button>
     </div>
   </aside>
@@ -31,7 +31,7 @@
     <header class="content-header">
       <h1>System Settings</h1>
       <div class="user-profile">
-        <span class="avatar">👑</span>
+        <i class="fa-solid fa-user-shield avatar-icon"></i>
         <span class="username">Administrator</span>
       </div>
     </header>
@@ -40,18 +40,18 @@
       <div class="settings-grid">
         <!-- Section 1 — GSoC Configuration -->
         <div class="settings-section">
-          <h2>GSoC Configuration</h2>
+          <h2>GSoC Program Configuration</h2>
           <div class="settings-card">
             <div class="form-group">
               <label for="currentYear">Current GSoC Year</label>
               <input type="number" id="currentYear" [(ngModel)]="currentYear" name="currentYear" class="form-control" min="2000" max="2100" />
-              <span class="help-text">Controls which GSoC program year is considered active.</span>
+              <span class="help-text">Specifies the active Google Summer of Code program year (e.g. 2026). This filters projects, ideas, and timelines to only display records related to this year.</span>
             </div>
 
             <div class="form-group toggle-group">
               <div class="toggle-label-container">
                 <label for="showIdeasPage">Show Ideas Page</label>
-                <span class="help-text">Show or hide the GSoC project ideas page for visitors.</span>
+                <span class="help-text">Globally toggle the visibility of the GSoC Project Ideas menu and its corresponding page. When disabled, the ideas list is hidden from public visitors.</span>
               </div>
               <label class="switch">
                 <input type="checkbox" id="showIdeasPage" [(ngModel)]="showIdeasPage" name="showIdeasPage" />
@@ -62,7 +62,7 @@
             <div class="form-group toggle-group">
               <div class="toggle-label-container">
                 <label for="registrationOpen">Registration Open</label>
-                <span class="help-text">Controls whether registration-related options and buttons appear.</span>
+                <span class="help-text">Determine whether new contributor and student registration is active. When toggled off, registration buttons are hidden and application forms are closed.</span>
               </div>
               <label class="switch">
                 <input type="checkbox" id="registrationOpen" [(ngModel)]="registrationOpen" name="registrationOpen" />
@@ -74,30 +74,30 @@
 
         <!-- Section 2 — Site Settings -->
         <div class="settings-section">
-          <h2>Site Settings</h2>
+          <h2>Site & SEO Settings</h2>
           <div class="settings-card">
             <div class="form-group">
               <label for="siteTitle">Site Title</label>
               <input type="text" id="siteTitle" [(ngModel)]="siteTitle" name="siteTitle" class="form-control" placeholder="Site branding title" />
-              <span class="help-text">Primary title used for site branding.</span>
+              <span class="help-text">The primary branding title displayed in the site headers, browser title tabs, and navigation components.</span>
             </div>
 
             <div class="form-group">
               <label for="siteDescription">Site Description</label>
               <textarea id="siteDescription" [(ngModel)]="siteDescription" name="siteDescription" class="form-control" rows="3" placeholder="Branding and SEO description..."></textarea>
-              <span class="help-text">Site-wide metadata and description text.</span>
+              <span class="help-text">A brief summary or mission statement of the organization. This text is injected into SEO meta tags and organizational description panels.</span>
             </div>
           </div>
         </div>
 
         <!-- Section 3 — Platform Settings -->
         <div class="settings-section">
-          <h2>Platform Settings</h2>
+          <h2>Platform Controls</h2>
           <div class="settings-card">
             <div class="form-group toggle-group">
               <div class="toggle-label-container">
                 <label for="maintenanceMode">Maintenance Mode</label>
-                <span class="help-text">Puts the application into maintenance state, showing a banner to users.</span>
+                <span class="help-text">Enable a platform-wide maintenance banner and redirect non-admin visitors. Use this when performing critical data schema migrations or system upgrades.</span>
               </div>
               <label class="switch">
                 <input type="checkbox" id="maintenanceMode" [(ngModel)]="maintenanceMode" name="maintenanceMode" />
@@ -111,10 +111,10 @@
       <div class="action-footer">
         <button (click)="onSave()" class="btn-save" [disabled]="isSaving">
           @if (!isSaving) {
-            <span class="icon">💾</span>
+            <i class="fa-solid fa-floppy-disk icon"></i>
           }
           @if (isSaving) {
-            <span class="loader"></span>
+            <i class="fa-solid fa-circle-notch fa-spin icon"></i>
           }
           {{ isSaving ? 'Saving...' : 'Save Settings' }}
         </button>
