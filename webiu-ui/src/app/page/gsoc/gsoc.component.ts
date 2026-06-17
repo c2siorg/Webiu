@@ -1,8 +1,7 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { gsocData } from '../../common/data/gsoc';
 import { CommonModule } from '@angular/common';
-import { SettingsService } from '../../services/settings.service';
+import { GsocService, GsocProgram, GsocIdea } from '../../services/gsoc.service';
 
 @Component({
   selector: 'app-gsoc',
@@ -12,21 +11,44 @@ import { SettingsService } from '../../services/settings.service';
   styleUrl: './gsoc.component.scss',
 })
 export class GsocComponent implements OnInit {
-  private settingsService = inject(SettingsService);
+  private gsocService = inject(GsocService);
 
-  gsocData = gsocData;
+  program: GsocProgram | null = null;
+  ideas: GsocIdea[] = [];
   activeProjectIndex: number | null = null;
-  currentYear = 2026;
+  isLoading = true;
 
   ngOnInit(): void {
-    this.settingsService.getPublicSettings().subscribe({
-      next: (res) => {
-        if (res?.success && res?.settings) {
-          this.currentYear = Number(res.settings['gsoc.current_year']) || 2026;
+    this.loadCurrentGsocData();
+  }
+
+  loadCurrentGsocData(): void {
+    this.isLoading = true;
+    
+    // Load current public program information
+    this.gsocService.getCurrentProgram().subscribe({
+      next: (progRes) => {
+        if (progRes.success) {
+          this.program = progRes.program;
         }
+        
+        // Load published project ideas corresponding to the current year
+        this.gsocService.getCurrentIdeas().subscribe({
+          next: (ideasRes) => {
+            if (ideasRes.success) {
+              this.ideas = ideasRes.ideas;
+            }
+            this.isLoading = false;
+          },
+          error: () => {
+            this.ideas = [];
+            this.isLoading = false;
+          }
+        });
       },
       error: () => {
-        this.currentYear = 2026;
+        this.program = null;
+        this.isLoading = false;
       }
     });
   }

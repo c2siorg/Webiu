@@ -18,6 +18,7 @@ import { GraphqlResolversModule } from './graphql/graphql.module';
 import { DatabaseModule } from './database/database.module';
 import { GithubWebhookModule } from './github-webhook/github-webhook.module';
 import { SystemSettingModule } from './system-setting/system-setting.module';
+import { GsocModule } from './gsoc/gsoc.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { SystemSettingModule } from './system-setting/system-setting.module';
     UserModule,
     GithubWebhookModule,
     SystemSettingModule,
+    GsocModule,
   ],
   controllers: [AppController],
   providers: [

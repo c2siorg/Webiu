@@ -13,11 +13,11 @@
       <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
         <i class="fa-solid fa-gears"></i> Settings
       </a>
-      <a class="nav-tab disabled" title="Locked - Coming Soon" role="tab" aria-disabled="true">
-        <i class="fa-solid fa-calendar-days"></i> GSoC Years <i class="fa-solid fa-lock badge-locked"></i>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Years
       </a>
-      <a class="nav-tab disabled" title="Locked - Coming Soon" role="tab" aria-disabled="true">
-        <i class="fa-solid fa-lightbulb"></i> Ideas <i class="fa-solid fa-lock badge-locked"></i>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-lightbulb"></i> Ideas
       </a>
     </div>
     

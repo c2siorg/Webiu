@@ -6,6 +6,9 @@ import { SystemSetting } from './entities/system-setting.entity';
 import { Repository as RepositoryEntity } from './entities/repository.entity';
 import { Contributor } from './entities/contributor.entity';
 import { RepositoryContributor } from './entities/repository-contributor.entity';
+import { GsocProgram } from './entities/gsoc-program.entity';
+import { GsocIdea } from './entities/gsoc-idea.entity';
+import { GsocMentor } from './entities/gsoc-mentor.entity';
 import { AdminSeedService } from './admin-seed.service';
 
 @Global()
@@ -27,6 +30,9 @@ import { AdminSeedService } from './admin-seed.service';
           RepositoryEntity,
           Contributor,
           RepositoryContributor,
+          GsocProgram,
+          GsocIdea,
+          GsocMentor,
         ],
         synchronize: false,
       }),
@@ -38,6 +44,9 @@ import { AdminSeedService } from './admin-seed.service';
       RepositoryEntity,
       Contributor,
       RepositoryContributor,
+      GsocProgram,
+      GsocIdea,
+      GsocMentor,
     ]),
   ],
   providers: [AdminSeedService],

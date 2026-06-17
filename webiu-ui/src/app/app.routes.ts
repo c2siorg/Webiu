@@ -99,6 +99,14 @@ export const routes: Routes = [
     canActivate: [adminAuthGuard],
   },
   {
+    path: 'admin/ideas',
+    loadComponent: () =>
+      import('./page/admin-ideas/admin-ideas.component').then(
+        (m) => m.AdminIdeasComponent,
+      ),
+    canActivate: [adminAuthGuard],
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./page/not-found/not-found.component').then(
