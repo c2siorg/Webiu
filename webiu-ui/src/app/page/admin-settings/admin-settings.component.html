@@ -1,0 +1,130 @@
+<div class="admin-panel-container">
+  <!-- Top Navigation Bar -->
+  <header class="admin-navbar">
+    <div class="navbar-left">
+      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      <span class="brand-name">WebiU Admin</span>
+    </div>
+    
+    <div class="navbar-center" role="tablist">
+      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </a>
+      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-gears"></i> Settings
+      </a>
+      <a class="nav-tab disabled" title="Locked - Coming Soon" role="tab" aria-disabled="true">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Years <i class="fa-solid fa-lock badge-locked"></i>
+      </a>
+      <a class="nav-tab disabled" title="Locked - Coming Soon" role="tab" aria-disabled="true">
+        <i class="fa-solid fa-lightbulb"></i> Ideas <i class="fa-solid fa-lock badge-locked"></i>
+      </a>
+    </div>
+    
+    <div class="navbar-right">
+      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
+      </button>
+      <div class="user-badge">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Administrator</span>
+      </div>
+      <button (click)="onLogout()" class="btn-navbar-logout" title="Log out of panel">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="admin-main-wrapper">
+    <div class="content-header-title">
+      <h1>System Settings</h1>
+      <p>Configure dynamic runtime properties, visibility options, site SEO metadata, and maintenance overlays.</p>
+    </div>
+
+    <div class="content-body">
+      <div class="settings-grid">
+        <!-- Section 1 — GSoC Configuration -->
+        <div class="settings-section">
+          <h2>GSoC Program Configuration</h2>
+          <div class="settings-card">
+            <div class="form-group">
+              <label for="currentYear">Current GSoC Year</label>
+              <input type="number" id="currentYear" [(ngModel)]="currentYear" name="currentYear" class="form-control" min="2000" max="2100" />
+              <span class="help-text">Specifies the active Google Summer of Code program year (e.g. 2026). This filters projects, ideas, and timelines to only display records related to this year.</span>
+            </div>
+
+            <div class="form-group toggle-group">
+              <div class="toggle-label-container">
+                <label for="showIdeasPage">Show Ideas Page</label>
+                <span class="help-text">Globally toggle the visibility of the GSoC Project Ideas menu and its corresponding page. When disabled, the ideas list is hidden from public visitors.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="showIdeasPage" [(ngModel)]="showIdeasPage" name="showIdeasPage" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+
+            <div class="form-group toggle-group">
+              <div class="toggle-label-container">
+                <label for="registrationOpen">Registration Open</label>
+                <span class="help-text">Determine whether new contributor and student registration is active. When toggled off, registration buttons are hidden and application forms are closed.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="registrationOpen" [(ngModel)]="registrationOpen" name="registrationOpen" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2 — Site Settings -->
+        <div class="settings-section">
+          <h2>Site & SEO Settings</h2>
+          <div class="settings-card">
+            <div class="form-group">
+              <label for="siteTitle">Site Title</label>
+              <input type="text" id="siteTitle" [(ngModel)]="siteTitle" name="siteTitle" class="form-control" placeholder="Site branding title" />
+              <span class="help-text">The primary branding title displayed in the site headers, browser title tabs, and navigation components.</span>
+            </div>
+
+            <div class="form-group">
+              <label for="siteDescription">Site Description</label>
+              <textarea id="siteDescription" [(ngModel)]="siteDescription" name="siteDescription" class="form-control" rows="3" placeholder="Branding and SEO description..."></textarea>
+              <span class="help-text">A brief summary or mission statement of the organization. This text is injected into SEO meta tags and organizational description panels.</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3 — Platform Settings -->
+        <div class="settings-section">
+          <h2>Platform Controls</h2>
+          <div class="settings-card">
+            <div class="form-group toggle-group">
+              <div class="toggle-label-container">
+                <label for="maintenanceMode">Maintenance Mode</label>
+                <span class="help-text">Enable a platform-wide maintenance banner and redirect non-admin visitors. Use this when performing critical data schema migrations or system upgrades.</span>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="maintenanceMode" [(ngModel)]="maintenanceMode" name="maintenanceMode" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-footer">
+        <button (click)="onSave()" class="btn-save" [disabled]="isSaving">
+          @if (!isSaving) {
+            <i class="fa-solid fa-floppy-disk icon"></i>
+          }
+          @if (isSaving) {
+            <i class="fa-solid fa-circle-notch fa-spin icon"></i>
+          }
+          {{ isSaving ? 'Saving...' : 'Save Settings' }}
+        </button>
+      </div>
+    </div>
+  </main>
+</div>

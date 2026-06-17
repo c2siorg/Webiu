@@ -2,6 +2,7 @@ import { Component, HostListener, OnInit, inject, PLATFORM_ID, DestroyRef } from
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
+import { SettingsService } from '../../services/settings.service';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -15,6 +16,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class NavbarComponent implements OnInit {
   private router = inject(Router);
   private themeService = inject(ThemeService);
+  private settingsService = inject(SettingsService);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
 
@@ -22,9 +24,17 @@ export class NavbarComponent implements OnInit {
   isSunVisible = true;
   isCommunityDropdownOpen = false;
   currentRoute = '/';
+  
+  showIdeasPage = true;
+  currentYear = 2026;
+
+  get currentYearShort(): string {
+    return String(this.currentYear).slice(-2);
+  }
 
   ngOnInit(): void {
     this.isSunVisible = !this.themeService.isDarkMode();
+    this.loadPublicSettings();
     this.router.events
       .pipe(
         filter(
@@ -37,6 +47,22 @@ export class NavbarComponent implements OnInit {
         this.isMenuOpen = false;
         this.isCommunityDropdownOpen = false;
       });
+  }
+
+  loadPublicSettings(): void {
+    this.settingsService.getPublicSettings().subscribe({
+      next: (res) => {
+        if (res?.success && res?.settings) {
+          const s = res.settings;
+          this.currentYear = Number(s['gsoc.current_year']) || 2026;
+          this.showIdeasPage = s['gsoc.show_ideas_page'] === true || s['gsoc.show_ideas_page'] === 'true';
+        }
+      },
+      error: () => {
+        this.showIdeasPage = true;
+        this.currentYear = 2026;
+      }
+    });
   }
 
   toggleCommunityDropdown(): void {

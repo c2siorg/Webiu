@@ -1,21 +1,22 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
+import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../services/settings.service';
+import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
-  selector: 'app-admin-dashboard',
+  selector: 'app-admin-settings',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
-  templateUrl: './admin-dashboard.component.html',
-  styleUrls: ['./admin-dashboard.component.scss'],
+  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
+  templateUrl: './admin-settings.component.html',
+  styleUrls: ['./admin-settings.component.scss'],
 })
-export class AdminDashboardComponent implements OnInit {
-  private authService = inject(AuthService);
+export class AdminSettingsComponent implements OnInit {
   private settingsService = inject(SettingsService);
+  private authService = inject(AuthService);
   private themeService = inject(ThemeService);
   private router = inject(Router);
   private toastr = inject(ToastrService);
@@ -23,10 +24,10 @@ export class AdminDashboardComponent implements OnInit {
   currentYear = 2026;
   showIdeasPage = true;
   registrationOpen = true;
+  siteTitle = 'WebiU';
+  siteDescription = '';
   maintenanceMode = false;
-  
-  isLoading = true;
-  isSyncing = false;
+  isSaving = false;
   isSunVisible = true;
 
   ngOnInit(): void {
@@ -42,30 +43,47 @@ export class AdminDashboardComponent implements OnInit {
           this.currentYear = Number(s['gsoc.current_year']) || 2026;
           this.showIdeasPage = s['gsoc.show_ideas_page'] === true || s['gsoc.show_ideas_page'] === 'true';
           this.registrationOpen = s['gsoc.registration_open'] === true || s['gsoc.registration_open'] === 'true';
+          this.siteTitle = s['site.title'] || 'WebiU';
+          this.siteDescription = s['site.description'] || '';
           this.maintenanceMode = s['site.maintenance_mode'] === true || s['site.maintenance_mode'] === 'true';
         }
-        this.isLoading = false;
       },
-      error: () => {
-        this.toastr.error('Failed to load live settings on dashboard overview.');
-        this.isLoading = false;
+      error: (err) => {
+        const errorMsg = err.error?.message || 'Failed to load system settings';
+        this.toastr.error(errorMsg);
       },
     });
   }
 
-  onSync(): void {
-    this.isSyncing = true;
-    this.toastr.info('Starting manual repository synchronization...', 'Sync Started');
+  onSave(): void {
+    this.isSaving = true;
+    const updates = {
+      'gsoc.current_year': this.currentYear,
+      'gsoc.show_ideas_page': this.showIdeasPage,
+      'gsoc.registration_open': this.registrationOpen,
+      'site.title': this.siteTitle,
+      'site.description': this.siteDescription,
+      'site.maintenance_mode': this.maintenanceMode,
+    };
 
-    this.settingsService.syncRepositories().subscribe({
+    this.settingsService.updateSettings(updates).subscribe({
       next: (res) => {
-        this.toastr.success(res.message || 'Repositories and contributors synchronized successfully.');
-        this.isSyncing = false;
+        this.toastr.success(res.message || 'Settings updated successfully.');
+        this.isSaving = false;
+        if (res?.settings) {
+          const s = res.settings;
+          this.currentYear = Number(s['gsoc.current_year']) || 2026;
+          this.showIdeasPage = s['gsoc.show_ideas_page'] === true;
+          this.registrationOpen = s['gsoc.registration_open'] === true;
+          this.siteTitle = s['site.title'] || 'WebiU';
+          this.siteDescription = s['site.description'] || '';
+          this.maintenanceMode = s['site.maintenance_mode'] === true;
+        }
       },
       error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to sync repositories.';
+        const errorMsg = err.error?.message || 'Failed to update settings.';
         this.toastr.error(errorMsg);
-        this.isSyncing = false;
+        this.isSaving = false;
       },
     });
   }
