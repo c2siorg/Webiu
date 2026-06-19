@@ -1,12 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { CommonModule } from '@angular/common';
 import { GsocService, GsocProgram, GsocIdea } from '../../services/gsoc.service';
 
 @Component({
   selector: 'app-gsoc',
   standalone: true,
-  imports: [NavbarComponent, CommonModule],
+  imports: [CommonModule],
   templateUrl: './gsoc.component.html',
   styleUrl: './gsoc.component.scss',
 })

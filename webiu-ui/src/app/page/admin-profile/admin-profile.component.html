@@ -1,0 +1,133 @@
+<div class="admin-panel-container">
+  <!-- Top Navigation Bar -->
+  <header class="admin-navbar">
+    <div class="navbar-left">
+      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      <span class="brand-name">WebiU Admin</span>
+    </div>
+    
+    <div class="navbar-center" role="tablist">
+      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </a>
+      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-gears"></i> Settings
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Years
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-lightbulb"></i> Ideas
+      </a>
+    </div>
+    
+    <div class="navbar-right">
+      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
+      </button>
+      <a routerLink="/admin/profile" class="user-badge active-profile" title="Manage Profile">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Administrator</span>
+      </a>
+      <button (click)="onLogout()" class="btn-navbar-logout" title="Log out of panel">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="admin-main-wrapper">
+    <div class="content-header-title">
+      <h1>Profile Management</h1>
+      <p>View administrator details, update your username, or rotate your password credentials securely.</p>
+    </div>
+
+    @if (isLoading) {
+      <div class="loading-state">
+        <i class="fa-solid fa-circle-notch fa-spin"></i>
+        <p>Loading profile details...</p>
+      </div>
+    } @else {
+      <div class="content-body">
+        <div class="settings-grid">
+          <!-- Section 1 — Account Information -->
+          <div class="settings-section">
+            <h2>Account Information</h2>
+            <div class="settings-card info-card">
+              <div class="info-item">
+                <span class="info-label"><i class="fa-solid fa-user"></i> Username:</span>
+                <span class="info-value font-mono">{{ username }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="fa-solid fa-id-card"></i> Role:</span>
+                <span class="info-value text-capitalize">{{ role }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="fa-solid fa-clock"></i> Account Created:</span>
+                <span class="info-value">{{ createdAt ? (createdAt | date:'medium') : 'N/A' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label"><i class="fa-solid fa-circle-check"></i> Last Login:</span>
+                <span class="info-value">{{ lastLoginAt ? (lastLoginAt | date:'medium') : 'Just now' }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2 — Username Management -->
+          <div class="settings-section">
+            <h2>Username Management</h2>
+            <div class="settings-card">
+              <form (ngSubmit)="onUpdateUsername()" #usernameForm="ngForm">
+                <div class="form-group">
+                  <label for="newUsername">Update Username</label>
+                  <input type="text" id="newUsername" [(ngModel)]="newUsername" name="newUsername" class="form-control" placeholder="Enter new username" required minlength="3" maxlength="30" />
+                  <span class="help-text">Updating your username will invalidate your current session, clear your cookies, and require you to log in again.</span>
+                </div>
+                <button type="submit" class="btn-save btn-action-profile" [disabled]="isSavingUsername || !newUsername || newUsername.trim() === username">
+                  @if (isSavingUsername) {
+                    <i class="fa-solid fa-circle-notch fa-spin icon"></i> Updating...
+                  } @else {
+                    <i class="fa-solid fa-user-pen icon"></i> Update Username
+                  }
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Section 3 — Password Management -->
+          <div class="settings-section">
+            <h2>Password Management</h2>
+            <div class="settings-card">
+              <form (ngSubmit)="onUpdatePassword()" #passwordForm="ngForm">
+                <div class="form-group">
+                  <label for="currentPassword">Current Password</label>
+                  <input type="password" id="currentPassword" [(ngModel)]="currentPasswordForUser" name="currentPassword" class="form-control" placeholder="••••••••" required />
+                  <span class="help-text">You must verify your identity by providing your current password.</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="newPassword">New Password</label>
+                  <input type="password" id="newPassword" [(ngModel)]="newPassword" name="newPassword" class="form-control" placeholder="••••••••" required minlength="6" />
+                  <span class="help-text">Choose a secure password at least 6 characters long.</span>
+                </div>
+
+                <div class="form-group">
+                  <label for="confirmPassword">Confirm Password</label>
+                  <input type="password" id="confirmPassword" [(ngModel)]="confirmPassword" name="confirmPassword" class="form-control" placeholder="••••••••" required />
+                </div>
+
+                <button type="submit" class="btn-save btn-action-profile" [disabled]="isSavingPassword || !currentPasswordForUser || !newPassword || !confirmPassword">
+                  @if (isSavingPassword) {
+                    <i class="fa-solid fa-circle-notch fa-spin icon"></i> Rotating...
+                  } @else {
+                    <i class="fa-solid fa-key icon"></i> Rotate Password
+                  }
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </main>
+</div>

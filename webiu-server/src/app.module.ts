@@ -19,6 +19,7 @@ import { DatabaseModule } from './database/database.module';
 import { GithubWebhookModule } from './github-webhook/github-webhook.module';
 import { SystemSettingModule } from './system-setting/system-setting.module';
 import { GsocModule } from './gsoc/gsoc.module';
+import { AdminProfileModule } from './admin-profile/admin-profile.module';
 
 @Module({
   imports: [
@@ -55,6 +56,7 @@ import { GsocModule } from './gsoc/gsoc.module';
     GithubWebhookModule,
     SystemSettingModule,
     GsocModule,
+    AdminProfileModule,
   ],
   controllers: [AppController],
   providers: [

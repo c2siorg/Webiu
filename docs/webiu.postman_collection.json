@@ -591,6 +591,112 @@
                     ]
                 }
             ]
+        },
+        {
+            "name": "Admin Profile",
+            "description": "Endpoints for retrieving administrator profile and rotating credentials.",
+            "item": [
+                {
+                    "name": "Get Profile",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/profile",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "profile"
+                            ]
+                        },
+                        "description": "Returns details of the currently authenticated administrator."
+                    },
+                    "response": [
+                        {
+                            "name": "200 OK — Success",
+                            "status": "OK",
+                            "code": 200,
+                            "header": [
+                                {
+                                    "key": "Content-Type",
+                                    "value": "application/json"
+                                }
+                            ],
+                            "body": "{\n  \"username\": \"admin\",\n  \"role\": \"administrator\",\n  \"createdAt\": \"2026-06-20T00:34:14.000Z\",\n  \"lastLoginAt\": \"2026-06-20T00:35:00.000Z\"\n}"
+                        }
+                    ]
+                },
+                {
+                    "name": "Update Username",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"new_admin_username\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/profile/username",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "profile",
+                                "username"
+                            ]
+                        },
+                        "description": "Updates the administrator username and invalidates the session cookie."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Password",
+                    "request": {
+                        "method": "PATCH",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"currentPassword\": \"old_password\",\n  \"newPassword\": \"new_secure_password\",\n  \"confirmPassword\": \"new_secure_password\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/profile/password",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "profile",
+                                "password"
+                            ]
+                        },
+                        "description": "Updates the administrator password and invalidates the session cookie."
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }
