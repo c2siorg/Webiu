@@ -1,0 +1,490 @@
+<div class="admin-panel-container">
+  <!-- Top Navigation Bar -->
+  <header class="admin-navbar">
+    <div class="navbar-left">
+      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      <span class="brand-name">WebiU Admin</span>
+    </div>
+    
+    <div class="navbar-center" role="tablist">
+      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </a>
+      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-gears"></i> Settings
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="nav-tab" [class.active]="activeTab === 'programs'" role="tab">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Years
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" [class.active]="activeTab === 'ideas' || activeTab === 'mentors'" role="tab">
+        <i class="fa-solid fa-lightbulb"></i> Ideas
+      </a>
+    </div>
+    
+    <div class="navbar-right">
+      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
+      </button>
+      <div class="user-badge">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Administrator</span>
+      </div>
+      <button (click)="onLogout()" class="btn-navbar-logout" title="Log out of panel">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="admin-main-wrapper">
+    <!-- Sub-tab Selector for GSoC Submodules -->
+    <div class="sub-nav-wrapper">
+      <button (click)="setTab('programs')" class="sub-nav-btn" [class.active]="activeTab === 'programs'">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Programs
+      </button>
+      <button (click)="setTab('ideas')" class="sub-nav-btn" [class.active]="activeTab === 'ideas'">
+        <i class="fa-solid fa-lightbulb"></i> Project Ideas
+      </button>
+      <button (click)="setTab('mentors')" class="sub-nav-btn" [class.active]="activeTab === 'mentors'">
+        <i class="fa-solid fa-users"></i> Mentors Directory
+      </button>
+    </div>
+
+    <!-- TAB 1: Programs Management -->
+    @if (activeTab === 'programs') {
+      <section class="management-section">
+        <div class="section-header">
+          <div>
+            <h1>GSoC Programs</h1>
+            <p class="section-desc">Add, configure, publish, and manage GSoC cycles and their global page templates.</p>
+          </div>
+          <button (click)="openAddProgramModal()" class="btn-add">
+            <i class="fa-solid fa-plus"></i> New Program Year
+          </button>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Program Title</th>
+                <th>Status</th>
+                <th>Active</th>
+                <th>Created At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (program of programs; track program.id) {
+                <tr>
+                  <td class="font-bold">{{ program.year }}</td>
+                  <td>{{ program.title }}</td>
+                  <td>
+                    <span class="status-badge" [class]="program.status.toLowerCase()">
+                      {{ program.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <span class="active-badge" [class.active]="program.isActive">
+                      {{ program.isActive ? 'Active' : 'No' }}
+                    </span>
+                  </td>
+                  <td class="text-muted">{{ program.createdAt | date:'shortDate' }}</td>
+                  <td>
+                    <div class="action-buttons">
+                      <button (click)="openEditProgramModal(program)" class="btn-action-edit" title="Edit Program">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button (click)="deleteProgram(program.id)" class="btn-action-delete" title="Delete Program">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" class="empty-row">No GSoC programs defined. Create one to get started!</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- TAB 2: Project Ideas Management -->
+    @if (activeTab === 'ideas') {
+      <section class="management-section">
+        <div class="section-header">
+          <div>
+            <h1>Project Ideas</h1>
+            <p class="section-desc">Manage specific project ideas, associate mentors, and reorder listings on the public page.</p>
+          </div>
+          <div class="header-actions">
+            <div class="filter-group">
+              <label for="programSelector" class="visually-hidden">Filter by Program</label>
+              <select id="programSelector" [(ngModel)]="selectedProgramId" (change)="onProgramSelectChange()" class="form-control-select">
+                @for (prog of programs; track prog.id) {
+                  <option [value]="prog.id">{{ prog.year }} - {{ prog.title }}</option>
+                }
+              </select>
+            </div>
+            <button (click)="openAddIdeaModal()" class="btn-add" [disabled]="!selectedProgramId">
+              <i class="fa-solid fa-plus"></i> Add Project Idea
+            </button>
+          </div>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width: 80px;">Order</th>
+                <th style="width: 80px;">No.</th>
+                <th>Title</th>
+                <th>Difficulty</th>
+                <th>Length</th>
+                <th>Mentors</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (idea of ideas; track idea.id; let idx = $index) {
+                <tr>
+                  <td>
+                    <div class="reorder-arrows">
+                      <button (click)="moveIdeaUp(idx)" class="btn-arrow" [disabled]="idx === 0" title="Move Up">
+                        <i class="fa-solid fa-angle-up"></i>
+                      </button>
+                      <button (click)="moveIdeaDown(idx)" class="btn-arrow" [disabled]="idx === ideas.length - 1" title="Move Down">
+                        <i class="fa-solid fa-angle-down"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td>{{ idea.projectNumber }}</td>
+                  <td class="font-bold">{{ idea.title }}</td>
+                  <td>
+                    <span class="difficulty-badge" [class]="idea.difficulty.toLowerCase()">
+                      {{ idea.difficulty }}
+                    </span>
+                  </td>
+                  <td>{{ idea.durationHours }}h</td>
+                  <td>
+                    <div class="mentors-list-td">
+                      @for (m of idea.mentors; track m.id) {
+                        <span class="mentor-tag">{{ m.name }}</span>
+                      } @empty {
+                        <span class="text-muted text-xs">No Mentors</span>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    <span class="status-badge" [class]="idea.status.toLowerCase()">
+                      {{ idea.status }}
+                    </span>
+                  </td>
+                  <td>
+                    <div class="action-buttons">
+                      <button (click)="openEditIdeaModal(idea)" class="btn-action-edit" title="Edit Idea">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button (click)="deleteIdea(idea.id)" class="btn-action-delete" title="Delete Idea">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="8" class="empty-row">No project ideas found for this program. Click "Add Project Idea" to insert a new idea.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+
+    <!-- TAB 3: Mentors Management -->
+    @if (activeTab === 'mentors') {
+      <section class="management-section">
+        <div class="section-header">
+          <div>
+            <h1>Mentors Directory</h1>
+            <p class="section-desc">Keep an archive of mentors that can be dynamically linked to multiple project ideas across cycles.</p>
+          </div>
+          <button (click)="openAddMentorModal()" class="btn-add">
+            <i class="fa-solid fa-plus"></i> Register Mentor
+          </button>
+        </div>
+
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>GitHub Username</th>
+                <th>Created At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (mentor of mentors; track mentor.id) {
+                <tr>
+                  <td class="font-bold">{{ mentor.name }}</td>
+                  <td>
+                    @if (mentor.githubHandle) {
+                      <a [href]="'https://github.com/' + mentor.githubHandle" target="_blank" class="github-link">
+                        <i class="fa-brands fa-github"></i> {{ mentor.githubHandle }}
+                      </a>
+                    } @else {
+                      <span class="text-muted">-</span>
+                    }
+                  </td>
+                  <td class="text-muted">{{ mentor.createdAt | date:'shortDate' }}</td>
+                  <td>
+                    <div class="action-buttons">
+                      <button (click)="openEditMentorModal(mentor)" class="btn-action-edit" title="Edit Mentor">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button (click)="deleteMentor(mentor.id)" class="btn-action-delete" title="Delete Mentor">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" class="empty-row">No mentors found. Register mentors to link them to project ideas!</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+    }
+  </main>
+</div>
+
+<!-- ================= MODALS ================= -->
+
+<!-- Program Modal -->
+@if (showProgramModal) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>{{ editingProgramId ? 'Edit GSoC Program' : 'New GSoC Program' }}</h2>
+        <button (click)="showProgramModal = false" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="saveProgram()">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="p-year">Year *</label>
+              <input type="number" id="p-year" [(ngModel)]="programForm.year" name="year" required class="form-control" min="2000" max="2100" />
+            </div>
+            <div class="form-group">
+              <label for="p-title">Title *</label>
+              <input type="text" id="p-title" [(ngModel)]="programForm.title" name="title" required class="form-control" placeholder="Google Summer of Code 2026" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="p-desc">Hero Description</label>
+            <textarea id="p-desc" [(ngModel)]="programForm.description" name="description" class="form-control" rows="2" placeholder="Branding subtitle displayed in the hero section..."></textarea>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="p-hero">Hero Image URL</label>
+              <input type="text" id="p-hero" [(ngModel)]="programForm.heroImageUrl" name="heroImageUrl" class="form-control" placeholder="../../../assets/gsoc_no_bg.png" />
+            </div>
+            <div class="form-group">
+              <label for="p-github">GitHub Org URL</label>
+              <input type="text" id="p-github" [(ngModel)]="programForm.githubOrgUrl" name="githubOrgUrl" class="form-control" placeholder="https://github.com/c2siorg" />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="p-slack">Slack Community Invite URL</label>
+              <input type="text" id="p-slack" [(ngModel)]="programForm.slackUrl" name="slackUrl" class="form-control" placeholder="Slack invite URL" />
+            </div>
+            <div class="form-group">
+              <label for="p-proposal">Proposal Template URL</label>
+              <input type="text" id="p-proposal" [(ngModel)]="programForm.proposalTemplateUrl" name="proposalTemplateUrl" class="form-control" placeholder="Template URL" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="p-intro">Intro/Instructions HTML</label>
+            <textarea id="p-intro" [(ngModel)]="programForm.introHtml" name="introHtml" class="form-control html-textarea" rows="6" placeholder="Rich HTML text for eligibility guidelines, contribution steps, videos, etc."></textarea>
+          </div>
+
+          <div class="form-row-2 border-top-divider">
+            <div class="form-group">
+              <label for="p-status">Publish Status</label>
+              <select id="p-status" [(ngModel)]="programForm.status" name="status" class="form-control">
+                <option value="DRAFT">DRAFT</option>
+                <option value="PUBLISHED">PUBLISHED</option>
+                <option value="ARCHIVED">ARCHIVED</option>
+              </select>
+            </div>
+            <div class="form-group toggle-field">
+              <label for="p-active">Active Program</label>
+              <label class="switch">
+                <input type="checkbox" id="p-active" [(ngModel)]="programForm.isActive" name="isActive" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" (click)="showProgramModal = false" class="btn-cancel">Cancel</button>
+            <button type="submit" class="btn-submit">Save Program</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Idea Modal -->
+@if (showIdeaModal) {
+  <div class="modal-overlay">
+    <div class="modal-card large-modal">
+      <div class="modal-header">
+        <h2>{{ editingIdeaId ? 'Edit Project Idea' : 'New Project Idea' }}</h2>
+        <button (click)="showIdeaModal = false" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body scrollable-body">
+        <form (ngSubmit)="saveIdea()">
+          <div class="form-row-3">
+            <div class="form-group">
+              <label for="i-program">GSoC Program Year *</label>
+              <select id="i-program" [(ngModel)]="ideaForm.programId" name="programId" required class="form-control">
+                @for (prog of programs; track prog.id) {
+                  <option [value]="prog.id">{{ prog.year }} - {{ prog.title }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="i-number">Project Number *</label>
+              <input type="number" id="i-number" [(ngModel)]="ideaForm.projectNumber" name="projectNumber" required class="form-control" min="1" />
+            </div>
+            <div class="form-group">
+              <label for="i-title">Project Title *</label>
+              <input type="text" id="i-title" [(ngModel)]="ideaForm.title" name="title" required class="form-control" placeholder="e.g. WebiU" />
+            </div>
+          </div>
+
+          <div class="form-row-3">
+            <div class="form-group">
+              <label for="i-difficulty">Difficulty *</label>
+              <select id="i-difficulty" [(ngModel)]="ideaForm.difficulty" name="difficulty" required class="form-control">
+                <option value="Easy">Easy</option>
+                <option value="Medium">Medium</option>
+                <option value="Hard">Hard</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="i-duration">Duration (Hours) *</label>
+              <input type="number" id="i-duration" [(ngModel)]="ideaForm.durationHours" name="durationHours" required class="form-control" placeholder="350" />
+            </div>
+            <div class="form-group">
+              <label for="i-slack">Slack Channel</label>
+              <input type="text" id="i-slack" [(ngModel)]="ideaForm.slackChannel" name="slackChannel" class="form-control" placeholder="e.g. #webiu" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="i-github">GitHub Repository URL</label>
+            <input type="text" id="i-github" [(ngModel)]="ideaForm.githubUrl" name="githubUrl" class="form-control" placeholder="https://github.com/c2siorg/Webiu" />
+          </div>
+
+          <div class="form-group">
+            <label for="i-exp">Brief Explanation *</label>
+            <textarea id="i-exp" [(ngModel)]="ideaForm.explanation" name="explanation" required class="form-control" rows="4" placeholder="Brief project description..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="i-results">Expected Results / Objectives</label>
+            <textarea id="i-results" [(ngModel)]="ideaForm.expectedResults" name="expectedResults" class="form-control" rows="4" placeholder="Bulleted list of expected results..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="i-prereq">Knowledge Prerequisites</label>
+            <textarea id="i-prereq" [(ngModel)]="ideaForm.prerequisites" name="prerequisites" class="form-control" rows="2" placeholder="e.g., Angular, TypeScript, NestJS, PostgreSQL"></textarea>
+          </div>
+
+          <!-- Mentors Selection Grid -->
+          <div class="form-group">
+            <span class="form-label-header" style="font-size: 13px; font-weight: 700; color: var(--admin-text);">Assign Mentors</span>
+            <div class="mentors-selection-grid">
+              @for (mentor of mentors; track mentor.id) {
+                <label class="mentor-checkbox-label">
+                  <input type="checkbox" [checked]="ideaForm.mentorIds.includes(mentor.id)" (change)="toggleMentorSelection(mentor.id)" />
+                  <span>{{ mentor.name }} @if (mentor.githubHandle) { <span class="text-muted">({{ mentor.githubHandle }})</span> }</span>
+                </label>
+              } @empty {
+                <p class="text-muted text-sm">No mentors in directory. Please register mentors first under the Mentors Directory tab.</p>
+              }
+            </div>
+          </div>
+
+          <div class="form-row-2 border-top-divider">
+            <div class="form-group">
+              <label for="i-status">Publish Status</label>
+              <select id="i-status" [(ngModel)]="ideaForm.status" name="status" class="form-control">
+                <option value="DRAFT">DRAFT</option>
+                <option value="PUBLISHED">PUBLISHED</option>
+                <option value="ARCHIVED">ARCHIVED</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="i-order">Display Order Index</label>
+              <input type="number" id="i-order" [(ngModel)]="ideaForm.displayOrder" name="displayOrder" class="form-control" />
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" (click)="showIdeaModal = false" class="btn-cancel">Cancel</button>
+            <button type="submit" class="btn-submit">Save Project Idea</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Mentor Modal -->
+@if (showMentorModal) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>{{ editingMentorId ? 'Edit Mentor' : 'Register Mentor' }}</h2>
+        <button (click)="showMentorModal = false" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="saveMentor()">
+          <div class="form-group">
+            <label for="m-name">Mentor Name *</label>
+            <input type="text" id="m-name" [(ngModel)]="mentorForm.name" name="name" required class="form-control" placeholder="Full display name" />
+          </div>
+
+          <div class="form-group">
+            <label for="m-github">GitHub Handle</label>
+            <input type="text" id="m-github" [(ngModel)]="mentorForm.githubHandle" name="githubHandle" class="form-control" placeholder="GitHub Username (without @)" />
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" (click)="showMentorModal = false" class="btn-cancel">Cancel</button>
+            <button type="submit" class="btn-submit">Save Mentor</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}

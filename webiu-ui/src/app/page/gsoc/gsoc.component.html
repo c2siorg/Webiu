@@ -1,46 +1,117 @@
 <div class="gsoc__page">
-  <div class="gsoc-hero">
-    <div class="gsoc-hero-content">
-      <h1>Google Summer of Code {{ currentYear }}</h1>
-      <p>
-        Score Lab has been participating in GSoC since 2013 and we are excited
-        to be part of GSoC {{ currentYear }}. Here are the project ideas for GSoC {{ currentYear }}.
-      </p>
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; gap: 16px;">
+      <i class="fa-solid fa-spinner fa-spin" style="font-size: 36px; color: var(--primary-color, #0366d6);"></i>
+      <p style="color: var(--font-color-p, #586069);">Loading GSoC Program Details...</p>
     </div>
-    <img src="../../../assets/gsoc_no_bg.png" alt="GSOC" />
-  </div>
-
-  <!-- Replaced legacy static text with dynamic innerHTML injection to allow rich blog-style intros from gsocData.ts -->
-  <div class="gsoc__details" [innerHTML]="gsocData.introHTML"></div>
-
-  <div class="gsoc__projects__list accordion">
-    @for (project of gsocData.projects; track project.id) {
-      <div
-        class="accordion-item"
-        [class.active]="activeProjectIndex === $index"
-      >
-        <div
-          class="accordion-header"
-          (click)="toggleAccordion($index)"
-          (keydown.enter)="toggleAccordion($index)"
-          tabindex="0"
-        >
-          <h4>{{ project.id }}. {{ project.title }}</h4>
-          <span class="icon">{{
-            activeProjectIndex === $index ? "−" : "+"
-          }}</span>
+  } @else {
+    <!-- Hero Section -->
+    @if (program) {
+      <div class="gsoc-hero">
+        <div class="gsoc-hero-content">
+          <h1>{{ program.title }}</h1>
+          <p>{{ program.description || 'Google Summer of Code Program cycle.' }}</p>
         </div>
-        @if (activeProjectIndex === $index) {
-          <!-- Using Angular 17+ @if syntax instead of *ngIf for better performance and readability -->
-          <div class="accordion-content">
-            <!-- Project content is now built using rich HTML grid strings from gsocData to preserve the premium card layout -->
+        <img [src]="program.heroImageUrl || '../../../assets/gsoc_no_bg.png'" alt="GSOC" />
+      </div>
+
+      <!-- Guidelines and Instructions -->
+      <div class="gsoc__details" [innerHTML]="program.introHtml"></div>
+
+      <!-- Project Ideas Accordion -->
+      <div class="gsoc__projects__list accordion">
+        @for (project of ideas; track project.id) {
+          <div
+            class="accordion-item"
+            [class.active]="activeProjectIndex === $index"
+          >
             <div
-              class="project-details"
-              [innerHTML]="project.detailsHTML"
-            ></div>
+              class="accordion-header"
+              (click)="toggleAccordion($index)"
+              (keydown.enter)="toggleAccordion($index)"
+              tabindex="0"
+            >
+              <h4>{{ project.projectNumber }}. {{ project.title }}</h4>
+              <span class="icon">{{
+                activeProjectIndex === $index ? "−" : "+"
+              }}</span>
+            </div>
+            @if (activeProjectIndex === $index) {
+              <div class="accordion-content">
+                <div class="project-details-grid">
+                  <div class="metadata-boxes">
+                    <div class="meta-box">
+                      <strong>Mentors</strong>
+                      <span>
+                        @for (mentor of project.mentors; track mentor.id; let last = $last) {
+                          {{ mentor.name }}@if (mentor.githubHandle) { (<a [href]="'https://github/' + mentor.githubHandle" target="_blank">{{ mentor.githubHandle }}</a>)}@if (!last) {; }
+                        } @empty {
+                          TBD
+                        }
+                      </span>
+                    </div>
+                    <div class="meta-box">
+                      <strong>Length</strong>
+                      <span>{{ project.durationHours }} hours</span>
+                    </div>
+                    <div class="meta-box">
+                      <strong>Difficulty</strong>
+                      <span>{{ project.difficulty }}</span>
+                    </div>
+                    @if (project.slackChannel) {
+                      <div class="meta-box">
+                        <strong>Slack</strong>
+                        <span>{{ project.slackChannel }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  <div class="content-section">
+                    <h4>Brief Explanation</h4>
+                    <p style="white-space: pre-wrap;">{{ project.explanation }}</p>
+                  </div>
+
+                  @if (project.expectedResults) {
+                    <div class="content-section">
+                      <h4>Expected Results / Key Objectives</h4>
+                      <p style="white-space: pre-wrap;">{{ project.expectedResults }}</p>
+                    </div>
+                  }
+
+                  @if (project.prerequisites) {
+                    <div class="content-section">
+                      <h4>Knowledge Prerequisite</h4>
+                      <p style="white-space: pre-wrap;">{{ project.prerequisites }}</p>
+                    </div>
+                  }
+
+                  @if (project.githubUrl) {
+                    <div class="content-section">
+                      <h4>Github URL</h4>
+                      <p>
+                        <a [href]="project.githubUrl" target="_blank">{{ project.githubUrl }}</a>
+                      </p>
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        } @empty {
+          <div style="text-align: center; padding: 48px; border: 1px dashed var(--gsoc-project-list-border, #e1e4e8); border-radius: 6px; color: var(--font-color-p, #586069);">
+            No project ideas have been published yet for this program year.
           </div>
         }
       </div>
+    } @else {
+      <!-- Fallback when no active published program is available in the database -->
+      <div style="text-align: center; padding: 80px 20px; color: var(--font-color-p, #586069); max-width: 600px; margin: 0 auto;">
+        <i class="fa-solid fa-calendar-xmark" style="font-size: 48px; color: #ef4444; margin-bottom: 24px;"></i>
+        <h2>GSoC Portal Offline</h2>
+        <p>There is currently no active Google Summer of Code program configured or published. Please check back later or contact administrators.</p>
+        <a routerLink="/" style="display: inline-block; margin-top: 24px; color: var(--primary-color, #0366d6); text-decoration: underline;">Return to Home</a>
+      </div>
     }
-  </div>
+  }
 </div>
