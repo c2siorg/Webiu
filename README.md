@@ -1,7 +1,7 @@
 # WebiU 2.0: C2SI/SCoRe Lab Website
 
 <p align="center">
-  <img width="400" height="auto" src="https://github.com/Grumpyyash/Webiu/blob/master/static/images/logo.png">
+  <img width="400" height="auto" src="https://github.com/Grumpyyash/Webiu/blob/master/static/images/logo.png" alt="WebiU Logo">
 </p>
 
 <p align="center">
@@ -13,16 +13,18 @@
 
 ## Project Summary
 
-**WebiU 2.0** is a full-stack web application that provides a comprehensive interface for showcasing C2SI/SCoRe Lab's open-source ecosystem. It integrates directly with the GitHub API to display real-time project statistics, contributor leaderboards, and individual contribution activity.
+**WebiU 2.0** is a full-stack web application designed to showcase C2SI and SCoRe Lab's open-source ecosystem. It syncs directly with GitHub to pull repository statistics, contributions, and contributor profiles into a local PostgreSQL database, enabling high-performance, real-time search and leaderboards without hitting GitHub API rate limits.
 
-**Key highlights:**
+**Key Highlights:**
 
-- **Real-time Project Data** — Fetches repository stats (stars, forks, language, issues, PRs) directly from GitHub.
-- **Contributor Leaderboards** — Aggregates contributions across all repositories to rank contributors.
-- **Contributor Search** — Look up any contributor to see their issues and pull requests within the organization.
-- **Dark Mode** — Toggle between light and dark themes with persistent preference.
-- **OAuth Sign-in** — Sign in with Google or GitHub accounts.
-- **Modern Stack** — Built with Angular 17+ (standalone components) and NestJS.
+* **Database-Backed Sync** — Stores organization repository and contributor data in PostgreSQL to serve low-latency requests.
+* **GitHub Webhook Integration** — Automatically updates the database when repositories are created, edited, archived, or deleted on GitHub.
+* **Drift Reconciliation** — Runs a background cron job every 12 hours to reconcile any missed webhook events.
+* **Administrator CMS Panel** — Secure dashboard to manage GSoC programs, project ideas, mentors, and global site settings.
+* **Dark Mode** — Toggle between light and dark themes with persistent preference.
+* **Modern Stack** — Built with Angular (standalone components) and NestJS.
+
+---
 
 ## Table of Contents
 
@@ -30,9 +32,9 @@
 2. [Tech Stack](#tech-stack)
 3. [Prerequisites](#prerequisites)
 4. [Installation & Setup](#installation--setup)
-   - [Frontend Setup](#frontend-setup-webiu-ui)
-   - [Backend Setup](#backend-setup-webiu-server)
-   - [Running with Docker](#running-with-docker)
+   * [Backend Setup (webiu-server)](#backend-setup-webiu-server)
+   * [Frontend Setup (webiu-ui)](#frontend-setup-webiu-ui)
+   * [Running with Docker](#running-with-docker)
 5. [Project Structure](#project-structure)
 6. [API Endpoints](#api-endpoints)
 7. [Linting & Code Quality](#linting--code-quality)
@@ -41,115 +43,148 @@
 10. [Documentation](#documentation)
 11. [License](#license)
 
+---
+
 ## Features
 
 | Feature | Description |
-|---------|-------------|
-| **Project Dashboard** | Browse all C2SI/SCoRe Lab repositories with stars, forks, language, open issues, and PR counts |
-| **Contributor Leaderboards** | See aggregated contribution stats across every repository in the organization |
-| **Contributor Search** | Search by GitHub username to view their issues and pull requests |
-| **Publications** | Dedicated page for research publications |
-| **GSoC** | Google Summer of Code information and project ideas |
-| **Community** | Community information and resources |
-| **Dark Mode** | System-wide light/dark theme toggle with localStorage persistence |
-| **OAuth Authentication** | Sign in with Google or GitHub |
-| **Responsive Design** | Fully responsive layout for desktop, tablet, and mobile |
+| :--- | :--- |
+| **Project Dashboard** | Browse all repositories with real-time stats (stars, forks, languages, open issues, and PR counts). |
+| **Contributor Leaderboards** | View aggregated contribution statistics across all repositories in the organization. |
+| **Contributor Search** | Query by GitHub username to view individual issues and pull requests inside the organization. |
+| **GSoC CMS & Explorer** | Manage GSoC programs, draft/publish project ideas, and map mentors dynamically from the admin panel. |
+| **Admin Settings Panel** | Update the active GSoC year, site title, description, and toggle maintenance mode dynamically. |
+| **Secure Admin Login** | Credentials-based administrator login secured with HttpOnly cookies and JWT sessions. |
+| **Responsive Design** | Fully responsive layout optimized for desktop, tablet, and mobile browsers. |
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|------------|
+| :--- | :--- |
 | **Frontend** | Angular 17+, TypeScript, SCSS, RxJS |
 | **Backend** | NestJS 10, TypeScript, Express |
+| **Database & ORM** | PostgreSQL, TypeORM |
 | **API Integration** | GitHub REST API via Axios |
-| **Authentication** | JWT, Passport, Google OAuth 2.0, GitHub OAuth |
-| **Email** | Nodemailer (Gmail) |
+| **Authentication** | JWT Session via Secure HttpOnly Cookie |
 | **Containerization** | Docker, Docker Compose |
 | **Code Quality** | ESLint, Prettier, Husky (pre-commit hooks) |
 | **Testing** | Jest (backend), Karma + Jasmine (frontend) |
+
+---
 
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
 
-- **Node.js** v18.x or higher — [Download](https://nodejs.org/)
-- **npm** v9.x or higher (ships with Node.js)
-- **Angular CLI** v17.x — Install globally: `npm install -g @angular/cli`
-- **Git** — [Download](https://git-scm.com/)
-- **Docker** (optional) — [Download](https://www.docker.com/) — only needed for containerized setup
+* **Node.js** v20.x or higher — [Download](https://nodejs.org/)
+* **npm** v9.x or higher (ships with Node.js)
+* **Angular CLI** v17.x or higher — Install globally: `npm install -g @angular/cli`
+* **PostgreSQL** Database server (v14+) — [Download](https://www.postgresql.org/)
+* **Git** — [Download](https://git-scm.com/)
+* **Docker** (Optional for containerized run) — [Download](https://www.docker.com/)
 
-You will also need a **GitHub Personal Access Token** for the backend to call the GitHub API. Generate one at [github.com/settings/tokens](https://github.com/settings/tokens) (no special scopes required for public repo data).
+You will also need:
+1. A **GitHub Personal Access Token** (classic, no special scopes needed for public repo data) to raise rate limits. Get yours at [github.com/settings/tokens](https://github.com/settings/tokens).
+2. A **GitHub Webhook Secret** (any custom secure string) if you plan to test webhook integration locally.
+
+---
 
 ## Installation & Setup
 
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/rajutkarsh07/Webiu.git
+git clone https://github.com/c2siorg/Webiu.git
 cd Webiu
 ```
 
 ### 2. Install Root Dependencies (Husky)
 
-The repository root has its own `package.json` that installs **Husky** and sets up the Git pre-commit hooks. You **must** run this from the root directory:
+The repository root manages **Husky** pre-commit hooks. Run this from the root directory:
 
 ```bash
 npm install
 ```
 
-> This runs the `prepare` script which initialises Husky. Without this step, the pre-commit lint hooks will not be active.
+---
 
-### 3. Frontend Setup (`webiu-ui`)
+### Backend Setup (`webiu-server`)
 
-```bash
-cd webiu-ui
-npm install
-ng serve
-```
+1. **Navigate to the server directory:**
+   ```bash
+   cd webiu-server
+   ```
 
-The frontend will be available at **http://localhost:4200**.
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-### 4. Backend Setup (`webiu-server`)
+3. **Configure Environment Variables:**
+   Copy `.env.example` to `.env`:
+   ```bash
+   cp .env.example .env
+   ```
+   Open `.env` and fill in the required details:
+   ```ini
+   NODE_ENV=development
+   PORT=5050
+   JWT_SECRET=use_a_strong_random_secret_here
+   ADMIN_USERNAME=admin
+   ADMIN_PASSWORD=choose_a_secure_admin_password
+   GITHUB_ACCESS_TOKEN=your_github_personal_access_token
+   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/webiu
+   DATABASE_SSL=false
+   GITHUB_WEBHOOK_SECRET=your_webhook_secret_here
+   FRONTEND_BASE_URL=http://localhost:4200
+   ```
 
-```bash
-cd webiu-server
-npm install
-cp .env.example .env
-```
+4. **Run Database Migrations:**
+   TypeORM will automatically sync schemas in development, but you can run migrations manually:
+   ```bash
+   npm run migration:run
+   ```
 
-Open `.env` and fill in the required values:
+5. **Start the server:**
+   ```bash
+   npm run start:dev
+   ```
+   The backend will be available at **http://localhost:5050**.
 
-```plaintext
-PORT=5050
-JWT_SECRET=your_jwt_secret_here
-GITHUB_ACCESS_TOKEN=your_github_personal_access_token
-FRONTEND_BASE_URL=http://localhost:4200
-```
+---
 
-At minimum, `JWT_SECRET` and `GITHUB_ACCESS_TOKEN` are required. OAuth and email features need their respective variables — see `.env.example` for the full list.
+### Frontend Setup (`webiu-ui`)
 
-Start the backend:
+1. **Navigate to the UI directory:**
+   ```bash
+   cd ../webiu-ui
+   ```
 
-```bash
-npm start
-```
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
 
-The server will run on **http://localhost:5050**.
+3. **Start the local server:**
+   ```bash
+   ng serve
+   ```
+   Open **http://localhost:4200** in your browser.
 
-### 5. Running with Docker
+---
 
-You can run the application containerized in either development mode or production preview mode.
+### Running with Docker
 
-#### Development Mode (Recommended for testing local changes)
-This runs the NestJS backend in watch mode and serves the Angular frontend via the local dev server. The frontend will dynamically connect to your local backend server at `http://localhost:5050`.
+You can run the entire stack (Angular, NestJS, and PostgreSQL) containerized.
 
+#### Development Mode (With source-code watch support)
 ```bash
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-#### Production Preview Mode
-This builds production-ready assets and serves the frontend via Nginx. Note that the frontend in this configuration is compiled to target the production API endpoint (`https://api.c2si.org`).
-
+#### Production Preview Mode (Serves UI via Nginx)
 ```bash
 docker compose up --build
 ```
@@ -160,6 +195,8 @@ docker compose up --build
 | Frontend | http://localhost:4200 |
 | Backend | http://localhost:5050 |
 
+---
+
 ## Project Structure
 
 ```
@@ -167,92 +204,96 @@ Webiu/
 ├── webiu-ui/                  # Angular frontend
 │   └── src/app/
 │       ├── components/        # Reusable UI components (navbar, cards)
-│       ├── page/              # Page components (homepage, projects, contributors, etc.)
-│       ├── services/          # Angular services (project caching, theming)
-│       ├── common/            # Shared utilities
-│       └── shared/            # Shared components (loading spinner)
+│       ├── page/              # Page layouts (homepage, admin panel, CMS)
+│       ├── services/          # Services (GSoC CMS API, theming, cache)
+│       └── shared/            # Common UI elements (loading spinner)
 │
 ├── webiu-server/              # NestJS backend
 │   └── src/
-│       ├── auth/              # Authentication (JWT + Google/GitHub OAuth)
-│       ├── project/           # Project data endpoints
-│       ├── contributor/       # Contributor data endpoints
-│       ├── github/            # GitHub API wrapper
-│       ├── user/              # User management
-│       ├── email/             # Email service
-│       └── common/            # Shared cache service
+│       ├── auth/              # Admin authentication & HttpOnly sessions
+│       ├── database/          # PostgreSQL database entities & migrations
+│       ├── github/            # GitHub API wrapper client
+│       ├── github-webhook/    # GitHub Webhook webhook payload handler
+│       ├── gsoc/              # GSoC CMS (programs, ideas, mentors)
+│       ├── system-setting/    # Config settings (title, year, maintenance)
+│       ├── project/           # Repository listing & sync logic
+│       └── contributor/       # Contributor leaderboards & sync
 │
-├── docs/
-│   ├── Architecture.md              # Code structure & data flow
-│   ├── CONTRIBUTING.md              # Contribution guidelines
-│   ├── API_DOCUMENTATION.md         # Full API reference
-│   └── webiu.postman_collection.json
-│
-├── docker-compose.yml
-└── README.md                  # This file
+├── docs/                      # Technical guides & specifications
+│   ├── ARCHITECTURE.md        # High-level architecture & code flows
+│   ├── API_DOCUMENTATION.md   # Endpoint inputs, outputs, and JSON formats
+│   └── CONTRIBUTING.md        # Git guidelines & code style conventions
 ```
 
-For a deep dive into the architecture, module system, data flow, and caching strategy, see **[Architecture.md](docs/Architecture.md)**.
+---
 
 ## API Endpoints
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/projects/projects` | All repositories with PR counts |
-| `GET` | `/api/issues/issuesAndPr?org=...&repo=...` | Issue and PR counts for a repo |
-| `GET` | `/api/contributor/contributors` | Aggregated contributor leaderboard |
-| `GET` | `/api/contributor/issues/:username` | Issues by a specific user |
-| `GET` | `/api/contributor/pull-requests/:username` | PRs by a specific user |
-| `GET` | `/api/contributor/stats/:username` | Combined issues + PRs for a user |
-| `POST` | `/api/v1/auth/register` | Register a new account |
-| `POST` | `/api/v1/auth/login` | Log in |
-| `GET` | `/api/v1/auth/verify-email?token=...` | Verify email address |
-| `GET` | `/auth/google` | Google OAuth sign-in |
-| `GET` | `/auth/github` | GitHub OAuth sign-in |
+A quick overview of key REST routes:
 
-Full API documentation (request/response schemas, validation, error codes) is in [`docs/API_DOCUMENTATION.md`](docs/API_DOCUMENTATION.md).
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `POST` | `/auth/login` | Public | Login admin & set HttpOnly session cookie |
+| `POST` | `/auth/logout` | Public | Clear admin session cookie |
+| `GET` | `/auth/me` | Public | Check if current session cookie is valid |
+| `GET` | `/api/v1/projects` | Public | Get cached list of org repositories |
+| `GET` | `/api/v1/contributor/contributors` | Public | Retrieve contributor leaderboard data |
+| `GET` | `/api/v1/contributor/stats/:username` | Public | Fetch contributor's issues and PR stats |
+| `POST` | `/api/v1/github-webhook` | GitHub | GitHub Webhook event receiver |
+| `GET` | `/gsoc/current` | Public | Fetch current GSoC year details |
+| `GET` | `/gsoc/current/ideas` | Public | Get active GSoC project ideas |
+| `GET` | `/admin/gsoc/programs` | Admin | List all GSoC programs |
+| `POST` | `/admin/gsoc/ideas` | Admin | Create a new project idea draft |
 
-A **Postman collection** for all endpoints is available at [`docs/webiu.postman_collection.json`](docs/webiu.postman_collection.json) — import it via **Postman → Import → File** to start testing immediately.
+For complete payload details, consult [API_DOCUMENTATION.md](file:///Users/tarunyakesh/Desktop/GSOC%2026/WebiU_Dev/docs/API_DOCUMENTATION.md).
+
+---
 
 ## Linting & Code Quality
 
-This project uses **ESLint**, **Prettier**, and **Husky** pre-commit hooks to maintain code quality. Commits that fail linting checks will be rejected automatically.
+The project uses **ESLint** and **Prettier** formatting enforced automatically on commit via **Husky** hooks.
 
-> **Important:** Husky is installed via `npm install` in the **root** directory (step 2 of setup). If you skipped that step, run it now from the repo root, otherwise pre-commit hooks will not fire.
-
-Run linting manually:
-
+Run formatting checks manually:
 ```bash
-# Frontend
+# Lint frontend
 cd webiu-ui && npm run lint
 
-# Backend
+# Lint backend
 cd webiu-server && npm run lint
 ```
 
+---
+
 ## Testing
 
+Run unit tests locally:
 ```bash
-# Backend (Jest)
-cd webiu-server && npm test
+# Test backend
+cd webiu-server && npm run test
 
-# Frontend (Karma + Jasmine)
-cd webiu-ui && ng test
+# Test frontend
+cd webiu-ui && npm run test
 ```
+
+---
 
 ## Contributing
 
-We welcome contributions! Please see **[CONTRIBUTING.md](docs/CONTRIBUTING.md)** for guidelines on branching, code style, commit messages, and the pull request process.
+We welcome contributions! Please review our [CONTRIBUTING.md](file:///Users/tarunyakesh/Desktop/GSOC%2026/WebiU_Dev/docs/CONTRIBUTING.md) to understand our git branch structures, conventions, and merge practices.
+
+---
 
 ## Documentation
 
 | Document | Description |
-|----------|-------------|
+| :--- | :--- |
 | [README.md](README.md) | Project overview, setup, and quick reference |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Code structure, module system, data flow, and caching |
-| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | How to contribute (branching, code style, PRs) |
-| [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | Full API reference — all endpoints, request/response schemas, error codes |
-| [docs/webiu.postman_collection.json](docs/webiu.postman_collection.json) | Postman collection — import and test all endpoints instantly |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Code structure, module system, data flow, and database schemas |
+| [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | Full API reference — endpoints, schemas, validation, and errors |
+| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | How to contribute (git branch rules, code conventions) |
+| [docs/webiu.postman_collection.json](docs/webiu.postman_collection.json) | Pre-configured Postman requests for rapid local testing |
+
+---
 
 ## License
 
