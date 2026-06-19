@@ -1,342 +1,293 @@
-# Architecture & Code Structure
+# WebiU 2.0 — Architecture & Code Structure
 
-This document explains how WebiU 2.0 is built, how the pieces fit together, and how data flows through the system. It is intended for developers who want to understand the codebase before contributing.
-
-## Table of Contents
-
-1. [High-Level Overview](#high-level-overview)
-2. [Repository Layout](#repository-layout)
-3. [Backend (`webiu-server`)](#backend-webiu-server)
-   - [Module System](#module-system)
-   - [GitHub Integration](#github-integration)
-   - [Caching Strategy](#caching-strategy)
-   - [Authentication & OAuth](#authentication--oauth)
-   - [API Reference](#api-reference)
-4. [Frontend (`webiu-ui`)](#frontend-webiu-ui)
-   - [Component Architecture](#component-architecture)
-   - [Routing](#routing)
-   - [Services](#services)
-   - [Styling & Theming](#styling--theming)
-5. [Data Flow](#data-flow)
-6. [DevOps & Tooling](#devops--tooling)
-7. [Environment Variables](#environment-variables)
+This document describes the high-level architecture, module design, data models, and deployment configurations of WebiU 2.0. It is written to be accessible to beginners while providing complete technical specifications for experienced developers.
 
 ---
 
-## High-Level Overview
+## 1. High-Level Architecture Overview
 
-WebiU 2.0 is a full-stack application that showcases C2SI/SCoRe Lab's open-source projects and contributors. It pulls data from the GitHub API, processes and caches it on the backend, and presents it through a responsive Angular frontend.
+WebiU 2.0 acts as a persistent database-backed aggregator and proxy for the **GitHub API (`api.github.com`)**. 
+
+### How WebiU Interacts with GitHub
+Instead of querying GitHub directly on every user action (which leads to slow page loads and rapid API rate limit exhaustion), WebiU employs a hybrid persistence-and-proxy model:
+
+1. **Persistent Catalog**: Organization repositories, basic metrics (stars, forks), and the contributor leaderboard are stored in a local **PostgreSQL** database.
+2. **Synchronization Events**: The database is kept in sync in real-time via **GitHub Webhooks** listening for repository modifications (creation, deletion, archiving, edits).
+3. **Background Recovery (Drift Alignment)**: A background **Reconciliation Scheduler** cron job executes every 12 hours, querying `api.github.com` to scan for any changes missed during downtime.
+4. **Live Cached Proxy**: For highly dynamic, individual user queries (like contributor issue/PR details, repository languages, and insights stats), the backend fetches data directly from `api.github.com` in real-time, caching responses locally for 5 minutes (`Cache-Control: public, max-age=300`) to guarantee high speed and efficiency.
+
+### System Architecture Diagram
 
 ```
-┌──────────────────┐         REST API         ┌──────────────────┐
-│                  │  ──────────────────────►  │                  │
-│   Angular 17+    │  http://localhost:5050    │     NestJS       │
-│   Frontend       │  ◄──────────────────────  │     Backend      │
-│   :4200          │                           │     :5050        │
-└──────────────────┘                           └────┬──────────┬──┘
-                                                    │          │
-                                         GitHub API │          │ TypeORM
-                                                    ▼          ▼
-                                           ┌──────────────┐ ┌──────────────┐
-                                           │api.github.com│ │  PostgreSQL  │
-                                           │ (c2siorg org)│ │   Database   │
-                                           └──────────────┘ └──────────────┘
+┌──────────────────┐         REST API (JSON)      ┌──────────────────┐
+│                  │  ─────────────────────────►  │                  │
+│   Angular 17+    │  http://localhost:5050       │     NestJS       │
+│   Frontend       │  ◄─────────────────────────  │     Backend      │
+│   (Port 4200)    │  (admin cookies included)    │     (Port 5050)  │
+└──────────────────┘                              └────┬──────────┬──┘
+                                                       │          │
+                                            GitHub API │          │ TypeORM
+                                            (Axios)    ▼          ▼
+                                               ┌──────────────┐ ┌──────────────┐
+                                               │api.github.com│ │  PostgreSQL  │
+                                               │ (c2siorg org)│ │   Database   │
+                                               └──────┬───────┘ └──────────────┘
+                                                      │
+                                                      │ GitHub Org Events
+                                                      ▼ (HMAC Signature Verified)
+                                               ┌──────────────┐
+                                               │  Webhook     │
+                                               │  Receiver    │
+                                               └──────────────┘
 ```
-
-- **Frontend** (`webiu-ui`) — Angular 17+ with standalone components, SCSS, and RxJS.
-- **Backend** (`webiu-server`) — NestJS with modular architecture, caching, PostgreSQL persistence, and GitHub integration.
-- **Database persistence** — PostgreSQL (via TypeORM) stores repository metadata, webhook event states, and contributor profile/relationship mappings to reduce GitHub API usage and enable low-latency queries.
 
 ---
 
-## Repository Layout
+## 2. Directory Structure & Layout
+
+A breakdown of the project layout, highlighting all major source folders and configuration files:
 
 ```
 Webiu/
-├── webiu-ui/                  # Angular frontend
+├── webiu-ui/                          # Angular standalone application
 │   ├── src/
 │   │   ├── app/
-│   │   │   ├── components/    # Reusable UI components (navbar, cards)
-│   │   │   ├── page/          # Route-level page components
-│   │   │   ├── services/      # Angular services (caching, theming)
-│   │   │   ├── common/        # Shared utilities
-│   │   │   ├── shared/        # Shared components (loading spinner)
-│   │   │   ├── app.routes.ts  # Route definitions
-│   │   │   ├── app.config.ts  # Angular providers
-│   │   │   └── app.component.ts
-│   │   ├── assets/            # Static files (images, icons)
-│   │   ├── environments/      # Environment-specific config
-│   │   └── styles.scss        # Global styles
-│   ├── Dockerfile
-│   └── package.json
+│   │   │   ├── components/            # Reusable components (navbar, cards)
+│   │   │   ├── page/                  # Route-level pages (homepage, admin-settings, gsoc)
+│   │   │   ├── services/              # Angular services (GSoC CMS, theming, cache)
+│   │   │   ├── common/                # Shared utilities & configurations
+│   │   │   ├── shared/                # Common UI elements (loading spinner)
+│   │   │   ├── app.routes.ts          # Route definitions
+│   │   │   ├── app.config.ts          # Angular application configuration
+│   │   │   └── app.component.ts       # Root UI template
+│   │   ├── assets/                    # Images, icons, static files
+│   │   ├── environments/              # Environment configurations (dev, prod)
+│   │   └── styles.scss                # Global stylesheet (themes, colors)
+│   ├── Dockerfile                     # Frontend containerization
+│   ├── nginx.conf                     # Nginx static deployment routing rule
+│   └── package.json                   # UI build dependencies
 │
-├── webiu-server/              # NestJS backend
+├── webiu-server/                      # NestJS REST backend
 │   ├── src/
-│   │   ├── auth/              # Authentication (JWT, Google/GitHub OAuth)
-│   │   ├── project/           # Project data endpoints
-│   │   ├── contributor/       # Contributor data endpoints
-│   │   ├── github/            # GitHub API wrapper service
-│   │   ├── user/              # User management
-│   │   ├── email/             # Email service (Nodemailer)
-│   │   ├── common/            # Shared utilities (CacheService)
-│   │   ├── app.module.ts      # Root module
-│   │   └── main.ts            # Application entry point
-│   ├── docs/                      ← you are here
-│   │   ├── Architecture.md                # This file
-│   │   ├── CONTRIBUTING.md                # Contribution guidelines
-│   │   ├── API_DOCUMENTATION.md           # Full API reference (all endpoints)
-│   │   └── webiu.postman_collection.json  # Postman collection (import-ready)
-│   ├── .env.example
-│   ├── Dockerfile
-│   └── package.json
+│   │   ├── auth/                      # JWT authentication & HttpOnly cookies
+│   │   ├── database/                  # PostgreSQL entity models & migrations
+│   │   ├── github/                    # GitHub REST client service
+│   │   ├── github-webhook/            # Webhook signature validation & handler
+│   │   ├── gsoc/                      # GSoC CMS (programs, ideas, mentors)
+│   │   ├── system-setting/            # Runtime configurations
+│   │   ├── project/                   # Repository listing & sync logic
+│   │   ├── contributor/               # Contributor stats & leaderboards
+│   │   ├── common/                    # Shared utilities & cache provider
+│   │   ├── app.module.ts              # Root backend NestJS module
+│   │   └── main.ts                    # Backend entrypoint file
+│   ├── Dockerfile                     # Backend containerization
+│   ├── .env.example                   # Env variable reference templates
+│   └── package.json                   # Server build dependencies
 │
-├── docker-compose.yml         # Multi-container orchestration
-├── package.json               # Root (Husky pre-commit hooks)
-└── README.md
+├── docs/                              # Project guides & resources
+│   ├── ARCHITECTURE.md                # This file (high-level layouts & flows)
+│   ├── API_DOCUMENTATION.md           # REST API specification reference
+│   ├── CONTRIBUTING.md                # Developer contribution rules
+│   └── webiu.postman_collection.json  # Pre-configured requests for local testing
+│
+├── docker-compose.yml                 # Multi-container local deployment
+└── README.md                          # Root README file
 ```
 
 ---
 
-## Backend (`webiu-server`)
+## 3. Data Models & Entity Relationships
 
-The backend is a NestJS application that acts as a proxy and aggregation layer on top of the GitHub API.
+We use **TypeORM** to manage our schemas. Below is a diagram showing how our persistent models are linked together in the PostgreSQL database:
 
-### Module System
+```mermaid
+erDiagram
+    ADMIN {
+        uuid id PK
+        string username
+        string password
+        date createdAt
+    }
+    SYSTEM_SETTINGS {
+        string key PK
+        string value
+    }
+    REPOSITORY {
+        uuid id PK
+        string githubRepoId
+        string name
+        string description
+        string homepage
+        string topics
+        int stars
+        int forks
+        boolean isActive
+        string syncStatus
+        string syncError
+        string reconciliationSource
+        date lastSyncedAt
+        date lastWebhookAt
+        date lastReconciliationAt
+    }
+    CONTRIBUTOR {
+        uuid id PK
+        string githubUserId
+        string username
+        string displayName
+        string avatarUrl
+        string profileUrl
+        string bio
+    }
+    REPOSITORY_CONTRIBUTOR {
+        uuid id PK
+        uuid repositoryId FK
+        uuid contributorId FK
+        int contributionCount
+    }
+    GSOC_PROGRAM {
+        uuid id PK
+        int year
+        string title
+        string description
+        string heroImageUrl
+        string introHtml
+        string slackUrl
+        string proposalTemplateUrl
+        string githubOrgUrl
+        string status
+        boolean isActive
+    }
+    GSOC_IDEA {
+        uuid id PK
+        uuid programId FK
+        int projectNumber
+        string title
+        string explanation
+        string expectedResults
+        string prerequisites
+        string difficulty
+        int durationHours
+        string slackChannel
+        string githubUrl
+        string status
+        int displayOrder
+    }
+    GSOC_MENTOR {
+        uuid id PK
+        string name
+        string githubHandle
+    }
+    GSOC_IDEA_MENTORS {
+        uuid ideaId FK
+        uuid mentorId FK
+    }
 
-NestJS organizes code into **modules**, each encapsulating a feature domain. Every module bundles its own controller(s) and service(s).
-
+    REPOSITORY ||--o{ REPOSITORY_CONTRIBUTOR : has
+    CONTRIBUTOR ||--o{ REPOSITORY_CONTRIBUTOR : makes
+    GSOC_PROGRAM ||--o{ GSOC_IDEA : contains
+    GSOC_IDEA }o--o{ GSOC_MENTOR : managed_by
 ```
-AppModule (root)
-├── ConfigModule          — Global environment variable access
-├── CommonModule          — Shared CacheService (exported to all modules)
-├── AuthModule            — JWT auth, Google/GitHub OAuth
-├── ProjectModule         — Project listing and issue/PR counts
-├── ContributorModule     — Contributor leaderboards and per-user stats
-└── UserModule            — User management
-```
-
-**How modules connect:**
-
-- `GithubModule` is imported by both `ProjectModule` and `ContributorModule` since they both need to call the GitHub API.
-- `CommonModule` exports `CacheService`, which is injected into `GithubService`, `ProjectService`, and `ContributorService`.
-- `ConfigModule` is global, so any service can inject `ConfigService` to read environment variables.
-
-**Controller → Service pattern:**
-
-Every HTTP request follows the same path:
-
-```
-HTTP Request → Controller (routing + validation) → Service (business logic) → GithubService (API calls)
-```
-
-### GitHub Integration
-
-`GithubService` (`src/github/github.service.ts`) is the single point of contact with the GitHub API. It handles:
-
-- **Authenticated requests** — Uses a personal access token from the `GITHUB_ACCESS_TOKEN` env variable.
-- **Pagination** — Automatically fetches all pages (100 items per page) until no more data is returned.
-- **Search API** — Uses GitHub's search endpoint for finding user issues and PRs within the `c2siorg` organization.
-- **PR enrichment** — For closed PRs, fetches individual PR details to determine merge status (the search API does not include `merged_at`).
-- **Caching** — Every API result is cached for 5 minutes via `CacheService` before making another external call.
-
-**Batch processing** is used in `ProjectService` and `ContributorService` to avoid GitHub's abuse detection. Repositories are processed 10 at a time using `Promise.all` on each batch.
-
-### Caching Strategy
-
-The application uses a **two-tier caching** approach:
-
-| Layer | Where | Mechanism | TTL |
-|-------|-------|-----------|-----|
-| **Backend in-memory** | `CacheService` | `Map<string, {data, expiresAt}>` | 5 minutes |
-| **HTTP cache headers** | Controller `@Header` decorator | `Cache-Control: public, max-age=300` | 5 minutes |
-| **Frontend in-memory** | `ProjectCacheService` | RxJS `shareReplay(1)` | Until page reload |
-
-`CacheService` is a simple key-value store with TTL expiration. Keys are descriptive strings like `all_projects`, `pulls_c2siorg_repoName`, `search_issues_username_c2siorg`, etc.
-
-### Authentication & OAuth
-
-The auth system supports three flows:
-
-1. **Email/Password** — Register and login via `POST /api/v1/auth/register` and `POST /api/v1/auth/login`. Passwords are hashed, and a JWT is returned on success. Email verification is supported.
-
-2. **Google OAuth** — The user is redirected to Google's consent screen via `GET /auth/google`. After authorization, Google redirects to `GET /auth/google/callback`, where the backend exchanges the code for tokens, verifies the ID token, and redirects the user back to the frontend with user data in query parameters.
-
-3. **GitHub OAuth** — Same flow as Google but using GitHub's OAuth endpoints. The backend exchanges the authorization code for an access token, fetches user info, and redirects to the frontend.
-
-### API Reference
-
-For full request/response documentation, validation rules, error codes, and example payloads, see **[`API_DOCUMENTATION.md`](./API_DOCUMENTATION.md)**.
-
-A **Postman collection** with all endpoints pre-configured is available at **[`webiu.postman_collection.json`](./webiu.postman_collection.json)**. Import it into Postman via **Import → File** to start testing immediately. The collection uses a `baseUrl` variable (default: `http://localhost:5050`) that you can override per-environment.
-
-**Quick endpoint summary:**
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/api/projects/projects` | All org repos with PR counts |
-| `GET` | `/api/issues/issuesAndPr?org=...&repo=...` | Issue and PR counts for a specific repo |
-| `GET` | `/api/contributor/contributors` | Aggregated contributor data across all repos |
-| `GET` | `/api/contributor/issues/:username` | Issues created by a user in the org |
-| `GET` | `/api/contributor/pull-requests/:username` | PRs created by a user in the org |
-| `GET` | `/api/contributor/stats/:username` | Combined issues + PRs for a user |
-| `POST` | `/api/v1/auth/register` | Register a new user |
-| `POST` | `/api/v1/auth/login` | Log in an existing user |
-| `GET` | `/api/v1/auth/verify-email?token=...` | Verify email address |
-| `GET` | `/auth/google` | Initiate Google OAuth |
-| `GET` | `/auth/google/callback` | Google OAuth callback |
-| `GET` | `/auth/github` | Initiate GitHub OAuth |
-| `GET` | `/auth/github/callback` | GitHub OAuth callback |
-| `GET` | `/api/user/followersAndFollowing/:username` | User followers/following (stub) |
 
 ---
 
-## Frontend (`webiu-ui`)
+## 4. Key Architectural Flows
 
-The frontend is an Angular 17+ application using **standalone components** (no `NgModule` boilerplate).
+### A. Administrator Authentication & Session Flow
+We removed social OAuth flows to ensure administrative credentials are isolated and self-hosted. 
 
-### Component Architecture
+Admin login uses credentials validated against the `admins` table. Upon success, a signed JWT is returned in an **HttpOnly, SameSite=Lax** session cookie named `admin_session`. The browser automatically includes this cookie in subsequent API requests.
 
-Components are split into two categories:
+```mermaid
+sequenceDiagram
+    participant Browser as Admin Browser
+    participant Server as NestJS Backend
+    participant DB as PostgreSQL
 
-**Page components** (`src/app/page/`) — Each page is a standalone component mapped to a route:
-
-| Component | Route | Purpose |
-|-----------|-------|---------|
-| `HomepageComponent` | `/` | Landing page with hero section |
-| `ProjectsComponent` | `/projects` | Grid of all org projects with stats |
-| `PublicationsComponent` | `/publications` | Research publications |
-| `ContributorsComponent` | `/contributors` | Contributor leaderboard |
-| `ContributorSearchComponent` | `/search` | Search a contributor's issues and PRs |
-| `CommunityComponent` | `/community` | Community information |
-| `GsocComponent` | `/gsoc` | Google Summer of Code page |
-| `GsocProjectIdeaComponent` | `/idea` | Individual GSoC project ideas |
-
-**Reusable components** (`src/app/components/`) — Presentational components used across pages:
-
-- `NavbarComponent` — Top navigation bar with dark mode toggle
-- `ProjectsCardComponent` — Individual project card (stars, forks, language, PRs)
-- `ProfileCardComponent` — Contributor profile card
-- `PublicationsCardComponent` — Publication entry card
-
-**Shared components** (`src/app/shared/`) — Generic UI utilities:
-
-- `LoadingSpinnerComponent` — Spinner shown during API calls
-
-### Routing
-
-Routes are defined in `app.routes.ts` and provided via `provideRouter(routes)` in `app.config.ts`. Scroll position restoration and anchor scrolling are enabled globally:
-
-```typescript
-RouterModule.forRoot(routes, {
-  scrollPositionRestoration: 'enabled',
-  anchorScrolling: 'enabled',
-});
+    Browser->>Server: POST /auth/login { username, password }
+    Server->>DB: Query admin user by username
+    DB-->>Server: Return hashed credentials
+    Note over Server: Validates password (bcrypt)
+    Note over Server: Signs JWT token
+    Server-->>Browser: Set-Cookie: admin_session=JWT (HttpOnly) & 200 OK
+    
+    Note over Browser: User visits /admin/settings
+    Browser->>Server: GET /admin/gsoc/programs (Cookie included)
+    Note over Server: AdminGuard verifies JWT signature
+    Server-->>Browser: Return GSoC programs JSON (200 OK)
 ```
-
-### Services
-
-| Service | Scope | Purpose |
-|---------|-------|---------|
-| `ProjectCacheService` | Root | Caches the project list using RxJS `shareReplay(1)` to avoid redundant API calls across components |
-| `ThemeService` | Root | Manages dark/light mode via `data-theme` attribute on `<html>` and persists the preference in `localStorage` |
-| `CommonUtilService` | Root | Shared utility functions |
-
-**How `ProjectCacheService` works:** The first call to `getProjects()` triggers an HTTP GET to the backend. The response Observable is stored and replayed (`shareReplay(1)`) for all subsequent subscribers. Calling `clearCache()` resets it so the next call fetches fresh data.
-
-### Styling & Theming
-
-- **SCSS** is used for all component styles.
-- **Global styles** are in `src/styles.scss`.
-- **Dark mode** is implemented via CSS custom properties. The `ThemeService` toggles a `data-theme="dark"` attribute on `<html>`, and SCSS rules use `[data-theme='dark']` selectors to override colors.
-- **FontAwesome** icons are used throughout the UI.
 
 ---
 
-## Data Flow
+### B. GitHub Webhook Ingest Flow
+When a repository is modified on GitHub (e.g. created, edited, renamed, archived, or deleted), GitHub pushes a webhook event to our server. 
 
-Here is how data flows for the main use case — loading the Projects page:
+We verify the event source using a secure token payload hash check (`HMAC-SHA256`) before committing any changes to the database.
 
+```mermaid
+sequenceDiagram
+    participant GitHub
+    participant Server as NestJS Webhook Controller
+    participant SyncService as Repository Sync Service
+    participant DB as PostgreSQL
+
+    GitHub->>Server: POST /api/v1/github-webhook (Header: x-hub-signature-256)
+    Note over Server: Computes HMAC-SHA256 of body<br/>using GITHUB_WEBHOOK_SECRET
+    Note over Server: Compares signature securely
+    alt Signature Mismatch
+        Server-->>GitHub: 401 Unauthorized
+    else Signature Valid
+        Server->>SyncService: Process repository event (payload)
+        alt Action is 'created' / 'edited' / 'unarchived'
+            SyncService->>DB: Query GitHub API & Upsert Repository & Contributors
+        else Action is 'deleted' / 'archived'
+            SyncService->>DB: Mark Repository as inactive (soft delete)
+        end
+        SyncService-->>Server: Complete
+        Server-->>GitHub: 200 OK
+    end
 ```
-1. User navigates to /projects
-
-2. ProjectsComponent calls ProjectCacheService.getProjects()
-
-3. ProjectCacheService checks if cache$ exists
-   ├── YES → Returns cached Observable (no HTTP call)
-   └── NO  → Makes HTTP GET to http://localhost:5050/api/projects/projects
-
-4. Backend: ProjectController.getAllProjects()
-   └── ProjectService.getAllProjects()
-       ├── Checks CacheService for key "all_projects"
-       │   ├── HIT  → Returns cached data immediately
-       │   └── MISS → Calls GithubService.getOrgRepos()
-       │              ├── Checks CacheService for key "org_repos_c2siorg"
-       │              │   ├── HIT  → Returns cached repos
-       │              │   └── MISS → Fetches all pages from GitHub API
-       │              │              └── Caches result (5 min TTL)
-       │              └── For each repo (batches of 10):
-       │                  └── GithubService.getRepoPulls(repoName)
-       │                      ├── Checks cache
-       │                      └── Fetches from GitHub if not cached
-       └── Caches final result under "all_projects" (5 min TTL)
-
-5. Response sent to frontend as JSON
-
-6. ProjectCacheService stores the Observable via shareReplay(1)
-
-7. ProjectsComponent renders ProjectsCardComponent for each repo
-```
-
-A similar pattern applies for the Contributor page and Contributor Search page.
 
 ---
 
-## DevOps & Tooling
+### C. Background Reconciliation & Drift Recovery
+If the server is down or a webhook delivery fails, database "drift" can occur. To recover from this, a background NestJS scheduler cron job executes every 12 hours.
 
-### Docker
-
-`docker-compose.yml` defines two services:
-
-- **webiu-server** — Builds from `./webiu-server/Dockerfile`, exposes port `5050`.
-- **webiu-ui** — Builds from `./webiu-ui/Dockerfile`, exposes port `4200`, depends on `webiu-server`.
-
-Both use Node 18 base images. Running `docker-compose up --build` from the root starts the entire stack.
-
-### Code Quality
-
-| Tool | Purpose | Config |
-|------|---------|--------|
-| **ESLint** | Static analysis and linting | Configured per project |
-| **Prettier** | Consistent code formatting | Configured per project |
-| **Husky** | Git pre-commit hooks | Root `package.json` — runs lint checks before every commit |
-
-### Testing
-
-- **Backend** — Jest (configured via NestJS defaults). Run with `npm test` in `webiu-server/`.
-- **Frontend** — Karma + Jasmine (configured via Angular CLI defaults). Run with `ng test` in `webiu-ui/`.
+The cron job:
+1. Downloads the full repository list from GitHub.
+2. Compares properties (stars, forks, description, topics, archiving) with PostgreSQL records.
+3. Synchronizes drifted properties and upserts missing records.
+4. Identifies repositories in PostgreSQL that no longer exist on GitHub and deactivates them.
 
 ---
 
-## Environment Variables
+### D. Dynamic Configuration & System Settings
+Instead of hardcoding details like the active year or site metadata, settings are stored in the database. 
 
-The backend requires a `.env` file. Copy `.env.example` to `.env` and fill in the values:
+The backend bootstrap phase seeds default keys. An admin can edit these keys dynamically from the admin panel, updating the site settings in real-time without server restarts or code updates.
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `PORT` | No | Server port (default: `5050`) |
-| `MONGODB_URI` | No | MongoDB connection string (currently unused) |
-| `JWT_SECRET` | Yes | Secret for signing JWT tokens |
-| `FRONTEND_BASE_URL` | No | Frontend URL for OAuth redirects (default: `http://localhost:4200`) |
-| `GMAIL_USER` | No | Gmail address for sending emails |
-| `GMAIL_PASSWORD` | No | Gmail app password for Nodemailer |
-| `GOOGLE_CLIENT_ID` | No | Google OAuth client ID |
-| `GOOGLE_CLIENT_SECRET` | No | Google OAuth client secret |
-| `GOOGLE_REDIRECT_URI` | No | Google OAuth callback URL |
-| `GITHUB_CLIENT_ID` | No | GitHub OAuth app client ID |
-| `GITHUB_CLIENT_SECRET` | No | GitHub OAuth app client secret |
-| `GITHUB_REDIRECT_URI` | No | GitHub OAuth callback URL |
-| `GITHUB_ACCESS_TOKEN` | Yes | GitHub personal access token for API calls |
+Supported keys include:
+* `gsoc.current_year`: Configures the public GSoC program view.
+* `gsoc.show_ideas_page`: Globally toggles project ideas visibility.
+* `gsoc.registration_open`: Shows/hides GSoC registration.
+* `site.title` & `site.description`: Configures layout SEO headers.
+* `site.maintenance_mode`: Toggles a public-facing holding screen.
 
-At minimum, you need `JWT_SECRET` and `GITHUB_ACCESS_TOKEN` to run the application. OAuth and email features require their respective variables.
+---
 
-The frontend reads its config from `src/environments/environment.ts`. For production builds, create an `environment.prod.ts` with `production: true` and the deployed backend URL.
+## 5. Deployment Architectures
+
+### A. Backend Deployment (Render.com)
+The backend container runs on Render as a Web Service.
+* **Working Directory Context**: Set `Root Directory` in Render to `webiu-server`. This ensures commands run inside the NestJS project folder.
+* **Build Command**: `npm install && npm run build`
+* **Start Command**: `npm run start:prod`
+* **Health Checks**: Configure the Render health check path to `/health`. Render polls this during builds and only redirects user traffic once a `200 OK` response is received.
+* **Database Connection**: Ensure `DATABASE_SSL=true` is set on Render to support encrypted database connections.
+
+### B. Frontend Deployment (GitHub Pages)
+The frontend is compiled into static HTML/CSS/JS files and hosted on GitHub Pages.
+* **Build Action**: Built using `npx ng build --configuration production --base-href=/Webiu/`.
+* **SPA Routing Fallback (`404.html`)**:
+  * Since GitHub Pages is a static file server, refreshing or directly entering a deep subroute (like `/projects` or `/admin`) returns a `404 Not Found` page instead of routing it to Angular.
+  * **Solution**: Our build workflow copies `index.html` to `404.html` in the build output (`cp dist/webiu/browser/index.html dist/webiu/browser/404.html`).
+  * When GitHub Pages encounters a subroute refresh, it serves `404.html`. The browser loads the Angular bundle, reads the URL path, and resolves the correct client component dynamically.
