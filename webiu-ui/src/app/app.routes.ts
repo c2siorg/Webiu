@@ -107,6 +107,14 @@ export const routes: Routes = [
     canActivate: [adminAuthGuard],
   },
   {
+    path: 'admin/profile',
+    loadComponent: () =>
+      import('./page/admin-profile/admin-profile.component').then(
+        (m) => m.AdminProfileComponent,
+      ),
+    canActivate: [adminAuthGuard],
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./page/not-found/not-found.component').then(

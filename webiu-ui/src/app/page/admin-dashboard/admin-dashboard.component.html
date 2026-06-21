@@ -19,16 +19,19 @@
       <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
         <i class="fa-solid fa-lightbulb"></i> Ideas
       </a>
+      <a routerLink="/admin/profile" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-user-gear"></i> Profile
+      </a>
     </div>
     
     <div class="navbar-right">
       <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
         <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
       </button>
-      <div class="user-badge">
+      <a routerLink="/admin/profile" class="user-badge" title="Manage Profile">
         <i class="fa-solid fa-user-shield"></i>
         <span>Administrator</span>
-      </div>
+      </a>
       <button (click)="onLogout()" class="btn-navbar-logout" title="Log out of panel">
         <i class="fa-solid fa-right-from-bracket"></i> Logout
       </button>

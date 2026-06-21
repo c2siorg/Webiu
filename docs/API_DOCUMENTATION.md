@@ -34,7 +34,11 @@ All responses are formatted in JSON. Endpoints are divided into public clientsid
    * [GET /admin/settings](#get-adminsettings)
    * [PATCH /admin/settings](#patch-adminsettings)
    * [GET /admin/settings/public](#get-adminsettingspublic)
-6. [GSoC CMS Endpoints](#6-gsoc-cms-endpoints)
+6. [Admin Profile Endpoints](#6-admin-profile-endpoints)
+   * [GET /admin/profile](#get-adminprofile)
+   * [PATCH /admin/profile/username](#patch-adminprofileusername)
+   * [PATCH /admin/profile/password](#patch-adminprofilepassword)
+7. [GSoC CMS Endpoints](#7-gsoc-cms-endpoints)
    * [GET /gsoc/current](#get-gsoccurrent)
    * [GET /gsoc/current/ideas](#get-gsoccurrentideas)
    * [GET /admin/gsoc/programs](#get-admingsocprograms)
@@ -50,10 +54,10 @@ All responses are formatted in JSON. Endpoints are divided into public clientsid
    * [POST /admin/gsoc/mentors](#post-admingsocmentors)
    * [PATCH /admin/gsoc/mentors/:id](#patch-admingsocmentorsid)
    * [DELETE /admin/gsoc/mentors/:id](#delete-admingsocmentorsid)
-7. [Health & Diagnostics](#7-health--diagnostics)
+8. [Health & Diagnostics](#8-health--diagnostics)
    * [GET /health](#get-health)
    * [GET /ready](#get-ready)
-8. [Importing into Postman](#importing-into-postman)
+9. [Importing into Postman](#importing-into-postman)
 
 ---
 
@@ -323,7 +327,66 @@ These endpoints manage global dynamic site variables in the database.
 
 ---
 
-## 6. GSoC CMS Endpoints
+## 6. Admin Profile Endpoints
+
+These routes allow administrators to manage their profile data and rotate credentials.
+
+### `GET /admin/profile`
+* **Access**: Admin Restricted (`AdminGuard` checks cookie)
+* **Purpose**: Retrieves administrator details.
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "username": "admin",
+    "role": "administrator",
+    "createdAt": "2026-06-20T00:34:14.000Z",
+    "lastLoginAt": "2026-06-20T00:35:00.000Z"
+  }
+  ```
+
+### `PATCH /admin/profile/username`
+* **Access**: Admin Restricted (`AdminGuard` checks cookie)
+* **Purpose**: Updates the username.
+* **Headers**: `Content-Type: application/json`
+* **Request Body**:
+  ```json
+  {
+    "username": "new_admin_username"
+  }
+  ```
+* **Success Response (200 OK)**:
+  * Clears cookie: `admin_session` (invalidates session, forcing logout)
+  ```json
+  {
+    "success": true,
+    "message": "Username updated successfully. Please log in again."
+  }
+  ```
+
+### `PATCH /admin/profile/password`
+* **Access**: Admin Restricted (`AdminGuard` checks cookie)
+* **Purpose**: Updates the administrator password.
+* **Headers**: `Content-Type: application/json`
+* **Request Body**:
+  ```json
+  {
+    "currentPassword": "old_password",
+    "newPassword": "new_secure_password",
+    "confirmPassword": "new_secure_password"
+  }
+  ```
+* **Success Response (200 OK)**:
+  * Clears cookie: `admin_session` (invalidates session, forcing logout)
+  ```json
+  {
+    "success": true,
+    "message": "Password updated successfully. Please log in again."
+  }
+  ```
+
+---
+
+## 7. GSoC CMS Endpoints
 
 These endpoints power the Summer of Code administration portal and public landing page.
 
@@ -436,7 +499,7 @@ These endpoints power the Summer of Code administration portal and public landin
 
 ---
 
-## 7. Health & Diagnostics
+## 8. Health & Diagnostics
 
 ### `GET /health`
 * **Access**: Public
@@ -462,7 +525,7 @@ These endpoints power the Summer of Code administration portal and public landin
 
 ---
 
-## 8. Importing into Postman
+## 9. Importing into Postman
 
 A pre-configured Postman Collection file with all these endpoints mapped out is located at:
 ```

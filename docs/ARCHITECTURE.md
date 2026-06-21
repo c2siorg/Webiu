@@ -105,8 +105,10 @@ erDiagram
     ADMIN {
         uuid id PK
         string username
-        string password
+        string passwordHash
         date createdAt
+        date updatedAt
+        date lastLoginAt
     }
     SYSTEM_SETTINGS {
         string key PK
@@ -216,9 +218,34 @@ sequenceDiagram
     Server-->>Browser: Return GSoC programs JSON (200 OK)
 ```
 
+### B. Admin Profile & Session Invalidation Flow
+Administrators can update their username or password. To ensure high security, any change to these credentials immediately invalidates all active sessions by clearing the HttpOnly session cookie (`admin_session`), forcing the user to log in again.
+
+```mermaid
+sequenceDiagram
+    participant Browser as Admin Browser
+    participant Server as NestJS Backend
+    participant DB as PostgreSQL
+
+    Note over Browser: User visits /admin/profile
+    Browser->>Server: GET /admin/profile (Cookie included)
+    Server-->>Browser: Return Profile Details
+    
+    Note over Browser: User updates Password
+    Browser->>Server: PATCH /admin/profile/password { currentPassword, newPassword, confirmPassword }
+    Server->>DB: Query Admin details
+    DB-->>Server: Return Admin record
+    Note over Server: Verifies current password (bcrypt)<br/>hashes new password
+    Server->>DB: Save updated password hash
+    DB-->>Server: Confirm saved
+    Note over Server: Invalidate session: clear admin_session cookie
+    Server-->>Browser: Clear-Cookie: admin_session & 200 OK
+    Note over Browser: Browser redirects to /admin (Login)
+```
+
 ---
 
-### B. GitHub Webhook Ingest Flow
+### C. GitHub Webhook Ingest Flow
 When a repository is modified on GitHub (e.g. created, edited, renamed, archived, or deleted), GitHub pushes a webhook event to our server. 
 
 We verify the event source using a secure token payload hash check (`HMAC-SHA256`) before committing any changes to the database.
@@ -249,7 +276,7 @@ sequenceDiagram
 
 ---
 
-### C. Background Reconciliation & Drift Recovery
+### D. Background Reconciliation & Drift Recovery
 If the server is down or a webhook delivery fails, database "drift" can occur. To recover from this, a background NestJS scheduler cron job executes every 12 hours.
 
 The cron job:
@@ -260,7 +287,7 @@ The cron job:
 
 ---
 
-### D. Dynamic Configuration & System Settings
+### E. Dynamic Configuration & System Settings
 Instead of hardcoding details like the active year or site metadata, settings are stored in the database. 
 
 The backend bootstrap phase seeds default keys. An admin can edit these keys dynamically from the admin panel, updating the site settings in real-time without server restarts or code updates.
