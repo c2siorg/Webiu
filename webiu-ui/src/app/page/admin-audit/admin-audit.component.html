@@ -189,8 +189,8 @@
 
 <!-- Details Modal -->
 @if (showModal && selectedLog) {
-  <div class="modal-backdrop" (click)="closeModal()">
-    <div class="modal-card" (click)="$event.stopPropagation()">
+  <div class="modal-backdrop" (click)="onBackdropClick($event)" (keydown.enter)="closeModal()" tabindex="0" role="button" aria-label="Close modal">
+    <div class="modal-card">
       <div class="modal-header">
         <h2>
           <i class="fa-solid fa-circle-info"></i> Log Entry Details

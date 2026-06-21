@@ -142,6 +142,12 @@ export class AdminAuditComponent implements OnInit {
     this.selectedLog = null;
   }
 
+  onBackdropClick(event: MouseEvent): void {
+    if ((event.target as HTMLElement).classList.contains('modal-backdrop')) {
+      this.closeModal();
+    }
+  }
+
   onLogout(): void {
     this.authService.logout().subscribe({
       next: () => {
