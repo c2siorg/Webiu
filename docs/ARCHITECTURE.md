@@ -183,11 +183,23 @@ erDiagram
         uuid ideaId FK
         uuid mentorId FK
     }
+    AUDIT_LOG {
+        uuid id PK
+        uuid adminId FK
+        string action
+        string entityType
+        string entityId
+        string oldValue
+        string newValue
+        jsonb metadata
+        date createdAt
+    }
 
     REPOSITORY ||--o{ REPOSITORY_CONTRIBUTOR : has
     CONTRIBUTOR ||--o{ REPOSITORY_CONTRIBUTOR : makes
     GSOC_PROGRAM ||--o{ GSOC_IDEA : contains
     GSOC_IDEA }o--o{ GSOC_MENTOR : managed_by
+    ADMIN ||--o{ AUDIT_LOG : performs
 ```
 
 ---
@@ -298,6 +310,39 @@ Supported keys include:
 * `gsoc.registration_open`: Shows/hides GSoC registration.
 * `site.title` & `site.description`: Configures layout SEO headers.
 * `site.maintenance_mode`: Toggles a public-facing holding screen.
+
+---
+
+### F. Audit Logging & Administrative Activity Tracking
+To maintain accountability and operational visibility, WebiU tracks all major configuration modifications, security transactions, and GSoC CMS updates.
+
+The audit pipeline runs synchronously with write requests:
+1. When an admin makes a request (e.g. `PATCH /admin/settings`), `AdminGuard` decodes the token and attaches the admin's database primary key (`id`) to the request context.
+2. The service queries the current state of the entity before applying updates.
+3. Upon successfully writing changes to the database, `AuditLogService` is invoked to create a log entry documenting the administrator ID, action key (e.g., `SETTING_UPDATED`), entity descriptors, previous state string, and updated state string.
+4. The logs are rendered on a dedicated dashboard in the administrator workspace (`/admin/audit`).
+
+```mermaid
+sequenceDiagram
+    participant Browser as Admin Browser
+    participant Server as NestJS Controller
+    participant Service as GSoC Service
+    participant Audit as AuditLog Service
+    participant DB as PostgreSQL
+
+    Browser->>Server: PATCH /admin/gsoc/programs/:id { title: "GSoC 2026 Updated" } (with Cookie)
+    Note over Server: AdminGuard decodes session cookie<br/>attaches admin's UUID to request
+    Server->>Service: update(id, dto, adminId)
+    Service->>DB: Fetch program record before update
+    DB-->>Service: Return old state JSON
+    Service->>DB: Save updated program properties
+    DB-->>Service: Confirm saved
+    Service->>Audit: createLog({ adminId, action: 'PROGRAM_UPDATED', entityType: 'gsoc_program', entityId, oldValue, newValue })
+    Audit->>DB: Insert into audit_logs table
+    DB-->>Audit: Confirm log saved
+    Service-->>Server: Return updated program
+    Server-->>Browser: 200 OK
+```
 
 ---
 

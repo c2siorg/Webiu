@@ -9,6 +9,7 @@ import { GsocProgram } from '../database/entities/gsoc-program.entity';
 import { CreateProgramDto } from './dto/create-program.dto';
 import { UpdateProgramDto } from './dto/update-program.dto';
 import { SystemSettingService } from '../system-setting/system-setting.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class GsocProgramService {
@@ -16,9 +17,13 @@ export class GsocProgramService {
     @InjectRepository(GsocProgram)
     private readonly programRepository: Repository<GsocProgram>,
     private readonly systemSettingService: SystemSettingService,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
-  async create(createProgramDto: CreateProgramDto): Promise<GsocProgram> {
+  async create(
+    createProgramDto: CreateProgramDto,
+    adminId?: string,
+  ): Promise<GsocProgram> {
     const existing = await this.programRepository.findOne({
       where: { year: createProgramDto.year },
     });
@@ -33,7 +38,19 @@ export class GsocProgramService {
     }
 
     const program = this.programRepository.create(createProgramDto);
-    return this.programRepository.save(program);
+    const saved = await this.programRepository.save(program);
+
+    if (adminId) {
+      await this.auditLogService.createLog({
+        adminId,
+        action: 'PROGRAM_CREATED',
+        entityType: 'gsoc_program',
+        entityId: saved.id,
+        newValue: JSON.stringify(saved),
+      });
+    }
+
+    return saved;
   }
 
   async findAll(): Promise<GsocProgram[]> {
@@ -53,8 +70,10 @@ export class GsocProgramService {
   async update(
     id: string,
     updateProgramDto: UpdateProgramDto,
+    adminId?: string,
   ): Promise<GsocProgram> {
     const program = await this.findOne(id);
+    const oldState = { ...program };
 
     if (updateProgramDto.year && updateProgramDto.year !== program.year) {
       const existing = await this.programRepository.findOne({
@@ -72,12 +91,49 @@ export class GsocProgramService {
     }
 
     Object.assign(program, updateProgramDto);
-    return this.programRepository.save(program);
+    const saved = await this.programRepository.save(program);
+
+    if (adminId) {
+      let action = 'PROGRAM_UPDATED';
+      if (
+        updateProgramDto.status === 'PUBLISHED' &&
+        oldState.status !== 'PUBLISHED'
+      ) {
+        action = 'PROGRAM_PUBLISHED';
+      } else if (
+        updateProgramDto.status === 'ARCHIVED' &&
+        oldState.status !== 'ARCHIVED'
+      ) {
+        action = 'PROGRAM_ARCHIVED';
+      }
+
+      await this.auditLogService.createLog({
+        adminId,
+        action,
+        entityType: 'gsoc_program',
+        entityId: saved.id,
+        oldValue: JSON.stringify(oldState),
+        newValue: JSON.stringify(saved),
+      });
+    }
+
+    return saved;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, adminId?: string): Promise<void> {
     const program = await this.findOne(id);
     await this.programRepository.remove(program);
+
+    if (adminId) {
+      await this.auditLogService.createLog({
+        adminId,
+        action: 'PROGRAM_ARCHIVED',
+        entityType: 'gsoc_program',
+        entityId: id,
+        oldValue: JSON.stringify(program),
+        newValue: null,
+      });
+    }
   }
 
   async findCurrentPublicProgram(): Promise<GsocProgram> {

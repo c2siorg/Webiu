@@ -4,10 +4,15 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcryptjs';
 import { AdminProfileService } from './admin-profile.service';
 import { Admin } from '../database/entities/admin.entity';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 describe('AdminProfileService', () => {
   let service: AdminProfileService;
   let adminRepositoryMock: any;
+
+  const mockAuditLogService = {
+    createLog: jest.fn().mockResolvedValue({}),
+  };
 
   beforeEach(async () => {
     adminRepositoryMock = {
@@ -21,6 +26,10 @@ describe('AdminProfileService', () => {
         {
           provide: getRepositoryToken(Admin),
           useValue: adminRepositoryMock,
+        },
+        {
+          provide: AuditLogService,
+          useValue: mockAuditLogService,
         },
       ],
     }).compile();

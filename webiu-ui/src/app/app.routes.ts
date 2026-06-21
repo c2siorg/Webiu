@@ -115,6 +115,14 @@ export const routes: Routes = [
     canActivate: [adminAuthGuard],
   },
   {
+    path: 'admin/audit',
+    loadComponent: () =>
+      import('./page/admin-audit/admin-audit.component').then(
+        (m) => m.AdminAuditComponent,
+      ),
+    canActivate: [adminAuthGuard],
+  },
+  {
     path: '**',
     loadComponent: () =>
       import('./page/not-found/not-found.component').then(

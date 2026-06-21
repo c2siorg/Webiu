@@ -10,12 +10,14 @@ import { AdminGsocController } from './admin-gsoc.controller';
 import { PublicGsocController } from './public-gsoc.controller';
 import { SystemSettingModule } from '../system-setting/system-setting.module';
 import { AuthModule } from '../auth/auth.module';
+import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([GsocProgram, GsocIdea, GsocMentor]),
     SystemSettingModule,
     AuthModule,
+    AuditLogModule,
   ],
   controllers: [AdminGsocController, PublicGsocController],
   providers: [GsocProgramService, GsocIdeaService, GsocMentorService],

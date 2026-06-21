@@ -54,10 +54,13 @@ All responses are formatted in JSON. Endpoints are divided into public clientsid
    * [POST /admin/gsoc/mentors](#post-admingsocmentors)
    * [PATCH /admin/gsoc/mentors/:id](#patch-admingsocmentorsid)
    * [DELETE /admin/gsoc/mentors/:id](#delete-admingsocmentorsid)
-8. [Health & Diagnostics](#8-health--diagnostics)
+8. [Audit Trail Endpoints](#8-audit-trail-endpoints)
+   * [GET /admin/audit](#get-adminaudit)
+   * [GET /admin/audit/:id](#get-adminauditid)
+9. [Health & Diagnostics](#9-health--diagnostics)
    * [GET /health](#get-health)
    * [GET /ready](#get-ready)
-9. [Importing into Postman](#importing-into-postman)
+10. [Importing into Postman](#importing-into-postman)
 
 ---
 
@@ -499,7 +502,76 @@ These endpoints power the Summer of Code administration portal and public landin
 
 ---
 
-## 8. Health & Diagnostics
+## 8. Audit Trail Endpoints
+
+These routes allow administrators to inspect dynamic configuration logs and profile credential histories.
+
+### `GET /admin/audit`
+* **Access**: Admin Restricted (`AdminGuard` checks cookie)
+* **Purpose**: Retrieves a paginated list of administrative activity logs.
+* **Query Parameters**:
+  * `page` (optional): Page number (default: `1`)
+  * `limit` (optional): Items per page (default: `20`, max `100`)
+  * `action` (optional): Filter by action (e.g. `SETTING_UPDATED`)
+  * `entityType` (optional): Filter by entity type (e.g. `settings`)
+  * `startDate` (optional): Filter logs created after this ISO date
+  * `endDate` (optional): Filter logs created before this ISO date
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "logs": [
+      {
+        "id": "e49dfb22-83fc-46cd-ae38-92701dfc6a99",
+        "adminId": "a90dfb22-83fc-46cd-ae38-92701dfc6a32",
+        "action": "SETTING_UPDATED",
+        "entityType": "settings",
+        "entityId": "gsoc.current_year",
+        "oldValue": "2025",
+        "newValue": "2026",
+        "metadata": null,
+        "createdAt": "2026-06-22T00:30:00.000Z",
+        "admin": {
+          "id": "a90dfb22-83fc-46cd-ae38-92701dfc6a32",
+          "username": "admin"
+        }
+      }
+    ],
+    "total": 1,
+    "page": 1,
+    "limit": 20,
+    "totalPages": 1
+  }
+  ```
+
+### `GET /admin/audit/:id`
+* **Access**: Admin Restricted (`AdminGuard` checks cookie)
+* **Purpose**: Retrieves specific detail for an audit log entry.
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "success": true,
+    "log": {
+      "id": "e49dfb22-83fc-46cd-ae38-92701dfc6a99",
+      "adminId": "a90dfb22-83fc-46cd-ae38-92701dfc6a32",
+      "action": "SETTING_UPDATED",
+      "entityType": "settings",
+      "entityId": "gsoc.current_year",
+      "oldValue": "2025",
+      "newValue": "2026",
+      "metadata": null,
+      "createdAt": "2026-06-22T00:30:00.000Z",
+      "admin": {
+        "id": "a90dfb22-83fc-46cd-ae38-92701dfc6a32",
+        "username": "admin"
+      }
+    }
+  }
+  ```
+
+---
+
+## 9. Health & Diagnostics
 
 ### `GET /health`
 * **Access**: Public
@@ -525,7 +597,7 @@ These endpoints power the Summer of Code administration portal and public landin
 
 ---
 
-## 9. Importing into Postman
+## 10. Importing into Postman
 
 A pre-configured Postman Collection file with all these endpoints mapped out is located at:
 ```

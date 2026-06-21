@@ -3,6 +3,7 @@ import { getRepositoryToken } from '@nestjs/typeorm';
 import { SystemSetting } from '../database/entities/system-setting.entity';
 import { SystemSettingService } from './system-setting.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 describe('SystemSettingService', () => {
   let service: SystemSettingService;
@@ -14,6 +15,10 @@ describe('SystemSettingService', () => {
     save: jest.fn(),
   };
 
+  const mockAuditLogService = {
+    createLog: jest.fn().mockResolvedValue({}),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -21,6 +26,10 @@ describe('SystemSettingService', () => {
         {
           provide: getRepositoryToken(SystemSetting),
           useValue: mockRepository,
+        },
+        {
+          provide: AuditLogService,
+          useValue: mockAuditLogService,
         },
       ],
     }).compile();
@@ -154,10 +163,15 @@ describe('SystemSettingService', () => {
         value: 'WebiU',
       });
       mockRepository.save.mockResolvedValue({});
-      mockRepository.find.mockResolvedValue([
-        { key: 'site.title', value: 'My New Title' },
-        { key: 'gsoc.current_year', value: '2027' },
-      ]);
+      mockRepository.find
+        .mockResolvedValueOnce([
+          { key: 'site.title', value: 'WebiU' },
+          { key: 'gsoc.current_year', value: '2026' },
+        ])
+        .mockResolvedValueOnce([
+          { key: 'site.title', value: 'My New Title' },
+          { key: 'gsoc.current_year', value: '2027' },
+        ]);
 
       const updates = {
         'site.title': 'My New Title',

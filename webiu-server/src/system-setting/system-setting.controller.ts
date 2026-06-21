@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Patch, Body, UseGuards, Req } from '@nestjs/common';
 import { SystemSettingService } from './system-setting.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 
@@ -15,8 +15,11 @@ export class SystemSettingController {
 
   @Patch()
   @UseGuards(AdminGuard)
-  async updateSettings(@Body() updates: Record<string, any>) {
-    const settings = await this.settingService.updateSettings(updates);
+  async updateSettings(@Req() req: any, @Body() updates: Record<string, any>) {
+    const settings = await this.settingService.updateSettings(
+      updates,
+      req.user.id,
+    );
     return {
       success: true,
       message: 'Settings updated successfully.',

@@ -11,6 +11,7 @@ import { GsocMentor } from '../database/entities/gsoc-mentor.entity';
 import { CreateIdeaDto } from './dto/create-idea.dto';
 import { UpdateIdeaDto } from './dto/update-idea.dto';
 import { SystemSettingService } from '../system-setting/system-setting.service';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class GsocIdeaService {
@@ -22,9 +23,13 @@ export class GsocIdeaService {
     @InjectRepository(GsocMentor)
     private readonly mentorRepository: Repository<GsocMentor>,
     private readonly systemSettingService: SystemSettingService,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
-  async create(createIdeaDto: CreateIdeaDto): Promise<GsocIdea> {
+  async create(
+    createIdeaDto: CreateIdeaDto,
+    adminId?: string,
+  ): Promise<GsocIdea> {
     const program = await this.programRepository.findOne({
       where: { id: createIdeaDto.programId },
     });
@@ -60,7 +65,19 @@ export class GsocIdeaService {
       mentors,
     });
 
-    return this.ideaRepository.save(idea);
+    const saved = await this.ideaRepository.save(idea);
+
+    if (adminId) {
+      await this.auditLogService.createLog({
+        adminId,
+        action: 'IDEA_CREATED',
+        entityType: 'gsoc_idea',
+        entityId: saved.id,
+        newValue: JSON.stringify(saved),
+      });
+    }
+
+    return saved;
   }
 
   async findAll(programId?: string): Promise<GsocIdea[]> {
@@ -89,8 +106,13 @@ export class GsocIdeaService {
     return idea;
   }
 
-  async update(id: string, updateIdeaDto: UpdateIdeaDto): Promise<GsocIdea> {
+  async update(
+    id: string,
+    updateIdeaDto: UpdateIdeaDto,
+    adminId?: string,
+  ): Promise<GsocIdea> {
     const idea = await this.findOne(id);
+    const oldState = { ...idea };
 
     if (updateIdeaDto.programId && updateIdeaDto.programId !== idea.programId) {
       const program = await this.programRepository.findOne({
@@ -118,12 +140,41 @@ export class GsocIdeaService {
     delete scalarFields.mentorIds;
     Object.assign(idea, scalarFields);
 
-    return this.ideaRepository.save(idea);
+    const saved = await this.ideaRepository.save(idea);
+
+    if (adminId) {
+      const action =
+        updateIdeaDto.status === 'PUBLISHED' && oldState.status !== 'PUBLISHED'
+          ? 'IDEA_PUBLISHED'
+          : 'IDEA_UPDATED';
+
+      await this.auditLogService.createLog({
+        adminId,
+        action,
+        entityType: 'gsoc_idea',
+        entityId: saved.id,
+        oldValue: JSON.stringify(oldState),
+        newValue: JSON.stringify(saved),
+      });
+    }
+
+    return saved;
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: string, adminId?: string): Promise<void> {
     const idea = await this.findOne(id);
     await this.ideaRepository.remove(idea);
+
+    if (adminId) {
+      await this.auditLogService.createLog({
+        adminId,
+        action: 'IDEA_DELETED',
+        entityType: 'gsoc_idea',
+        entityId: id,
+        oldValue: JSON.stringify(idea),
+        newValue: null,
+      });
+    }
   }
 
   async reorder(orderedIds: string[]): Promise<void> {

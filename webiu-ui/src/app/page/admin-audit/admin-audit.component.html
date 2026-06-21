@@ -1,0 +1,263 @@
+<div class="admin-panel-container">
+  <!-- Top Navigation Bar -->
+  <header class="admin-navbar">
+    <div class="navbar-left">
+      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      <span class="brand-name">WebiU Admin</span>
+    </div>
+    
+    <div class="navbar-center" role="tablist">
+      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </a>
+      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-gears"></i> Settings
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Years
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-lightbulb"></i> Ideas
+      </a>
+      <a routerLink="/admin/profile" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-user-gear"></i> Profile
+      </a>
+      <a routerLink="/admin/audit" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-list-check"></i> Audit Logs
+      </a>
+    </div>
+    
+    <div class="navbar-right">
+      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
+      </button>
+      <a routerLink="/admin/profile" class="user-badge" title="Manage Profile">
+        <i class="fa-solid fa-user-shield"></i>
+        <span>Administrator</span>
+      </a>
+      <button (click)="onLogout()" class="btn-navbar-logout" title="Log out of panel">
+        <i class="fa-solid fa-right-from-bracket"></i> Logout
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="admin-main-wrapper">
+    <div class="content-header-title">
+      <h1>Administrative Audit Trail</h1>
+      <p>Monitor system mutations, security events, configurations, and administrative profile updates.</p>
+    </div>
+
+    <!-- Filters Deck -->
+    <section class="filters-section">
+      <div class="filters-card">
+        <div class="filters-grid">
+          <div class="form-group">
+            <label for="actionFilter">Action Type</label>
+            <select id="actionFilter" [(ngModel)]="selectedAction" class="form-control">
+              <option value="">All Actions</option>
+              @for (action of actionOptions; track action) {
+                <option [value]="action">{{ action }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="entityFilter">Entity Type</label>
+            <select id="entityFilter" [(ngModel)]="selectedEntityType" class="form-control">
+              <option value="">All Entities</option>
+              @for (entity of entityTypeOptions; track entity) {
+                <option [value]="entity">{{ entity }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" [(ngModel)]="startDate" class="form-control" />
+          </div>
+
+          <div class="form-group">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" [(ngModel)]="endDate" class="form-control" />
+          </div>
+        </div>
+
+        <div class="filters-actions">
+          <button (click)="clearFilters()" class="btn-secondary">
+            <i class="fa-solid fa-filter-circle-xmark"></i> Clear Filters
+          </button>
+          <button (click)="applyFilters()" class="btn-primary">
+            <i class="fa-solid fa-magnifying-glass"></i> Filter Logs
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Audit Logs Table -->
+    <section class="table-section">
+      <div class="table-card">
+        @if (isLoading) {
+          <div class="loading-overlay">
+            <i class="fa-solid fa-circle-notch fa-spin spinner"></i>
+            <p>Loading activity logs...</p>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="audit-table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Admin</th>
+                  <th>Action</th>
+                  <th>Entity Type</th>
+                  <th>Entity ID</th>
+                  <th class="text-right">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (logs.length === 0) {
+                  <tr>
+                    <td colspan="6" class="no-records">
+                      <i class="fa-solid fa-box-open"></i>
+                      <p>No audit trail records match your current filters.</p>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (log of logs; track log.id) {
+                    <tr>
+                      <td class="timestamp-col">
+                        {{ log.createdAt | date:'medium' }}
+                      </td>
+                      <td class="admin-col">
+                        <span class="user-chip">
+                          <i class="fa-solid fa-user-shield"></i>
+                          {{ log.admin?.username || 'System / Seed' }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="action-badge" [attr.data-action]="log.action">
+                          {{ log.action }}
+                        </span>
+                      </td>
+                      <td>
+                        <span class="entity-badge">
+                          {{ log.entityType }}
+                        </span>
+                      </td>
+                      <td class="entity-id-col" [title]="log.entityId">
+                        <code>{{ log.entityId || 'N/A' }}</code>
+                      </td>
+                      <td class="text-right">
+                        <button (click)="viewDetails(log.id)" class="btn-icon" title="View Detail Log">
+                          <i class="fa-solid fa-eye"></i> View
+                        </button>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Controls -->
+          @if (totalPages > 1) {
+            <div class="pagination-controls">
+              <span class="pagination-info">
+                Showing Page <strong>{{ page }}</strong> of <strong>{{ totalPages }}</strong> ({{ total }} total logs)
+              </span>
+              <div class="pagination-buttons">
+                <button (click)="setPage(page - 1)" [disabled]="page === 1" class="btn-page">
+                  <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                @for (p of [].constructor(totalPages); track $index) {
+                  <button (click)="setPage($index + 1)" [class.active]="$index + 1 === page" class="btn-page">
+                    {{ $index + 1 }}
+                  </button>
+                }
+                <button (click)="setPage(page + 1)" [disabled]="page === totalPages" class="btn-page">
+                  <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- Details Modal -->
+@if (showModal && selectedLog) {
+  <div class="modal-backdrop" (click)="closeModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>
+          <i class="fa-solid fa-circle-info"></i> Log Entry Details
+        </h2>
+        <button (click)="closeModal()" class="btn-close-modal">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="meta-grid">
+          <div class="meta-item">
+            <span class="meta-label">Action</span>
+            <span class="action-badge" [attr.data-action]="selectedLog.action">
+              {{ selectedLog.action }}
+            </span>
+          </div>
+
+          <div class="meta-item">
+            <span class="meta-label">Entity</span>
+            <span class="entity-badge">{{ selectedLog.entityType }}</span>
+          </div>
+
+          <div class="meta-item">
+            <span class="meta-label">Entity ID</span>
+            <code>{{ selectedLog.entityId || 'N/A' }}</code>
+          </div>
+
+          <div class="meta-item">
+            <span class="meta-label">Timestamp</span>
+            <span>{{ selectedLog.createdAt | date:'medium' }}</span>
+          </div>
+
+          <div class="meta-item">
+            <span class="meta-label">Administrator</span>
+            <span class="user-chip">
+              <i class="fa-solid fa-user-shield"></i>
+              {{ selectedLog.admin?.username || 'System / Seed' }}
+            </span>
+          </div>
+        </div>
+
+        @if (selectedLog.metadata) {
+          <div class="diff-block">
+            <h3>Log Metadata</h3>
+            <pre><code>{{ selectedLog.metadata | json }}</code></pre>
+          </div>
+        }
+
+        <div class="diff-container">
+          <div class="diff-block">
+            <h3>Old State</h3>
+            <pre class="json-code"><code>{{ formatJson(selectedLog.oldValue) }}</code></pre>
+          </div>
+
+          <div class="diff-block">
+            <h3>New State</h3>
+            <pre class="json-code"><code>{{ formatJson(selectedLog.newValue) }}</code></pre>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button (click)="closeModal()" class="btn-primary">
+          Close Details
+        </button>
+      </div>
+    </div>
+  </div>
+}

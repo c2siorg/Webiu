@@ -5,6 +5,7 @@ import { GsocProgramService } from './gsoc-program.service';
 import { GsocProgram } from '../database/entities/gsoc-program.entity';
 import { SystemSettingService } from '../system-setting/system-setting.service';
 import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 describe('GsocProgramService', () => {
   let service: GsocProgramService;
@@ -24,6 +25,10 @@ describe('GsocProgramService', () => {
     getSettingNumber: jest.fn(),
   };
 
+  const mockAuditLogService = {
+    createLog: jest.fn().mockResolvedValue({}),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -35,6 +40,10 @@ describe('GsocProgramService', () => {
         {
           provide: SystemSettingService,
           useValue: mockSystemSettingService,
+        },
+        {
+          provide: AuditLogService,
+          useValue: mockAuditLogService,
         },
       ],
     }).compile();

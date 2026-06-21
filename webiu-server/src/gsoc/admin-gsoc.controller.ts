@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   HttpCode,
+  Req,
 } from '@nestjs/common';
 import { AdminGuard } from '../auth/guards/admin.guard';
 import { GsocProgramService } from './gsoc-program.service';
@@ -38,8 +39,8 @@ export class AdminGsocController {
   }
 
   @Post('programs')
-  async createProgram(@Body() dto: CreateProgramDto) {
-    const program = await this.programService.create(dto);
+  async createProgram(@Req() req: any, @Body() dto: CreateProgramDto) {
+    const program = await this.programService.create(dto, req.user.id);
     return {
       success: true,
       message: 'GSoC program created successfully',
@@ -48,8 +49,12 @@ export class AdminGsocController {
   }
 
   @Patch('programs/:id')
-  async updateProgram(@Param('id') id: string, @Body() dto: UpdateProgramDto) {
-    const program = await this.programService.update(id, dto);
+  async updateProgram(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateProgramDto,
+  ) {
+    const program = await this.programService.update(id, dto, req.user.id);
     return {
       success: true,
       message: 'GSoC program updated successfully',
@@ -58,8 +63,8 @@ export class AdminGsocController {
   }
 
   @Delete('programs/:id')
-  async deleteProgram(@Param('id') id: string) {
-    await this.programService.remove(id);
+  async deleteProgram(@Req() req: any, @Param('id') id: string) {
+    await this.programService.remove(id, req.user.id);
     return { success: true, message: 'GSoC program deleted successfully' };
   }
 
@@ -71,8 +76,8 @@ export class AdminGsocController {
   }
 
   @Post('ideas')
-  async createIdea(@Body() dto: CreateIdeaDto) {
-    const idea = await this.ideaService.create(dto);
+  async createIdea(@Req() req: any, @Body() dto: CreateIdeaDto) {
+    const idea = await this.ideaService.create(dto, req.user.id);
     return {
       success: true,
       message: 'Project idea created successfully',
@@ -91,8 +96,12 @@ export class AdminGsocController {
   }
 
   @Patch('ideas/:id')
-  async updateIdea(@Param('id') id: string, @Body() dto: UpdateIdeaDto) {
-    const idea = await this.ideaService.update(id, dto);
+  async updateIdea(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateIdeaDto,
+  ) {
+    const idea = await this.ideaService.update(id, dto, req.user.id);
     return {
       success: true,
       message: 'Project idea updated successfully',
@@ -101,8 +110,8 @@ export class AdminGsocController {
   }
 
   @Delete('ideas/:id')
-  async deleteIdea(@Param('id') id: string) {
-    await this.ideaService.remove(id);
+  async deleteIdea(@Req() req: any, @Param('id') id: string) {
+    await this.ideaService.remove(id, req.user.id);
     return { success: true, message: 'Project idea deleted successfully' };
   }
 
@@ -114,20 +123,24 @@ export class AdminGsocController {
   }
 
   @Post('mentors')
-  async createMentor(@Body() dto: CreateMentorDto) {
-    const mentor = await this.mentorService.create(dto);
+  async createMentor(@Req() req: any, @Body() dto: CreateMentorDto) {
+    const mentor = await this.mentorService.create(dto, req.user.id);
     return { success: true, message: 'Mentor created successfully', mentor };
   }
 
   @Patch('mentors/:id')
-  async updateMentor(@Param('id') id: string, @Body() dto: UpdateMentorDto) {
-    const mentor = await this.mentorService.update(id, dto);
+  async updateMentor(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() dto: UpdateMentorDto,
+  ) {
+    const mentor = await this.mentorService.update(id, dto, req.user.id);
     return { success: true, message: 'Mentor updated successfully', mentor };
   }
 
   @Delete('mentors/:id')
-  async deleteMentor(@Param('id') id: string) {
-    await this.mentorService.remove(id);
+  async deleteMentor(@Req() req: any, @Param('id') id: string) {
+    await this.mentorService.remove(id, req.user.id);
     return { success: true, message: 'Mentor deleted successfully' };
   }
 }

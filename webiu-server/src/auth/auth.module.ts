@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { CredentialService } from './credential.service';
 import { Admin } from '../database/entities/admin.entity';
+import { AuditLogModule } from '../audit-log/audit-log.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { Admin } from '../database/entities/admin.entity';
       inject: [ConfigService],
     }),
     TypeOrmModule.forFeature([Admin]),
+    AuditLogModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, CredentialService],

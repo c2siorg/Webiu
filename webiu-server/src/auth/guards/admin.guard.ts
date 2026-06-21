@@ -37,7 +37,11 @@ export class AdminGuard implements CanActivate {
         throw new UnauthorizedException('Not authorized as administrator');
       }
 
-      request.user = decoded;
+      request.user = {
+        id: adminExists.id,
+        username: adminExists.username,
+        role: decoded.role,
+      };
       return true;
     } catch {
       throw new UnauthorizedException(
