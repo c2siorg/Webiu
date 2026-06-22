@@ -82,7 +82,7 @@ describe('AdminProfileController', () => {
       });
 
       const req = {
-        user: { username: 'admin' },
+        user: { id: 'mock-admin-id', username: 'admin' },
         get: jest.fn().mockReturnValue('localhost'),
       };
       const res = {
@@ -99,7 +99,11 @@ describe('AdminProfileController', () => {
         success: true,
         message: 'Username updated successfully. Please log in again.',
       });
-      expect(service.updateUsername).toHaveBeenCalledWith('admin', 'new-name');
+      expect(service.updateUsername).toHaveBeenCalledWith(
+        'admin',
+        'new-name',
+        'mock-admin-id',
+      );
       expect(res.clearCookie).toHaveBeenCalledWith(
         'admin_session',
         expect.any(Object),
@@ -112,7 +116,7 @@ describe('AdminProfileController', () => {
       mockProfileService.updatePassword.mockResolvedValue(undefined);
 
       const req = {
-        user: { username: 'admin' },
+        user: { id: 'mock-admin-id', username: 'admin' },
         get: jest.fn().mockReturnValue('localhost'),
       };
       const res = {
@@ -131,7 +135,11 @@ describe('AdminProfileController', () => {
         success: true,
         message: 'Password updated successfully. Please log in again.',
       });
-      expect(service.updatePassword).toHaveBeenCalledWith('admin', dto);
+      expect(service.updatePassword).toHaveBeenCalledWith(
+        'admin',
+        dto,
+        'mock-admin-id',
+      );
       expect(res.clearCookie).toHaveBeenCalledWith(
         'admin_session',
         expect.any(Object),

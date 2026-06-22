@@ -41,7 +41,11 @@ export class AdminProfileController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const currentUsername = req.user.username;
-    await this.profileService.updateUsername(currentUsername, dto.username);
+    await this.profileService.updateUsername(
+      currentUsername,
+      dto.username,
+      req.user.id,
+    );
 
     this.clearSessionCookie(req, response);
 
@@ -58,7 +62,7 @@ export class AdminProfileController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const username = req.user.username;
-    await this.profileService.updatePassword(username, dto);
+    await this.profileService.updatePassword(username, dto, req.user.id);
 
     this.clearSessionCookie(req, response);
 

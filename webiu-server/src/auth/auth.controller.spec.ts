@@ -8,6 +8,8 @@ import { AuthService } from './auth.service';
 import { Admin } from '../database/entities/admin.entity';
 import { LoginDto } from './dto/login.dto';
 
+import { AuditLogService } from '../audit-log/audit-log.service';
+
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
@@ -21,11 +23,15 @@ describe('AuthController', () => {
     return res;
   };
 
+  const mockAuditLogService = {
+    createLog: jest.fn().mockResolvedValue({}),
+  };
+
   beforeEach(async () => {
     adminRepositoryMock = {
       findOne: jest.fn().mockImplementation(({ where }) => {
         if (where.username === 'admin') {
-          return { username: 'admin' } as Admin;
+          return { id: 'mock-admin-id', username: 'admin' } as Admin;
         }
         return null;
       }),
@@ -58,6 +64,10 @@ describe('AuthController', () => {
         {
           provide: getRepositoryToken(Admin),
           useValue: adminRepositoryMock,
+        },
+        {
+          provide: AuditLogService,
+          useValue: mockAuditLogService,
         },
       ],
     }).compile();
@@ -105,7 +115,8 @@ describe('AuthController', () => {
       const res = mockResponse();
       const req = {
         get: jest.fn().mockReturnValue('localhost:5050'),
-      } as unknown as Request;
+        user: { id: 'mock-admin-id', username: 'admin' },
+      } as any;
 
       const result = await controller.logout(req, res);
 

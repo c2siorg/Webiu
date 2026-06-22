@@ -7,6 +7,7 @@ import { GsocProgram } from '../database/entities/gsoc-program.entity';
 import { GsocMentor } from '../database/entities/gsoc-mentor.entity';
 import { SystemSettingService } from '../system-setting/system-setting.service';
 import { BadRequestException } from '@nestjs/common';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 describe('GsocIdeaService', () => {
   let service: GsocIdeaService;
@@ -34,6 +35,10 @@ describe('GsocIdeaService', () => {
     getSettingNumber: jest.fn(),
   };
 
+  const mockAuditLogService = {
+    createLog: jest.fn().mockResolvedValue({}),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -53,6 +58,10 @@ describe('GsocIdeaService', () => {
         {
           provide: SystemSettingService,
           useValue: mockSystemSettingService,
+        },
+        {
+          provide: AuditLogService,
+          useValue: mockAuditLogService,
         },
       ],
     }).compile();

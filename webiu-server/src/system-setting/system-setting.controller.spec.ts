@@ -69,14 +69,18 @@ describe('SystemSettingController', () => {
       };
       mockSystemSettingService.updateSettings.mockResolvedValue(mockSettings);
 
-      const result = await controller.updateSettings(updates);
+      const req = { user: { id: 'mock-admin-id' } };
+      const result = await controller.updateSettings(req, updates);
 
       expect(result).toEqual({
         success: true,
         message: 'Settings updated successfully.',
         settings: mockSettings,
       });
-      expect(service.updateSettings).toHaveBeenCalledWith(updates);
+      expect(service.updateSettings).toHaveBeenCalledWith(
+        updates,
+        'mock-admin-id',
+      );
     });
   });
 

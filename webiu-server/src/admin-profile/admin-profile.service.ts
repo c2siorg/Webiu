@@ -8,12 +8,14 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { Admin } from '../database/entities/admin.entity';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 @Injectable()
 export class AdminProfileService {
   constructor(
     @InjectRepository(Admin)
     private readonly adminRepository: Repository<Admin>,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   async getProfile(username: string): Promise<Admin> {
@@ -31,6 +33,7 @@ export class AdminProfileService {
   async updateUsername(
     currentUsername: string,
     newUsername: string,
+    adminId?: string,
   ): Promise<Admin> {
     const trimmed = newUsername.trim();
 
@@ -45,13 +48,28 @@ export class AdminProfileService {
     }
 
     const admin = await this.getProfile(currentUsername);
+    const oldUsername = admin.username;
     admin.username = trimmed;
-    return this.adminRepository.save(admin);
+    const savedAdmin = await this.adminRepository.save(admin);
+
+    if (adminId) {
+      await this.auditLogService.createLog({
+        adminId,
+        action: 'USERNAME_CHANGED',
+        entityType: 'profile',
+        entityId: admin.id,
+        oldValue: JSON.stringify({ username: oldUsername }),
+        newValue: JSON.stringify({ username: trimmed }),
+      });
+    }
+
+    return savedAdmin;
   }
 
   async updatePassword(
     username: string,
     dto: UpdatePasswordDto,
+    adminId?: string,
   ): Promise<void> {
     const { currentPassword, newPassword, confirmPassword } = dto;
 
@@ -80,5 +98,16 @@ export class AdminProfileService {
 
     admin.passwordHash = await bcrypt.hash(newPassword, 10);
     await this.adminRepository.save(admin);
+
+    if (adminId) {
+      await this.auditLogService.createLog({
+        adminId,
+        action: 'PASSWORD_CHANGED',
+        entityType: 'profile',
+        entityId: admin.id,
+        oldValue: '********',
+        newValue: '********',
+      });
+    }
   }
 }

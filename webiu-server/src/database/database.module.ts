@@ -9,6 +9,7 @@ import { RepositoryContributor } from './entities/repository-contributor.entity'
 import { GsocProgram } from './entities/gsoc-program.entity';
 import { GsocIdea } from './entities/gsoc-idea.entity';
 import { GsocMentor } from './entities/gsoc-mentor.entity';
+import { AuditLog } from './entities/audit-log.entity';
 import { AdminSeedService } from './admin-seed.service';
 
 @Global()
@@ -33,6 +34,7 @@ import { AdminSeedService } from './admin-seed.service';
           GsocProgram,
           GsocIdea,
           GsocMentor,
+          AuditLog,
         ],
         synchronize: false,
       }),
@@ -47,6 +49,7 @@ import { AdminSeedService } from './admin-seed.service';
       GsocProgram,
       GsocIdea,
       GsocMentor,
+      AuditLog,
     ]),
   ],
   providers: [AdminSeedService],

@@ -697,6 +697,67 @@
                     "response": []
                 }
             ]
+        },
+        {
+            "name": "Audit Logs",
+            "description": "Endpoints for inspecting administrative action logs and details.",
+            "item": [
+                {
+                    "name": "Get Audit Logs",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/audit",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "audit"
+                            ],
+                            "query": [
+                                {
+                                    "key": "page",
+                                    "value": "1"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "20"
+                                }
+                            ]
+                        },
+                        "description": "Returns a paginated list of audit activity logs."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Audit Log Details",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/audit/:id",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "audit",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "log-uuid-here"
+                                }
+                            ]
+                        },
+                        "description": "Returns detailed old/new state and metadata for a specific audit log."
+                    },
+                    "response": []
+                }
+            ]
         }
     ]
 }

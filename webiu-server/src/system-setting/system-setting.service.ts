@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { SystemSetting } from '../database/entities/system-setting.entity';
+import { AuditLogService } from '../audit-log/audit-log.service';
 
 const DEFAULT_SETTINGS: Record<string, string> = {
   'gsoc.current_year': '2026',
@@ -25,6 +26,7 @@ export class SystemSettingService implements OnApplicationBootstrap {
   constructor(
     @InjectRepository(SystemSetting)
     private readonly settingRepository: Repository<SystemSetting>,
+    private readonly auditLogService: AuditLogService,
   ) {}
 
   async onApplicationBootstrap() {
@@ -93,6 +95,7 @@ export class SystemSettingService implements OnApplicationBootstrap {
 
   async updateSettings(
     updates: Record<string, string | boolean | number>,
+    adminId?: string,
   ): Promise<Record<string, string | boolean | number>> {
     this.logger.log(`Updating system settings: ${JSON.stringify(updates)}`);
 
@@ -103,16 +106,35 @@ export class SystemSettingService implements OnApplicationBootstrap {
       this.validateSetting(key, value);
     }
 
+    const oldSettings = await this.getAllSettings();
+
     for (const [key, value] of Object.entries(updates)) {
       let setting = await this.settingRepository.findOne({ where: { key } });
       const stringValue = String(value);
 
-      if (!setting) {
-        setting = this.settingRepository.create({ key, value: stringValue });
-      } else {
-        setting.value = stringValue;
+      const oldVal = oldSettings[key];
+      const newVal = this.parseValue(key, stringValue);
+
+      if (String(oldVal) !== stringValue) {
+        if (!setting) {
+          setting = this.settingRepository.create({ key, value: stringValue });
+        } else {
+          setting.value = stringValue;
+        }
+        await this.settingRepository.save(setting);
+
+        // Audit setting update
+        if (adminId) {
+          await this.auditLogService.createLog({
+            adminId,
+            action: 'SETTING_UPDATED',
+            entityType: 'settings',
+            entityId: key,
+            oldValue: String(oldVal),
+            newValue: String(newVal),
+          });
+        }
       }
-      await this.settingRepository.save(setting);
     }
 
     return this.getAllSettings();
