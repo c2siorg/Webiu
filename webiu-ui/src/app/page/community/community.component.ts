@@ -1,12 +1,10 @@
 import { Component, inject, DestroyRef, OnInit } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
-import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor } from '../../common/data/contributor';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';
 import { ContributorGalaxyComponent } from '../../components/contributor-galaxy/contributor-galaxy.component';
 
@@ -15,10 +13,8 @@ import { ContributorGalaxyComponent } from '../../components/contributor-galaxy/
   selector: 'app-community',
   standalone: true,
   imports: [
-    NavbarComponent,
     CommonModule,
     HttpClientModule,
-    ProfileCardComponent,
     RouterModule,
     ContributorGalaxyComponent,
   ],
