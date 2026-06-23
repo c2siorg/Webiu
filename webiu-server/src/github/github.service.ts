@@ -104,9 +104,31 @@ export class GithubService {
     const cached = this.cacheService.get<GithubRepo[]>(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllPages(
-      `${this.baseUrl}/orgs/${this.orgName}/repos`,
-    );
+    let repos: any[] = [];
+    try {
+      repos = await this.fetchAllPages(
+        `${this.baseUrl}/orgs/${this.orgName}/repos`,
+      );
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        this.logger.log(
+          `Org ${this.orgName} not found. Trying as user instead...`,
+        );
+        try {
+          repos = await this.fetchAllPages(
+            `${this.baseUrl}/users/${this.orgName}/repos`,
+          );
+        } catch (userError) {
+          this.logger.error(
+            `Failed to fetch repositories for user ${this.orgName}:`,
+            userError.message,
+          );
+          throw userError;
+        }
+      } else {
+        throw error;
+      }
+    }
 
     repos.sort((a: GithubRepo, b: GithubRepo) =>
       a.name.toLowerCase().localeCompare(b.name.toLowerCase()),
@@ -157,11 +179,24 @@ export class GithubService {
       const cached = this.cacheService.get<any[]>(cacheKey);
       if (cached) return cached;
 
-      const response = await axios.get(
-        `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-        { headers: this.headers },
-      );
-      const repos = response.data;
+      let repos: any[];
+      try {
+        const response = await axios.get(
+          `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
+          { headers: this.headers },
+        );
+        repos = response.data;
+      } catch (error) {
+        if (error instanceof AxiosError && error.response?.status === 404) {
+          const response = await axios.get(
+            `${this.baseUrl}/users/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
+            { headers: this.headers },
+          );
+          repos = response.data;
+        } else {
+          throw error;
+        }
+      }
       this.cacheService.set(cacheKey, repos, CACHE_TTL);
       return repos;
     }
@@ -170,9 +205,20 @@ export class GithubService {
     const cached = this.cacheService.get<any[]>(cacheKey);
     if (cached) return cached;
 
-    const repos = await this.fetchAllPages(
-      `${this.baseUrl}/orgs/${this.orgName}/repos`,
-    );
+    let repos: any[];
+    try {
+      repos = await this.fetchAllPages(
+        `${this.baseUrl}/orgs/${this.orgName}/repos`,
+      );
+    } catch (error) {
+      if (error instanceof AxiosError && error.response?.status === 404) {
+        repos = await this.fetchAllPages(
+          `${this.baseUrl}/users/${this.orgName}/repos`,
+        );
+      } else {
+        throw error;
+      }
+    }
     this.cacheService.set(cacheKey, repos);
     return repos;
   }
@@ -382,7 +428,7 @@ export class GithubService {
     if (cached) return cached;
 
     const issues = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:issue`,
+      `${this.baseUrl}/search/issues?q=author:${username}+user:${this.orgName}+type:issue`,
     );
     this.cacheService.set(cacheKey, issues);
     return issues;
@@ -395,7 +441,7 @@ export class GithubService {
     if (cached) return cached;
 
     const prs = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/issues?q=author:${username}+org:${this.orgName}+type:pr`,
+      `${this.baseUrl}/search/issues?q=author:${username}+user:${this.orgName}+type:pr`,
     );
 
     // Fetch details for closed PRs to determine if they were merged
@@ -487,7 +533,7 @@ export class GithubService {
 
     const encoded = encodeURIComponent(query);
     const repos = await this.fetchAllSearchPages(
-      `${this.baseUrl}/search/repositories?q=${encoded}+org:${this.orgName}`,
+      `${this.baseUrl}/search/repositories?q=${encoded}+user:${this.orgName}`,
     );
 
     this.cacheService.set(cacheKey, repos);

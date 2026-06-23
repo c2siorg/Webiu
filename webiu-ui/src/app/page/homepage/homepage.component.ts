@@ -3,17 +3,20 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { getHomepageDetails } from '../../common/data/homepage';
 import { HttpClient } from '@angular/common/http';
+import { RepoIntelligenceCoreComponent } from '../../components/repo-intelligence-core/repo-intelligence-core.component';
+import { SearchService } from '../../services/search.service';
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, RepoIntelligenceCoreComponent],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.scss',
 })
 export class HomepageComponent implements OnInit {
   homepageData = getHomepageDetails();
   private http = inject(HttpClient);
+  private searchService = inject(SearchService);
 
   ngOnInit() {
     this.http.get<any>('assets/data/projects.json').subscribe({
@@ -22,6 +25,11 @@ export class HomepageComponent implements OnInit {
       },
       error: (err) => console.error('Failed to load projects', err)
     });
+  }
+
+  triggerSearch(event: Event): void {
+    event.preventDefault();
+    this.searchService.open();
   }
 
   // Get language color for projects

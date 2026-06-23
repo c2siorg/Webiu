@@ -5,6 +5,7 @@ import { FooterComponent } from './components/footer/footer.component';
 import { BackToTopComponent } from './components/back-to-top/back-to-top.component';
 import { SettingsService } from './services/settings.service';
 import { Title, Meta } from '@angular/platform-browser';
+import { SpotlightSearchComponent } from './components/spotlight-search/spotlight-search.component';
 
 @Component({
   selector: 'app-root',
@@ -14,6 +15,7 @@ import { Title, Meta } from '@angular/platform-browser';
     NavbarComponent,
     FooterComponent,
     BackToTopComponent,
+    SpotlightSearchComponent,
     RouterModule,
   ],
   templateUrl: './app.component.html',

@@ -10,8 +10,10 @@ export class ThemeService {
 
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
-      const isDarkMode = localStorage.getItem(this.DARK_MODE_KEY) === 'true';
-      if (isDarkMode) {
+      // Default to dark mode. Only use light if user explicitly chose it.
+      const storedPref = localStorage.getItem(this.DARK_MODE_KEY);
+      const isLight = storedPref === 'false';
+      if (!isLight) {
         document.documentElement.setAttribute('data-theme', 'dark');
       }
     }
@@ -34,7 +36,7 @@ export class ThemeService {
     if (isPlatformBrowser(this.platformId)) {
       return document.documentElement.getAttribute('data-theme') === 'dark';
     }
-    return false;
+    return true;
   }
 
 }

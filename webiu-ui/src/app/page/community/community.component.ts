@@ -8,6 +8,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { RouterModule } from '@angular/router';
+import { ContributorGalaxyComponent } from '../../components/contributor-galaxy/contributor-galaxy.component';
 
 
 @Component({
@@ -19,6 +20,7 @@ import { RouterModule } from '@angular/router';
     HttpClientModule,
     ProfileCardComponent,
     RouterModule,
+    ContributorGalaxyComponent,
   ],
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],

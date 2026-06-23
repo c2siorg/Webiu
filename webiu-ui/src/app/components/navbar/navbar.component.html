@@ -12,21 +12,20 @@
       class="menu-overlay"
       (click)="closeMenu()"
       (keydown.enter)="closeMenu()"
-      (keydown.space)="closeMenu(); $event.preventDefault()"
       tabindex="0"
       role="button"
       [attr.aria-label]="'Close menu'"
     ></div>
   }
+
   <div
     [ngClass]="{ navbar__menu: true, open: isMenuOpen }"
     id="navbarMenu"
     (click)="$event.stopPropagation()"
     (keydown.enter)="$event.stopPropagation()"
-    (keydown.space)="$event.preventDefault(); $event.stopPropagation()"
     tabindex="0"
   >
-    <!-- Sidebar Header (visible only when open on mobile) -->
+    <!-- Sidebar Header (mobile only) -->
     <div class="sidebar-header">
       <a [routerLink]="['/']" class="logo-link" (click)="closeMenu()">
         <img
@@ -51,7 +50,6 @@
       [class.active]="isRouteActive('/')"
       (click)="navigateTo('/')"
       (keydown.enter)="navigateTo('/')"
-      (keydown.space)="navigateTo('/'); $event.preventDefault()"
       tabindex="0"
       role="link"
       [attr.aria-label]="'Home'"
@@ -59,13 +57,13 @@
       <img src="../../../assets/home.svg" alt="Home Icon" class="menu-icon" />
       <p>Home</p>
     </div>
+
     <div
       class="navbar__menu__items"
       routerLink="/projects"
       [class.active]="isRouteActive('/projects')"
       (click)="navigateTo('/projects')"
       (keydown.enter)="navigateTo('/projects')"
-      (keydown.space)="navigateTo('/projects'); $event.preventDefault()"
       tabindex="0"
       role="link"
       [attr.aria-label]="'Projects'"
@@ -73,13 +71,13 @@
       <img src="../../../assets/projects.svg" alt="Projects Icon" class="menu-icon" />
       <p>Projects</p>
     </div>
+
     <div
       class="navbar__menu__items"
       routerLink="/publications"
       [class.active]="isRouteActive('/publications')"
       (click)="navigateTo('/publications')"
       (keydown.enter)="navigateTo('/publications')"
-      (keydown.space)="navigateTo('/publications'); $event.preventDefault()"
       tabindex="0"
       role="link"
       [attr.aria-label]="'Publications'"
@@ -87,13 +85,13 @@
       <img src="../../../assets/publications.svg" alt="Publications Icon" class="menu-icon" />
       <p>Publications</p>
     </div>
+
     <div
       class="navbar__menu__items"
       routerLink="/contributors"
       [class.active]="isRouteActive('/contributors')"
       (click)="navigateTo('/contributors')"
       (keydown.enter)="navigateTo('/contributors')"
-      (keydown.space)="navigateTo('/contributors'); $event.preventDefault()"
       tabindex="0"
       role="link"
       [attr.aria-label]="'Contributors'"
@@ -101,16 +99,17 @@
       <img src="../../../assets/contributors.svg" alt="Contributors Icon" class="menu-icon" />
       <p>Contributors</p>
     </div>
+
     <div class="dropdown-container">
       <div
         class="navbar__menu__items community-toggle"
         [class.active]="isRouteActive('/community')"
         (click)="toggleCommunityDropdown(); $event.stopPropagation()"
         (keydown.enter)="toggleCommunityDropdown(); $event.stopPropagation()"
-        (keydown.space)="toggleCommunityDropdown(); $event.stopPropagation(); $event.preventDefault()"
         tabindex="0"
         role="button"
         [attr.aria-label]="'Community Dropdown'"
+        [attr.aria-expanded]="isCommunityDropdownOpen"
       >
         <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
         <p>{{ getCommunityDropdownLabel() }}</p>
@@ -118,14 +117,13 @@
       </div>
 
       @if (isCommunityDropdownOpen) {
-        <div class="dropdown-menu community-dropdown" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()" tabindex="-1">
+        <div class="dropdown-menu community-dropdown" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" tabindex="-1">
           <div
             class="dropdown-item"
             routerLink="/community"
             [class.active]="currentRoute === '/community'"
             (click)="navigateTo('/community')"
             (keydown.enter)="navigateTo('/community')"
-            (keydown.space)="navigateTo('/community'); $event.preventDefault()"
             tabindex="0"
             role="link"
           >
@@ -137,7 +135,6 @@
             [class.active]="currentRoute === '/opportunities'"
             (click)="navigateTo('/opportunities')"
             (keydown.enter)="navigateTo('/opportunities')"
-            (keydown.space)="navigateTo('/opportunities'); $event.preventDefault()"
             tabindex="0"
             role="link"
           >
@@ -146,6 +143,7 @@
         </div>
       }
     </div>
+
     @if (showIdeasPage) {
       <div
         class="navbar__menu__items"
@@ -153,7 +151,6 @@
         [class.active]="isRouteActive('/gsoc')"
         (click)="navigateTo('/gsoc')"
         (keydown.enter)="navigateTo('/gsoc')"
-        (keydown.space)="navigateTo('/gsoc'); $event.preventDefault()"
         tabindex="0"
         role="link"
         [attr.aria-label]="'Google Summer of Code'"
@@ -162,8 +159,22 @@
         <p>GSoC {{ currentYearShort }}</p>
       </div>
     }
+  </div>
 
   <div class="navbar__right-actions">
+    <button
+      class="search-toggle-btn"
+      type="button"
+      aria-label="Search"
+      title="Search (Shortcut: /)"
+      (click)="triggerSearch($event)"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8"></circle>
+        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+      </svg>
+    </button>
+
     <button
       class="sun-moon-toggle"
       type="button"
@@ -182,7 +193,6 @@
       class="navigation__buttons"
       (click)="toggleMenu()"
       (keydown.enter)="toggleMenu()"
-      (keydown.space)="toggleMenu(); $event.preventDefault()"
       tabindex="0"
       role="button"
       [attr.aria-label]="isMenuOpen ? 'Close menu' : 'Open menu'"
@@ -193,3 +203,68 @@
     </div>
   </div>
 </div>
+
+<!-- Mobile Bottom Navigation Bar -->
+<nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+  <div class="mobile-bottom-nav__items">
+    <a
+      class="mobile-bottom-nav__item"
+      [class.active]="isRouteActive('/')"
+      (click)="navigateTo('/')"
+      (keydown.enter)="navigateTo('/')"
+      role="link"
+      tabindex="0"
+      aria-label="Home"
+    >
+      <img src="../../../assets/home.svg" alt="Home" />
+      <span>Home</span>
+    </a>
+    <a
+      class="mobile-bottom-nav__item"
+      [class.active]="isRouteActive('/projects')"
+      (click)="navigateTo('/projects')"
+      (keydown.enter)="navigateTo('/projects')"
+      role="link"
+      tabindex="0"
+      aria-label="Projects"
+    >
+      <img src="../../../assets/projects.svg" alt="Projects" />
+      <span>Projects</span>
+    </a>
+    <a
+      class="mobile-bottom-nav__item"
+      (click)="triggerSearch($event)"
+      (keydown.enter)="triggerSearch($event)"
+      role="button"
+      tabindex="0"
+      aria-label="Search"
+    >
+      <img src="../../../assets/search.svg" alt="Search" />
+      <span>Search</span>
+    </a>
+    <a
+      class="mobile-bottom-nav__item"
+      [class.active]="isRouteActive('/community')"
+      (click)="navigateTo('/community')"
+      (keydown.enter)="navigateTo('/community')"
+      role="link"
+      tabindex="0"
+      aria-label="Community"
+    >
+      <img src="../../../assets/community.svg" alt="Community" />
+      <span>Community</span>
+    </a>
+    <a
+      class="mobile-bottom-nav__item"
+      [class.active]="isRouteActive('/contributors')"
+      (click)="navigateTo('/contributors')"
+      (keydown.enter)="navigateTo('/contributors')"
+      role="link"
+      tabindex="0"
+      aria-label="Contributors"
+    >
+      <img src="../../../assets/contributors.svg" alt="Contributors" />
+      <span>Contributors</span>
+    </a>
+  </div>
+</nav>
