@@ -4,7 +4,6 @@ import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime } from 'rxjs/operators';
-import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { Contributor } from '../../common/data/contributor';
 
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
@@ -12,6 +11,7 @@ import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
+import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
 
 interface ContributionRange {
   label: string;
@@ -23,11 +23,11 @@ interface ContributionRange {
   selector: 'app-contributors',
   standalone: true,
   imports: [
-    NavbarComponent,
     HttpClientModule,
     ReactiveFormsModule,
     ProfileCardComponent,
     LoadingSpinnerComponent,
+    RevealOnScrollDirective,
   ],
   templateUrl: './contributors.component.html',
   styleUrls: ['./contributors.component.scss'],
@@ -288,9 +288,5 @@ export class ContributorsComponent implements OnInit {
     this.router.navigate(['/search'], {
       queryParams: { username: username },
     });
-  }
-
-  trackByFn(_: number, profile: Contributor): string {
-    return profile.login;
   }
 }

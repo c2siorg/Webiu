@@ -669,6 +669,51 @@ table tr:nth-child(even) {
 /* ── Handwritten Utility (Caveat font) ─────────────────────── */
 .handwritten {
   font-family: 'Caveat', cursive;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.02em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.6);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* ── Scroll Reveal Animations (Scroll-driven & IntersectionObserver fallback) ── */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1), transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform, opacity;
+}
+
+.scroll-reveal--visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Native Scroll-driven animation support for modern browsers */
+@supports ((animation-timeline: view()) and (animation-range: entry)) {
+  @keyframes growReveal {
+    from {
+      opacity: 0;
+      transform: translateY(28px) scale(0.97);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .scroll-reveal {
+    animation: growReveal auto linear forwards;
+    animation-timeline: view();
+    animation-range: entry 5% entry 30%;
+    /* Disable JS fallback transition when native timeline animates */
+    transition: none !important;
+  }
 }

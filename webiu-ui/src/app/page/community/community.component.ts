@@ -7,6 +7,7 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { RouterModule } from '@angular/router';
 import { ContributorGalaxyComponent } from '../../components/contributor-galaxy/contributor-galaxy.component';
+import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
 
 
 @Component({
@@ -17,6 +18,7 @@ import { ContributorGalaxyComponent } from '../../components/contributor-galaxy/
     HttpClientModule,
     RouterModule,
     ContributorGalaxyComponent,
+    RevealOnScrollDirective,
   ],
   templateUrl: './community.component.html',
   styleUrls: ['./community.component.scss'],

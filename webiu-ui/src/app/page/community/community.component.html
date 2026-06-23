@@ -1,7 +1,7 @@
 <div class="community">
   <div class="community-hero">
     <div class="community-hero-content">
-      <h1>Join our community</h1>
+      <h1>Phenomenally <span class="handwritten-accent">happy</span> to have you in our community</h1>
       <div class="media-icons">
         @for (icon of icons; track $index) {
           <a class="icon-link" href="{{ icon.link }}"
@@ -32,7 +32,7 @@
       <div class="team">
         <div class="team-align">
           @for (user of users; track $index) {
-            <div class="card">
+            <div class="card" appRevealOnScroll [direction]="$index % 3 === 0 ? 'left' : ($index % 3 === 2 ? 'right' : 'center')" [revealDelay]="($index % 3) * 120">
               <div class="card-data">
                 <a
                   class="user-name"

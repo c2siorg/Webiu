@@ -10,8 +10,9 @@
     <img src="../../../assets/publications-img.png" alt="publications" fetchpriority="high" />
   </div>
   <div class="publications-cards-container">
-    @for (publication of publicationsData; track $index) {
+    @for (publication of publicationsData; track publication.heading; let i = $index) {
     <app-publications-card [heading]="publication.heading" [link]="publication.link" [issued_by]="publication.issued_by"
-      [description]="publication.description"></app-publications-card>}
+      [description]="publication.description"
+      appRevealOnScroll [direction]="i % 3 === 0 ? 'left' : (i % 3 === 2 ? 'right' : 'center')" [revealDelay]="(i % 3) * 120"></app-publications-card>}
   </div>
 </div>

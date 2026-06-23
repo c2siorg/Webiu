@@ -24,6 +24,10 @@ export class ProjectsCardComponent implements OnInit {
   @Input() updatedAt!: string;
   @Input() org!: string;
   @Input() repo!: string;
+  @Input() stars = 0;
+  @Input() forks = 0;
+  @Input() size = 0;
+  @Input() license = '';
 
   issueCount = 0;
   pullRequestCount = 0;
@@ -36,6 +40,7 @@ export class ProjectsCardComponent implements OnInit {
   ngOnInit(): void {
     if (!this.initialized) {
       this.fetchIssuesAndPRs();
+      this.fetchTechStack();
     }
   }
 
@@ -100,5 +105,13 @@ export class ProjectsCardComponent implements OnInit {
     };
 
     return languageColors[lang ?? this.language] || languageColors['Default'];
+  }
+
+  getFormattedSize(): string {
+    if (this.size === 0) return '0 KB';
+    if (this.size < 1024) {
+      return `${this.size} KB`;
+    }
+    return `${(this.size / 1024).toFixed(1)} MB`;
   }
 }

@@ -2,27 +2,38 @@
 
   <!-- ═══ HERO SECTION ══════════════════════════════════════════ -->
   <section class="hero-section">
-    <div class="hero-bg-grid"></div>
+    <div class="hero-bg-grid" appParallax [speed]="0.1"></div>
 
     <!-- Custom 3D Three.js Repo Canvas that overlaps the typography -->
-    <app-repo-intelligence-core class="hero-3d-core"></app-repo-intelligence-core>
+    <app-repo-intelligence-core class="hero-3d-core" appParallax [speed]="0.4" [mouseFactor]="15"></app-repo-intelligence-core>
 
-    <div class="hero-container hero-container--centered">
-      <div class="hero-eyebrow">
+    <div class="hero-container hero-container--centered" appParallax [speed]="0.2">
+      <div class="hero-eyebrow" appRevealOnScroll [revealDelay]="100" direction="center">
         <span class="eyebrow-dot"></span>
         Open Source Intelligence Platform
       </div>
 
-      <h1 class="hero-title">
-        <span class="hero-word hero-word--1">OPEN</span>
-        <span class="hero-word hero-word--2">SOURCE</span>
-        <span class="hero-word hero-word--3 hero-word--dim">INTELLIGENCE</span>
+      <h1 class="hero-title" appRevealOnScroll [revealDelay]="200" direction="center">
+        <div class="hero-title-row">
+          <span class="hero-word hero-word--1">CEYLON</span>
+          <span class="hero-word hero-word--2">COMPUTER</span>
+        </div>
+        <div class="hero-title-row">
+          <span class="hero-word hero-word--3">SCIENCE</span>
+          <span class="hero-word hero-word--4 hero-word--dim">INSTITUTE</span>
+        </div>
+        <span class="hero-handwritten-note">
+          <svg class="handwritten-arrow" width="34" height="24" viewBox="0 0 34 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M1 23C8.5 19 18.5 10 27 1M27 1H17M27 1V9" stroke="var(--accent-lime)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Open Science Lab
+        </span>
       </h1>
 
-      <p class="hero-description">{{ homepageData.hero.description }}</p>
+      <p class="hero-description" appRevealOnScroll [revealDelay]="300" direction="center">{{ homepageData.hero.description }}</p>
       
       <!-- Premium Hero Search Trigger -->
-      <div class="hero-search-trigger" (click)="triggerSearch($event)" tabindex="0" (keydown.enter)="triggerSearch($event)">
+      <div class="hero-search-trigger" (click)="triggerSearch($event)" tabindex="0" (keydown.enter)="triggerSearch($event)" appRevealOnScroll [revealDelay]="400" direction="center">
         <div class="hero-search-trigger-content">
           <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -35,7 +46,7 @@
         </div>
       </div>
 
-      <div class="hero-cta">
+      <div class="hero-cta" appRevealOnScroll [revealDelay]="500" direction="center">
         <a [routerLink]="homepageData.hero.primaryCTA.link" class="btn-primary-hero" id="hero-cta-primary">
           {{ homepageData.hero.primaryCTA.text }}
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -46,10 +57,10 @@
       </div>
 
       <!-- Live Metrics Row -->
-      <div class="hero-metrics">
+      <div class="hero-metrics" appRevealOnScroll [revealDelay]="600" direction="center">
         @for (stat of homepageData.stats; track stat.label) {
           <div class="hero-metric">
-            <span class="hero-metric-value" [attr.data-target]="stat.value">{{ stat.value }}</span>
+            <span class="hero-metric-value" [appCountUp]="stat.value" [duration]="2.5">{{ stat.value }}</span>
             <span class="hero-metric-label">{{ stat.label }}</span>
           </div>
         }
@@ -60,7 +71,7 @@
   <!-- ═══ FEATURED PROJECTS ═════════════════════════════════════ -->
   <section class="featured-section">
     <div class="container">
-      <div class="section-header-row">
+      <div class="section-header-row" appRevealOnScroll direction="center">
         <div>
           <div class="accent-line"></div>
           <h2 class="section-title">Featured Projects</h2>
@@ -74,7 +85,7 @@
 
       <div class="projects-grid">
         @for (project of homepageData.featuredProjects; track project.name; let i = $index) {
-          <div class="project-card" [style.--card-delay]="(i * 80) + 'ms'">
+          <div class="project-card" appRevealOnScroll [direction]="i % 3 === 0 ? 'left' : (i % 3 === 2 ? 'right' : 'center')" [revealDelay]="(i % 3) * 120">
             <div class="project-card-header">
               <div class="project-icon">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--accent-lime)" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
@@ -109,7 +120,7 @@
   <!-- ═══ EXPLORE C2SI (Core Sections) ════════════════════════ -->
   <section class="explore-section">
     <div class="container">
-      <div class="section-header-center">
+      <div class="section-header-center" appRevealOnScroll direction="center">
         <div class="accent-line" style="margin: 0 auto var(--spacing)"></div>
         <h2 class="section-title">Explore C2SI</h2>
         <p class="section-subtitle">Everything you need to discover, contribute, and collaborate</p>
@@ -117,7 +128,7 @@
 
       <div class="explore-grid">
         @for (section of homepageData.sections; track section.title; let i = $index) {
-          <a [routerLink]="section.link" class="explore-card" [style.--card-delay]="(i * 100) + 'ms'" [id]="'explore-' + section.title.toLowerCase()">
+          <a [routerLink]="section.link" class="explore-card" appRevealOnScroll [direction]="i % 3 === 0 ? 'left' : (i % 3 === 2 ? 'right' : 'center')" [revealDelay]="(i % 3) * 120" [id]="'explore-' + section.title.toLowerCase()">
             <div class="explore-card-icon">
               @switch (section.icon) {
                 @case ("code") {
@@ -157,7 +168,7 @@
   <!-- ═══ RECENT PUBLICATIONS ════════════════════════════════ -->
   <section class="publications-section">
     <div class="container">
-      <div class="section-header-row">
+      <div class="section-header-row" appRevealOnScroll direction="center">
         <div>
           <div class="accent-line"></div>
           <h2 class="section-title">Recent Publications</h2>
@@ -171,7 +182,7 @@
 
       <div class="publications-list">
         @for (pub of homepageData.recentPublications; track pub.heading; let i = $index) {
-          <div class="pub-item" [style.--card-delay]="(i * 60) + 'ms'">
+          <div class="pub-item" appRevealOnScroll direction="center" [revealDelay]="i * 80">
             <div class="pub-index">{{ (i + 1).toString().padStart(2, '0') }}</div>
             <div class="pub-body">
               <a [href]="pub.link" target="_blank" class="pub-title" rel="noopener noreferrer">
@@ -193,7 +204,7 @@
   <!-- ═══ RESEARCH AREAS ══════════════════════════════════════ -->
   <section class="research-section">
     <div class="container">
-      <div class="section-header-center">
+      <div class="section-header-center" appRevealOnScroll direction="center">
         <div class="accent-line" style="margin: 0 auto var(--spacing)"></div>
         <h2 class="section-title">Research Focus Areas</h2>
         <p class="section-subtitle">Advancing computer science across multiple domains</p>
@@ -201,7 +212,7 @@
 
       <div class="research-grid">
         @for (area of homepageData.researchAreas; track area.title; let i = $index) {
-          <div class="research-card" [style.--card-delay]="(i * 80) + 'ms'">
+          <div class="research-card" appRevealOnScroll [direction]="i % 3 === 0 ? 'left' : (i % 3 === 2 ? 'right' : 'center')" [revealDelay]="(i % 3) * 120">
             <div class="research-icon" [style.color]="area.color" [style.background]="area.color + '14'">
               @switch (area.icon) {
                 @case ("shield") {
@@ -235,7 +246,7 @@
   <!-- ═══ FINAL CTA ════════════════════════════════════════════ -->
   <section class="cta-section">
     <div class="container">
-      <div class="cta-card">
+      <div class="cta-card" appRevealOnScroll direction="center">
         <div class="cta-glow"></div>
         <div class="cta-content">
           <h2 class="cta-title">Ready to Contribute?</h2>

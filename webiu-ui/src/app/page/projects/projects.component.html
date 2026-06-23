@@ -35,7 +35,12 @@
         <app-projects-card [name]="project.name" [org]="org" [repo]="project.name" [description]="project.description || ''"
           [issue]="project.open_issues_count" [link]="project.html_url" [language]="project.language || ''"
           [topics]="project.topics" [createdAt]="project.created_at" [updatedAt]="project.updated_at"
-          [pullRequests]="project.pull_requests" [style.--card-delay]="(i * 60) + 'ms'"></app-projects-card>
+          [pullRequests]="project.pull_requests"
+          [stars]="project.stargazers_count"
+          [forks]="project.forks_count"
+          [size]="project.size"
+          [license]="project.license?.spdx_id || ''"
+          appRevealOnScroll [direction]="i % 3 === 0 ? 'left' : (i % 3 === 2 ? 'right' : 'center')" [revealDelay]="(i % 3) * 120"></app-projects-card>
         }
       } @else {
         <app-projects-card [name]="'No projects found.'" [description]="

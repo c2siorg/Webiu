@@ -8,7 +8,9 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   padding: 0;
-  transition: all var(--transition);
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 250ms cubic-bezier(0.16, 1, 0.3, 1);
   position: relative;
   overflow: hidden;
 
@@ -21,21 +23,16 @@
     height: 3px;
     background: linear-gradient(90deg, var(--accent-lime), var(--accent-purple));
     opacity: 0;
-    transition: opacity var(--transition);
+    transition: opacity 250ms cubic-bezier(0.16, 1, 0.3, 1);
     z-index: 1;
   }
 
   &:hover {
-    border-color: var(--border-strong);
-    box-shadow: var(--shadow-lg);
-    transform: translateY(-3px);
+    border-color: rgba(123, 140, 255, 0.45);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 0 20px rgba(123, 140, 255, 0.15);
+    transform: translateY(-8px) scale(1.015);
 
     &::before { opacity: 1; }
-
-    .projects__card__open__btn {
-      background: var(--accent-purple-dim);
-      border-top-color: rgba(123, 140, 255, 0.2);
-    }
   }
 
   &.no-projects {
@@ -54,7 +51,49 @@
   align-items: flex-start;
   justify-content: space-between;
   gap: 16px;
-  padding: 22px 22px 0;
+  padding: 32px 32px 0;
+}
+
+.projects__card__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.projects__card__license-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent-purple);
+  background: var(--accent-purple-dim);
+  border: 1px solid rgba(123, 140, 255, 0.2);
+  padding: 4px 8px;
+  border-radius: var(--radius-sm, 4px);
+  letter-spacing: 0.05em;
+  line-height: 1;
+}
+
+.projects__card__metrics-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.projects__card__metric-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--font-size-sm, 13px);
+  color: var(--text-secondary);
+  font-weight: 500;
+
+  svg {
+    flex-shrink: 0;
+  }
 }
 
 /* ── Description ─────────────────────────────────────────────── */
@@ -88,184 +127,163 @@
 
 /* ── Details Row (lang + issue + PR + GitHub) ───────────────── */
 .projects__card__details {
-  padding: 14px 22px;
+  padding: 24px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 16px;
   flex-wrap: wrap;
+  border-top: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.01);
+}
 
-  > span {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    font-size: var(--font-size-sm);
-    font-weight: 500;
-    color: var(--text-secondary);
-  }
-
-  h4 {
-    font-size: var(--font-size-sm);
-    font-weight: 600;
-    color: var(--text-secondary);
-  }
+.projects__card__badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
 }
 
 .circle-box {
-  width: 11px;
-  height: 11px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   flex-shrink: 0;
 }
 
-/* Action buttons row */
-.projects__card__details__info {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-shrink: 0;
-}
-
-.issue-btn,
-.pr-btn {
+.lang-badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 10px;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm, 6px);
   background: var(--surface-raised);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.metric-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-sm, 6px);
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
   text-decoration: none;
   transition: all var(--transition-fast);
-  cursor: pointer;
 
   svg {
     width: 14px;
     height: 14px;
     flex-shrink: 0;
-
-    path { fill: var(--text-muted); }
-  }
-
-  p {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin: 0;
-  }
-
-  span {
-    font-size: var(--font-size-sm);
-    font-weight: 700;
-    color: var(--text-primary);
-    font-family: 'Clash Display', system-ui, sans-serif;
+    stroke: var(--text-muted);
   }
 
   &:hover {
-    border-color: var(--accent-purple);
-    background: var(--accent-purple-dim);
+    border-color: rgba(199, 244, 100, 0.45);
+    color: var(--accent-lime);
+    background: rgba(199, 244, 100, 0.05);
 
-    p { color: var(--accent-purple); }
-    svg path { fill: var(--accent-purple); }
+    svg {
+      stroke: var(--accent-lime);
+    }
   }
 }
 
-.git-btn {
+.projects__card__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.btn-insights {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 5px 12px;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm, 6px);
   background: var(--text-primary);
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  color: var(--bg);
+  font-size: 13px;
+  font-weight: 700;
   text-decoration: none;
   transition: all var(--transition-fast);
 
-  svg { width: 14px; height: 14px; flex-shrink: 0; }
-
-  p {
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--bg);
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    margin: 0;
+  .arrow-icon {
+    transition: transform var(--transition-fast);
+    stroke: var(--bg);
   }
 
   &:hover {
     background: var(--accent-purple);
-    transform: translateY(-1px);
+    color: #fff;
+    
+    .arrow-icon {
+      transform: translateX(4px);
+      stroke: #fff;
+    }
   }
 }
 
-/* Expand toggle button */
-.projects__card__open__btn {
-  display: flex;
+.btn-github {
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  padding: 10px;
-  background: var(--surface-raised);
-  border: none;
-  border-top: 1px solid var(--border);
-  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm, 6px);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-secondary);
   transition: all var(--transition-fast);
 
   svg {
-    width: 12px;
-    height: 20px;
-    transition: transform var(--transition-fast);
-
-    path { fill: var(--text-muted); }
+    stroke: var(--text-secondary);
   }
 
   &:hover {
-    background: var(--accent-purple-dim);
+    border-color: var(--text-primary);
+    background: var(--surface-raised);
+    color: var(--text-primary);
+
+    svg {
+      stroke: var(--text-primary);
+    }
   }
 }
 
-/* Hidden details panel */
-.projects__card__hidden {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-  background: var(--surface-raised);
-  border-top: 0px solid var(--border);
-
-  &.visible {
-    max-height: 400px;
-    border-top-width: 1px;
-    padding-bottom: 16px;
-  }
-}
-
-/* Tags inside hidden panel */
-.projects__card__hidden__tags {
+/* Topics Row directly on card */
+.projects__card__topics-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  padding: 16px 22px 0;
+  margin-top: 16px;
 }
 
-.projects__card__tag {
+.projects__card__topic-tag {
   display: inline-flex;
   align-items: center;
   padding: 4px 10px;
-  background: var(--surface);
+  background: var(--surface-raised);
   border: 1px solid var(--border);
-  border-radius: var(--radius-full);
+  border-radius: var(--radius-full, 9999px);
   font-size: 11px;
   font-weight: 600;
   color: var(--text-secondary);
   letter-spacing: 0.02em;
-}
+  transition: all var(--transition-fast);
 
-.projects__card__lang-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+  &:hover {
+    border-color: var(--accent-purple);
+    color: var(--text-primary);
+  }
 }
 
 .lang-dot {
@@ -273,19 +291,6 @@
   height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
-}
-
-/* Date metadata inside hidden panel */
-.projects__card__details p {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  margin: 0;
-  padding: 8px 22px 0;
-
-  strong {
-    color: var(--text-primary);
-    font-weight: 600;
-  }
 }
 
 /* ── Dark mode ───────────────────────────────────────────────── */
@@ -298,9 +303,5 @@
 
   .git-btn {
     svg path { fill: #07090D; }
-  }
-
-  .projects__card__open__btn svg path {
-    fill: var(--text-muted);
   }
 }

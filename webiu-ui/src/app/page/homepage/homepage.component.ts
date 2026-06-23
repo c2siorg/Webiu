@@ -5,11 +5,21 @@ import { getHomepageDetails } from '../../common/data/homepage';
 import { HttpClient } from '@angular/common/http';
 import { RepoIntelligenceCoreComponent } from '../../components/repo-intelligence-core/repo-intelligence-core.component';
 import { SearchService } from '../../services/search.service';
+import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
+import { ParallaxDirective } from '../../shared/parallax.directive';
+import { CountUpDirective } from '../../shared/count-up.directive';
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [CommonModule, RouterModule, RepoIntelligenceCoreComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    RepoIntelligenceCoreComponent,
+    RevealOnScrollDirective,
+    ParallaxDirective,
+    CountUpDirective,
+  ],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.scss',
 })

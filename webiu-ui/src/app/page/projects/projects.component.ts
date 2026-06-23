@@ -10,6 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { ProjectCacheService } from 'src/app/services/project-cache.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
 
 @Component({
   selector: 'app-projects',
@@ -19,6 +20,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
     FormsModule,
     ProjectsCardComponent,
     LoadingSpinnerComponent,
+    RevealOnScrollDirective,
   ],
   templateUrl: './projects.component.html',
   styleUrls: ['./projects.component.scss'],

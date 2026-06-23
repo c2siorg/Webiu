@@ -12,14 +12,22 @@
 /* ── HERO SECTION ─────────────────────────────────────────────── */
 .hero-section {
   position: relative;
-  min-height: 98vh;
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   background: var(--bg);
-  padding: clamp(100px, 15vh, 160px) clamp(1rem, 5vw, 2rem);
+  padding: clamp(40px, 6vh, 80px) clamp(1rem, 5vw, 2rem);
   text-align: center;
+  box-sizing: border-box;
+
+  @media (max-width: 768px) {
+    height: calc(100vh - 56px - 60px);
+    height: calc(100dvh - 56px - 60px);
+    padding: clamp(20px, 4vh, 40px) clamp(1rem, 5vw, 1.5rem);
+  }
 }
 
 /* Subtle dot-grid background */
@@ -94,31 +102,80 @@
   flex-direction: column;
   line-height: 0.95;
   margin-bottom: 32px;
-  gap: 8px;
+  gap: clamp(8px, 1.5vh, 16px);
   user-select: none;
+  position: relative;
+}
+
+.hero-title-row {
+  display: flex;
+  gap: clamp(8px, 2.5vw, 20px);
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 .hero-word {
   font-family: 'Clash Display', 'Geist', system-ui, sans-serif;
-  font-size: clamp(3.5rem, 10vw, 8.5rem);
+  font-size: clamp(2.2rem, 6.8vw, 5.2rem);
   font-weight: 800;
   color: var(--text-primary);
-  letter-spacing: -0.05em;
-  line-height: 0.95;
+  letter-spacing: -0.04em;
+  line-height: 1.0;
   display: block;
   opacity: 0;
   transform: translateY(40px);
 }
 
 .hero-word--1 { animation: heroWordIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both; }
-.hero-word--2 { animation: heroWordIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.25s both; }
-.hero-word--3 { animation: heroWordIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.4s both; }
+.hero-word--2 { animation: heroWordIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both; }
+.hero-word--3 { animation: heroWordIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both; }
+.hero-word--4 { animation: heroWordIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.46s both; }
 
 .hero-word--dim {
   background: linear-gradient(135deg, var(--text-muted) 30%, var(--text-secondary));
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   opacity: 0.75;
+}
+
+/* Handwritten annotation style */
+.hero-handwritten-note {
+  position: absolute;
+  right: clamp(-10px, 4vw, 40px);
+  bottom: clamp(-45px, -5vw, -30px);
+  font-family: 'Caveat', cursive;
+  font-size: clamp(1.4rem, 4vw, 2.2rem);
+  font-weight: 600;
+  color: var(--accent-lime);
+  transform: rotate(-4deg);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  animation: fadeIn 0.8s ease 0.9s both;
+  white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 0, 0, 0.6);
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+
+  .handwritten-arrow {
+    transform: rotate(5deg);
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-handwritten-note {
+    position: static;
+    margin: 16px auto 0;
+    transform: rotate(-2deg);
+    font-size: 1.6rem;
+    justify-content: center;
+
+    .handwritten-arrow {
+      transform: rotate(90deg) scaleY(-1);
+    }
+  }
 }
 
 @keyframes heroWordIn {
@@ -715,8 +772,8 @@
 
 .research-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
 }
 
 .research-card {
@@ -727,14 +784,33 @@
   display: flex;
   flex-direction: column;
   gap: 12px;
-  align-items: flex-start;
-  transition: all var(--transition);
-  animation: fadeInUp 0.5s ease calc(var(--card-delay, 0ms)) both;
+  align-items: center;
+  text-align: center;
+  transition: transform 250ms cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 250ms cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-lime), var(--accent-purple));
+    opacity: 0;
+    transition: opacity 250ms cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1;
+  }
 
   &:hover {
-    border-color: var(--border-strong);
-    box-shadow: var(--shadow);
-    transform: translateY(-3px);
+    border-color: rgba(123, 140, 255, 0.45);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12), 0 0 20px rgba(123, 140, 255, 0.15);
+    transform: translateY(-8px) scale(1.015);
+
+    &::before { opacity: 1; }
 
     .research-icon { transform: scale(1.08); }
   }
@@ -937,5 +1013,43 @@
       width: 100%;
       justify-content: center;
     }
+  }
+}
+
+/* ── Parallax scroll animations for Homepage Hero elements ── */
+@supports (animation-timeline: scroll()) {
+  @keyframes parallaxBg {
+    to {
+      transform: translateY(100px);
+    }
+  }
+  @keyframes parallaxCanvas {
+    to {
+      transform: translateY(160px) scale(0.96);
+    }
+  }
+  @keyframes parallaxHeroText {
+    to {
+      transform: translateY(80px);
+      opacity: 0.15;
+    }
+  }
+
+  .hero-bg-grid {
+    animation: parallaxBg linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0px 800px;
+  }
+
+  .hero-3d-core {
+    animation: parallaxCanvas linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0px 800px;
+  }
+
+  .hero-container--centered {
+    animation: parallaxHeroText linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0px 650px;
   }
 }
