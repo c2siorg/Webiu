@@ -8,6 +8,7 @@ import { Project } from '../projects/project.model';
 import { ProjectBasicInfoComponent } from '../../components/project-basic-info/project-basic-info.component';
 import { ProjectInsightsComponent } from '../../components/project-insights/project-insights.component';
 import { ProjectContributorsComponent } from '../../components/project-contributors/project-contributors.component';
+import { ProjectOrbitComponent } from '../../components/project-orbit/project-orbit.component';
 
 @Component({
   selector: 'app-project-details',
@@ -18,6 +19,7 @@ import { ProjectContributorsComponent } from '../../components/project-contribut
     ProjectBasicInfoComponent,
     ProjectInsightsComponent,
     ProjectContributorsComponent,
+    ProjectOrbitComponent,
   ],
   templateUrl: './project-details.component.html',
   styleUrls: ['./project-details.component.scss'],

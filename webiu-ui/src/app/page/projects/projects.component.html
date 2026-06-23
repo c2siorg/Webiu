@@ -26,21 +26,22 @@
     <app-loading-spinner message="Loading projects..."></app-loading-spinner>
     }
     @if (!isLoading) {
-    @if (displayProjects.length > 0) {
-    @for (
-    project of displayProjects;
-    track trackByProjectName($index, project)
-    ) {
-    <app-projects-card [name]="project.name" [org]="org" [repo]="project.name" [description]="project.description || ''"
-      [issue]="project.open_issues_count" [link]="project.html_url" [language]="project.language || ''"
-      [topics]="project.topics" [createdAt]="project.created_at" [updatedAt]="project.updated_at"
-      [pullRequests]="project.pull_requests"></app-projects-card>
-    }
-    } @else {
-    <app-projects-card [name]="'No projects found.'" [description]="
-            'Please enter a valid project name or check back later.'
-          " class="no-projects"></app-projects-card>
-    }
+      @if (displayProjects.length > 0) {
+        @for (
+        project of displayProjects;
+        track project.name;
+        let i = $index
+        ) {
+        <app-projects-card [name]="project.name" [org]="org" [repo]="project.name" [description]="project.description || ''"
+          [issue]="project.open_issues_count" [link]="project.html_url" [language]="project.language || ''"
+          [topics]="project.topics" [createdAt]="project.created_at" [updatedAt]="project.updated_at"
+          [pullRequests]="project.pull_requests" [style.--card-delay]="(i * 60) + 'ms'"></app-projects-card>
+        }
+      } @else {
+        <app-projects-card [name]="'No projects found.'" [description]="
+                'Please enter a valid project name or check back later.'
+              " class="no-projects"></app-projects-card>
+      }
     }
     @if (!isLoading && displayProjects.length > 0) {
     <div class="pagination-container">

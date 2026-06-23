@@ -3,6 +3,7 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { SettingsService } from '../../services/settings.service';
+import { SearchService } from '../../services/search.service';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -17,6 +18,7 @@ export class NavbarComponent implements OnInit {
   private router = inject(Router);
   private themeService = inject(ThemeService);
   private settingsService = inject(SettingsService);
+  private searchService = inject(SearchService);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
 
@@ -92,6 +94,11 @@ export class NavbarComponent implements OnInit {
   toggleMode(): void {
     this.isSunVisible = !this.isSunVisible;
     this.toggleTheme();
+  }
+
+  triggerSearch(event: Event): void {
+    event.preventDefault();
+    this.searchService.open();
   }
 
   preventReload(event: Event): void {

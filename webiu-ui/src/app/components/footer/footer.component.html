@@ -1,83 +1,66 @@
 <footer class="app-footer">
   <div class="footer-container">
+    <!-- Org Info Column -->
     <div class="footer-column org-info">
       <img
         src="../../../assets/c2silogo-dark_no_bg.png"
         alt="C2SI Logo"
         class="footer-logo"
       />
-      <p class="tagline">Empowering open-source innovation and community.</p>
-      <p class="copyright">
-        &copy; {{ currentYear }} C2SI. All rights reserved.
-      </p>
+      <p class="tagline">Open Source Intelligence Platform powering research, discovery, and community.</p>
+      <div class="footer-badges">
+        <span class="footer-badge">
+          <span class="footer-badge-dot"></span>
+          Live Platform
+        </span>
+      </div>
+      <p class="copyright">&copy; {{ currentYear }} C2SI · SCoRe Lab. All rights reserved.</p>
     </div>
 
+    <!-- Navigation Column -->
     <div class="footer-column">
-      <h3>Navigation</h3>
+      <h3>Explore</h3>
       <ul>
-        <li>
-          <a routerLink="/projects" routerLinkActive="active">Projects</a>
-        </li>
-        <li>
-          <a routerLink="/publications" routerLinkActive="active"
-            >Publications</a
-          >
-        </li>
-        <li>
-          <a routerLink="/contributors" routerLinkActive="active"
-            >Contributors</a
-          >
-        </li>
-        <li>
-          <a routerLink="/community" routerLinkActive="active">Community</a>
-        </li>
-        <li><a routerLink="/gsoc" routerLinkActive="active">GSoC</a></li>
+        <li><a routerLink="/projects" routerLinkActive="active">Projects</a></li>
+        <li><a routerLink="/contributors" routerLinkActive="active">Contributors</a></li>
+        <li><a routerLink="/publications" routerLinkActive="active">Publications</a></li>
+        <li><a routerLink="/search" routerLinkActive="active">Search</a></li>
       </ul>
     </div>
 
+    <!-- Community Column -->
     <div class="footer-column">
       <h3>Community</h3>
       <ul>
-        <li>
-          <a
-            href="https://www.linkedin.com/company/c2siorg/"
-            target="_blank"
-            rel="noopener noreferrer"
-            >LinkedIn</a
-          >
-        </li>
-        <li>
-          <a
-            href="https://github.com/c2siorg"
-            target="_blank"
-            rel="noopener noreferrer"
-            >GitHub</a
-          >
-        </li>
-        <li>
-          <a
-            href="https://scorelab.org/"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Website</a
-          >
-        </li>
-        <li>
-          <a
-            href="mailto:gsoc@c2si.com"
-            target="_blank"
-            rel="noopener noreferrer"
-            >Email</a
-          >
-        </li>
+        <li><a routerLink="/community" routerLinkActive="active">Community</a></li>
+        <li><a routerLink="/opportunities" routerLinkActive="active">Opportunities</a></li>
+        <li><a routerLink="/gsoc" routerLinkActive="active">GSoC Hub</a></li>
       </ul>
     </div>
 
+    <!-- Connect Column -->
     <div class="footer-column">
-      <h3>Opportunity</h3>
+      <h3>Connect</h3>
       <ul>
-        <li><a routerLink="/opportunities" routerLinkActive="active">Opportunities</a></li>
+        <li>
+          <a href="https://github.com/c2siorg" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/company/c2siorg/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
+        </li>
+        <li>
+          <a href="https://scorelab.org/" target="_blank" rel="noopener noreferrer">SCoRe Lab</a>
+        </li>
+        <li>
+          <a href="mailto:gsoc@c2si.com">Email Us</a>
+        </li>
       </ul>
     </div>
+  </div>
+
+  <!-- Footer Bottom Bar -->
+  <div class="footer-bottom">
+    <p class="footer-bottom-text">Built with Angular · Open Source on <a href="https://github.com/c2siorg/Webiu" target="_blank" rel="noopener noreferrer">GitHub</a></p>
+    <p class="footer-tech">Made with <span>♥</span> by the C2SI community <span class="handwritten" style="font-size: 1.2rem; color: var(--accent-lime); margin-left: 8px; display: inline-block; transform: rotate(-2deg); vertical-align: middle;">Built by contributors.</span></p>
   </div>
 </footer>
