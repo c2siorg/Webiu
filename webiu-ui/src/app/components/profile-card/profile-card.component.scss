@@ -3,6 +3,12 @@
    Contributor intelligence card
    ───────────────────────────────────────────────────────────── */
 
+:host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 .profile-box {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -16,6 +22,7 @@
   transition: all var(--transition);
   position: relative;
   overflow: hidden;
+  flex: 1;
 
   &::before {
     content: '';
@@ -147,7 +154,7 @@
   border: 1px solid var(--border);
   width: 100%;
   transition: all var(--transition-fast);
-  margin-top: 4px;
+  margin-top: auto;
 
   &:hover {
     border-color: var(--accent-purple);
