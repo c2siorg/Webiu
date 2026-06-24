@@ -241,9 +241,9 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     }
 
     if (isDark) {
-      // Dark Mode: Deep indigo ambient base & high-intensity point lights with localized distance decay
-      this.ambientLight.color.setHex(0x120d2d); // Deep dark purple-indigo base
-      this.ambientLight.intensity = 1.4;       // Lowered to allow valleys to fade into shadows
+      // Dark Mode: Rich purple ambient base to create distinct silhouette layers in shades of purple
+      this.ambientLight.color.setHex(0x4c1d95); // Vibrant purple base (purple-900)
+      this.ambientLight.intensity = 1.5;       // Raised to make the different shades of purple highly visible
 
       this.light1.color.setHex(0x3b82f6); // Vibrant Blue
       this.light2.color.setHex(0x06b6d4); // Vibrant Cyan
