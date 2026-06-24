@@ -201,21 +201,21 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     this.ambientLight = new THREE.AmbientLight(0x000000, 0.5);
     this.scene.add(this.ambientLight);
 
-    // Four point lights located around the borders (Z set to 80 to position them in front of the tilted plane)
+    // Four point lights located around the borders (Z set to 40 to bring them closer to the plane for intense color highlights)
     this.light1 = new THREE.PointLight(0x0e09dc, baseIntensity, dMax);
-    this.light1.position.set(0, 40, 80);
+    this.light1.position.set(0, 40, 40);
     this.scene.add(this.light1);
 
     this.light2 = new THREE.PointLight(0x1cd1e1, baseIntensity, dMax);
-    this.light2.position.set(40, 0, 80);
+    this.light2.position.set(40, 0, 40);
     this.scene.add(this.light2);
 
     this.light3 = new THREE.PointLight(0x18c02c, baseIntensity, dMax);
-    this.light3.position.set(-40, 0, 80);
+    this.light3.position.set(-40, 0, 40);
     this.scene.add(this.light3);
 
     this.light4 = new THREE.PointLight(0xee3bcf, baseIntensity, dMax);
-    this.light4.position.set(0, -40, 80);
+    this.light4.position.set(0, -40, 40);
     this.scene.add(this.light4);
 
     // Initialize theme-dependent colors
@@ -237,31 +237,31 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
 
     if (this.scene.fog && this.scene.fog instanceof THREE.FogExp2) {
       this.scene.fog.color.setStyle(parsedBgColor);
-      this.scene.fog.density = isDark ? 0.006 : 0.012;
+      this.scene.fog.density = isDark ? 0.004 : 0.012; // Lower density in dark mode so far-away ridges stay visible
     }
 
     if (isDark) {
-      // Dark Mode: Low ambient light for high-contrast valleys & extremely bright point lights for neon ridges
-      this.ambientLight.color.setHex(0x0b091a); // Very dark violet-indigo base
-      this.ambientLight.intensity = 0.8;
+      // Dark Mode: Bright indigo ambient light for background visibility & neon point lights with infinite range
+      this.ambientLight.color.setHex(0x1e1b4b); // Rich deep indigo base
+      this.ambientLight.intensity = 2.6;       // Raised to guarantee clear shape visibility of all mountains
 
       this.light1.color.setHex(0x3b82f6); // Vibrant Blue
       this.light2.color.setHex(0x06b6d4); // Vibrant Cyan
       this.light3.color.setHex(0x10b981); // Vibrant Green
       this.light4.color.setHex(0xd946ef); // Vibrant Pink
       
-      this.light1.intensity = 25.0;
-      this.light2.intensity = 25.0;
-      this.light3.intensity = 25.0;
-      this.light4.intensity = 25.0;
+      this.light1.intensity = 12.0;       // Extremely bright highlights
+      this.light2.intensity = 12.0;
+      this.light3.intensity = 12.0;
+      this.light4.intensity = 12.0;
 
-      this.light1.distance = 160;
-      this.light2.distance = 160;
-      this.light3.distance = 160;
-      this.light4.distance = 160;
+      this.light1.distance = 0;           // 0 distance = infinite range, illuminating the whole terrain
+      this.light2.distance = 0;
+      this.light3.distance = 0;
+      this.light4.distance = 0;
 
-      this.material.roughness = 0.45;
-      this.material.metalness = 0.15;
+      this.material.roughness = 0.4;
+      this.material.metalness = 0.1;
     } else {
       // Light Mode: Clean white backdrop & light pastel colors
       this.ambientLight.color.setHex(0xffffff);
@@ -277,10 +277,10 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
       this.light3.intensity = 2.2;
       this.light4.intensity = 2.2;
 
-      this.light1.distance = 120;
-      this.light2.distance = 120;
-      this.light3.distance = 120;
-      this.light4.distance = 120;
+      this.light1.distance = 0;
+      this.light2.distance = 0;
+      this.light3.distance = 0;
+      this.light4.distance = 0;
 
       this.material.roughness = 0.4;
       this.material.metalness = 0.1;
