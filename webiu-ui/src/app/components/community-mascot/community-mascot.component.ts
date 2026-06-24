@@ -49,7 +49,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   private mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
   private clock = new THREE.Clock();
 
-  // Figurine Groups & Meshes for animations
+  // Mascot Groups & Meshes for animations
   private mascotGroup!: THREE.Group;
   private headGroup!: THREE.Group;
   private bodyMesh!: THREE.Mesh;
@@ -59,24 +59,35 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   private cheekLeftMat!: THREE.MeshStandardMaterial;
   private cheekRightMat!: THREE.MeshStandardMaterial;
   private atmosphericGlow!: THREE.Mesh;
+  private smileMesh!: THREE.Mesh;
+
+  // Blinking eyes meshes
+  private eyeLeftBall!: THREE.Group;
+  private eyeRightBall!: THREE.Group;
 
   // Pumpkins & Bats arrays
   private pumpkins: THREE.Group[] = [];
-  private bats: {
-    group: THREE.Group;
-    wingL: THREE.Group;
-    wingR: THREE.Group;
-    initialY: number;
-    initialX: number;
-    initialZ: number;
-    speed: number;
-    range: number;
-    type: 'hover' | 'orbit' | 'wander';
-    phase: number;
-  }[] = [];
+  
+  // Bats details
+  private bat1!: { group: THREE.Group; wingL: THREE.Group; wingR: THREE.Group; initialY: number; initialX: number; range: number };
+  private bat2!: { group: THREE.Group; wingL: THREE.Group; wingR: THREE.Group; initialY: number; initialX: number; initialZ: number; state: 'roost' | 'fly_to_land' | 'landed' | 'fly_to_roost'; stateTimer: number };
+  private bat3!: { group: THREE.Group; wingL: THREE.Group; wingR: THREE.Group; initialY: number; initialX: number; range: number };
 
   // Emissive pumpkin face material
   private faceGlowMat!: THREE.MeshStandardMaterial;
+
+  // Eye blinking state variables
+  private lastBlinkTime = 0;
+  private nextBlinkInterval = 4.0; // Random interval between 4-8 seconds
+  private isBlinking = false;
+  private blinkTimer = 0;
+  private blinkDuration = 0.14; // Duration of a single blink
+
+  // Viewport Welcome Greeting state variables
+  private hasGreeted = false;
+  private isGreeting = false;
+  private greetingTimer = 0;
+  private greetingDuration = 2.0; // 2 seconds greeting animation
 
   // Celebration state variables
   private isCelebrating = false;
@@ -107,6 +118,10 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
               if (!this.isAnimating) {
                 this.isAnimating = true;
                 this.animate();
+              }
+              // Trigger the one-time community welcome greeting sequence when entering viewport
+              if (!this.hasGreeted) {
+                this.startGreeting();
               }
             } else {
               if (this.isAnimating) {
@@ -161,6 +176,13 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     this.renderer.setSize(w, h);
   };
 
+  startGreeting(): void {
+    if (this.hasGreeted) return;
+    this.isGreeting = true;
+    this.greetingTimer = 0;
+    this.hasGreeted = true;
+  }
+
   celebrate(): void {
     if (this.isCelebrating) return;
     this.isCelebrating = true;
@@ -183,7 +205,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-      // Premium Blender-like Tone Mapping
+      // Premium ACES Filmic Tone Mapping for Blender look
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       this.renderer.toneMappingExposure = 1.05;
     } catch (e) {
@@ -193,15 +215,15 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
 
     this.scene = new THREE.Scene();
 
-    // Camera setup - framed to feel like a collectible figurine showcase
+    // Camera setup - framed to feel like a premium digital collectible figurine
     this.camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
-    this.camera.position.set(0, 1.4, 7.5);
+    this.camera.position.set(0, 1.3, 7.5);
     this.camera.lookAt(0, 0.2, 0);
 
-    // Add Lights
+    // Add Lights (Warm yellow/orange key + purple rim)
     this.addLighting();
 
-    // Create Atmospheric Purple Backlight Glow Card
+    // Create Atmospheric Purple/Blue Backlight Glow Card
     this.createAtmosphericGlow();
 
     // Create 3D Figurine Showcase components
@@ -215,12 +237,12 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   }
 
   private addLighting(): void {
-    // Soft deep purple ambient backdrop lighting
-    const ambientLight = new THREE.AmbientLight(0x282348, 1.2);
+    // Soft warm purple ambient backdrop lighting (soften shadows, no pure black)
+    const ambientLight = new THREE.AmbientLight(0x3a2c5a, 1.8);
     this.scene.add(ambientLight);
 
-    // Main: Warm front key light (#FFD9A0)
-    const keyLight = new THREE.DirectionalLight(0xffd9a0, 2.5);
+    // Warm key light (#FFD166 - Cozy warm yellow key)
+    const keyLight = new THREE.DirectionalLight(0xffd166, 2.3);
     keyLight.position.set(4, 7, 5);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 1024;
@@ -228,20 +250,19 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     keyLight.shadow.bias = -0.002;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 20;
-    // Blur soft shadows
-    keyLight.shadow.radius = 4;
+    keyLight.shadow.radius = 5.0; // Soft contact shadows
     this.scene.add(keyLight);
 
-    // CRITICAL: Purple rim light behind character (#A855F7)
-    const purpleRim = new THREE.DirectionalLight(0xa855f7, 4.0);
+    // Purple rim light behind character (#A855F7)
+    const purpleRim = new THREE.DirectionalLight(0xa855f7, 3.8);
     purpleRim.position.set(-5, 4, -6);
     purpleRim.lookAt(0, 0.2, 0);
     this.scene.add(purpleRim);
 
-    // Soft cyan fill light for extra color contrast on shadows
-    const cyanFill = new THREE.DirectionalLight(0x4da6ff, 0.6);
-    cyanFill.position.set(-6, -2, 3);
-    this.scene.add(cyanFill);
+    // Cozy orange fill light from bottom front (#FFB347)
+    const orangeFill = new THREE.DirectionalLight(0xffb347, 0.8);
+    orangeFill.position.set(-4, -1, 3);
+    this.scene.add(orangeFill);
   }
 
   private createAtmosphericGlow(): void {
@@ -254,8 +275,8 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     const ctx = glowCanvas.getContext('2d');
     if (ctx) {
       const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-      grad.addColorStop(0, 'rgba(168, 85, 247, 0.26)'); // #A855F7 (emissive purple backlight)
-      grad.addColorStop(0.5, 'rgba(123, 74, 219, 0.08)');
+      grad.addColorStop(0, 'rgba(124, 58, 237, 0.28)'); // #7C3AED
+      grad.addColorStop(0.4, 'rgba(168, 85, 247, 0.15)'); // #A855F7
       grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
       ctx.fillStyle = grad;
       ctx.fillRect(0, 0, 256, 256);
@@ -358,9 +379,11 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     pants.position.y = 0.02;
     this.mascotGroup.add(pants);
 
-    // 4. Head Group (Includes Face, Hair, Helmet, Cheeks, Eyes)
+    // 4. Head Group (Face, Hair, Helmet, Cheeks, Eyes)
     this.headGroup = new THREE.Group();
     this.headGroup.position.set(0, 1.1, 0);
+    // CRITICAL: Charm Head Tilt (default 10 degrees tilt on Z axis)
+    this.headGroup.rotation.z = 0.17; 
     this.mascotGroup.add(this.headGroup);
 
     // Face/Skin
@@ -370,25 +393,26 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       roughness: 0.9,
     });
     const face = new THREE.Mesh(faceGeo, faceMat);
+    face.position.set(0, 0, 0.12); // Shift face forward so it projects through the helmet opening
     face.castShadow = true;
     face.receiveShadow = true;
     this.headGroup.add(face);
 
-    // Cute skin/pink ears peeking out on sides
+    // Cute skin/pink ears peeking out on sides - parented to face
     const earGeo = new THREE.SphereGeometry(0.12, 16, 16);
     const earMat = new THREE.MeshStandardMaterial({ color: 0xffccb3, roughness: 0.95 });
     
     const earL = new THREE.Mesh(earGeo, earMat);
-    earL.position.set(-0.43, 0.06, 0.05);
+    earL.position.set(-0.43, 0.06, -0.07); // Adjusted Z relative to face center
     earL.scale.set(1.2, 1.2, 0.7);
-    this.headGroup.add(earL);
+    face.add(earL);
 
     const earR = new THREE.Mesh(earGeo, earMat);
-    earR.position.set(0.43, 0.06, 0.05);
+    earR.position.set(0.43, 0.06, -0.07); // Adjusted Z relative to face center
     earR.scale.set(1.2, 1.2, 0.7);
-    this.headGroup.add(earR);
+    face.add(earR);
 
-    // Hair Bangs (Stylized brown clay locks hanging over forehead)
+    // Hair Bangs (Stylized brown clay locks hanging over forehead) - parented to face
     const hairMat = new THREE.MeshStandardMaterial({ color: 0x5c3c2b, roughness: 0.95 });
     const hairLockGeo = new THREE.SphereGeometry(0.1, 12, 12);
     const bangs = [
@@ -402,7 +426,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       lock.position.set(bang.x, bang.y, bang.z);
       lock.scale.set(bang.sx, bang.sy, bang.sz);
       lock.castShadow = true;
-      this.headGroup.add(lock);
+      face.add(lock);
     });
 
     // Ribbed Pumpkin Helmet (Composed of overlapping rotated ellipsoids)
@@ -411,7 +435,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     this.headGroup.add(helmetGroup);
 
     const helmetSegmentMat = new THREE.MeshStandardMaterial({
-      color: 0xe86c31, // matte pumpkin orange
+      color: 0xe86c31, // pumpkin orange
       roughness: 0.78,
       metalness: 0.05,
     });
@@ -420,7 +444,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     for (let i = 0; i < helmetSegments; i++) {
       const segment = new THREE.Mesh(helmetSegmentGeo, helmetSegmentMat);
       segment.rotation.y = (i / helmetSegments) * Math.PI;
-      segment.scale.set(1.07, 0.9, 0.85); // Squash and stretch to form vertical ribs
+      segment.scale.set(1.07, 0.9, 0.85); // vertical ribs
       segment.castShadow = true;
       helmetGroup.add(segment);
     }
@@ -437,53 +461,99 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     stem.castShadow = true;
     this.headGroup.add(stem);
 
-    // Sleepy Expressive Eyes (horizontal capsules, angled down)
-    const eyeGeo = new THREE.CapsuleGeometry(0.042, 0.1, 8, 12);
-    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x22252a, roughness: 0.95 });
-    
-    const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-    eyeL.position.set(-0.18, 0.08, 0.39);
-    eyeL.rotation.z = Math.PI / 2.3; // tilt outward slightly
-    eyeL.rotation.y = -0.15;
-    this.headGroup.add(eyeL);
+    // 100x EMOTIONAL: Rebuild Eyes (Large white eyeballs, dark pupils, double white shiny reflections) - parented to face
+    this.eyeLeftBall = new THREE.Group();
+    this.eyeLeftBall.position.set(-0.16, 0.08, 0.445);
+    this.eyeLeftBall.rotation.y = -0.12; // angle slightly outwards to look cute
+    face.add(this.eyeLeftBall);
 
-    const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-    eyeR.position.set(0.18, 0.08, 0.39);
-    eyeR.rotation.z = -Math.PI / 2.3; // tilt outward slightly
-    eyeR.rotation.y = 0.15;
-    this.headGroup.add(eyeR);
+    this.eyeRightBall = new THREE.Group();
+    this.eyeRightBall.position.set(0.16, 0.08, 0.445);
+    this.eyeRightBall.rotation.y = 0.12;
+    face.add(this.eyeRightBall);
+
+    // Eyeball base (White) - glossy figurine look
+    const whiteMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.15, metalness: 0.1 });
+    const eyeballGeo = new THREE.SphereGeometry(0.08, 16, 16);
+    
+    const ballL = new THREE.Mesh(eyeballGeo, whiteMat);
+    ballL.scale.set(1, 1.1, 0.55); // rounded 3D oval eyeball
+    this.eyeLeftBall.add(ballL);
+
+    const ballR = new THREE.Mesh(eyeballGeo, whiteMat);
+    ballR.scale.set(1, 1.1, 0.55); // rounded 3D oval eyeball
+    this.eyeRightBall.add(ballR);
+
+    // Iris / Pupil (Charcoal dark blue/black)
+    const pupilMat = new THREE.MeshStandardMaterial({ color: 0x11131a, roughness: 0.2, metalness: 0.1 });
+    const pupilGeo = new THREE.SphereGeometry(0.055, 12, 12);
+    
+    const pupilL = new THREE.Mesh(pupilGeo, pupilMat);
+    pupilL.position.set(0.005, -0.01, 0.038); // sits perfectly on front of eyeball
+    pupilL.scale.set(1, 1, 0.18);
+    this.eyeLeftBall.add(pupilL);
+
+    const pupilR = new THREE.Mesh(pupilGeo, pupilMat);
+    pupilR.position.set(-0.005, -0.01, 0.038);
+    pupilR.scale.set(1, 1, 0.18);
+    this.eyeRightBall.add(pupilR);
+
+    // Double shiny reflections (Pixar-style specular highlights)
+    const reflectionMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const reflectGeo = new THREE.SphereGeometry(0.014, 8, 8);
+    const reflectMiniGeo = new THREE.SphereGeometry(0.007, 8, 8);
+
+    // Left eye highlights - placed slightly further forward than pupil to not clip
+    const specL1 = new THREE.Mesh(reflectGeo, reflectionMat);
+    specL1.position.set(0.024, 0.02, 0.046);
+    this.eyeLeftBall.add(specL1);
+
+    const specL2 = new THREE.Mesh(reflectMiniGeo, reflectionMat);
+    specL2.position.set(0.004, -0.02, 0.046);
+    this.eyeLeftBall.add(specL2);
+
+    // Right eye highlights - symmetrical direction
+    const specR1 = new THREE.Mesh(reflectGeo, reflectionMat);
+    specR1.position.set(0.024, 0.02, 0.046);
+    this.eyeRightBall.add(specR1);
+
+    const specR2 = new THREE.Mesh(reflectMiniGeo, reflectionMat);
+    specR2.position.set(0.004, -0.02, 0.046);
+    this.eyeRightBall.add(specR2);
 
     // Nose (tiny skin sphere)
-    const noseGeo = new THREE.SphereGeometry(0.035, 8, 8);
+    const noseGeo = new THREE.SphereGeometry(0.045, 12, 12);
     const nose = new THREE.Mesh(noseGeo, faceMat);
-    nose.position.set(0, 0.01, 0.46);
-    this.headGroup.add(nose);
+    nose.position.set(0, 0.01, 0.48);
+    face.add(nose);
 
-    // Mouth (tiny red mouth shape)
-    const mouthGeo = new THREE.TorusGeometry(0.03, 0.01, 4, 8, Math.PI);
-    const mouthMat = new THREE.MeshStandardMaterial({ color: 0xbb3333, roughness: 0.9 });
-    const mouth = new THREE.Mesh(mouthGeo, mouthMat);
-    mouth.position.set(0, -0.1, 0.44);
-    mouth.rotation.x = 0.1;
-    this.headGroup.add(mouth);
+    // 100x EMOTIONAL: Curved closed mouth smile (Curved gentle line)
+    const smileGeo = new THREE.TorusGeometry(0.05, 0.014, 6, 16, Math.PI / 1.5);
+    const smileMat = new THREE.MeshStandardMaterial({ color: 0x6e241c, roughness: 0.95 });
+    this.smileMesh = new THREE.Mesh(smileGeo, smileMat);
+    this.smileMesh.position.set(0, -0.08, 0.478);
+    this.smileMesh.rotation.z = Math.PI; // flip to smile up
+    face.add(this.smileMesh);
 
-    // Blushing cheeks (glow/emissive standard pink)
-    const cheekGeo = new THREE.SphereGeometry(0.06, 8, 8);
+    // 100x EMOTIONAL: Soft pink blushing cheeks (#FFB6C1)
     this.cheekLeftMat = new THREE.MeshStandardMaterial({
-      color: 0xff6688,
-      emissive: 0xff3366,
-      emissiveIntensity: 0.2,
-      roughness: 0.9,
+      color: 0xffb6c1,
+      roughness: 0.95,
+      transparent: true,
+      opacity: 0.65,
     });
     this.cheekRightMat = this.cheekLeftMat.clone();
 
+    const cheekGeo = new THREE.SphereGeometry(0.06, 16, 16);
+    cheekGeo.scale(1.2, 0.8, 0.45); // Squash it to make it a flat blush disk
+
     const cheekL = new THREE.Mesh(cheekGeo, this.cheekLeftMat);
-    cheekL.position.set(-0.31, -0.06, 0.38);
-    this.headGroup.add(cheekL);
+    cheekL.position.set(-0.25, -0.09, 0.415);
+    face.add(cheekL);
 
     const cheekR = new THREE.Mesh(cheekGeo, this.cheekRightMat);
-    cheekR.position.set(0.31, -0.06, 0.38);
-    this.headGroup.add(cheekR);
+    cheekR.position.set(0.25, -0.09, 0.415);
+    face.add(cheekR);
 
     // 5. Arms (peach skin capsule limbs)
     const armGeo = new THREE.SphereGeometry(0.12, 12, 12);
@@ -537,7 +607,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     this.basketGroup.position.set(0.62, 0.3, 0.3);
     this.mascotGroup.add(this.basketGroup);
 
-    // 100x DETAILED: Hand-woven wood basket geometry (#8B5A2B)
+    // Hand-woven wood basket geometry (#8B5A2B)
     const basketContainer = new THREE.Group();
     this.basketGroup.add(basketContainer);
 
@@ -669,19 +739,20 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     crossH.position.set(0, 0.34, 0.105);
     tsGroup.add(crossH);
 
-    // 2. Ribbed Glowing Jack-o'-Lanterns (5 varied pumpkins)
+    // 2. Ribbed Glowing Jack-o'-Lanterns (5 pumpkins)
+    // CRITICAL: Emits cozy warm orange light (#FFB347)
     this.faceGlowMat = new THREE.MeshStandardMaterial({
-      color: 0xffe099,
-      emissive: 0xffb347, // Emits warm orange light (#FFB347)
+      color: 0xffdf80,
+      emissive: 0xffb347,
       emissiveIntensity: 1.8,
       roughness: 0.9,
     });
 
-    this.createJackOLantern(1.1, -0.9, 0.8, 0.3, -0.2); // right front
-    this.createJackOLantern(-0.8, -0.95, 1.2, 0.25, 0.4); // left front
-    this.createJackOLantern(1.2, -0.95, -0.6, 0.28, -0.5); // right back
-    this.createJackOLantern(-1.3, -0.95, 0.7, 0.2, 0.9); // left side small
-    this.createJackOLantern(0.4, -0.98, -1.2, 0.24, 0.1); // center back
+    this.createJackOLantern(1.25, -0.9, 0.75, 0.48, -0.2); // right front (was 0.3)
+    this.createJackOLantern(-0.9, -0.95, 1.15, 0.42, 0.4); // left front (was 0.25)
+    this.createJackOLantern(1.35, -0.95, -0.65, 0.44, -0.5); // right back (was 0.28)
+    this.createJackOLantern(-1.45, -0.95, 0.75, 0.32, 0.9); // left side small (was 0.2)
+    this.createJackOLantern(0.45, -0.98, -1.25, 0.38, 0.1); // center back (was 0.24)
   }
 
   private createJackOLantern(x: number, y: number, z: number, scale: number, rotationY: number): void {
@@ -743,10 +814,10 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   }
 
   private createBats(): void {
-    // We add 3 bats with unique flight configuration profiles
-    this.addBat(-1.3, 1.2, 0.4, 0.012, 0.28, 'hover', 0);
-    this.addBat(1.4, 1.4, -0.3, 0.016, 0.22, 'orbit', Math.PI);
-    this.addBat(0.2, 1.5, 0.8, 0.01, 0.24, 'wander', Math.PI / 2);
+    // We add 3 bats with unique flight configuration profiles and state controls
+    this.bat1 = this.addBat(-1.3, 1.2, 0.4, 0.012, 0.28);
+    this.bat2 = this.addBat2(1.4, 1.4, -0.3); // Interactive FSM Bat
+    this.bat3 = this.addBat(-1.0, 1.5, 0.8, 0.01, 0.24); // Curious mirroring bat
   }
 
   private addBat(
@@ -754,10 +825,8 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     y: number,
     z: number,
     speed: number,
-    range: number,
-    type: 'hover' | 'orbit' | 'wander',
-    phase: number
-  ): void {
+    range: number
+  ): { group: THREE.Group; wingL: THREE.Group; wingR: THREE.Group; initialY: number; initialX: number; range: number } {
     const batGroup = new THREE.Group();
     batGroup.position.set(x, y, z);
     this.scene.add(batGroup);
@@ -825,24 +894,38 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     outerWingR.rotation.z = 0.25;
     wingR.add(outerWingR);
 
-    this.bats.push({
+    return {
       group: batGroup,
       wingL,
       wingR,
       initialY: y,
       initialX: x,
-      initialZ: z,
-      speed,
       range,
-      type,
-      phase,
-    });
+    };
+  }
+
+  private addBat2(
+    x: number,
+    y: number,
+    z: number
+  ): { group: THREE.Group; wingL: THREE.Group; wingR: THREE.Group; initialY: number; initialX: number; initialZ: number; state: 'roost' | 'fly_to_land' | 'landed' | 'fly_to_roost'; stateTimer: number } {
+    const batSetup = this.addBat(x, y, z, 0.015, 0.3);
+    return {
+      group: batSetup.group,
+      wingL: batSetup.wingL,
+      wingR: batSetup.wingR,
+      initialY: y,
+      initialX: x,
+      initialZ: z,
+      state: 'roost',
+      stateTimer: 0,
+    };
   }
 
   private addPumpkinPointLights(): void {
     // Put localized warm orange point lights (#FFB347) directly near pumpkins
     this.pumpkins.forEach((pumpkin) => {
-      const pLight = new THREE.PointLight(0xffb347, 2.0, 3.0);
+      const pLight = new THREE.PointLight(0xffb347, 1.8, 2.5);
       pLight.position.set(
         pumpkin.position.x,
         pumpkin.position.y + 0.15,
@@ -850,6 +933,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       );
       pLight.castShadow = true;
       pLight.shadow.bias = -0.004;
+      pLight.shadow.radius = 4;
       this.scene.add(pLight);
     });
   }
@@ -859,90 +943,216 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     this.animationId = requestAnimationFrame(this.animate);
 
     const elapsed = this.clock.getElapsedTime();
+    const deltaTime = Math.min(this.clock.getDelta(), 0.1); // cap delta time to prevent giant frame leaps
 
     // 1. Mouse movements look-at ease interpolation
     this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.08;
     this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.08;
 
-    // 2. Idle Mascot slow breathing, chest scale, and basket lag
-    if (this.mascotGroup && this.headGroup && this.bodyMesh && this.basketGroup) {
+    // 2. Randomized Eyeblink & Double Blinking Logic (every 4-8 seconds)
+    this.blinkTimer += deltaTime;
+    if (!this.isBlinking) {
+      if (elapsed - this.lastBlinkTime > this.nextBlinkInterval) {
+        this.isBlinking = true;
+        this.blinkTimer = 0;
+        this.lastBlinkTime = elapsed;
+        // set next random interval
+        this.nextBlinkInterval = 4.0 + Math.random() * 4.0;
+      }
+    } else {
+      if (this.blinkTimer > this.blinkDuration) {
+        this.isBlinking = false;
+        this.eyeLeftBall.scale.y = 1.0;
+        this.eyeRightBall.scale.y = 1.0;
+      } else {
+        // double blink curve: smooth squeeze down and up
+        const scale = Math.abs(Math.sin((this.blinkTimer / this.blinkDuration) * Math.PI - Math.PI / 2));
+        this.eyeLeftBall.scale.y = Math.max(0.05, scale);
+        this.eyeRightBall.scale.y = Math.max(0.05, scale);
+      }
+    }
+
+    // 3. Viewport Welcome Greeting Animation (2 seconds once, waves arm, lifts basket)
+    if (this.isGreeting) {
+      this.greetingTimer += deltaTime;
+      const progress = this.greetingTimer / this.greetingDuration;
+
+      if (progress >= 1.0) {
+        this.isGreeting = false;
+        // restore idle states
+        this.mascotGroup.position.y = -0.9;
+        this.leftArm.rotation.z = 0;
+        this.basketGroup.position.y = 0.3;
+        this.basketGroup.rotation.z = 0;
+        this.smileMesh.scale.set(1.0, 1.0, 1.0);
+      } else {
+        // Look directly toward viewer (head rotates to center on Y and X)
+        this.headGroup.rotation.y = THREE.MathUtils.lerp(this.mouse.x * 0.44, 0, progress);
+        this.headGroup.rotation.x = THREE.MathUtils.lerp(-this.mouse.y * 0.2, 0.08, progress); // slightly raised head
+        this.headGroup.rotation.z = THREE.MathUtils.lerp(0.17, 0.05, progress); // tilt reduced slightly
+
+        if (progress < 0.6) {
+          // Wave left arm rapidly
+          const waveZ = Math.PI / 1.6 + Math.sin(this.greetingTimer * 24) * 0.65;
+          this.leftArm.rotation.z = waveZ;
+
+          // Lift basket hand slightly
+          this.basketGroup.position.y = 0.38 + Math.sin(this.greetingTimer * 12) * 0.02;
+          this.basketGroup.rotation.z = 0.08;
+
+          // Smile scale increases
+          this.smileMesh.scale.set(1.15, 1.15, 1.15);
+        } else {
+          // Gently return back to idle state
+          const easeBack = (progress - 0.6) / 0.4;
+          this.leftArm.rotation.z = THREE.MathUtils.lerp(Math.PI / 1.6, 0, easeBack);
+          this.basketGroup.position.y = THREE.MathUtils.lerp(0.38, 0.3, easeBack);
+          this.basketGroup.rotation.z = THREE.MathUtils.lerp(0.08, 0, easeBack);
+          this.smileMesh.scale.set(
+            THREE.MathUtils.lerp(1.15, 1.0, easeBack),
+            THREE.MathUtils.lerp(1.15, 1.0, easeBack),
+            THREE.MathUtils.lerp(1.15, 1.0, easeBack)
+          );
+        }
+      }
+    } 
+    // 4. Mascot Idle Breathing bobbing, chest scale, and basket lag
+    else if (this.mascotGroup && this.headGroup && this.bodyMesh && this.basketGroup) {
       if (!this.isCelebrating) {
-        // Slow chest breathing (body Y-position bobbing and shirt scaling)
-        const breathePhase = elapsed * 1.6;
-        const breatheOffset = Math.sin(breathePhase) * 0.02;
+        // Slow natural breathing
+        const breathePhase = elapsed * 1.5;
+        const breatheOffset = Math.sin(breathePhase) * 0.016;
         
         this.mascotGroup.position.y = -0.9 + breatheOffset;
-        this.bodyMesh.scale.y = 1.0 + breatheOffset * 0.3;
+        this.bodyMesh.scale.y = 1.0 + breatheOffset * 0.25;
         
-        // Delayed secondary movement for the basket (delayed phase)
-        this.basketGroup.position.y = 0.3 + Math.sin(breathePhase - 0.5) * 0.015;
+        // Delayed secondary movement for the basket (0.5 rad lag)
+        this.basketGroup.position.y = 0.3 + Math.sin(breathePhase - 0.5) * 0.012;
 
-        this.leftArm.rotation.z = Math.sin(breathePhase) * 0.05;
-        this.rightArm.rotation.z = -Math.sin(breathePhase) * 0.05;
+        this.leftArm.rotation.z = Math.sin(breathePhase) * 0.04;
+        this.rightArm.rotation.z = -Math.sin(breathePhase) * 0.04;
 
-        // Head tilt following mouse
+        // Head tilt following mouse (maintain charm 10 degrees base tilt on Z)
         this.headGroup.rotation.y = this.mouse.x * 0.44;
         this.headGroup.rotation.x = -this.mouse.y * 0.2;
-        this.headGroup.rotation.z = this.mouse.x * 0.08;
+        this.headGroup.rotation.z = 0.17 + this.mouse.x * 0.06;
       }
     }
 
-    // 3. Bat unique flights and wing flapping speeds
-    this.bats.forEach((bat) => {
-      const batTime = elapsed * 2.0 + bat.phase;
+    // 5. Bat unique flight paths and interaction loops
+    // Bat 1: Slow vertical hovering
+    const bat1Time = elapsed * 2.2;
+    this.bat1.group.position.y = this.bat1.initialY + Math.sin(bat1Time) * this.bat1.range;
+    this.bat1.group.position.x = this.bat1.initialX + Math.cos(bat1Time * 0.3) * 0.04;
+    const flap1 = Math.sin(elapsed * 12) * 0.6;
+    this.bat1.wingL.rotation.z = flap1;
+    this.bat1.wingR.rotation.z = -flap1;
 
-      if (bat.type === 'hover') {
-        // Bat 1: slow vertical hovering
-        bat.group.position.y = bat.initialY + Math.sin(batTime * 1.2) * bat.range;
-        bat.group.position.x = bat.initialX + Math.cos(batTime * 0.4) * 0.05;
-        
-        // Flap speed
-        const flap = Math.sin(elapsed * 12) * 0.6;
-        bat.wingL.rotation.z = flap;
-        bat.wingR.rotation.z = -flap;
-      } 
-      else if (bat.type === 'orbit') {
-        // Bat 2: circular horizontal orbit around character
-        const orbitAngle = elapsed * 0.8 + bat.phase;
-        const orbitRadius = 1.8;
-        
-        bat.group.position.x = Math.sin(orbitAngle) * orbitRadius;
-        bat.group.position.z = Math.cos(orbitAngle) * orbitRadius;
-        bat.group.position.y = bat.initialY + Math.sin(batTime * 1.5) * 0.12;
+    // Bat 2: FSM Landing Loop (periodic flight to mascot pumpkin stem and land)
+    this.bat2.stateTimer += deltaTime;
+    if (this.bat2.state === 'roost') {
+      // Roost home for 7 seconds
+      this.bat2.group.position.set(this.bat2.initialX, this.bat2.initialY, this.bat2.initialZ);
+      this.bat2.group.rotation.set(0, 0, 0);
 
-        // Face forward along trajectory
-        bat.group.rotation.y = orbitAngle + Math.PI / 2;
+      // Fast wings
+      const flap = Math.sin(elapsed * 15) * 0.6;
+      this.bat2.wingL.rotation.z = flap;
+      this.bat2.wingR.rotation.z = -flap;
 
-        // Fast flapping speed
-        const flap = Math.sin(elapsed * 18) * 0.65;
-        bat.wingL.rotation.z = flap;
-        bat.wingR.rotation.z = -flap;
-      } 
-      else if (bat.type === 'wander') {
-        // Bat 3: left-right wandering with vertical variation
-        bat.group.position.x = bat.initialX + Math.sin(elapsed * 1.0) * 1.5;
-        bat.group.position.y = bat.initialY + Math.cos(elapsed * 1.6) * 0.22;
-        
-        // Medium flapping speed
-        const flap = Math.sin(elapsed * 15) * 0.6;
-        bat.wingL.rotation.z = flap;
-        bat.wingR.rotation.z = -flap;
+      if (this.bat2.stateTimer > 7.0) {
+        this.bat2.state = 'fly_to_land';
+        this.bat2.stateTimer = 0;
       }
-    });
+    } 
+    else if (this.bat2.state === 'fly_to_land') {
+      // Lerp position to landing spot on mascot helmet stem
+      const flyProgress = this.bat2.stateTimer / 1.5; // 1.5 seconds flight
+      if (flyProgress >= 1.0) {
+        this.bat2.state = 'landed';
+        this.bat2.stateTimer = 0;
+      } else {
+        const targetX = this.mascotGroup.position.x + this.headGroup.position.x;
+        const targetY = this.mascotGroup.position.y + this.headGroup.position.y + 0.68;
+        const targetZ = this.mascotGroup.position.z + this.headGroup.position.z + 0.04;
 
-    // 4. Jack-o'-Lantern warm breathing pulse
+        this.bat2.group.position.x = THREE.MathUtils.lerp(this.bat2.initialX, targetX, flyProgress);
+        this.bat2.group.position.y = THREE.MathUtils.lerp(this.bat2.initialY, targetY, flyProgress);
+        this.bat2.group.position.z = THREE.MathUtils.lerp(this.bat2.initialZ, targetZ, flyProgress);
+
+        // Flap wings rapidly during flight
+        const flap = Math.sin(elapsed * 22) * 0.7;
+        this.bat2.wingL.rotation.z = flap;
+        this.bat2.wingR.rotation.z = -flap;
+      }
+    } 
+    else if (this.bat2.state === 'landed') {
+      // Sit on mascot stem for 3 seconds, flap slowly
+      const targetX = this.mascotGroup.position.x + this.headGroup.position.x;
+      const targetY = this.mascotGroup.position.y + this.headGroup.position.y + 0.68;
+      const targetZ = this.mascotGroup.position.z + this.headGroup.position.z + 0.04;
+
+      this.bat2.group.position.set(targetX, targetY, targetZ);
+      this.bat2.group.rotation.y = this.headGroup.rotation.y; // face same way as mascot head
+
+      const flap = Math.sin(elapsed * 4) * 0.2; // slow peaceful flap
+      this.bat2.wingL.rotation.z = flap;
+      this.bat2.wingR.rotation.z = -flap;
+
+      if (this.bat2.stateTimer > 3.0) {
+        this.bat2.state = 'fly_to_roost';
+        this.bat2.stateTimer = 0;
+      }
+    } 
+    else if (this.bat2.state === 'fly_to_roost') {
+      // Lerp position back to home roost
+      const flyProgress = this.bat2.stateTimer / 1.5;
+      if (flyProgress >= 1.0) {
+        this.bat2.state = 'roost';
+        this.bat2.stateTimer = 0;
+      } else {
+        const startX = this.mascotGroup.position.x + this.headGroup.position.x;
+        const startY = this.mascotGroup.position.y + this.headGroup.position.y + 0.68;
+        const startZ = this.mascotGroup.position.z + this.headGroup.position.z + 0.04;
+
+        this.bat2.group.position.x = THREE.MathUtils.lerp(startX, this.bat2.initialX, flyProgress);
+        this.bat2.group.position.y = THREE.MathUtils.lerp(startY, this.bat2.initialY, flyProgress);
+        this.bat2.group.position.z = THREE.MathUtils.lerp(startZ, this.bat2.initialZ, flyProgress);
+        
+        this.bat2.group.rotation.y = THREE.MathUtils.lerp(this.headGroup.rotation.y, 0, flyProgress);
+
+        const flap = Math.sin(elapsed * 22) * 0.7;
+        this.bat2.wingL.rotation.z = flap;
+        this.bat2.wingR.rotation.z = -flap;
+      }
+    }
+
+    // Bat 3: Floating nearby and mirroring the mascot's head rotations
+    const bat3Time = elapsed * 1.8;
+    this.bat3.group.position.y = this.bat3.initialY + Math.sin(bat3Time) * this.bat3.range;
+    this.bat3.group.position.x = this.bat3.initialX + Math.cos(bat3Time * 0.4) * 0.06;
+    
+    // Mirror head tilt/look direction (makes bat look curious and connected)
+    this.bat3.group.rotation.y = this.headGroup.rotation.y;
+    this.bat3.group.rotation.x = this.headGroup.rotation.x;
+
+    const flap3 = Math.sin(elapsed * 14) * 0.55;
+    this.bat3.wingL.rotation.z = flap3;
+    this.bat3.wingR.rotation.z = -flap3;
+
+    // 6. Jack-o'-Lantern warm breathing pulse
     if (this.faceGlowMat) {
-      this.faceGlowMat.emissiveIntensity = 1.6 + Math.sin(elapsed * 3.2) * 0.25;
+      this.faceGlowMat.emissiveIntensity = 1.4 + Math.sin(elapsed * 3.2) * 0.25;
     }
 
-    // 5. Ambient backlight glow breathing
+    // 7. Ambient backlight glow breathing
     if (this.atmosphericGlow) {
       this.atmosphericGlow.scale.setScalar(1.0 + Math.sin(elapsed * 1.2) * 0.04);
     }
 
-    // 6. Celebration Event Timeline
+    // 8. Celebration Event Timeline (bounces, spins, waves arm, cheek blush flares)
     if (this.isCelebrating) {
-      this.celebrationTimer += 0.024; // step delta approximation
+      this.celebrationTimer += deltaTime;
 
       const progress = this.celebrationTimer / this.celebrationDuration;
 
