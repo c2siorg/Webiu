@@ -241,26 +241,26 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     }
 
     if (isDark) {
-      // Dark Mode: Rich violet/indigo ambient backdrop & super-bright neon highlight lights
-      this.ambientLight.color.setHex(0x1a163b); // Rich deep indigo
-      this.ambientLight.intensity = 2.4;
+      // Dark Mode: Low ambient light for high-contrast valleys & extremely bright point lights for neon ridges
+      this.ambientLight.color.setHex(0x0b091a); // Very dark violet-indigo base
+      this.ambientLight.intensity = 0.8;
 
       this.light1.color.setHex(0x3b82f6); // Vibrant Blue
       this.light2.color.setHex(0x06b6d4); // Vibrant Cyan
       this.light3.color.setHex(0x10b981); // Vibrant Green
       this.light4.color.setHex(0xd946ef); // Vibrant Pink
       
-      this.light1.intensity = 18.0;
-      this.light2.intensity = 18.0;
-      this.light3.intensity = 18.0;
-      this.light4.intensity = 18.0;
+      this.light1.intensity = 25.0;
+      this.light2.intensity = 25.0;
+      this.light3.intensity = 25.0;
+      this.light4.intensity = 25.0;
 
-      this.light1.distance = 180;
-      this.light2.distance = 180;
-      this.light3.distance = 180;
-      this.light4.distance = 180;
+      this.light1.distance = 160;
+      this.light2.distance = 160;
+      this.light3.distance = 160;
+      this.light4.distance = 160;
 
-      this.material.roughness = 0.35;
+      this.material.roughness = 0.45;
       this.material.metalness = 0.15;
     } else {
       // Light Mode: Clean white backdrop & light pastel colors
@@ -310,8 +310,8 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
 
     // 3. Animate vertices using Simplex Noise
     const positionAttribute = this.plane.geometry.attributes['position'];
-    const xyCoef = 12; // controls noise frequency (tighter waves, matches CodePen adjusted view)
-    const zCoef = 15;   // controls wave amplitude height (taller waves)
+    const xyCoef = 24; // controls noise frequency (larger value = wider, smoother, more curved waves)
+    const zCoef = 12;   // controls wave amplitude height (lower value = less pointy peaks)
 
     for (let i = 0; i < positionAttribute.count; i++) {
       const x = positionAttribute.getX(i);
