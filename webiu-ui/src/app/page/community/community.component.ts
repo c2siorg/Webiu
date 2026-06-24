@@ -6,7 +6,7 @@ import { Contributor } from '../../common/data/contributor';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { RouterModule } from '@angular/router';
-import { ContributorGalaxyComponent } from '../../components/contributor-galaxy/contributor-galaxy.component';
+import { CommunityMascotComponent } from '../../components/community-mascot/community-mascot.component';
 import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
 
 
@@ -17,7 +17,7 @@ import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive
     CommonModule,
     HttpClientModule,
     RouterModule,
-    ContributorGalaxyComponent,
+    CommunityMascotComponent,
     RevealOnScrollDirective,
   ],
   templateUrl: './community.component.html',
