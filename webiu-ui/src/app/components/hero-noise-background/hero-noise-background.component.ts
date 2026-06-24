@@ -177,8 +177,8 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     this.camera.position.set(0, 0, 70);
 
     // 3. Create the Terrain Plane Grid
-    // 80x80 segments provides higher density for beautiful smooth waves
-    const geometry = new THREE.PlaneGeometry(160, 160, 80, 80);
+    // 120x120 segments provides ultra-high resolution for perfectly smooth, curved waves
+    const geometry = new THREE.PlaneGeometry(160, 160, 120, 120);
 
     // Standard material with roughness and metalness matching the CodePen
     this.material = new THREE.MeshStandardMaterial({
@@ -310,18 +310,19 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
 
     // 3. Animate vertices using Simplex Noise
     const positionAttribute = this.plane.geometry.attributes['position'];
-    const xyCoef = 24; // controls noise frequency (larger value = wider, smoother, more curved waves)
-    const zCoef = 12;   // controls wave amplitude height (lower value = less pointy peaks)
+    const xyCoef = 36; // controls noise frequency (larger value = wider, smoother, more curved waves)
+    const zCoef = 9;   // controls wave amplitude height (lower value = less pointy peaks)
 
     for (let i = 0; i < positionAttribute.count; i++) {
       const x = positionAttribute.getX(i);
       const y = positionAttribute.getY(i);
 
-      // Compute smooth undulating wave height
-      const z = this.simplex.noise2D(
+      // Compute smooth undulating wave height with clamped sine mapping for perfectly round peaks
+      const noiseVal = Math.max(-1, Math.min(1, this.simplex.noise2D(
         x / xyCoef,
         y / xyCoef + time * 0.5
-      ) * zCoef;
+      )));
+      const z = Math.sin(noiseVal * Math.PI / 2) * zCoef;
 
       positionAttribute.setZ(i, z);
     }
