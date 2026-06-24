@@ -237,28 +237,28 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
 
     if (this.scene.fog && this.scene.fog instanceof THREE.FogExp2) {
       this.scene.fog.color.setStyle(parsedBgColor);
-      this.scene.fog.density = isDark ? 0.004 : 0.012; // Lower density in dark mode so far-away ridges stay visible
+      this.scene.fog.density = isDark ? 0.011 : 0.012; // Adjusted dark mode fog density to create distinct silhouette layers
     }
 
     if (isDark) {
-      // Dark Mode: Bright indigo ambient light for background visibility & neon point lights with infinite range
-      this.ambientLight.color.setHex(0x1e1b4b); // Rich deep indigo base
-      this.ambientLight.intensity = 2.6;       // Raised to guarantee clear shape visibility of all mountains
+      // Dark Mode: Deep indigo ambient base & high-intensity point lights with localized distance decay
+      this.ambientLight.color.setHex(0x120d2d); // Deep dark purple-indigo base
+      this.ambientLight.intensity = 1.4;       // Lowered to allow valleys to fade into shadows
 
       this.light1.color.setHex(0x3b82f6); // Vibrant Blue
       this.light2.color.setHex(0x06b6d4); // Vibrant Cyan
       this.light3.color.setHex(0x10b981); // Vibrant Green
       this.light4.color.setHex(0xd946ef); // Vibrant Pink
       
-      this.light1.intensity = 12.0;       // Extremely bright highlights
-      this.light2.intensity = 12.0;
-      this.light3.intensity = 12.0;
-      this.light4.intensity = 12.0;
+      this.light1.intensity = 16.0;       // Bright neon foreground peaks
+      this.light2.intensity = 16.0;
+      this.light3.intensity = 16.0;
+      this.light4.intensity = 16.0;
 
-      this.light1.distance = 0;           // 0 distance = infinite range, illuminating the whole terrain
-      this.light2.distance = 0;
-      this.light3.distance = 0;
-      this.light4.distance = 0;
+      this.light1.distance = 110;          // Localized decay to separate foreground, middle ground, and background
+      this.light2.distance = 110;
+      this.light3.distance = 110;
+      this.light4.distance = 110;
 
       this.material.roughness = 0.4;
       this.material.metalness = 0.1;
@@ -277,10 +277,10 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
       this.light3.intensity = 2.2;
       this.light4.intensity = 2.2;
 
-      this.light1.distance = 0;
-      this.light2.distance = 0;
-      this.light3.distance = 0;
-      this.light4.distance = 0;
+      this.light1.distance = 120;
+      this.light2.distance = 120;
+      this.light3.distance = 120;
+      this.light4.distance = 120;
 
       this.material.roughness = 0.4;
       this.material.metalness = 0.1;
