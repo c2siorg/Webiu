@@ -4,6 +4,7 @@ import { adminAuthGuard } from './common/guards/admin-auth.guard';
 export const routes: Routes = [
   {
     path: '',
+    title: 'WebiU — Open Source Intelligence Platform',
     loadComponent: () =>
       import('./page/homepage/homepage.component').then(
         (m) => m.HomepageComponent,
@@ -11,6 +12,7 @@ export const routes: Routes = [
   },
   {
     path: 'projects',
+    title: 'Projects | WebiU',
     loadComponent: () =>
       import('./page/projects/projects.component').then(
         (m) => m.ProjectsComponent,
@@ -18,6 +20,7 @@ export const routes: Routes = [
   },
   {
     path: 'publications',
+    title: 'Publications | WebiU',
     loadComponent: () =>
       import('./page/publications/publications.component').then(
         (m) => m.PublicationsComponent,
@@ -25,6 +28,7 @@ export const routes: Routes = [
   },
   {
     path: 'contributors',
+    title: 'Contributors | WebiU',
     loadComponent: () =>
       import('./page/contributors/contributors.component').then(
         (m) => m.ContributorsComponent,
@@ -32,6 +36,7 @@ export const routes: Routes = [
   },
   {
     path: 'community',
+    title: 'Community | WebiU',
     loadComponent: () =>
       import('./page/community/community.component').then(
         (m) => m.CommunityComponent,
@@ -39,11 +44,13 @@ export const routes: Routes = [
   },
   {
     path: 'gsoc',
+    title: 'GSoC Project Ideas | WebiU',
     loadComponent: () =>
       import('./page/gsoc/gsoc.component').then((m) => m.GsocComponent),
   },
   {
     path: 'gsoc/2024',
+    title: 'GSoC 2024 Archive | WebiU',
     loadComponent: () =>
       import('./page/gsoc2024/gsoc2024.component').then(
         (m) => m.Gsoc2024Component,
@@ -51,6 +58,7 @@ export const routes: Routes = [
   },
   {
     path: 'opportunities',
+    title: 'Opportunities | WebiU',
     loadComponent: () =>
       import('./page/opportunities/opportunities.component').then(
         (m) => m.OpportunitiesComponent,
@@ -58,6 +66,7 @@ export const routes: Routes = [
   },
   {
     path: 'idea',
+    title: 'GSoC Project Idea | WebiU',
     loadComponent: () =>
       import('./page/gsoc-project-idea/gsoc-project-idea.component').then(
         (m) => m.GsocProjectIdeaComponent,
@@ -65,6 +74,7 @@ export const routes: Routes = [
   },
   {
     path: 'project/:id',
+    title: 'Project Details | WebiU',
     loadComponent: () =>
       import('./page/project-details/project-details.component').then(
         (m) => m.ProjectDetailsComponent,
@@ -72,6 +82,7 @@ export const routes: Routes = [
   },
   {
     path: 'search',
+    title: 'Advanced Search | WebiU',
     loadComponent: () =>
       import('./page/contributor-search/contributor-search.component').then(
         (m) => m.ContributorSearchComponent,
@@ -79,11 +90,13 @@ export const routes: Routes = [
   },
   {
     path: 'admin',
+    title: 'Admin Access | WebiU',
     loadComponent: () =>
       import('./page/admin/admin.component').then((m) => m.AdminComponent),
   },
   {
     path: 'admin/dashboard',
+    title: 'Admin Dashboard | WebiU',
     loadComponent: () =>
       import('./page/admin-dashboard/admin-dashboard.component').then(
         (m) => m.AdminDashboardComponent,
@@ -92,6 +105,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/settings',
+    title: 'Admin Settings | WebiU',
     loadComponent: () =>
       import('./page/admin-settings/admin-settings.component').then(
         (m) => m.AdminSettingsComponent,
@@ -100,6 +114,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/ideas',
+    title: 'Admin GSoC Management | WebiU',
     loadComponent: () =>
       import('./page/admin-ideas/admin-ideas.component').then(
         (m) => m.AdminIdeasComponent,
@@ -108,6 +123,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/profile',
+    title: 'Admin Profile | WebiU',
     loadComponent: () =>
       import('./page/admin-profile/admin-profile.component').then(
         (m) => m.AdminProfileComponent,
@@ -116,6 +132,7 @@ export const routes: Routes = [
   },
   {
     path: 'admin/audit',
+    title: 'Admin Audit Logs | WebiU',
     loadComponent: () =>
       import('./page/admin-audit/admin-audit.component').then(
         (m) => m.AdminAuditComponent,
@@ -124,6 +141,7 @@ export const routes: Routes = [
   },
   {
     path: '**',
+    title: 'Page Not Found | WebiU',
     loadComponent: () =>
       import('./page/not-found/not-found.component').then(
         (m) => m.NotFoundComponent,

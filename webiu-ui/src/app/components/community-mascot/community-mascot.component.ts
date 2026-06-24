@@ -21,15 +21,22 @@ import * as THREE from 'three';
       :host {
         display: block;
         width: 100%;
-        height: 380px;
+        height: 480px;
         position: relative;
-        overflow: hidden;
+        overflow: visible;
         cursor: pointer;
+        background: transparent !important;
+      }
+      @media (max-width: 768px) {
+        :host {
+          height: 380px;
+        }
       }
       .mascot-canvas {
         width: 100%;
         height: 100%;
         display: block;
+        background: transparent !important;
       }
     `,
   ],
@@ -58,7 +65,6 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   private basketGroup!: THREE.Group;
   private cheekLeftMat!: THREE.MeshStandardMaterial;
   private cheekRightMat!: THREE.MeshStandardMaterial;
-  private atmosphericGlow!: THREE.Mesh;
   private smileMesh!: THREE.Mesh;
 
   // Blinking eyes meshes
@@ -208,6 +214,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       // Premium ACES Filmic Tone Mapping for Blender look
       this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
       this.renderer.toneMappingExposure = 1.05;
+      this.renderer.setClearColor(0x000000, 0);
     } catch (e) {
       console.warn('WebGL is not supported or failed to initialize:', e);
       return;
@@ -215,16 +222,15 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
 
     this.scene = new THREE.Scene();
 
-    // Camera setup - framed to feel like a premium digital collectible figurine
-    this.camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
-    this.camera.position.set(0, 1.3, 7.5);
-    this.camera.lookAt(0, 0.2, 0);
+    // Camera setup - scaled down a small bit to fit the platform completely without clipping at the edges
+    this.camera = new THREE.PerspectiveCamera(35, w / h, 0.1, 100); // Zoomed out slightly to 35 fov
+    this.camera.position.set(0, 1.15, 6.7); // Moved camera slightly back and up
+    this.camera.lookAt(0, 0.15, 0);
 
     // Add Lights (Warm yellow/orange key + purple rim)
     this.addLighting();
 
-    // Create Atmospheric Purple/Blue Backlight Glow Card
-    this.createAtmosphericGlow();
+    // Glow is now handled via native CSS background-gradient on the wrapper container
 
     // Create 3D Figurine Showcase components
     this.createDisplayPlatform();
@@ -265,35 +271,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     this.scene.add(orangeFill);
   }
 
-  private createAtmosphericGlow(): void {
-    // Create a circular billboard behind character with a soft radial purple/magenta gradient texture
-    const glowGeo = new THREE.PlaneGeometry(6.5, 6.5);
-    
-    const glowCanvas = document.createElement('canvas');
-    glowCanvas.width = 256;
-    glowCanvas.height = 256;
-    const ctx = glowCanvas.getContext('2d');
-    if (ctx) {
-      const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-      grad.addColorStop(0, 'rgba(124, 58, 237, 0.28)'); // #7C3AED
-      grad.addColorStop(0.4, 'rgba(168, 85, 247, 0.15)'); // #A855F7
-      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, 256, 256);
-    }
-    
-    const glowTexture = new THREE.CanvasTexture(glowCanvas);
-    const glowMat = new THREE.MeshBasicMaterial({
-      map: glowTexture,
-      transparent: true,
-      blending: THREE.AdditiveBlending,
-      depthWrite: false,
-    });
-    
-    this.atmosphericGlow = new THREE.Mesh(glowGeo, glowMat);
-    this.atmosphericGlow.position.set(0, 0.2, -1.8);
-    this.scene.add(this.atmosphericGlow);
-  }
+
 
   private createDisplayPlatform(): void {
     // 1. Moss green top platform (#334D3D)
@@ -1220,10 +1198,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       this.faceGlowMat.emissiveIntensity = 1.4 + Math.sin(elapsed * 3.2) * 0.25;
     }
 
-    // 7. Ambient backlight glow breathing
-    if (this.atmosphericGlow) {
-      this.atmosphericGlow.scale.setScalar(1.0 + Math.sin(elapsed * 1.2) * 0.04);
-    }
+
 
     // 8. Celebration Event Timeline (bounces, spins, waves arm, cheek blush flares)
     if (this.isCelebrating) {

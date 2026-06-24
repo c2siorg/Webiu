@@ -114,6 +114,12 @@ export class GsocComponent implements OnInit {
   activeProjectIndex: number | null = null;
   isLoading = true;
 
+  // Search & Filter State
+  searchQuery = '';
+  selectedDifficulty = 'All';
+  selectedTech = 'All';
+  availableTechs: string[] = [];
+
   ngOnInit(): void {
     this.loadCurrentGsocData();
   }
@@ -135,25 +141,89 @@ export class GsocComponent implements OnInit {
               } else {
                 this.ideas = MOCK_IDEAS;
               }
+              this.extractAvailableTechs();
               this.isLoading = false;
             },
             error: () => {
               this.ideas = MOCK_IDEAS;
+              this.extractAvailableTechs();
               this.isLoading = false;
             }
           });
         } else {
           this.program = MOCK_PROGRAM;
           this.ideas = MOCK_IDEAS;
+          this.extractAvailableTechs();
           this.isLoading = false;
         }
       },
       error: () => {
         this.program = MOCK_PROGRAM;
         this.ideas = MOCK_IDEAS;
+        this.extractAvailableTechs();
         this.isLoading = false;
       }
     });
+  }
+
+  extractAvailableTechs(): void {
+    const techSet = new Set<string>();
+    this.ideas.forEach(idea => {
+      if (idea.prerequisites) {
+        idea.prerequisites.split(',').forEach(tech => {
+          const trimmed = tech.trim();
+          if (trimmed) {
+            // Standardize some names if needed, otherwise just title case / trim
+            techSet.add(trimmed);
+          }
+        });
+      }
+    });
+    this.availableTechs = Array.from(techSet).sort();
+  }
+
+  get filteredIdeas(): GsocIdea[] {
+    return this.ideas.filter(idea => {
+      // Difficulty match
+      const matchesDifficulty = this.selectedDifficulty === 'All' || 
+        idea.difficulty.toLowerCase() === this.selectedDifficulty.toLowerCase();
+      
+      // Technology match
+      const matchesTech = this.selectedTech === 'All' || (
+        idea.prerequisites && 
+        idea.prerequisites.split(',').map(t => t.trim().toLowerCase()).includes(this.selectedTech.toLowerCase())
+      );
+
+      // Search query match
+      const matchesSearch = !this.searchQuery || 
+        idea.title.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+        (idea.explanation && idea.explanation.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+        (idea.expectedResults && idea.expectedResults.toLowerCase().includes(this.searchQuery.toLowerCase())) ||
+        (idea.prerequisites && idea.prerequisites.toLowerCase().includes(this.searchQuery.toLowerCase()));
+
+      return matchesDifficulty && matchesTech && matchesSearch;
+    });
+  }
+
+  setDifficulty(difficulty: string): void {
+    this.selectedDifficulty = difficulty;
+    this.activeProjectIndex = null; // Reset accordion on filter change
+  }
+
+  setTech(tech: string): void {
+    this.selectedTech = tech;
+    this.activeProjectIndex = null; // Reset accordion on filter change
+  }
+
+  onSearch(event: Event): void {
+    const target = event.target as HTMLInputElement;
+    this.searchQuery = target.value;
+    this.activeProjectIndex = null;
+  }
+
+  splitPrerequisites(prereqs: string): string[] {
+    if (!prereqs) return [];
+    return prereqs.split(',').map(p => p.trim()).filter(p => p.length > 0);
   }
 
   toggleAccordion(index: number): void {

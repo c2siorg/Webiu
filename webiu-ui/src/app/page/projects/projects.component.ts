@@ -1,6 +1,5 @@
-
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
-import { Title, Meta } from '@angular/platform-browser';
+import { Meta } from '@angular/platform-browser';
 
 import { HttpClientModule, HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
@@ -36,7 +35,6 @@ export class ProjectsComponent implements OnInit {
   serverTotal = 0;
   searchError: string | null = null;
 
-  private titleService = inject(Title);
   private metaService = inject(Meta);
   private toastr = inject(ToastrService);
   private destroyRef = inject(DestroyRef);
@@ -44,7 +42,6 @@ export class ProjectsComponent implements OnInit {
   private http = inject(HttpClient);
 
   ngOnInit(): void {
-    this.titleService.setTitle('Projects | Webiu 2.0');
     this.metaService.updateTag({
       name: 'description',
       content: 'Explore the open-source projects hosted by C2SI and SCoRe Lab.',

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
-import { Title, Meta } from '@angular/platform-browser';
+import { Meta } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -60,12 +60,10 @@ export class ContributorsComponent implements OnInit {
   private http = inject(HttpClient);
   private commonUtil = inject(CommmonUtilService);
   private router = inject(Router);
-  private titleService = inject(Title);
   private metaService = inject(Meta);
   private destroyRef = inject(DestroyRef);
 
   ngOnInit() {
-    this.titleService.setTitle('Contributors | Webiu 2.0');
     this.metaService.updateTag({
       name: 'description',
       content: 'Meet the contributors powering C2SI and SCoRe Lab projects.',

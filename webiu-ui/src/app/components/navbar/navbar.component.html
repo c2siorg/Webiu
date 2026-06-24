@@ -100,48 +100,32 @@
       <p>Contributors</p>
     </div>
 
-    <div class="dropdown-container">
-      <div
-        class="navbar__menu__items community-toggle"
-        [class.active]="isRouteActive('/community')"
-        (click)="toggleCommunityDropdown(); $event.stopPropagation()"
-        (keydown.enter)="toggleCommunityDropdown(); $event.stopPropagation()"
-        tabindex="0"
-        role="button"
-        [attr.aria-label]="'Community Dropdown'"
-        [attr.aria-expanded]="isCommunityDropdownOpen"
-      >
-        <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
-        <p>{{ getCommunityDropdownLabel() }}</p>
-        <span class="dropdown-arrow" [class.open]="isCommunityDropdownOpen">▼</span>
-      </div>
+    <div
+      class="navbar__menu__items"
+      routerLink="/community"
+      [class.active]="isRouteActive('/community')"
+      (click)="navigateTo('/community')"
+      (keydown.enter)="navigateTo('/community')"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Community'"
+    >
+      <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
+      <p>Community</p>
+    </div>
 
-      @if (isCommunityDropdownOpen) {
-        <div class="dropdown-menu community-dropdown" (click)="$event.stopPropagation()" (keydown.enter)="$event.stopPropagation()" tabindex="-1">
-          <div
-            class="dropdown-item"
-            routerLink="/community"
-            [class.active]="currentRoute === '/community'"
-            (click)="navigateTo('/community')"
-            (keydown.enter)="navigateTo('/community')"
-            tabindex="0"
-            role="link"
-          >
-            <p>Community</p>
-          </div>
-          <div
-            class="dropdown-item"
-            routerLink="/opportunities"
-            [class.active]="currentRoute === '/opportunities'"
-            (click)="navigateTo('/opportunities')"
-            (keydown.enter)="navigateTo('/opportunities')"
-            tabindex="0"
-            role="link"
-          >
-            <p>Opportunities</p>
-          </div>
-        </div>
-      }
+    <div
+      class="navbar__menu__items"
+      routerLink="/opportunities"
+      [class.active]="isRouteActive('/opportunities')"
+      (click)="navigateTo('/opportunities')"
+      (keydown.enter)="navigateTo('/opportunities')"
+      tabindex="0"
+      role="link"
+      [attr.aria-label]="'Opportunities'"
+    >
+      <img src="../../../assets/opportunities.svg" alt="Opportunities Icon" class="menu-icon" />
+      <p>Opportunities</p>
     </div>
 
     @if (showIdeasPage) {
@@ -198,7 +182,11 @@
       [attr.aria-label]="isMenuOpen ? 'Close menu' : 'Open menu'"
     >
       <div class="nav-btn">
-        <img src="../../../assets/ham-menu.svg" alt="Open menu" />
+        <div class="hamburger-icon" [class.open]="isMenuOpen">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
       </div>
     </div>
   </div>

@@ -24,7 +24,6 @@ export class NavbarComponent implements OnInit {
 
   isMenuOpen = false;
   isSunVisible = true;
-  isCommunityDropdownOpen = false;
   currentRoute = '/';
   
   showIdeasPage = true;
@@ -47,7 +46,6 @@ export class NavbarComponent implements OnInit {
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
         this.isMenuOpen = false;
-        this.isCommunityDropdownOpen = false;
       });
   }
 
@@ -67,24 +65,12 @@ export class NavbarComponent implements OnInit {
     });
   }
 
-  toggleCommunityDropdown(): void {
-    this.isCommunityDropdownOpen = !this.isCommunityDropdownOpen;
-  }
-
-  closeCommunityDropdown(): void {
-    this.isCommunityDropdownOpen = false;
-  }
-
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
-    if (!this.isMenuOpen) {
-      this.isCommunityDropdownOpen = false;
-    }
   }
 
   closeMenu(): void {
     this.isMenuOpen = false;
-    this.isCommunityDropdownOpen = false;
   }
 
   toggleTheme(): void {
@@ -115,17 +101,6 @@ export class NavbarComponent implements OnInit {
 
     const navbarMenu = document.querySelector('#navbarMenu');
     const navigationButtons = document.querySelector('.navigation__buttons');
-    const communityDropdown = document.querySelector('.community-dropdown');
-    const communityButton = document.querySelector('.community-toggle');
-
-    // Handle community dropdown closing
-    if (
-      this.isCommunityDropdownOpen &&
-      !communityDropdown?.contains(event.target as Node) &&
-      !communityButton?.contains(event.target as Node)
-    ) {
-      this.isCommunityDropdownOpen = false;
-    }
 
     // Handle menu closing when clicking outside (but not on the toggle button)
     if (
@@ -142,16 +117,7 @@ export class NavbarComponent implements OnInit {
     if (route === '/projects' && this.currentRoute.startsWith('/project')) {
       return true;
     }
-    if (route === '/community' && (this.currentRoute === '/community' || this.currentRoute === '/opportunities')) {
-      return true;
-    }
     return this.currentRoute === route;
-  }
-
-  getCommunityDropdownLabel(): string {
-    return this.currentRoute === '/opportunities'
-      ? 'Opportunities'
-      : 'Community';
   }
 
   navigateTo(route: string): void {

@@ -28,19 +28,20 @@ export class RepositorySyncService implements OnApplicationBootstrap {
 
     if (count === 0) {
       this.logger.log(
-        'No repositories found in database. Running initial sync...',
+        'No repositories found in database. Running initial sync in the background...',
       );
-      try {
-        await this.syncRepositories('bootstrap');
-        this.logger.log(
-          'Initial repository synchronization completed successfully.',
-        );
-      } catch (error) {
-        this.logger.error(
-          'Failed to run initial repository sync:',
-          error.message,
-        );
-      }
+      this.syncRepositories('bootstrap')
+        .then(() => {
+          this.logger.log(
+            'Initial repository synchronization completed successfully.',
+          );
+        })
+        .catch((error) => {
+          this.logger.error(
+            'Failed to run initial repository sync:',
+            error.message,
+          );
+        });
     } else {
       this.logger.log('Repositories already exist in database.');
     }
