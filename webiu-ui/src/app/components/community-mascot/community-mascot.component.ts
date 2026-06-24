@@ -416,10 +416,10 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     const hairMat = new THREE.MeshStandardMaterial({ color: 0x5c3c2b, roughness: 0.95 });
     const hairLockGeo = new THREE.SphereGeometry(0.1, 12, 12);
     const bangs = [
-      { x: -0.26, y: 0.28, z: 0.35, sx: 0.85, sy: 1.3, sz: 0.85 },
-      { x: -0.1, y: 0.3, z: 0.38, sx: 1.0, sy: 1.5, sz: 1.0 },
-      { x: 0.1, y: 0.3, z: 0.38, sx: 1.0, sy: 1.4, sz: 1.0 },
-      { x: 0.26, y: 0.28, z: 0.35, sx: 0.85, sy: 1.3, sz: 0.85 },
+      { x: -0.20, y: 0.34, z: 0.34, sx: 0.6, sy: 0.8, sz: 0.4 },
+      { x: -0.07, y: 0.36, z: 0.35, sx: 0.7, sy: 0.9, sz: 0.4 },
+      { x: 0.07, y: 0.36, z: 0.35, sx: 0.7, sy: 0.9, sz: 0.4 },
+      { x: 0.20, y: 0.34, z: 0.34, sx: 0.6, sy: 0.8, sz: 0.4 },
     ];
     bangs.forEach((bang) => {
       const lock = new THREE.Mesh(hairLockGeo, hairMat);
@@ -428,6 +428,52 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       lock.castShadow = true;
       face.add(lock);
     });
+
+    // 100x EMOTIONAL: Realistic 3D clay eyebrows parented to face
+    const eyebrowMat = new THREE.MeshStandardMaterial({ color: 0x5c3c2b, roughness: 0.95 });
+    const browGeo = new THREE.SphereGeometry(0.016, 8, 8);
+
+    // Left Eyebrow
+    const eyebrowLGroup = new THREE.Group();
+    eyebrowLGroup.position.set(-0.16, 0.20, 0.44); // placed right above the left eye (y=0.08)
+    eyebrowLGroup.rotation.z = 0.12; // friendly tilt
+    face.add(eyebrowLGroup);
+    
+    const browL1 = new THREE.Mesh(browGeo, eyebrowMat);
+    browL1.position.set(-0.035, -0.005, 0);
+    browL1.scale.set(1.5, 0.8, 0.8);
+    eyebrowLGroup.add(browL1);
+    
+    const browL2 = new THREE.Mesh(browGeo, eyebrowMat);
+    browL2.position.set(0, 0.008, 0);
+    browL2.scale.set(1.8, 1.0, 0.8);
+    eyebrowLGroup.add(browL2);
+    
+    const browL3 = new THREE.Mesh(browGeo, eyebrowMat);
+    browL3.position.set(0.035, -0.005, 0);
+    browL3.scale.set(1.5, 0.8, 0.8);
+    eyebrowLGroup.add(browL3);
+
+    // Right Eyebrow
+    const eyebrowRGroup = new THREE.Group();
+    eyebrowRGroup.position.set(0.16, 0.20, 0.44); // placed right above the right eye
+    eyebrowRGroup.rotation.z = -0.12; // friendly tilt
+    face.add(eyebrowRGroup);
+    
+    const browR1 = new THREE.Mesh(browGeo, eyebrowMat);
+    browR1.position.set(-0.035, -0.005, 0);
+    browR1.scale.set(1.5, 0.8, 0.8);
+    eyebrowRGroup.add(browR1);
+    
+    const browR2 = new THREE.Mesh(browGeo, eyebrowMat);
+    browR2.position.set(0, 0.008, 0);
+    browR2.scale.set(1.8, 1.0, 0.8);
+    eyebrowRGroup.add(browR2);
+    
+    const browR3 = new THREE.Mesh(browGeo, eyebrowMat);
+    browR3.position.set(0.035, -0.005, 0);
+    browR3.scale.set(1.5, 0.8, 0.8);
+    eyebrowRGroup.add(browR3);
 
     // Ribbed Pumpkin Helmet (Composed of overlapping rotated ellipsoids)
     const helmetGroup = new THREE.Group();
@@ -748,11 +794,11 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       roughness: 0.9,
     });
 
-    this.createJackOLantern(1.25, -0.9, 0.75, 0.48, -0.2); // right front (was 0.3)
-    this.createJackOLantern(-0.9, -0.95, 1.15, 0.42, 0.4); // left front (was 0.25)
-    this.createJackOLantern(1.35, -0.95, -0.65, 0.44, -0.5); // right back (was 0.28)
-    this.createJackOLantern(-1.45, -0.95, 0.75, 0.32, 0.9); // left side small (was 0.2)
-    this.createJackOLantern(0.45, -0.98, -1.25, 0.38, 0.1); // center back (was 0.24)
+    this.createJackOLantern(1.3, -0.9, 0.75, 0.85, -0.2); // right front (was 0.48)
+    this.createJackOLantern(-0.95, -0.95, 1.1, 0.75, 0.4); // left front (was 0.42)
+    this.createJackOLantern(1.4, -0.95, -0.7, 0.80, -0.5); // right back (was 0.44)
+    this.createJackOLantern(-1.55, -0.95, 0.7, 0.58, 0.9); // left side small (was 0.32)
+    this.createJackOLantern(0.45, -0.98, -1.3, 0.70, 0.1); // center back (was 0.38)
   }
 
   private createJackOLantern(x: number, y: number, z: number, scale: number, rotationY: number): void {
@@ -788,25 +834,54 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     stem.castShadow = true;
     pumpkin.add(stem);
 
-    // Overlay glowing eyes & mouth cutouts (eyes: rounded sockets, mouth: smiling)
-    const eyeGeo = new THREE.SphereGeometry(0.045, 8, 8);
+    // Overlay glowing eyes, nose & mouth cutouts (classic Halloween look)
+    // Eyes: Diamonds
+    const eyeGeo = new THREE.BoxGeometry(0.06, 0.06, 0.02);
     
     const eyeL = new THREE.Mesh(eyeGeo, this.faceGlowMat);
-    eyeL.position.set(-0.1, 0.08, 0.32);
-    eyeL.scale.set(1, 1.2, 0.3);
+    eyeL.position.set(-0.1, 0.09, 0.32);
+    eyeL.rotation.z = Math.PI / 4; // diamond shape
     pumpkin.add(eyeL);
 
     const eyeR = new THREE.Mesh(eyeGeo, this.faceGlowMat);
-    eyeR.position.set(0.1, 0.08, 0.32);
-    eyeR.scale.set(1, 1.2, 0.3);
+    eyeR.position.set(0.1, 0.09, 0.32);
+    eyeR.rotation.z = Math.PI / 4; // diamond shape
     pumpkin.add(eyeR);
 
-    // Cute smiling mouth cutout
-    const mouthGeo = new THREE.TorusGeometry(0.08, 0.025, 4, 12, Math.PI);
-    const mouth = new THREE.Mesh(mouthGeo, this.faceGlowMat);
-    mouth.position.set(0, -0.02, 0.31);
-    mouth.rotation.x = Math.PI; // flip to face smile up
-    pumpkin.add(mouth);
+    // Nose: Small diamond in the center
+    const noseGeo = new THREE.BoxGeometry(0.035, 0.035, 0.02);
+    const pumpkinNose = new THREE.Mesh(noseGeo, this.faceGlowMat);
+    pumpkinNose.position.set(0, 0.015, 0.33);
+    pumpkinNose.rotation.z = Math.PI / 4; // diamond shape
+    pumpkin.add(pumpkinNose);
+
+    // Mouth: Classic jagged Halloween grin (horizontal lip with center up-tooth and side down-teeth)
+    const mouthGroup = new THREE.Group();
+    mouthGroup.position.set(0, -0.07, 0.31);
+    pumpkin.add(mouthGroup);
+
+    const toothGeo = new THREE.BoxGeometry(0.026, 0.04, 0.02);
+    
+    // Center tooth pointing up
+    const tCenter = new THREE.Mesh(toothGeo, this.faceGlowMat);
+    tCenter.position.set(0, 0.014, 0);
+    mouthGroup.add(tCenter);
+    
+    // Left tooth pointing down
+    const tL = new THREE.Mesh(toothGeo, this.faceGlowMat);
+    tL.position.set(-0.065, -0.01, 0);
+    mouthGroup.add(tL);
+
+    // Right tooth pointing down
+    const tR = new THREE.Mesh(toothGeo, this.faceGlowMat);
+    tR.position.set(0.065, -0.01, 0);
+    mouthGroup.add(tR);
+
+    // Main mouth horizontal bar
+    const lipGeo = new THREE.BoxGeometry(0.17, 0.022, 0.02);
+    const lip = new THREE.Mesh(lipGeo, this.faceGlowMat);
+    lip.position.set(0, 0, 0);
+    mouthGroup.add(lip);
 
     // Scale final group
     pumpkin.scale.set(scale, scale, scale);
@@ -925,7 +1000,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   private addPumpkinPointLights(): void {
     // Put localized warm orange point lights (#FFB347) directly near pumpkins
     this.pumpkins.forEach((pumpkin) => {
-      const pLight = new THREE.PointLight(0xffb347, 1.8, 2.5);
+      const pLight = new THREE.PointLight(0xffb347, 2.2, 3.5);
       pLight.position.set(
         pumpkin.position.x,
         pumpkin.position.y + 0.15,
@@ -988,7 +1063,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       } else {
         // Look directly toward viewer (head rotates to center on Y and X)
         this.headGroup.rotation.y = THREE.MathUtils.lerp(this.mouse.x * 0.44, 0, progress);
-        this.headGroup.rotation.x = THREE.MathUtils.lerp(-this.mouse.y * 0.2, 0.08, progress); // slightly raised head
+        this.headGroup.rotation.x = THREE.MathUtils.lerp(this.mouse.y * 0.2, 0.08, progress); // slightly raised head
         this.headGroup.rotation.z = THREE.MathUtils.lerp(0.17, 0.05, progress); // tilt reduced slightly
 
         if (progress < 0.6) {
@@ -1034,7 +1109,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
 
         // Head tilt following mouse (maintain charm 10 degrees base tilt on Z)
         this.headGroup.rotation.y = this.mouse.x * 0.44;
-        this.headGroup.rotation.x = -this.mouse.y * 0.2;
+        this.headGroup.rotation.x = this.mouse.y * 0.2;
         this.headGroup.rotation.z = 0.17 + this.mouse.x * 0.06;
       }
     }
