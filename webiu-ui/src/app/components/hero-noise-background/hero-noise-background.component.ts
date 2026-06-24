@@ -55,7 +55,7 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
 
   // 3D Objects
   private plane!: THREE.Mesh;
-  private material!: THREE.MeshPhysicalMaterial;
+  private material!: THREE.MeshStandardMaterial;
   private simplex = new SimplexNoise();
 
   // Lights
@@ -171,7 +171,7 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     this.scene = new THREE.Scene();
     
     // Setup matching theme fog to blend the horizon edges away
-    this.scene.fog = new THREE.FogExp2(0x000000, 0.008);
+    this.scene.fog = new THREE.FogExp2(0x000000, 0.012);
 
     this.camera = new THREE.PerspectiveCamera(60, w / h, 0.1, 1000);
     this.camera.position.set(0, 0, 70);
@@ -180,44 +180,42 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     // 80x80 segments provides higher density for beautiful smooth waves
     const geometry = new THREE.PlaneGeometry(160, 160, 80, 80);
 
-    // Premium MeshPhysicalMaterial with clearcoat lacquer reflections
-    this.material = new THREE.MeshPhysicalMaterial({
+    // Standard material with roughness and metalness matching the CodePen
+    this.material = new THREE.MeshStandardMaterial({
       color: 0xffffff,
-      roughness: 0.35,
-      metalness: 0.15,
-      clearcoat: 0.8,
-      clearcoatRoughness: 0.1,
+      roughness: 0.4,
+      metalness: 0.1,
       side: THREE.DoubleSide,
     });
 
     this.plane = new THREE.Mesh(geometry, this.material);
     // Tilt the plane slightly towards the camera and lower its base Y position
-    this.plane.rotation.x = -Math.PI / 2.2;
-    this.plane.position.set(0, -22, 0);
+    this.plane.rotation.x = -Math.PI / 2.3;
+    this.plane.position.set(0, -10, 0); // Raised slightly to fill bottom half of viewport
     this.scene.add(this.plane);
 
     // 4. Add Shifting Point Lights
     const dMax = 120;
-    const baseIntensity = 1.6;
+    const baseIntensity = 2.2;
 
     this.ambientLight = new THREE.AmbientLight(0x000000, 0.5);
     this.scene.add(this.ambientLight);
 
-    // Four point lights located around the borders
-    this.light1 = new THREE.PointLight(0x8a2be2, baseIntensity, dMax);
-    this.light1.position.set(0, 40, 20);
+    // Four point lights located around the borders (Z set to 80 to position them in front of the tilted plane)
+    this.light1 = new THREE.PointLight(0x0e09dc, baseIntensity, dMax);
+    this.light1.position.set(0, 40, 80);
     this.scene.add(this.light1);
 
-    this.light2 = new THREE.PointLight(0x00d2ff, baseIntensity, dMax);
-    this.light2.position.set(40, 0, 20);
+    this.light2 = new THREE.PointLight(0x1cd1e1, baseIntensity, dMax);
+    this.light2.position.set(40, 0, 80);
     this.scene.add(this.light2);
 
-    this.light3 = new THREE.PointLight(0x00ff87, baseIntensity, dMax);
-    this.light3.position.set(-40, 0, 20);
+    this.light3 = new THREE.PointLight(0x18c02c, baseIntensity, dMax);
+    this.light3.position.set(-40, 0, 80);
     this.scene.add(this.light3);
 
-    this.light4 = new THREE.PointLight(0xff007f, baseIntensity, dMax);
-    this.light4.position.set(0, -40, 20);
+    this.light4 = new THREE.PointLight(0xee3bcf, baseIntensity, dMax);
+    this.light4.position.set(0, -40, 80);
     this.scene.add(this.light4);
 
     // Initialize theme-dependent colors
@@ -235,36 +233,57 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     // Dynamically retrieve current background style color from the DOM
     const computedStyle = getComputedStyle(document.documentElement);
     const bgColorStr = computedStyle.getPropertyValue('--bg').trim();
-    const parsedBgColor = bgColorStr || (isDark ? '#0a051d' : '#ffffff');
+    const parsedBgColor = bgColorStr || (isDark ? '#07090d' : '#f7f7f2');
 
-    if (this.scene.fog) {
+    if (this.scene.fog && this.scene.fog instanceof THREE.FogExp2) {
       this.scene.fog.color.setStyle(parsedBgColor);
+      this.scene.fog.density = isDark ? 0.006 : 0.012;
     }
 
     if (isDark) {
-      // Dark Mode: Deep saturated purple/blue background colors & glowing primary lights
-      this.ambientLight.color.setHex(0x0c0721);
-      this.ambientLight.intensity = 0.7;
+      // Dark Mode: Rich violet/indigo ambient backdrop & super-bright neon highlight lights
+      this.ambientLight.color.setHex(0x1a163b); // Rich deep indigo
+      this.ambientLight.intensity = 2.4;
 
-      this.light1.color.setHex(0x8a2be2); // Deep purple
-      this.light2.color.setHex(0x00d2ff); // Vivid Cyan
-      this.light3.color.setHex(0x00ff87); // Acid green/teal
-      this.light4.color.setHex(0xff007f); // Neon Pink
+      this.light1.color.setHex(0x3b82f6); // Vibrant Blue
+      this.light2.color.setHex(0x06b6d4); // Vibrant Cyan
+      this.light3.color.setHex(0x10b981); // Vibrant Green
+      this.light4.color.setHex(0xd946ef); // Vibrant Pink
       
+      this.light1.intensity = 18.0;
+      this.light2.intensity = 18.0;
+      this.light3.intensity = 18.0;
+      this.light4.intensity = 18.0;
+
+      this.light1.distance = 180;
+      this.light2.distance = 180;
+      this.light3.distance = 180;
+      this.light4.distance = 180;
+
       this.material.roughness = 0.35;
       this.material.metalness = 0.15;
     } else {
       // Light Mode: Clean white backdrop & light pastel colors
       this.ambientLight.color.setHex(0xffffff);
-      this.ambientLight.intensity = 1.5;
+      this.ambientLight.intensity = 1.4;
 
       this.light1.color.setHex(0xb19ffb); // Pastel lavender
       this.light2.color.setHex(0x94c5ff); // Pastel sky blue
       this.light3.color.setHex(0xa2f5cb); // Pastel mint green
       this.light4.color.setHex(0xffb8d1); // Pastel rose pink
 
-      this.material.roughness = 0.55;
-      this.material.metalness = 0.05;
+      this.light1.intensity = 2.2;
+      this.light2.intensity = 2.2;
+      this.light3.intensity = 2.2;
+      this.light4.intensity = 2.2;
+
+      this.light1.distance = 120;
+      this.light2.distance = 120;
+      this.light3.distance = 120;
+      this.light4.distance = 120;
+
+      this.material.roughness = 0.4;
+      this.material.metalness = 0.1;
     }
   }
 
@@ -287,12 +306,12 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
 
     // Apply interactive tilt
     this.plane.rotation.y = this.mouse.x * 0.08;
-    this.plane.rotation.x = -Math.PI / 2.2 + this.mouse.y * 0.05;
+    this.plane.rotation.x = -Math.PI / 2.3 + this.mouse.y * 0.05;
 
     // 3. Animate vertices using Simplex Noise
     const positionAttribute = this.plane.geometry.attributes['position'];
-    const xyCoef = 50; // controls noise frequency
-    const zCoef = 10;   // controls wave amplitude height
+    const xyCoef = 12; // controls noise frequency (tighter waves, matches CodePen adjusted view)
+    const zCoef = 15;   // controls wave amplitude height (taller waves)
 
     for (let i = 0; i < positionAttribute.count; i++) {
       const x = positionAttribute.getX(i);
@@ -310,19 +329,20 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     positionAttribute.needsUpdate = true;
     this.plane.geometry.computeVertexNormals();
 
-    // 4. Orbit point lights to animate moving gradients across the terrain
+    // 4. Orbit point lights above the tilted terrain (with vertical offset Y = 20)
     const orbitRadius = 40;
+    const yOffset = 20;
     this.light1.position.x = Math.sin(time) * orbitRadius;
-    this.light1.position.y = Math.cos(time * 0.8) * orbitRadius;
+    this.light1.position.y = yOffset + Math.cos(time * 0.8) * orbitRadius;
 
     this.light2.position.x = Math.cos(time * 0.7) * orbitRadius;
-    this.light2.position.y = Math.sin(time * 1.2) * orbitRadius;
+    this.light2.position.y = yOffset + Math.sin(time * 1.2) * orbitRadius;
 
     this.light3.position.x = Math.sin(time * 1.1) * orbitRadius;
-    this.light3.position.y = Math.cos(time * 0.9) * orbitRadius;
+    this.light3.position.y = yOffset + Math.cos(time * 0.9) * orbitRadius;
 
     this.light4.position.x = Math.cos(time * 1.3) * orbitRadius;
-    this.light4.position.y = Math.sin(time * 0.6) * orbitRadius;
+    this.light4.position.y = yOffset + Math.sin(time * 0.6) * orbitRadius;
 
     this.renderer.render(this.scene, this.camera);
   };
