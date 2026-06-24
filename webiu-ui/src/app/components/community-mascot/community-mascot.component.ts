@@ -49,24 +49,30 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   private mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
   private clock = new THREE.Clock();
 
-  // Mascot Groups & Meshes for animations
+  // Figurine Groups & Meshes for animations
   private mascotGroup!: THREE.Group;
   private headGroup!: THREE.Group;
+  private bodyMesh!: THREE.Mesh;
   private leftArm!: THREE.Mesh;
   private rightArm!: THREE.Mesh;
+  private basketGroup!: THREE.Group;
   private cheekLeftMat!: THREE.MeshStandardMaterial;
   private cheekRightMat!: THREE.MeshStandardMaterial;
+  private atmosphericGlow!: THREE.Mesh;
 
   // Pumpkins & Bats arrays
   private pumpkins: THREE.Group[] = [];
   private bats: {
     group: THREE.Group;
-    wingGroupL: THREE.Group;
-    wingGroupR: THREE.Group;
+    wingL: THREE.Group;
+    wingR: THREE.Group;
     initialY: number;
     initialX: number;
+    initialZ: number;
     speed: number;
     range: number;
+    type: 'hover' | 'orbit' | 'wander';
+    phase: number;
   }[] = [];
 
   // Emissive pumpkin face material
@@ -176,6 +182,10 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
       this.renderer.shadowMap.enabled = true;
       this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+      // Premium Blender-like Tone Mapping
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      this.renderer.toneMappingExposure = 1.05;
     } catch (e) {
       console.warn('WebGL is not supported or failed to initialize:', e);
       return;
@@ -183,16 +193,19 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
 
     this.scene = new THREE.Scene();
 
-    // Camera setup - zoomed in slightly to frame the character nicely
+    // Camera setup - framed to feel like a collectible figurine showcase
     this.camera = new THREE.PerspectiveCamera(38, w / h, 0.1, 100);
-    this.camera.position.set(0, 1.3, 7.5);
+    this.camera.position.set(0, 1.4, 7.5);
     this.camera.lookAt(0, 0.2, 0);
 
     // Add Lights
     this.addLighting();
 
-    // Create 3D Clay Scene components
-    this.createPedestal();
+    // Create Atmospheric Purple Backlight Glow Card
+    this.createAtmosphericGlow();
+
+    // Create 3D Figurine Showcase components
+    this.createDisplayPlatform();
     this.createMascotCharacter();
     this.createDecorations();
     this.createBats();
@@ -203,11 +216,11 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
 
   private addLighting(): void {
     // Soft deep purple ambient backdrop lighting
-    const ambientLight = new THREE.AmbientLight(0x282348, 1.3);
+    const ambientLight = new THREE.AmbientLight(0x282348, 1.2);
     this.scene.add(ambientLight);
 
-    // Warm key light (moonlight effect) casting soft shadows
-    const keyLight = new THREE.DirectionalLight(0xfff3e0, 2.5);
+    // Main: Warm front key light (#FFD9A0)
+    const keyLight = new THREE.DirectionalLight(0xffd9a0, 2.5);
     keyLight.position.set(4, 7, 5);
     keyLight.castShadow = true;
     keyLight.shadow.mapSize.width = 1024;
@@ -215,65 +228,98 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     keyLight.shadow.bias = -0.002;
     keyLight.shadow.camera.near = 0.5;
     keyLight.shadow.camera.far = 20;
+    // Blur soft shadows
+    keyLight.shadow.radius = 4;
     this.scene.add(keyLight);
 
-    // CRITICAL: Cyan Rim light from behind (outlines the character for premium render quality)
-    const cyanRim = new THREE.DirectionalLight(0x3bd0ff, 3.8);
-    cyanRim.position.set(-6, 4, -6);
-    cyanRim.lookAt(0, 0.2, 0);
-    this.scene.add(cyanRim);
+    // CRITICAL: Purple rim light behind character (#A855F7)
+    const purpleRim = new THREE.DirectionalLight(0xa855f7, 4.0);
+    purpleRim.position.set(-5, 4, -6);
+    purpleRim.lookAt(0, 0.2, 0);
+    this.scene.add(purpleRim);
 
-    // CRITICAL: Secondary soft magenta rim light for chromatic contrast
-    const magentaRim = new THREE.DirectionalLight(0xff5cb3, 1.4);
-    magentaRim.position.set(6, 3, -6);
-    magentaRim.lookAt(0, 0.2, 0);
-    this.scene.add(magentaRim);
-
-    // Soft yellow fill light from front left
-    const fillLight = new THREE.DirectionalLight(0xffea9f, 0.5);
-    fillLight.position.set(-4, 2, 3);
-    this.scene.add(fillLight);
+    // Soft cyan fill light for extra color contrast on shadows
+    const cyanFill = new THREE.DirectionalLight(0x4da6ff, 0.6);
+    cyanFill.position.set(-6, -2, 3);
+    this.scene.add(cyanFill);
   }
 
-  private createPedestal(): void {
-    // 1. Pedestal base (dark clay brown)
-    const baseGeo = new THREE.CylinderGeometry(2.35, 2.4, 0.35, 40);
-    const baseMat = new THREE.MeshStandardMaterial({
-      color: 0x5c3d26, // rich chocolate clay
+  private createAtmosphericGlow(): void {
+    // Create a circular billboard behind character with a soft radial purple/magenta gradient texture
+    const glowGeo = new THREE.PlaneGeometry(6.5, 6.5);
+    
+    const glowCanvas = document.createElement('canvas');
+    glowCanvas.width = 256;
+    glowCanvas.height = 256;
+    const ctx = glowCanvas.getContext('2d');
+    if (ctx) {
+      const grad = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
+      grad.addColorStop(0, 'rgba(168, 85, 247, 0.26)'); // #A855F7 (emissive purple backlight)
+      grad.addColorStop(0.5, 'rgba(123, 74, 219, 0.08)');
+      grad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, 256, 256);
+    }
+    
+    const glowTexture = new THREE.CanvasTexture(glowCanvas);
+    const glowMat = new THREE.MeshBasicMaterial({
+      map: glowTexture,
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    });
+    
+    this.atmosphericGlow = new THREE.Mesh(glowGeo, glowMat);
+    this.atmosphericGlow.position.set(0, 0.2, -1.8);
+    this.scene.add(this.atmosphericGlow);
+  }
+
+  private createDisplayPlatform(): void {
+    // 1. Moss green top platform (#334D3D)
+    const topGeo = new THREE.CylinderGeometry(2.35, 2.35, 0.15, 40);
+    const topMat = new THREE.MeshStandardMaterial({
+      color: 0x334d3d,
       roughness: 0.9,
       metalness: 0.05,
     });
-    const baseMesh = new THREE.Mesh(baseGeo, baseMat);
-    baseMesh.position.y = -1.2;
-    baseMesh.receiveShadow = true;
-    this.scene.add(baseMesh);
+    const topMesh = new THREE.Mesh(topGeo, topMat);
+    topMesh.position.y = -1.0;
+    topMesh.receiveShadow = true;
+    this.scene.add(topMesh);
 
-    // 2. Green grass top layer
-    const grassGeo = new THREE.CylinderGeometry(2.37, 2.37, 0.08, 40);
-    const grassMat = new THREE.MeshStandardMaterial({
-      color: 0x2e4f2a, // dark organic green clay
-      roughness: 0.95,
-      metalness: 0.02,
+    // Rounded rim top transition using a torus
+    const rimGeo = new THREE.TorusGeometry(2.32, 0.08, 12, 40);
+    const rim = new THREE.Mesh(rimGeo, topMat);
+    rim.position.y = -0.925;
+    rim.rotation.x = Math.PI / 2;
+    rim.receiveShadow = true;
+    this.scene.add(rim);
+
+    // 2. Bottom clay platform layer (#CFA77A)
+    const bottomGeo = new THREE.CylinderGeometry(2.35, 2.38, 0.35, 40);
+    const bottomMat = new THREE.MeshStandardMaterial({
+      color: 0xcfa77a,
+      roughness: 0.9,
+      metalness: 0.05,
     });
-    const grassMesh = new THREE.Mesh(grassGeo, grassMat);
-    grassMesh.position.y = -1.0;
-    grassMesh.receiveShadow = true;
-    this.scene.add(grassMesh);
+    const bottomMesh = new THREE.Mesh(bottomGeo, bottomMat);
+    bottomMesh.position.y = -1.25;
+    bottomMesh.receiveShadow = true;
+    this.scene.add(bottomMesh);
 
     // 3. Dripping Grass Overhang (Organic overlapping green spheres around the edge)
     const numDrips = 28;
-    const radius = 2.36;
+    const radius = 2.34;
     const dripGeo = new THREE.SphereGeometry(0.12, 12, 12);
     for (let i = 0; i < numDrips; i++) {
       const angle = (i / numDrips) * Math.PI * 2;
-      const drip = new THREE.Mesh(dripGeo, grassMat);
+      const drip = new THREE.Mesh(dripGeo, topMat);
       
-      // Add wave pattern to drip offset for natural/organic growth look
       const dripOffsetY = Math.sin(i * 1.6) * 0.05 - 0.04;
       drip.position.set(Math.cos(angle) * radius, -1.0 + dripOffsetY, Math.sin(angle) * radius);
       
-      // Squash/Stretch drips vertically
-      drip.scale.set(1.0, 1.3 + Math.sin(i) * 0.4, 1.0);
+      // Squash/Stretch drips vertically for drop look
+      drip.scale.set(1.0, 1.4 + Math.sin(i) * 0.4, 1.0);
       drip.castShadow = true;
       drip.receiveShadow = true;
       this.scene.add(drip);
@@ -285,22 +331,22 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     this.mascotGroup.position.set(0, -0.9, 0.2); // Align mascot on top of the base
     this.scene.add(this.mascotGroup);
 
-    // 1. Shirt/Body (Blue Cylinder)
+    // 1. Shirt/Body (Blue Cylinder in #1D2951)
     const shirtGeo = new THREE.CylinderGeometry(0.38, 0.44, 0.8, 16);
     const shirtMat = new THREE.MeshStandardMaterial({
-      color: 0x223659, // dark indigo clay
-      roughness: 0.85,
+      color: 0x1d2951, // dark navy hoodie fabric
+      roughness: 0.9, // soft fabric texture
       metalness: 0.05,
     });
-    const shirt = new THREE.Mesh(shirtGeo, shirtMat);
-    shirt.position.y = 0.4;
-    shirt.castShadow = true;
-    shirt.receiveShadow = true;
-    this.mascotGroup.add(shirt);
+    this.bodyMesh = new THREE.Mesh(shirtGeo, shirtMat);
+    this.bodyMesh.position.y = 0.4;
+    this.bodyMesh.castShadow = true;
+    this.bodyMesh.receiveShadow = true;
+    this.mascotGroup.add(this.bodyMesh);
 
     // 2. Collar (Torus)
     const collarGeo = new THREE.TorusGeometry(0.24, 0.05, 8, 16);
-    const collarMat = new THREE.MeshStandardMaterial({ color: 0x1b2c4c, roughness: 0.85 });
+    const collarMat = new THREE.MeshStandardMaterial({ color: 0x141f3b, roughness: 0.9 });
     const collar = new THREE.Mesh(collarGeo, collarMat);
     collar.position.set(0, 0.8, 0);
     collar.rotation.x = Math.PI / 2;
@@ -359,7 +405,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
       this.headGroup.add(lock);
     });
 
-    // 100x DETAILED: Ribbed Pumpkin Helmet (Composed of overlapping rotated ellipsoids)
+    // Ribbed Pumpkin Helmet (Composed of overlapping rotated ellipsoids)
     const helmetGroup = new THREE.Group();
     helmetGroup.position.set(0, 0.08, 0);
     this.headGroup.add(helmetGroup);
@@ -455,7 +501,7 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     this.rightArm.castShadow = true;
     this.mascotGroup.add(this.rightArm);
 
-    // 6. Basket (carried in right arm)
+    // 6. Detailed Woven Basket & Candies
     this.createBasket();
 
     // 7. Legs & Boots
@@ -486,44 +532,101 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   }
 
   private createBasket(): void {
-    const basket = new THREE.Group();
-    basket.position.set(0.62, 0.3, 0.3);
-    this.mascotGroup.add(basket);
+    this.basketGroup = new THREE.Group();
+    // Position basket hanging near mascot's right hand/arm
+    this.basketGroup.position.set(0.62, 0.3, 0.3);
+    this.mascotGroup.add(this.basketGroup);
 
-    // Basket body (textured cylinder)
-    const bodyGeo = new THREE.CylinderGeometry(0.22, 0.18, 0.25, 12);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x8a5a36, roughness: 0.95 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.castShadow = true;
-    basket.add(body);
+    // 100x DETAILED: Hand-woven wood basket geometry (#8B5A2B)
+    const basketContainer = new THREE.Group();
+    this.basketGroup.add(basketContainer);
 
-    // Basket handle (torus half)
-    const handleGeo = new THREE.TorusGeometry(0.18, 0.025, 6, 12, Math.PI);
-    const handle = new THREE.Mesh(handleGeo, bodyMat);
+    const woodMat = new THREE.MeshStandardMaterial({
+      color: 0x8b5a2b, // warm wood brown
+      roughness: 0.95,
+    });
+
+    // Vertical Woven Strands/Ribs
+    const numStrands = 12;
+    const strandGeo = new THREE.CylinderGeometry(0.015, 0.015, 0.25, 6);
+    for (let i = 0; i < numStrands; i++) {
+      const angle = (i / numStrands) * Math.PI * 2;
+      const strand = new THREE.Mesh(strandGeo, woodMat);
+      strand.position.set(Math.cos(angle) * 0.19, 0, Math.sin(angle) * 0.19);
+      strand.rotation.y = -angle;
+      strand.castShadow = true;
+      basketContainer.add(strand);
+    }
+
+    // Horizontal Weave Rings (stacked torus rings)
+    const weaveRingGeo = new THREE.TorusGeometry(0.19, 0.015, 6, 24);
+    const numRings = 4;
+    for (let i = 0; i < numRings; i++) {
+      const ring = new THREE.Mesh(weaveRingGeo, woodMat);
+      ring.position.y = -0.1 + (i * 0.07);
+      ring.rotation.x = Math.PI / 2;
+      ring.castShadow = true;
+      basketContainer.add(ring);
+    }
+
+    // Solid Basket Floor base
+    const floorGeo = new THREE.CylinderGeometry(0.16, 0.15, 0.03, 12);
+    const floor = new THREE.Mesh(floorGeo, woodMat);
+    floor.position.y = -0.115;
+    floor.castShadow = true;
+    basketContainer.add(floor);
+
+    // Basket handle (Torus half)
+    const handleGeo = new THREE.TorusGeometry(0.19, 0.022, 6, 16, Math.PI);
+    const handle = new THREE.Mesh(handleGeo, woodMat);
     handle.position.set(0, 0.12, 0);
-    basket.add(handle);
+    handle.castShadow = true;
+    basketContainer.add(handle);
 
-    // Candy load inside basket (little colored spheres)
-    const candyColors = [0x4da6ff, 0xff7b61, 0xc8ff4d, 0xffffff];
-    for (let i = 0; i < 7; i++) {
-      const size = 0.04 + Math.random() * 0.04;
-      const candyGeo = new THREE.SphereGeometry(size, 8, 8);
-      const candyMat = new THREE.MeshStandardMaterial({
-        color: candyColors[i % candyColors.length],
-        roughness: 0.6,
-      });
-      const candy = new THREE.Mesh(candyGeo, candyMat);
+    // Candies inside: Glossy wrapper reflections (Shiny metallic materials)
+    const candyGeo = new THREE.SphereGeometry(0.045, 8, 8);
+    const twistGeo = new THREE.ConeGeometry(0.025, 0.04, 5);
+    const candyMat = new THREE.MeshStandardMaterial({
+      color: 0x4da6ff, // glossy blue candy wrapper
+      roughness: 0.12,
+      metalness: 0.8,
+    });
+
+    for (let i = 0; i < 6; i++) {
+      const candy = new THREE.Group();
+      
+      // Candy Core
+      const core = new THREE.Mesh(candyGeo, candyMat);
+      core.castShadow = true;
+      candy.add(core);
+
+      // Twisted Wrapper Ends (Left & Right cones)
+      const twistL = new THREE.Mesh(twistGeo, candyMat);
+      twistL.position.set(-0.05, 0, 0);
+      twistL.rotation.z = Math.PI / 2;
+      candy.add(twistL);
+
+      const twistR = new THREE.Mesh(twistGeo, candyMat);
+      twistR.position.set(0.05, 0, 0);
+      twistR.rotation.z = -Math.PI / 2;
+      candy.add(twistR);
+
+      // Random position inside the basket container
+      const angle = Math.random() * Math.PI * 2;
+      const dist = Math.random() * 0.12;
       candy.position.set(
-        (Math.random() - 0.5) * 0.22,
-        0.08 + Math.random() * 0.05,
-        (Math.random() - 0.5) * 0.22
+        Math.cos(angle) * dist,
+        -0.02 + Math.random() * 0.06,
+        Math.sin(angle) * dist
       );
-      basket.add(candy);
+      candy.rotation.set(Math.random() * 0.5, Math.random() * 3, Math.random() * 0.5);
+
+      basketContainer.add(candy);
     }
   }
 
   private createDecorations(): void {
-    // 1. Tombstone (left side of platform) with nested step borders
+    // 1. Tombstone (left side of platform) with nested step borders & cross relief
     const tsGroup = new THREE.Group();
     tsGroup.position.set(-1.3, -0.92, -0.4);
     tsGroup.rotation.y = 0.4;
@@ -546,24 +649,39 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     stoneTop.castShadow = true;
     tsGroup.add(stoneTop);
 
-    // Detailed: Nested relief step border on front face
+    // Nested relief border step on front face
     const borderGeo = new THREE.BoxGeometry(0.3, 0.55, 0.03);
     const borderMat = new THREE.MeshStandardMaterial({ color: 0x576073, roughness: 0.95 });
     const borderMesh = new THREE.Mesh(borderGeo, borderMat);
     borderMesh.position.set(0, 0.28, 0.085);
     tsGroup.add(borderMesh);
 
-    // 2. Ribbed Glowing Jack-o'-Lanterns
+    // Cross engraving relief (Step box shapes)
+    const crossVertGeo = new THREE.BoxGeometry(0.045, 0.24, 0.015);
+    const crossHorizGeo = new THREE.BoxGeometry(0.14, 0.045, 0.015);
+    const crossMat = new THREE.MeshStandardMaterial({ color: 0x475061, roughness: 0.95 });
+    
+    const crossV = new THREE.Mesh(crossVertGeo, crossMat);
+    crossV.position.set(0, 0.3, 0.105);
+    tsGroup.add(crossV);
+
+    const crossH = new THREE.Mesh(crossHorizGeo, crossMat);
+    crossH.position.set(0, 0.34, 0.105);
+    tsGroup.add(crossH);
+
+    // 2. Ribbed Glowing Jack-o'-Lanterns (5 varied pumpkins)
     this.faceGlowMat = new THREE.MeshStandardMaterial({
-      color: 0xffdf80,
-      emissive: 0xffa500,
-      emissiveIntensity: 1.6,
+      color: 0xffe099,
+      emissive: 0xffb347, // Emits warm orange light (#FFB347)
+      emissiveIntensity: 1.8,
       roughness: 0.9,
     });
 
     this.createJackOLantern(1.1, -0.9, 0.8, 0.3, -0.2); // right front
     this.createJackOLantern(-0.8, -0.95, 1.2, 0.25, 0.4); // left front
     this.createJackOLantern(1.2, -0.95, -0.6, 0.28, -0.5); // right back
+    this.createJackOLantern(-1.3, -0.95, 0.7, 0.2, 0.9); // left side small
+    this.createJackOLantern(0.4, -0.98, -1.2, 0.24, 0.1); // center back
   }
 
   private createJackOLantern(x: number, y: number, z: number, scale: number, rotationY: number): void {
@@ -572,10 +690,10 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     pumpkin.rotation.y = rotationY;
     this.scene.add(pumpkin);
 
-    // 100x DETAILED: Ribbed Pumpkin body (overlapping squashed ellipsoids)
+    // Ribbed Pumpkin body (overlapping squashed ellipsoids)
     const pumpkinBody = new THREE.Group();
     const segmentMat = new THREE.MeshStandardMaterial({
-      color: 0xe66225, // organic dark orange clay
+      color: 0xe86c31,
       roughness: 0.82,
     });
     const segmentGeo = new THREE.SphereGeometry(0.34, 16, 16);
@@ -590,31 +708,33 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     }
     pumpkin.add(pumpkinBody);
 
-    // Small stem
+    // Curved stem
     const stemGeo = new THREE.CylinderGeometry(0.025, 0.04, 0.1, 8);
     const stemMat = new THREE.MeshStandardMaterial({ color: 0x485c35, roughness: 0.9 });
     const stem = new THREE.Mesh(stemGeo, stemMat);
-    stem.position.y = 0.32;
+    stem.position.set(0, 0.32, -0.02);
+    stem.rotation.x = -0.2; // curved/tilted back
     stem.castShadow = true;
     pumpkin.add(stem);
 
-    // Overlay glowing eyes & mouth (simulates face carving without CSG)
-    const eyeGeo = new THREE.BoxGeometry(0.06, 0.06, 0.02);
+    // Overlay glowing eyes & mouth cutouts (eyes: rounded sockets, mouth: smiling)
+    const eyeGeo = new THREE.SphereGeometry(0.045, 8, 8);
     
     const eyeL = new THREE.Mesh(eyeGeo, this.faceGlowMat);
-    eyeL.position.set(-0.11, 0.08, 0.32);
-    eyeL.rotation.z = 0.3;
+    eyeL.position.set(-0.1, 0.08, 0.32);
+    eyeL.scale.set(1, 1.2, 0.3);
     pumpkin.add(eyeL);
 
     const eyeR = new THREE.Mesh(eyeGeo, this.faceGlowMat);
-    eyeR.position.set(0.11, 0.08, 0.32);
-    eyeR.rotation.z = -0.3;
+    eyeR.position.set(0.1, 0.08, 0.32);
+    eyeR.scale.set(1, 1.2, 0.3);
     pumpkin.add(eyeR);
 
-    // Mouth plane
-    const mouthGeo = new THREE.BoxGeometry(0.14, 0.05, 0.02);
+    // Cute smiling mouth cutout
+    const mouthGeo = new THREE.TorusGeometry(0.08, 0.025, 4, 12, Math.PI);
     const mouth = new THREE.Mesh(mouthGeo, this.faceGlowMat);
-    mouth.position.set(0, -0.06, 0.33);
+    mouth.position.set(0, -0.02, 0.31);
+    mouth.rotation.x = Math.PI; // flip to face smile up
     pumpkin.add(mouth);
 
     // Scale final group
@@ -623,32 +743,45 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
   }
 
   private createBats(): void {
-    this.addBat(-1.4, 1.2, 0.4, 0.015, 0.3);
-    this.addBat(1.5, 1.4, -0.3, 0.012, 0.25);
+    // We add 3 bats with unique flight configuration profiles
+    this.addBat(-1.3, 1.2, 0.4, 0.012, 0.28, 'hover', 0);
+    this.addBat(1.4, 1.4, -0.3, 0.016, 0.22, 'orbit', Math.PI);
+    this.addBat(0.2, 1.5, 0.8, 0.01, 0.24, 'wander', Math.PI / 2);
   }
 
-  private addBat(x: number, y: number, z: number, speed: number, range: number): void {
+  private addBat(
+    x: number,
+    y: number,
+    z: number,
+    speed: number,
+    range: number,
+    type: 'hover' | 'orbit' | 'wander',
+    phase: number
+  ): void {
     const batGroup = new THREE.Group();
     batGroup.position.set(x, y, z);
     this.scene.add(batGroup);
 
-    // Bat body (Black Sphere)
+    // Bat body (Black Sphere: #1F1F24)
     const bodyGeo = new THREE.SphereGeometry(0.09, 8, 8);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0x1d212b, roughness: 0.95 });
+    const bodyMat = new THREE.MeshStandardMaterial({
+      color: 0x1f1f24,
+      roughness: 0.9,
+    });
     const body = new THREE.Mesh(bodyGeo, bodyMat);
     body.castShadow = true;
     batGroup.add(body);
 
-    // Glowing eyes (yellow spheres)
-    const eyeGeo = new THREE.SphereGeometry(0.015, 6, 6);
-    const eyeMat = new THREE.MeshBasicMaterial({ color: 0xffea4d });
+    // Glowing eyes (oversized yellow spheres: #FFF275)
+    const eyeGeo = new THREE.SphereGeometry(0.018, 8, 8);
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0xfff275 });
     
     const eyeL = new THREE.Mesh(eyeGeo, eyeMat);
-    eyeL.position.set(-0.035, 0.02, 0.08);
+    eyeL.position.set(-0.035, 0.01, 0.08);
     batGroup.add(eyeL);
 
     const eyeR = new THREE.Mesh(eyeGeo, eyeMat);
-    eyeR.position.set(0.035, 0.02, 0.08);
+    eyeR.position.set(0.035, 0.01, 0.08);
     batGroup.add(eyeR);
 
     // Detailed bat ears
@@ -663,58 +796,60 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     earR.rotation.z = -0.25;
     batGroup.add(earR);
 
-    // Detailed: Jointed/segmented wings
-    const wingGroupL = new THREE.Group();
-    wingGroupL.position.set(-0.07, 0, 0);
-    batGroup.add(wingGroupL);
+    // Jointed/segmented wings
+    const wingL = new THREE.Group();
+    wingL.position.set(-0.07, 0, 0);
+    batGroup.add(wingL);
 
     const innerWingGeo = new THREE.BoxGeometry(0.18, 0.08, 0.01);
     const innerWingL = new THREE.Mesh(innerWingGeo, bodyMat);
     innerWingL.position.set(-0.09, 0, 0);
-    wingGroupL.add(innerWingL);
+    wingL.add(innerWingL);
 
     const outerWingGeo = new THREE.BoxGeometry(0.14, 0.06, 0.01);
     const outerWingL = new THREE.Mesh(outerWingGeo, bodyMat);
     outerWingL.position.set(-0.22, -0.01, 0);
     outerWingL.rotation.z = -0.25;
-    wingGroupL.add(outerWingL);
+    wingL.add(outerWingL);
 
-    const wingGroupR = new THREE.Group();
-    wingGroupR.position.set(0.07, 0, 0);
-    batGroup.add(wingGroupR);
+    const wingR = new THREE.Group();
+    wingR.position.set(0.07, 0, 0);
+    batGroup.add(wingR);
 
     const innerWingR = new THREE.Mesh(innerWingGeo, bodyMat);
     innerWingR.position.set(0.09, 0, 0);
-    wingGroupR.add(innerWingR);
+    wingR.add(innerWingR);
 
     const outerWingR = new THREE.Mesh(outerWingGeo, bodyMat);
     outerWingR.position.set(0.22, -0.01, 0);
     outerWingR.rotation.z = 0.25;
-    wingGroupR.add(outerWingR);
+    wingR.add(outerWingR);
 
     this.bats.push({
       group: batGroup,
-      wingGroupL,
-      wingGroupR,
+      wingL,
+      wingR,
       initialY: y,
       initialX: x,
+      initialZ: z,
       speed,
       range,
+      type,
+      phase,
     });
   }
 
   private addPumpkinPointLights(): void {
-    // Put localized warm orange point lights directly near each pumpkin base/face
+    // Put localized warm orange point lights (#FFB347) directly near pumpkins
     this.pumpkins.forEach((pumpkin) => {
-      const pLight = new THREE.PointLight(0xff7700, 3.2, 3.2);
-      // offset slightly forward/upwards of the pumpkin
+      const pLight = new THREE.PointLight(0xffb347, 2.0, 3.0);
       pLight.position.set(
         pumpkin.position.x,
-        pumpkin.position.y + 0.1,
-        pumpkin.position.z + 0.3
+        pumpkin.position.y + 0.15,
+        pumpkin.position.z + 0.25
       );
       pLight.castShadow = true;
-      pLight.shadow.bias = -0.005;
+      pLight.shadow.bias = -0.004;
       this.scene.add(pLight);
     });
   }
@@ -729,38 +864,83 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.08;
     this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.08;
 
-    // 2. Idle Character bobbing & head tilt
-    if (this.mascotGroup && this.headGroup) {
+    // 2. Idle Mascot slow breathing, chest scale, and basket lag
+    if (this.mascotGroup && this.headGroup && this.bodyMesh && this.basketGroup) {
       if (!this.isCelebrating) {
-        // Idle bobbing
-        this.mascotGroup.position.y = -0.9 + Math.sin(elapsed * 2.2) * 0.035;
-        this.leftArm.rotation.z = Math.sin(elapsed * 2.2) * 0.06;
-        this.rightArm.rotation.z = -Math.sin(elapsed * 2.2) * 0.06;
+        // Slow chest breathing (body Y-position bobbing and shirt scaling)
+        const breathePhase = elapsed * 1.6;
+        const breatheOffset = Math.sin(breathePhase) * 0.02;
+        
+        this.mascotGroup.position.y = -0.9 + breatheOffset;
+        this.bodyMesh.scale.y = 1.0 + breatheOffset * 0.3;
+        
+        // Delayed secondary movement for the basket (delayed phase)
+        this.basketGroup.position.y = 0.3 + Math.sin(breathePhase - 0.5) * 0.015;
+
+        this.leftArm.rotation.z = Math.sin(breathePhase) * 0.05;
+        this.rightArm.rotation.z = -Math.sin(breathePhase) * 0.05;
 
         // Head tilt following mouse
-        this.headGroup.rotation.y = this.mouse.x * 0.48;
-        this.headGroup.rotation.x = -this.mouse.y * 0.22;
-        this.headGroup.rotation.z = this.mouse.x * 0.1;
+        this.headGroup.rotation.y = this.mouse.x * 0.44;
+        this.headGroup.rotation.x = -this.mouse.y * 0.2;
+        this.headGroup.rotation.z = this.mouse.x * 0.08;
       }
     }
 
-    // 3. Bat hovering, floating & wing flapping
+    // 3. Bat unique flights and wing flapping speeds
     this.bats.forEach((bat) => {
-      bat.group.position.y = bat.initialY + Math.sin(elapsed * 4.0 + bat.initialX) * bat.range;
-      bat.group.position.x = bat.initialX + Math.cos(elapsed * 1.5 + bat.initialY) * 0.08;
+      const batTime = elapsed * 2.0 + bat.phase;
 
-      // Fast organic wing flapping
-      const flapAngle = Math.sin(elapsed * 14) * 0.6;
-      bat.wingGroupL.rotation.z = flapAngle;
-      bat.wingGroupR.rotation.z = -flapAngle;
+      if (bat.type === 'hover') {
+        // Bat 1: slow vertical hovering
+        bat.group.position.y = bat.initialY + Math.sin(batTime * 1.2) * bat.range;
+        bat.group.position.x = bat.initialX + Math.cos(batTime * 0.4) * 0.05;
+        
+        // Flap speed
+        const flap = Math.sin(elapsed * 12) * 0.6;
+        bat.wingL.rotation.z = flap;
+        bat.wingR.rotation.z = -flap;
+      } 
+      else if (bat.type === 'orbit') {
+        // Bat 2: circular horizontal orbit around character
+        const orbitAngle = elapsed * 0.8 + bat.phase;
+        const orbitRadius = 1.8;
+        
+        bat.group.position.x = Math.sin(orbitAngle) * orbitRadius;
+        bat.group.position.z = Math.cos(orbitAngle) * orbitRadius;
+        bat.group.position.y = bat.initialY + Math.sin(batTime * 1.5) * 0.12;
+
+        // Face forward along trajectory
+        bat.group.rotation.y = orbitAngle + Math.PI / 2;
+
+        // Fast flapping speed
+        const flap = Math.sin(elapsed * 18) * 0.65;
+        bat.wingL.rotation.z = flap;
+        bat.wingR.rotation.z = -flap;
+      } 
+      else if (bat.type === 'wander') {
+        // Bat 3: left-right wandering with vertical variation
+        bat.group.position.x = bat.initialX + Math.sin(elapsed * 1.0) * 1.5;
+        bat.group.position.y = bat.initialY + Math.cos(elapsed * 1.6) * 0.22;
+        
+        // Medium flapping speed
+        const flap = Math.sin(elapsed * 15) * 0.6;
+        bat.wingL.rotation.z = flap;
+        bat.wingR.rotation.z = -flap;
+      }
     });
 
     // 4. Jack-o'-Lantern warm breathing pulse
     if (this.faceGlowMat) {
-      this.faceGlowMat.emissiveIntensity = 1.3 + Math.sin(elapsed * 3.5) * 0.3;
+      this.faceGlowMat.emissiveIntensity = 1.6 + Math.sin(elapsed * 3.2) * 0.25;
     }
 
-    // 5. Celebration Event Timeline
+    // 5. Ambient backlight glow breathing
+    if (this.atmosphericGlow) {
+      this.atmosphericGlow.scale.setScalar(1.0 + Math.sin(elapsed * 1.2) * 0.04);
+    }
+
+    // 6. Celebration Event Timeline
     if (this.isCelebrating) {
       this.celebrationTimer += 0.024; // step delta approximation
 
