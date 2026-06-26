@@ -13,6 +13,7 @@ import { AdminGuard } from '../auth/guards/admin.guard';
 import { AdminProfileService } from './admin-profile.service';
 import { UpdateUsernameDto } from './dto/update-username.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { getCookieOptions } from '../common/utils/cookie-helper';
 
 @Controller('admin/profile')
 @UseGuards(AdminGuard)
@@ -73,17 +74,6 @@ export class AdminProfileController {
   }
 
   private clearSessionCookie(request: Request, response: Response) {
-    const host = request.get('host') || '';
-    const isLocalhost =
-      host.includes('localhost') || host.includes('127.0.0.1');
-
-    response.clearCookie('admin_session', {
-      httpOnly: true,
-      secure: isLocalhost
-        ? false
-        : this.configService.get<string>('NODE_ENV') === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
+    response.clearCookie('admin_session', getCookieOptions(this.configService));
   }
 }
