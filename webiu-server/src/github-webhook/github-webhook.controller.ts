@@ -11,8 +11,10 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
 import * as crypto from 'crypto';
+import { SkipThrottle } from '@nestjs/throttler';
 import { GithubWebhookService } from './github-webhook.service';
 
+@SkipThrottle()
 @Controller('api/v1/github-webhook')
 export class GithubWebhookController {
   constructor(

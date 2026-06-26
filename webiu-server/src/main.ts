@@ -9,6 +9,10 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
   const configService = app.get(ConfigService);
 
+  // Enable express trust proxy for load balancers (req.ip resolves to actual client IP)
+  const expressApp = app.getHttpAdapter().getInstance();
+  expressApp.set('trust proxy', 1);
+
   // 1. Startup Validation
   const criticalEnvVars = [
     'GITHUB_ACCESS_TOKEN',
