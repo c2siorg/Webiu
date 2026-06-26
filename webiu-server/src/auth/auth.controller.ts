@@ -18,6 +18,7 @@ import { Admin } from '../database/entities/admin.entity';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { UseGuards } from '@nestjs/common';
 import { AdminGuard } from './guards/admin.guard';
+import { getCookieOptions } from '../common/utils/cookie-helper';
 
 @Controller('auth')
 export class AuthController {
@@ -38,17 +39,9 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const token = await this.authService.login(loginDto);
-    const host = request.get('host') || '';
-    const isLocalhost =
-      host.includes('localhost') || host.includes('127.0.0.1');
 
     response.cookie('admin_session', token, {
-      httpOnly: true,
-      secure: isLocalhost
-        ? false
-        : this.configService.get<string>('NODE_ENV') === 'production',
-      sameSite: 'lax',
-      path: '/',
+      ...getCookieOptions(this.configService),
       maxAge: 3600 * 1000, // 1 hour
     });
 
@@ -79,10 +72,6 @@ export class AuthController {
     @Req() request: any,
     @Res({ passthrough: true }) response: Response,
   ) {
-    const host = request.get('host') || '';
-    const isLocalhost =
-      host.includes('localhost') || host.includes('127.0.0.1');
-
     // Audit log LOGOUT
     if (request.user && request.user.id) {
       await this.auditLogService.createLog({
@@ -97,14 +86,7 @@ export class AuthController {
       });
     }
 
-    response.clearCookie('admin_session', {
-      httpOnly: true,
-      secure: isLocalhost
-        ? false
-        : this.configService.get<string>('NODE_ENV') === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
+    response.clearCookie('admin_session', getCookieOptions(this.configService));
 
     return { success: true };
   }
