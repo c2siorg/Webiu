@@ -25,4 +25,7 @@ export class Admin {
 
   @Column({ nullable: true, type: 'timestamp' })
   lastLoginAt: Date;
+
+  @Column({ default: 1 })
+  tokenVersion: number;
 }

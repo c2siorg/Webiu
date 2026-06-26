@@ -50,6 +50,7 @@ export class AdminProfileService {
     const admin = await this.getProfile(currentUsername);
     const oldUsername = admin.username;
     admin.username = trimmed;
+    admin.tokenVersion = (admin.tokenVersion || 1) + 1;
     const savedAdmin = await this.adminRepository.save(admin);
 
     if (adminId) {
@@ -97,6 +98,7 @@ export class AdminProfileService {
     }
 
     admin.passwordHash = await bcrypt.hash(newPassword, 10);
+    admin.tokenVersion = (admin.tokenVersion || 1) + 1;
     await this.adminRepository.save(admin);
 
     if (adminId) {
