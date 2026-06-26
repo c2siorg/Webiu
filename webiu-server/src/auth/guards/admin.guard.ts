@@ -37,13 +37,26 @@ export class AdminGuard implements CanActivate {
         throw new UnauthorizedException('Not authorized as administrator');
       }
 
+      if (decoded.role !== 'admin') {
+        throw new UnauthorizedException('Not authorized as administrator');
+      }
+
+      if (decoded.tokenVersion !== adminExists.tokenVersion) {
+        throw new UnauthorizedException(
+          'Authentication session is invalid or expired',
+        );
+      }
+
       request.user = {
         id: adminExists.id,
         username: adminExists.username,
         role: decoded.role,
       };
       return true;
-    } catch {
+    } catch (err) {
+      if (err instanceof UnauthorizedException) {
+        throw err;
+      }
       throw new UnauthorizedException(
         'Authentication session is invalid or expired',
       );

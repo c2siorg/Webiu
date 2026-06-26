@@ -30,11 +30,16 @@ describe('AuthController', () => {
   beforeEach(async () => {
     adminRepositoryMock = {
       findOne: jest.fn().mockImplementation(({ where }) => {
-        if (where.username === 'admin') {
-          return { id: 'mock-admin-id', username: 'admin' } as Admin;
+        if (where.username === 'admin' || where.id === 'mock-admin-id') {
+          return {
+            id: 'mock-admin-id',
+            username: 'admin',
+            tokenVersion: 1,
+          } as Admin;
         }
         return null;
       }),
+      save: jest.fn().mockResolvedValue({}),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -49,7 +54,11 @@ describe('AuthController', () => {
         {
           provide: JwtService,
           useValue: {
-            verify: jest.fn().mockReturnValue({ username: 'admin' }),
+            verify: jest.fn().mockReturnValue({
+              username: 'admin',
+              role: 'admin',
+              tokenVersion: 1,
+            }),
           },
         },
         {

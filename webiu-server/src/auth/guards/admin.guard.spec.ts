@@ -27,7 +27,7 @@ describe('AdminGuard', () => {
     adminRepositoryMock = {
       findOne: jest.fn().mockImplementation(({ where }) => {
         if (where.username === 'admin') {
-          return { username: 'admin' } as Admin;
+          return { username: 'admin', tokenVersion: 1 } as Admin;
         }
         return null;
       }),
@@ -39,7 +39,11 @@ describe('AdminGuard', () => {
         {
           provide: JwtService,
           useValue: {
-            verify: jest.fn().mockReturnValue({ username: 'admin' }),
+            verify: jest.fn().mockReturnValue({
+              username: 'admin',
+              role: 'admin',
+              tokenVersion: 1,
+            }),
           },
         },
         {
@@ -58,7 +62,7 @@ describe('AdminGuard', () => {
   });
 
   describe('canActivate', () => {
-    it('should return true if token is valid and matches admin username in db', async () => {
+    it('should return true if token is valid and matches admin username, role, and version in db', async () => {
       const context = mockExecutionContext('valid-jwt-token');
 
       const result = await guard.canActivate(context);
@@ -93,6 +97,34 @@ describe('AdminGuard', () => {
       const context = mockExecutionContext('valid-jwt-token');
       (jwtService.verify as jest.Mock).mockReturnValue({
         username: 'not-admin',
+        role: 'admin',
+        tokenVersion: 1,
+      });
+
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should throw UnauthorizedException if role in JWT is not admin', async () => {
+      const context = mockExecutionContext('valid-jwt-token');
+      (jwtService.verify as jest.Mock).mockReturnValue({
+        username: 'admin',
+        role: 'user',
+        tokenVersion: 1,
+      });
+
+      await expect(guard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should throw UnauthorizedException if tokenVersion in JWT does not match db version', async () => {
+      const context = mockExecutionContext('valid-jwt-token');
+      (jwtService.verify as jest.Mock).mockReturnValue({
+        username: 'admin',
+        role: 'admin',
+        tokenVersion: 2, // mismatch
       });
 
       await expect(guard.canActivate(context)).rejects.toThrow(

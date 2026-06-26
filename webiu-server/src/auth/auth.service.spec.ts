@@ -1,16 +1,23 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { getRepositoryToken } from '@nestjs/typeorm';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CredentialService } from './credential.service';
 import { LoginDto } from './dto/login.dto';
+import { Admin } from '../database/entities/admin.entity';
 
 describe('AuthService', () => {
   let service: AuthService;
   let credentialService: CredentialService;
   let jwtService: JwtService;
+  let adminRepositoryMock: any;
 
   beforeEach(async () => {
+    adminRepositoryMock = {
+      findOne: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -25,6 +32,10 @@ describe('AuthService', () => {
           useValue: {
             sign: jest.fn().mockReturnValue('mock-jwt-token'),
           },
+        },
+        {
+          provide: getRepositoryToken(Admin),
+          useValue: adminRepositoryMock,
         },
       ],
     }).compile();
@@ -47,6 +58,10 @@ describe('AuthService', () => {
       (credentialService.validateCredentials as jest.Mock).mockResolvedValue(
         true,
       );
+      adminRepositoryMock.findOne.mockResolvedValue({
+        username: 'admin',
+        tokenVersion: 1,
+      } as Admin);
 
       const result = await service.login(loginDto);
 
@@ -58,6 +73,7 @@ describe('AuthService', () => {
       expect(jwtService.sign).toHaveBeenCalledWith({
         username: 'admin',
         role: 'admin',
+        tokenVersion: 1,
       });
     });
 

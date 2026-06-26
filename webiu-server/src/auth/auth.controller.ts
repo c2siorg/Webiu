@@ -72,8 +72,17 @@ export class AuthController {
     @Req() request: any,
     @Res({ passthrough: true }) response: Response,
   ) {
-    // Audit log LOGOUT
+    // Invalidate token by incrementing version in database
     if (request.user && request.user.id) {
+      const admin = await this.adminRepository.findOne({
+        where: { id: request.user.id },
+      });
+      if (admin) {
+        admin.tokenVersion = (admin.tokenVersion || 1) + 1;
+        await this.adminRepository.save(admin);
+      }
+
+      // Audit log LOGOUT
       await this.auditLogService.createLog({
         adminId: request.user.id,
         action: 'LOGOUT',
@@ -106,7 +115,11 @@ export class AuthController {
         where: { username: decoded.username },
       });
 
-      if (adminExists) {
+      if (
+        adminExists &&
+        decoded.role === 'admin' &&
+        decoded.tokenVersion === adminExists.tokenVersion
+      ) {
         return { authenticated: true };
       }
     } catch {}
