@@ -106,6 +106,9 @@ html {
   --background-dark:    #0F172A;
   --sidebar-border:     #E5E7EB;
   --sidebar-hover:      #F2F2EE;
+  --admin-navbar-bg:    rgba(255, 255, 255, 0.7);
+  --admin-navbar-border: var(--border);
+  --brand-logo-filter:  drop-shadow(0 2px 4px rgba(0,0,0,0.05));
 
   /* Typography Scale */
   --font-size-xs:       12px;
@@ -215,6 +218,9 @@ html {
   --navbar-p:           #F8FAFC;
   --sidebar-border:     #1E293B;
   --sidebar-hover:      rgba(255, 255, 255, 0.04);
+  --admin-navbar-bg:    rgba(16, 20, 26, 0.7);
+  --admin-navbar-border: rgba(255, 255, 255, 0.05);
+  --brand-logo-filter:  invert(1);
 
   background-color: var(--bg);
 }
@@ -226,7 +232,7 @@ html {
 [data-theme="dark"] .navbar .logo {
   filter: invert(1);
 }
-[data-theme="dark"] .nav-btn {
+[data-theme="dark"] .mobile-bottom-nav__item img {
   filter: invert(1);
 }
 [data-theme="dark"] .sidebar-close-btn img {
@@ -651,24 +657,4 @@ table tr:nth-child(even) {
   100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
 }
 
-/* ── Responsive ──────────────────────────────────────────────── */
-@media (max-width: 768px) {
-  body { font-size: var(--font-size-sm); }
-
-  h1 { font-size: 1.875rem; }
-  h2 { font-size: 1.5rem; }
-
-  button, .btn {
-    font-size: var(--font-size-sm);
-    padding: 0.5rem 1rem;
-  }
-
-  nav ul { flex-direction: column; gap: 0.5rem; }
-}
-
-/* ── Handwritten Utility (Caveat font) ─────────────────────── */
-.handwritten {
-  font-family: 'Caveat', cursive;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-}
+@import './app/page/admin/admin-shared.scss';

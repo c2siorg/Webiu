@@ -1,53 +1,161 @@
 .publications__card {
   display: flex;
-  padding: 16px 28px;
+  padding: 32px;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
-  gap: 20px;
-  border-radius: 8px;
-  border: 2px solid var(--publications-card-border);
-  background: var(--publications-card-bg);
-  box-shadow: 0px 4px 24px 0px var(--publications-card-box-shadow);
+  border-radius: var(--radius-lg, 16px);
+  border: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--surface) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-sm);
   width: 100%;
-  max-width: 500px;
   height: 100%;
   box-sizing: border-box;
+  transition: transform 300ms cubic-bezier(0.16, 1, 0.3, 1), 
+              box-shadow 300ms cubic-bezier(0.16, 1, 0.3, 1), 
+              border-color 300ms cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent-lime), var(--accent-purple));
+    opacity: 0;
+    transition: opacity 300ms cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 1;
+  }
+
+  &:hover {
+    border-color: rgba(199, 244, 100, 0.45);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16), 0 0 20px rgba(199, 244, 100, 0.1);
+    transform: translateY(-8px) scale(1.015);
+
+    &::before {
+      opacity: 1;
+    }
+
+    .publications__card__title a {
+      color: var(--accent-lime);
+    }
+  }
+}
+
+/* ── Header Row ─────────────────────────────────────────────── */
+.publications__card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.publications__card__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(199, 244, 100, 0.08);
+  border: 1px solid rgba(199, 244, 100, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.publications__card__badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent-purple);
+  background: var(--accent-purple-dim);
+  border: 1px solid rgba(123, 140, 255, 0.2);
+  padding: 4px 12px;
+  border-radius: var(--radius-full, 9999px);
+  letter-spacing: 0.06em;
+}
+
+/* ── Body ───────────────────────────────────────────────────── */
+.publications__card__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+.publications__card__title {
+  margin: 0;
+  line-height: 1.4;
 
   a {
-    color: var(--primary-dark, var(--primary-dark, #0a0a15));
+    color: var(--text-primary);
     font-size: 20px;
-    font-weight: 500;
-    line-height: 150%;
-    text-decoration-line: underline;
-    max-width: 460px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: color var(--transition-fast);
+    display: inline-block;
+  }
+}
+
+.publications__card__issued__by {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.5;
+  margin: 0;
+  display: flex;
+  align-items: center;
+}
+
+.publications__card__desc {
+  color: var(--text-muted, #898989);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Footer ─────────────────────────────────────────────────── */
+.publications__card__footer {
+  margin-top: 24px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+  width: 100%;
+}
+
+.publications__card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--accent-lime);
+  text-decoration: none;
+  font-size: var(--font-size-sm, 14px);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+
+  .cta-arrow {
+    transition: transform var(--transition-fast);
+    stroke: var(--accent-lime);
   }
 
-  .publications__card__issued__by {
-    color: var(--primary-dark, var(--primary-dark, #0a0a15));
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 150%;
-    max-width: 460px;
-  }
+  &:hover {
+    color: var(--text-primary);
 
-  .publications__card__desc {
-    color: var(--font-light, #898989);
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 150%;
-    max-width: 460px;
+    .cta-arrow {
+      transform: translateX(4px);
+      stroke: var(--text-primary);
+    }
   }
 }
 
 @media screen and (max-width: 600px) {
   .publications__card {
-    max-width: 400px;
-  }
-}
-
-@media screen and (max-width: 450px) {
-  .publications__card {
-    max-width: 300px;
+    padding: 24px;
   }
 }

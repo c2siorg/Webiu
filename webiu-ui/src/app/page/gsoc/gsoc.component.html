@@ -1,27 +1,100 @@
 <div class="gsoc__page">
   <!-- Loading State -->
   @if (isLoading) {
-    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 400px; gap: 16px;">
-      <i class="fa-solid fa-spinner fa-spin" style="font-size: 36px; color: var(--primary-color, #0366d6);"></i>
-      <p style="color: var(--font-color-p, #586069);">Loading GSoC Program Details...</p>
+    <div class="loading-state">
+      <i class="fa-solid fa-spinner fa-spin"></i>
+      <p>Loading GSoC Program Details...</p>
     </div>
   } @else {
     <!-- Hero Section -->
     @if (program) {
       <div class="gsoc-hero">
         <div class="gsoc-hero-content">
+          <div class="accent-line"></div>
+          <span class="hero-badge">C2SI Programs</span>
           <h1>{{ program.title }}</h1>
           <p>{{ program.description || 'Google Summer of Code Program cycle.' }}</p>
         </div>
-        <img [src]="program.heroImageUrl || '../../../assets/gsoc_no_bg.png'" alt="GSOC" />
+        <div class="hero-image-container">
+          <img [src]="program.heroImageUrl || '../../../assets/gsoc_no_bg.png'" alt="GSOC Logo" class="hero-image" />
+        </div>
       </div>
 
       <!-- Guidelines and Instructions -->
       <div class="gsoc__details" [innerHTML]="program.introHtml"></div>
 
+      <!-- Projects Section Title -->
+      <div class="projects-section-header">
+        <h2>Project Ideas</h2>
+        <p>Explore opportunities and find projects matching your skills</p>
+      </div>
+
+      <!-- Search & Filters Container -->
+      <div class="filter-container">
+        <!-- Search Input -->
+        <div class="search-box">
+          <i class="fa-solid fa-magnifying-glass search-icon"></i>
+          <input
+            type="text"
+            placeholder="Search project title, technology, or description..."
+            (input)="onSearch($event)"
+            [value]="searchQuery"
+          />
+          @if (searchQuery) {
+            <button class="clear-search" (click)="searchQuery = ''; activeProjectIndex = null">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
+          }
+        </div>
+
+        <!-- Filter Controls -->
+        <div class="filters-row">
+          <!-- Difficulty Filter Pills -->
+          <div class="filter-group">
+            <span class="filter-label">Difficulty:</span>
+            <div class="filter-pills">
+              @for (diff of ['All', 'Easy', 'Medium', 'Hard']; track diff) {
+                <button
+                  class="pill-btn"
+                  [class.active]="selectedDifficulty === diff"
+                  (click)="setDifficulty(diff)"
+                >
+                  {{ diff }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <!-- Technologies Filter Pills -->
+          @if (availableTechs.length > 0) {
+            <div class="filter-group tech-group">
+              <span class="filter-label">Technology:</span>
+              <div class="filter-pills scrollable-pills">
+                <button
+                  class="pill-btn"
+                  [class.active]="selectedTech === 'All'"
+                  (click)="setTech('All')"
+                >
+                  All
+                </button>
+                @for (tech of availableTechs; track tech) {
+                  <button
+                    class="pill-btn"
+                    [class.active]="selectedTech === tech"
+                    (click)="setTech(tech)"
+                  >
+                    {{ tech }}
+                  </button>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
       <!-- Project Ideas Accordion -->
       <div class="gsoc__projects__list accordion">
-        @for (project of ideas; track project.id) {
+        @for (project of filteredIdeas; track project.id) {
           <div
             class="accordion-item"
             [class.active]="activeProjectIndex === $index"
@@ -31,67 +104,93 @@
               (click)="toggleAccordion($index)"
               (keydown.enter)="toggleAccordion($index)"
               tabindex="0"
+              role="button"
+              [attr.aria-expanded]="activeProjectIndex === $index"
             >
-              <h4>{{ project.projectNumber }}. {{ project.title }}</h4>
-              <span class="icon">{{
-                activeProjectIndex === $index ? "−" : "+"
-              }}</span>
+              <div class="header-left">
+                <span class="project-num">#{{ project.projectNumber }}</span>
+                <h4>{{ project.title }}</h4>
+              </div>
+              <div class="header-right">
+                <!-- Badges -->
+                <span class="badge diff-badge" [class]="project.difficulty | lowercase">
+                  {{ project.difficulty }}
+                </span>
+                <span class="badge duration-badge">
+                  <i class="fa-regular fa-clock"></i> {{ project.durationHours }}h
+                </span>
+                <span class="icon-toggle">
+                  <i class="fa-solid" [class.fa-chevron-down]="activeProjectIndex !== $index" [class.fa-chevron-up]="activeProjectIndex === $index"></i>
+                </span>
+              </div>
             </div>
             @if (activeProjectIndex === $index) {
               <div class="accordion-content">
                 <div class="project-details-grid">
+                  <!-- Metadata Cards -->
                   <div class="metadata-boxes">
-                    <div class="meta-box">
-                      <strong>Mentors</strong>
-                      <span>
-                        @for (mentor of project.mentors; track mentor.id; let last = $last) {
-                          {{ mentor.name }}@if (mentor.githubHandle) { (<a [href]="'https://github/' + mentor.githubHandle" target="_blank">{{ mentor.githubHandle }}</a>)}@if (!last) {; }
-                        } @empty {
-                          TBD
-                        }
-                      </span>
+                    <div class="meta-box mentors-box">
+                      <div class="meta-icon">
+                        <i class="fa-solid fa-users-gear"></i>
+                      </div>
+                      <div class="meta-info">
+                        <strong>Mentors</strong>
+                        <span>
+                          @for (mentor of project.mentors; track mentor.id; let last = $last) {
+                            <a [href]="'https://github.com/' + mentor.githubHandle" target="_blank" class="mentor-link">
+                              {{ mentor.name }} <span class="gh-handle">(&commat;{{ mentor.githubHandle }})</span>
+                            </a>@if (!last) {<span class="separator">, </span>}
+                          } @empty {
+                            TBD
+                          }
+                        </span>
+                      </div>
                     </div>
-                    <div class="meta-box">
-                      <strong>Length</strong>
-                      <span>{{ project.durationHours }} hours</span>
-                    </div>
-                    <div class="meta-box">
-                      <strong>Difficulty</strong>
-                      <span>{{ project.difficulty }}</span>
-                    </div>
+
                     @if (project.slackChannel) {
-                      <div class="meta-box">
-                        <strong>Slack</strong>
-                        <span>{{ project.slackChannel }}</span>
+                      <div class="meta-box slack-box">
+                        <div class="meta-icon">
+                          <i class="fa-brands fa-slack"></i>
+                        </div>
+                        <div class="meta-info">
+                          <strong>Slack Channel</strong>
+                          <span>{{ project.slackChannel }}</span>
+                        </div>
                       </div>
                     }
                   </div>
 
+                  <!-- Details sections -->
                   <div class="content-section">
-                    <h4>Brief Explanation</h4>
-                    <p style="white-space: pre-wrap;">{{ project.explanation }}</p>
+                    <h4><i class="fa-solid fa-circle-info"></i> Project Explanation</h4>
+                    <p class="explanation-text">{{ project.explanation }}</p>
                   </div>
 
                   @if (project.expectedResults) {
                     <div class="content-section">
-                      <h4>Expected Results / Key Objectives</h4>
-                      <p style="white-space: pre-wrap;">{{ project.expectedResults }}</p>
+                      <h4><i class="fa-solid fa-bullseye"></i> Expected Results / Key Objectives</h4>
+                      <p>{{ project.expectedResults }}</p>
                     </div>
                   }
 
+                  <!-- Prerequisites rendering as tags -->
                   @if (project.prerequisites) {
                     <div class="content-section">
-                      <h4>Knowledge Prerequisite</h4>
-                      <p style="white-space: pre-wrap;">{{ project.prerequisites }}</p>
+                      <h4><i class="fa-solid fa-laptop-code"></i> Prerequisites & Stack</h4>
+                      <div class="tech-pills">
+                        @for (tech of splitPrerequisites(project.prerequisites); track tech) {
+                          <span class="tech-pill">{{ tech }}</span>
+                        }
+                      </div>
                     </div>
                   }
 
+                  <!-- Link Actions -->
                   @if (project.githubUrl) {
-                    <div class="content-section">
-                      <h4>Github URL</h4>
-                      <p>
-                        <a [href]="project.githubUrl" target="_blank">{{ project.githubUrl }}</a>
-                      </p>
+                    <div class="actions-section">
+                      <a [href]="project.githubUrl" target="_blank" class="btn-github">
+                        <i class="fa-brands fa-github"></i> View Repository
+                      </a>
                     </div>
                   }
                 </div>
@@ -99,18 +198,23 @@
             }
           </div>
         } @empty {
-          <div style="text-align: center; padding: 48px; border: 1px dashed var(--gsoc-project-list-border, #e1e4e8); border-radius: 6px; color: var(--font-color-p, #586069);">
-            No project ideas have been published yet for this program year.
+          <div class="empty-state">
+            <i class="fa-solid fa-folder-open"></i>
+            <h3>No Project Ideas Found</h3>
+            <p>No project ideas match your search criteria or selected filters. Try clearing your filters.</p>
+            <button class="btn-reset" (click)="searchQuery = ''; selectedDifficulty = 'All'; selectedTech = 'All'; activeProjectIndex = null">
+              Reset All Filters
+            </button>
           </div>
         }
       </div>
     } @else {
-      <!-- Fallback when no active published program is available in the database -->
-      <div style="text-align: center; padding: 80px 20px; color: var(--font-color-p, #586069); max-width: 600px; margin: 0 auto;">
-        <i class="fa-solid fa-calendar-xmark" style="font-size: 48px; color: #ef4444; margin-bottom: 24px;"></i>
+      <!-- Fallback when no active published program is available -->
+      <div class="offline-state">
+        <i class="fa-solid fa-calendar-xmark"></i>
         <h2>GSoC Portal Offline</h2>
         <p>There is currently no active Google Summer of Code program configured or published. Please check back later or contact administrators.</p>
-        <a routerLink="/" style="display: inline-block; margin-top: 24px; color: var(--primary-color, #0366d6); text-decoration: underline;">Return to Home</a>
+        <a routerLink="/" class="btn-home">Return to Home</a>
       </div>
     }
   }

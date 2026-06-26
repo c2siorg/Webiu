@@ -1,29 +1,34 @@
 <div class="community">
   <div class="community-hero">
     <div class="community-hero-content">
-      <h1>Join our community</h1>
+      <h1>Phenomenally <span class="handwritten-accent">happy</span> to have you in our community</h1>
       <div class="media-icons">
         @for (icon of icons; track $index) {
-          <a class="icon-link" href="{{ icon.link }}"
-            ><img
+          <a class="icon-link" href="{{ icon.link }}" target="_blank" rel="noopener noreferrer">
+            <img
               class="icon"
               src="{{ icon.media_icon }}"
               alt="Social Media Icon"
-          /></a>
+            />
+          </a>
         }
       </div>
     </div>
-    <app-contributor-galaxy style="flex: 1; min-width: 290px; max-width: 480px;"></app-contributor-galaxy>
+    <app-community-mascot class="mascot-wrapper"></app-community-mascot>
   </div>
 
   <div class="team-details">
-    <p class="team-caption">Top Contributors</p>
-    <p class="team-description">
-      Dedicated individuals who are pushing the boundaries of technology
-    </p>
+    <div class="section-header">
+      <span class="accent-line"></span>
+      <h2 class="section-title">Top Contributors</h2>
+      <p class="section-subtitle">
+        Dedicated individuals who are pushing the boundaries of technology
+      </p>
+    </div>
 
     @if (isLoading) {
       <div class="loading-spinner">
+        <div class="spinner"></div>
         <p>Loading contributors...</p>
       </div>
     }
@@ -32,26 +37,38 @@
       <div class="team">
         <div class="team-align">
           @for (user of users; track $index) {
-            <div class="card">
+            <div class="card contributor-card" appRevealOnScroll [direction]="$index % 3 === 0 ? 'left' : ($index % 3 === 2 ? 'right' : 'center')" [revealDelay]="($index % 3) * 120">
               <div class="card-data">
+                <div class="avatar-container">
+                  <img class="user-avatar" [src]="user.avatar_url" alt="{{ user.login }} avatar" loading="lazy" />
+                  <span class="rank-badge">#{{ $index + 1 }}</span>
+                </div>
+                
                 <a
                   class="user-name"
                   href="https://github.com/{{ user.login }}"
                   target="_blank"
                   rel="noopener noreferrer"
-                  style="text-decoration: none; display: block"
                 >
                   {{ user.login }}
                 </a>
-                <p class="user-designation">{{ user.contributions }} commits</p>
+                
+                <span class="tag tag--purple commit-tag">{{ user.contributions }} commits</span>
+                
+                <div class="user-stats">
+                  <div class="stat-box">
+                    <span class="stat-count">{{ user.followers }}</span>
+                    <span class="stat-name">followers</span>
+                  </div>
+                </div>
               </div>
             </div>
           }
         </div>
 
         <div class="view-all-container">
-          <a routerLink="/contributors" class="view-all-link"
-            >View All Contributors &rarr;</a
+          <a routerLink="/contributors" class="view-all-link btn"
+            >View All Contributors <span class="arrow">&rarr;</span></a
           >
         </div>
       </div>

@@ -71,7 +71,7 @@
 
     @if (!isLoading) {
       <div class="contributors-grid">
-        @for (profile of displayProfiles; track trackByFn($index, profile)) {
+        @for (profile of displayProfiles; track profile.login; let i = $index) {
           <app-profile-card
             [login]="profile.login"
             [contributions]="profile.contributions"
@@ -80,6 +80,7 @@
             [followers]="profile.followers"
             [following]="profile.following"
             (usernameClick)="onUsernameClick($event)"
+            appRevealOnScroll [direction]="i % 3 === 0 ? 'left' : (i % 3 === 2 ? 'right' : 'center')" [revealDelay]="(i % 3) * 120"
           ></app-profile-card>
         }
       </div>

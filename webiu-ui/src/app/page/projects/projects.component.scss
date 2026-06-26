@@ -55,7 +55,7 @@
   padding: 0 clamp(1rem, 5vw, 2rem) clamp(48px, 8vw, 80px);
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 36px;
 }
 
 /* ── Search ─────────────────────────────────────────────────── */
@@ -126,7 +126,6 @@
 /* ── Card Grid ───────────────────────────────────────────────── */
 app-projects-card {
   display: block;
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) var(--card-delay, 0ms) both;
 }
 
 app-loading-spinner {

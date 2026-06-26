@@ -3,13 +3,23 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { getHomepageDetails } from '../../common/data/homepage';
 import { HttpClient } from '@angular/common/http';
-import { RepoIntelligenceCoreComponent } from '../../components/repo-intelligence-core/repo-intelligence-core.component';
+import { HeroNoiseBackgroundComponent } from '../../components/hero-noise-background/hero-noise-background.component';
 import { SearchService } from '../../services/search.service';
+import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
+import { ParallaxDirective } from '../../shared/parallax.directive';
+import { CountUpDirective } from '../../shared/count-up.directive';
 
 @Component({
   selector: 'app-homepage',
   standalone: true,
-  imports: [CommonModule, RouterModule, RepoIntelligenceCoreComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    HeroNoiseBackgroundComponent,
+    RevealOnScrollDirective,
+    ParallaxDirective,
+    CountUpDirective,
+  ],
   templateUrl: './homepage.component.html',
   styleUrl: './homepage.component.scss',
 })

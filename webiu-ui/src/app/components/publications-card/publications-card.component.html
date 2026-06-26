@@ -1,5 +1,41 @@
 <div class="publications__card">
-  <a [href]="link" target="_blank">{{ heading }}</a>
-  <p class="publications__card__issued__by">{{ issued_by }}</p>
-  <p class="publications__card__desc">{{ description }}</p>
+  <!-- Card Header Row (Icon + Badge) -->
+  <div class="publications__card__header">
+    <div class="publications__card__icon">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-lime)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+        <polyline points="14 2 14 8 20 8"></polyline>
+        <line x1="16" y1="13" x2="8" y2="13"></line>
+        <line x1="16" y1="17" x2="8" y2="17"></line>
+        <line x1="10" y1="9" x2="8" y2="9"></line>
+      </svg>
+    </div>
+    <span class="publications__card__badge">Research Paper</span>
+  </div>
+
+  <!-- Card Body -->
+  <div class="publications__card__body">
+    <h3 class="publications__card__title">
+      <a [href]="link" target="_blank" rel="noopener noreferrer">{{ heading }}</a>
+    </h3>
+    <p class="publications__card__issued__by">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline; vertical-align: middle; margin-right:4px;">
+        <circle cx="12" cy="12" r="10"></circle>
+        <polyline points="12 6 12 12 16 14"></polyline>
+      </svg>
+      {{ issued_by }}
+    </p>
+    <p class="publications__card__desc">{{ description }}</p>
+  </div>
+
+  <!-- Card Footer (CTA Action Link) -->
+  <div class="publications__card__footer">
+    <a [href]="link" target="_blank" rel="noopener noreferrer" class="publications__card__cta">
+      Read Publication 
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="cta-arrow">
+        <line x1="5" y1="12" x2="19" y2="12"></line>
+        <polyline points="12 5 19 12 12 19"></polyline>
+      </svg>
+    </a>
+  </div>
 </div>

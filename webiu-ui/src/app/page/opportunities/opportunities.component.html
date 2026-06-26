@@ -3,44 +3,63 @@
     
     <!-- Hero Section -->
     <div class="opp-hero">
-      <div class="opp-hero-text">
+      <div class="opp-hero-text" appRevealOnScroll direction="left" [revealDelay]="100">
         <h1>{{ data.hero.title }}</h1>
         <p class="subtitle">{{ data.hero.subtitle }}</p>
       </div>
-      <div class="opp-hero-image">
-        <img [src]="data.hero.image" alt="Opportunities Illustration" />
+      <div class="opp-hero-image" appRevealOnScroll direction="right" [revealDelay]="200">
+        <img [src]="data.hero.image" alt="Opportunities Illustration" class="illustration-img" />
       </div>
     </div>
 
     <!-- Content Sections -->
     <div class="opp-content">
-      @for (section of data.sections; track section.title) {
-        <section class="info-section">
-          <h2 class="main-heading">{{ section.title }}</h2>
-          <hr class="divider" />
-          <div class="details">
-            <h3>{{ section.subHeading }}</h3>
-            <p>{{ section.description }}</p>
-          </div>
-        </section>
-      }
-
-      <!-- Openings Section -->
-      <section class="info-section">
-        <h2 class="main-heading">{{ data.openings.title }}</h2>
-        <hr class="divider" />
-        
-        @for (opening of data.openings.list; track opening.id) {
-          <div class="opening-card">
-            <h3>{{ opening.id }}. {{ opening.title }}</h3>
-            <p class="org">{{ opening.organization }}</p>
-            <ul>
-              @for (req of opening.requirements; track req) {
-                <li>{{ req }}</li>
-              }
-            </ul>
+      <div class="info-grid">
+        @for (section of data.sections; track section.title; let idx = $index) {
+          <div class="card info-card" appRevealOnScroll [direction]="idx % 2 === 0 ? 'left' : 'right'" [revealDelay]="idx * 150 + 100">
+            <span class="accent-line"></span>
+            <h2 class="main-heading">{{ section.title }}</h2>
+            <div class="details">
+              <h3 class="sub-heading">{{ section.subHeading }}</h3>
+              <p class="description">{{ section.description }}</p>
+            </div>
           </div>
         }
+      </div>
+
+      <!-- Openings Section -->
+      <section class="openings-section" appRevealOnScroll direction="center" [revealDelay]="200">
+        <div class="section-header">
+          <span class="accent-line"></span>
+          <h2 class="section-title">{{ data.openings.title }}</h2>
+          <p class="section-subtitle">Join us in driving forward cutting-edge software solutions and open source standards.</p>
+        </div>
+        
+        <div class="openings-list">
+          @for (opening of data.openings.list; track opening.id) {
+            <div class="card opening-card" appRevealOnScroll direction="center" [revealDelay]="150">
+              <div class="opening-details">
+                <span class="org-badge">{{ opening.organization }}</span>
+                <h3 class="opening-title">{{ opening.title }}</h3>
+                
+                <div class="requirements-container">
+                  <span class="req-title">Preferred Stack:</span>
+                  <div class="req-tags">
+                    @for (req of opening.requirements; track req) {
+                      <span class="tag tag--purple">{{ req }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+              
+              <div class="opening-cta">
+                <button (click)="applyFor(opening.title)" class="btn btn-apply">
+                  Apply Now <span class="arrow">&rarr;</span>
+                </button>
+              </div>
+            </div>
+          }
+        </div>
       </section>
     </div>
 

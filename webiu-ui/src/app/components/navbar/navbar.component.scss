@@ -214,7 +214,7 @@
   align-items: stretch;
   justify-content: flex-start;
   overflow-y: auto;
-  animation: slideInFromRight 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  animation: slideInFromRight 0.28s cubic-bezier(0.16, 1, 0.3, 1);
 
   .sidebar-header {
     display: flex !important;
@@ -262,6 +262,15 @@
     border-bottom: 1px solid var(--border);
     gap: 12px;
     transition: background var(--transition-fast);
+    opacity: 0;
+    transform: translateX(30px);
+    animation: slideInMenuItem 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+    @for $i from 1 through 8 {
+      &:nth-child(#{$i + 1}) {
+        animation-delay: #{$i * 0.04}s;
+      }
+    }
 
     .menu-icon { width: 20px; height: 20px; opacity: 0.6; }
 
@@ -338,6 +347,13 @@
         p { color: var(--accent-purple); font-weight: 600; }
       }
     }
+  }
+}
+
+@keyframes slideInMenuItem {
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
@@ -508,19 +524,52 @@
     background: var(--surface-raised);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    transition: background var(--transition-fast);
+    transition: background var(--transition-fast), border-color var(--transition-fast);
     cursor: pointer;
-
-    img {
-      pointer-events: none;
-      user-select: none;
-      width: 20px;
-      height: 20px;
-    }
 
     &:hover {
       background: var(--accent-purple-dim);
       border-color: rgba(123, 140, 255, 0.25);
+
+      .hamburger-icon span {
+        background-color: var(--accent-purple);
+      }
+    }
+
+    .hamburger-icon {
+      width: 18px;
+      height: 12px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+
+      span {
+        display: block;
+        width: 100%;
+        height: 2px;
+        background-color: var(--text-primary);
+        border-radius: 2px;
+        transition: transform var(--transition-fast), opacity var(--transition-fast), background-color var(--transition-fast);
+        transform-origin: left center;
+
+        &:nth-child(1) { transform: none; }
+        &:nth-child(2) { opacity: 1; }
+        &:nth-child(3) { transform: none; }
+      }
+
+      &.open {
+        span:nth-child(1) {
+          transform: rotate(45deg) translate(1px, -1px);
+        }
+        span:nth-child(2) {
+          width: 0%;
+          opacity: 0;
+        }
+        span:nth-child(3) {
+          transform: rotate(-45deg) translate(1px, 1px);
+        }
+      }
     }
   }
 }
@@ -532,7 +581,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  z-index: 998;
+  z-index: 10001;
   background: var(--surface);
   border-top: 1px solid var(--border);
   backdrop-filter: blur(16px) saturate(180%);
@@ -593,11 +642,10 @@
 /* ── Body padding for bottom nav on mobile ───────────────────── */
 @media (max-width: 768px) {
   body {
-    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px));
+    padding-bottom: calc(60px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
-/* ── Animations ──────────────────────────────────────────────── */
 @keyframes slideInFromRight {
   from { transform: translateX(100%); }
   to   { transform: translateX(0); }
@@ -630,7 +678,7 @@
 
 @media (max-width: 768px) {
   .mobile-bottom-nav {
-    display: block;
+    display: block !important;
   }
 
   .navbar {
@@ -662,5 +710,9 @@
   .mobile-bottom-nav {
     background: rgba(16, 20, 26, 0.92);
     border-top-color: var(--border);
+
+    .mobile-bottom-nav__item img {
+      filter: invert(1);
+    }
   }
 }
