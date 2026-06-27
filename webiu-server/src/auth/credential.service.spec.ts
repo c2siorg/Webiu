@@ -27,13 +27,20 @@ describe('CredentialService', () => {
     service = module.get<CredentialService>(CredentialService);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
   describe('validateCredentials', () => {
-    it('should return false if admin is not found', async () => {
+    it('should return false if admin is not found and run dummy bcrypt comparison', async () => {
       adminRepositoryMock.findOne.mockResolvedValue(null);
+      const compareSpy = jest
+        .spyOn(bcrypt, 'compare')
+        .mockImplementation(() => Promise.resolve(false));
 
       const result = await service.validateCredentials('wrong-admin', 'pass');
 
@@ -41,6 +48,10 @@ describe('CredentialService', () => {
       expect(adminRepositoryMock.findOne).toHaveBeenCalledWith({
         where: { username: 'wrong-admin' },
       });
+      expect(compareSpy).toHaveBeenCalledWith(
+        'pass',
+        '$2b$10$s7v7P6yP0d7HUX7p5xP6uO5i2Zf9c0Z2O5eW8p3k8p5p5p5p5p5p5',
+      );
     });
 
     it('should return false if password comparison fails', async () => {
@@ -49,17 +60,14 @@ describe('CredentialService', () => {
         passwordHash: 'hashed-password',
       } as Admin;
       adminRepositoryMock.findOne.mockResolvedValue(mockAdmin);
-      jest
+      const compareSpy = jest
         .spyOn(bcrypt, 'compare')
         .mockImplementation(() => Promise.resolve(false));
 
       const result = await service.validateCredentials('admin', 'wrong-pass');
 
       expect(result).toBe(false);
-      expect(bcrypt.compare).toHaveBeenCalledWith(
-        'wrong-pass',
-        'hashed-password',
-      );
+      expect(compareSpy).toHaveBeenCalledWith('wrong-pass', 'hashed-password');
     });
 
     it('should return true and update lastLoginAt if credentials are valid', async () => {
@@ -69,7 +77,7 @@ describe('CredentialService', () => {
         lastLoginAt: null,
       } as Admin;
       adminRepositoryMock.findOne.mockResolvedValue(mockAdmin);
-      jest
+      const compareSpy = jest
         .spyOn(bcrypt, 'compare')
         .mockImplementation(() => Promise.resolve(true));
 
@@ -78,6 +86,10 @@ describe('CredentialService', () => {
       expect(result).toBe(true);
       expect(mockAdmin.lastLoginAt).toBeInstanceOf(Date);
       expect(adminRepositoryMock.save).toHaveBeenCalledWith(mockAdmin);
+      expect(compareSpy).toHaveBeenCalledWith(
+        'correct-pass',
+        'hashed-password',
+      );
     });
   });
 });

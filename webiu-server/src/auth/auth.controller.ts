@@ -19,6 +19,7 @@ import { AuditLogService } from '../audit-log/audit-log.service';
 import { UseGuards } from '@nestjs/common';
 import { AdminGuard } from './guards/admin.guard';
 import { getCookieOptions } from '../common/utils/cookie-helper';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -31,6 +32,7 @@ export class AuthController {
     private readonly auditLogService: AuditLogService,
   ) {}
 
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @Post('login')
   @HttpCode(200)
   async login(

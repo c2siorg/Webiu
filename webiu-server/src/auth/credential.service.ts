@@ -23,6 +23,10 @@ export class CredentialService {
     });
 
     if (!admin) {
+      // Execute dummy bcrypt check to equalize timing profile (approx 80-100ms)
+      const dummyHash =
+        '$2b$10$s7v7P6yP0d7HUX7p5xP6uO5i2Zf9c0Z2O5eW8p3k8p5p5p5p5p5p5';
+      await bcrypt.compare(password, dummyHash);
       return false;
     }
 
