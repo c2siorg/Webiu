@@ -4,6 +4,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GqlThrottlerGuard } from './graphql/gql-throttler.guard';
+import { MaintenanceGuard } from './auth/guards/maintenance.guard';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import * as depthLimit from 'graphql-depth-limit';
@@ -66,6 +67,11 @@ import { AuditLogModule } from './audit-log/audit-log.module';
     {
       provide: APP_GUARD,
       useClass: GqlThrottlerGuard,
+    },
+    // Enforce Maintenance Mode globally — intercepts HTTP and GraphQL contexts
+    {
+      provide: APP_GUARD,
+      useClass: MaintenanceGuard,
     },
   ],
 })
