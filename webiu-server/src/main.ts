@@ -63,7 +63,10 @@ async function bootstrap() {
 
   app.enableCors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server, or same-origin requests).
+      // Note: Allowing no-origin requests with credentials is a conscious design choice to support
+      // non-browser clients (like native scripts, cron tasks, or terminal utilities) while ensuring
+      // browser-based clients are strictly gated by the CORS whitelist.
       if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
         callback(null, true);
       } else {

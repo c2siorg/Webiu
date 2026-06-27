@@ -40,6 +40,7 @@ export class ProjectsComponent implements OnInit {
   private destroyRef = inject(DestroyRef);
   private projectCacheService = inject(ProjectCacheService);
   private http = inject(HttpClient);
+  private fallbackData: ProjectResponse | null = null;
 
   ngOnInit(): void {
     this.metaService.updateTag({
@@ -99,27 +100,44 @@ export class ProjectsComponent implements OnInit {
       },
       error: () => {
         if (!this.searchTerm) {
-          this.http.get<ProjectResponse>('assets/data/projects.json').subscribe({
-            next: (data: ProjectResponse) => {
-              this.serverTotal = data.total;
-              const start = (this.currentPage - 1) * this.projectsPerPage;
-              this.displayProjects = data.repositories.slice(
-                start,
-                start + this.projectsPerPage,
-              );
-              this.totalPages = Math.max(
-                1,
-                Math.ceil(this.serverTotal / this.projectsPerPage),
-              );
-              this.isLoading = false;
-            },
-            error: () => {
-              this.displayProjects = [];
-              this.serverTotal = 0;
-              this.totalPages = 1;
-              this.isLoading = false;
-            }
-          });
+          // When the backend is down, we fall back to loading the local static projects.json backup.
+          // We cache it locally to avoid repeatedly downloading the full dataset on every page change.
+          if (this.fallbackData) {
+            this.serverTotal = this.fallbackData.total;
+            const start = (this.currentPage - 1) * this.projectsPerPage;
+            this.displayProjects = this.fallbackData.repositories.slice(
+              start,
+              start + this.projectsPerPage,
+            );
+            this.totalPages = Math.max(
+              1,
+              Math.ceil(this.serverTotal / this.projectsPerPage),
+            );
+            this.isLoading = false;
+          } else {
+            this.http.get<ProjectResponse>('assets/data/projects.json').subscribe({
+              next: (data: ProjectResponse) => {
+                this.fallbackData = data;
+                this.serverTotal = data.total;
+                const start = (this.currentPage - 1) * this.projectsPerPage;
+                this.displayProjects = data.repositories.slice(
+                  start,
+                  start + this.projectsPerPage,
+                );
+                this.totalPages = Math.max(
+                  1,
+                  Math.ceil(this.serverTotal / this.projectsPerPage),
+                );
+                this.isLoading = false;
+              },
+              error: () => {
+                this.displayProjects = [];
+                this.serverTotal = 0;
+                this.totalPages = 1;
+                this.isLoading = false;
+              }
+            });
+          }
         } else {
           // Global error interceptor will handle the notification
           this.displayProjects = [];
