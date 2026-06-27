@@ -12,6 +12,7 @@ describe('CredentialService', () => {
     adminRepositoryMock = {
       findOne: jest.fn(),
       save: jest.fn(),
+      update: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -72,6 +73,7 @@ describe('CredentialService', () => {
 
     it('should return true and update lastLoginAt if credentials are valid', async () => {
       const mockAdmin = {
+        id: 'some-uuid',
         username: 'admin',
         passwordHash: 'hashed-password',
         lastLoginAt: null,
@@ -85,7 +87,9 @@ describe('CredentialService', () => {
 
       expect(result).toBe(true);
       expect(mockAdmin.lastLoginAt).toBeInstanceOf(Date);
-      expect(adminRepositoryMock.save).toHaveBeenCalledWith(mockAdmin);
+      expect(adminRepositoryMock.update).toHaveBeenCalledWith('some-uuid', {
+        lastLoginAt: expect.any(Date),
+      });
       expect(compareSpy).toHaveBeenCalledWith(
         'correct-pass',
         'hashed-password',
