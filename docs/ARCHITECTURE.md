@@ -359,6 +359,12 @@ The backend container runs on Render as a Web Service.
 ### B. Frontend Deployment (GitHub Pages)
 The frontend is compiled into static HTML/CSS/JS files and hosted on GitHub Pages.
 * **Build Action**: Built using `npx ng build --configuration production --base-href=/Webiu/`.
+* **Custom API URL Injection**:
+  * By default, the production build points to `https://api.c2si.org`.
+  * You can override the API URL at build-time by supplying the `--define.API_URL` parameter to the Angular compiler:
+    ```bash
+    npx ng build --configuration production --define.API_URL="\"https://my-custom-api.com\""
+    ```
 * **SPA Routing Fallback (`404.html`)**:
   * Since GitHub Pages is a static file server, refreshing or directly entering a deep subroute (like `/projects` or `/admin`) returns a `404 Not Found` page instead of routing it to Angular.
   * **Solution**: Our build workflow copies `index.html` to `404.html` in the build output (`cp dist/webiu/browser/index.html dist/webiu/browser/404.html`).
