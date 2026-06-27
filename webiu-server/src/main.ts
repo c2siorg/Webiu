@@ -4,6 +4,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import helmet from 'helmet';
 import * as compression from 'compression';
+import { getRepositoryToken } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Admin } from './database/entities/admin.entity';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { rawBody: true });
@@ -14,14 +17,28 @@ async function bootstrap() {
   expressApp.set('trust proxy', 1);
 
   // 1. Startup Validation
+  const adminRepository = app.get<Repository<Admin>>(getRepositoryToken(Admin));
+  let adminExists = false;
+  try {
+    const adminCount = await adminRepository.count();
+    adminExists = adminCount > 0;
+  } catch (err) {
+    console.warn(
+      `[Startup Warning] Could not check admin existence from database: ${err.message}`,
+    );
+  }
+
   const criticalEnvVars = [
     'GITHUB_ACCESS_TOKEN',
     'JWT_SECRET',
-    'ADMIN_USERNAME',
-    'ADMIN_PASSWORD',
     'DATABASE_URL',
     'GITHUB_WEBHOOK_SECRET',
   ];
+
+  if (!adminExists) {
+    criticalEnvVars.push('ADMIN_USERNAME', 'ADMIN_PASSWORD');
+  }
+
   const missing = criticalEnvVars.filter(
     (varName) => !configService.get(varName),
   );
