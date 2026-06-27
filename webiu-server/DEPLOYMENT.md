@@ -39,12 +39,14 @@ The backend relies on the following environment variables. Ensure these are defi
 | `NODE_ENV` | Yes | App environment (`development`, `production`, `test`) |
 | `PORT` | No | Server port (defaults to `5050` if omitted) |
 | `JWT_SECRET` | **Yes (Critical)** | Secret key used to sign session/admin JWTs |
-| `ADMIN_USERNAME` | **Yes (Critical)** | Administrator login username |
-| `ADMIN_PASSWORD` | **Yes (Critical)** | Administrator login password |
+| `ADMIN_USERNAME` | **Conditional (Critical)** | Administrator login username (only required if no administrator exists in the database) |
+| `ADMIN_PASSWORD` | **Conditional (Critical)** | Administrator login password (only required if no administrator exists in the database) |
 | `GITHUB_ACCESS_TOKEN` | **Yes (Critical)** | Personal Access Token to query GitHub API rates without limits |
 | `GITHUB_ORG_NAME` | No | GitHub Organization to query (defaults to `c2siorg` if omitted) |
 | `FRONTEND_BASE_URL` | Yes | Comma-separated list of allowed CORS origins (e.g. `http://localhost:4200,https://c2siorg.github.io`) |
-| `DATABASE_URL` | No (Future) | PostgreSQL connection URI for persistence layer |
+| `DATABASE_URL` | Yes | PostgreSQL connection URI for persistence layer |
+| `DATABASE_SSL` | No | Set to `true` or `false` to override auto SSL detection (defaults to true if url has render.com or NODE_ENV is production) |
+| `DATABASE_REJECT_UNAUTHORIZED` | No | Set to `true` or `false` to control TLS certificate validation (defaults to false for render.com URLs, true otherwise) |
 | `BACKEND_BASE_URL` | Yes | Public absolute URL of this backend (used for transactional email links) |
 | `GMAIL_USER` | No | Google Account address for nodemailer SMTP server |
 | `GMAIL_PASSWORD` | No | App password for Gmail SMTP authentication |
@@ -54,9 +56,11 @@ The backend relies on the following environment variables. Ensure these are defi
 ## 3. Startup Validation
 
 The backend performs validation of **critical** environment variables upon startup. 
-If `GITHUB_ACCESS_TOKEN`, `JWT_SECRET`, `ADMIN_USERNAME`, or `ADMIN_PASSWORD` is missing, the bootstrap process will log a clear error message:
+If the database contains no administrator accounts, `ADMIN_USERNAME` and `ADMIN_PASSWORD` are dynamically added to the list of critical variables so that the initial administrator can be seeded.
+
+If any required critical environment variables are missing, the bootstrap process will log a clear error message:
 ```
-[Startup Failure] Critical environment variables are missing: GITHUB_ACCESS_TOKEN, JWT_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD
+[Startup Failure] Critical environment variables are missing: GITHUB_ACCESS_TOKEN, JWT_SECRET, DATABASE_URL, GITHUB_WEBHOOK_SECRET, ADMIN_USERNAME, ADMIN_PASSWORD
 ```
 And the process will exit immediately with code `1` to prevent running in an unauthenticated or non-functional state.
 
