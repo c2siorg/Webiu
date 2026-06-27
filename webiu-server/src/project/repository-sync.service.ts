@@ -20,6 +20,53 @@ export class RepositorySyncService implements OnApplicationBootstrap {
     private readonly githubService: GithubService,
   ) {}
 
+  private async runLocked<T>(
+    repoName: string,
+    fn: () => Promise<T>,
+  ): Promise<T> {
+    const lockId = this.getLockId(repoName);
+    if (
+      !this.repoRepository.manager ||
+      !this.repoRepository.manager.connection
+    ) {
+      return await fn();
+    }
+    const queryRunner =
+      this.repoRepository.manager.connection.createQueryRunner();
+    await queryRunner.connect();
+
+    try {
+      this.logger.log(
+        `Acquiring database advisory lock for repository: ${repoName} (ID: ${lockId})`,
+      );
+      await queryRunner.query('SELECT pg_advisory_lock($1)', [lockId]);
+      this.logger.log(`Advisory lock acquired for repository: ${repoName}`);
+
+      return await fn();
+    } finally {
+      try {
+        await queryRunner.query('SELECT pg_advisory_unlock($1)', [lockId]);
+        this.logger.log(`Advisory lock released for repository: ${repoName}`);
+      } catch (err) {
+        this.logger.error(
+          `Failed to release advisory lock for repository ${repoName}:`,
+          err.message,
+        );
+      } finally {
+        await queryRunner.release();
+      }
+    }
+  }
+
+  private getLockId(str: string): number {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+      hash = (hash << 5) - hash + str.charCodeAt(i);
+      hash |= 0; // Convert to 32bit integer
+    }
+    return Math.abs(hash);
+  }
+
   async onApplicationBootstrap() {
     this.logger.log(
       'Checking if initial repository synchronization is required...',
@@ -47,7 +94,7 @@ export class RepositorySyncService implements OnApplicationBootstrap {
     }
   }
 
-  async saveRepositoryData(
+  async saveRepositoryDataInternal(
     repo: RepositoryEntity,
     gitRepo: any,
     source: string,
@@ -73,6 +120,16 @@ export class RepositorySyncService implements OnApplicationBootstrap {
     const savedRepo = await this.repoRepository.save(repo);
     await this.syncContributorsForRepository(savedRepo);
     return savedRepo;
+  }
+
+  async saveRepositoryData(
+    repo: RepositoryEntity,
+    gitRepo: any,
+    source: string,
+  ): Promise<RepositoryEntity> {
+    return this.runLocked(gitRepo.name, async () => {
+      return this.saveRepositoryDataInternal(repo, gitRepo, source);
+    });
   }
 
   async syncContributorsForRepository(repo: RepositoryEntity): Promise<void> {
@@ -212,30 +269,41 @@ export class RepositorySyncService implements OnApplicationBootstrap {
         return;
       }
 
-      const githubRepoId = String(gitRepo.id);
-      let repo = await this.repoRepository.findOne({
-        where: { githubRepoId },
+      await this.runLocked(repoName, async () => {
+        const githubRepoId = String(gitRepo.id);
+        let repo = await this.repoRepository.findOne({
+          where: { githubRepoId },
+        });
+
+        if (!repo) {
+          repo = this.repoRepository.create({ githubRepoId });
+        }
+
+        await this.saveRepositoryDataInternal(repo, gitRepo, source);
       });
-
-      if (!repo) {
-        repo = this.repoRepository.create({ githubRepoId });
-      }
-
-      await this.saveRepositoryData(repo, gitRepo, source);
       this.logger.log(`Synchronized repository ${repoName} successfully.`);
     } catch (error) {
       this.logger.error(
         `Failed to sync repository ${repoName}:`,
         error.message,
       );
-      const repo = await this.repoRepository.findOne({
-        where: { name: repoName },
-      });
-      if (repo) {
-        repo.syncStatus = 'failed';
-        repo.syncError = error.message;
-        repo.reconciliationSource = source;
-        await this.repoRepository.save(repo);
+      try {
+        await this.runLocked(repoName, async () => {
+          const repo = await this.repoRepository.findOne({
+            where: { name: repoName },
+          });
+          if (repo) {
+            repo.syncStatus = 'failed';
+            repo.syncError = error.message;
+            repo.reconciliationSource = source;
+            await this.repoRepository.save(repo);
+          }
+        });
+      } catch (logErr) {
+        this.logger.error(
+          `Failed to log sync error for ${repoName}:`,
+          logErr.message,
+        );
       }
       throw error;
     }
@@ -245,29 +313,33 @@ export class RepositorySyncService implements OnApplicationBootstrap {
     repoName: string,
     source: string = 'webhook',
   ): Promise<void> {
-    this.logger.log(`Soft-deleting (marking inactive) repository: ${repoName}`);
-    const repo = await this.repoRepository.findOne({
-      where: { name: repoName },
-    });
-    if (repo) {
-      repo.isActive = false;
-      repo.syncStatus = 'success';
-      repo.syncError = null;
-      repo.reconciliationSource = source;
-      repo.lastSyncedAt = new Date();
-
-      if (source === 'webhook') {
-        repo.lastWebhookAt = new Date();
-      } else if (source === 'cron') {
-        repo.lastReconciliationAt = new Date();
-      }
-
-      await this.repoRepository.save(repo);
-      this.logger.log(`Marked repository ${repoName} as inactive.`);
-    } else {
+    await this.runLocked(repoName, async () => {
       this.logger.log(
-        `Repository ${repoName} not found in database for deactivation.`,
+        `Soft-deleting (marking inactive) repository: ${repoName}`,
       );
-    }
+      const repo = await this.repoRepository.findOne({
+        where: { name: repoName },
+      });
+      if (repo) {
+        repo.isActive = false;
+        repo.syncStatus = 'success';
+        repo.syncError = null;
+        repo.reconciliationSource = source;
+        repo.lastSyncedAt = new Date();
+
+        if (source === 'webhook') {
+          repo.lastWebhookAt = new Date();
+        } else if (source === 'cron') {
+          repo.lastReconciliationAt = new Date();
+        }
+
+        await this.repoRepository.save(repo);
+        this.logger.log(`Marked repository ${repoName} as inactive.`);
+      } else {
+        this.logger.log(
+          `Repository ${repoName} not found in database for deactivation.`,
+        );
+      }
+    });
   }
 }

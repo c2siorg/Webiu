@@ -49,18 +49,140 @@ export class GithubService {
     return this.orgName;
   }
 
+  private async getWithRetry<T = any>(
+    url: string,
+    config: any = {},
+  ): Promise<import('axios').AxiosResponse<T>> {
+    const maxRetries = 3;
+    let attempt = 0;
+
+    while (attempt < maxRetries) {
+      try {
+        const response = await axios.get<T>(url, {
+          ...config,
+          headers: {
+            ...this.headers,
+            ...config.headers,
+          },
+        });
+
+        const remaining = response.headers
+          ? response.headers['x-ratelimit-remaining']
+          : undefined;
+        if (remaining && parseInt(String(remaining), 10) === 0) {
+          const resetTime = response.headers
+            ? response.headers['x-ratelimit-reset']
+            : undefined;
+          if (resetTime) {
+            const waitTimeMs =
+              parseInt(String(resetTime), 10) * 1000 - Date.now();
+            if (waitTimeMs > 0) {
+              this.logger.warn(
+                `GitHub API limit exhausted. Proactively backing off for ${Math.ceil(
+                  waitTimeMs / 1000,
+                )} seconds.`,
+              );
+              await new Promise((resolve) =>
+                setTimeout(resolve, waitTimeMs + 1000),
+              );
+            }
+          }
+        }
+
+        return response;
+      } catch (error) {
+        attempt++;
+        const axiosError = error as AxiosError;
+        const status = axiosError.response?.status;
+
+        if (status === 403 || status === 429) {
+          const resHeaders = axiosError.response?.headers || {};
+          const retryAfter = resHeaders['retry-after'];
+          const resetTime = resHeaders['x-ratelimit-reset'];
+
+          let delayMs = 1000 * Math.pow(2, attempt);
+
+          if (retryAfter) {
+            delayMs = parseInt(String(retryAfter), 10) * 1000;
+          } else if (resetTime) {
+            delayMs = parseInt(String(resetTime), 10) * 1000 - Date.now();
+          }
+
+          if (delayMs > 0 && attempt < maxRetries) {
+            this.logger.warn(
+              `GitHub API rate limit/abuse limit hit (status ${status}). Retrying in ${Math.ceil(
+                delayMs / 1000,
+              )}s (Attempt ${attempt}/${maxRetries})...`,
+            );
+            await new Promise((resolve) => setTimeout(resolve, delayMs + 1000));
+            continue;
+          }
+        }
+
+        throw error;
+      }
+    }
+
+    throw new Error(
+      `GitHub request to ${url} failed after ${maxRetries} attempts`,
+    );
+  }
+
+  private async githubGet<T = any>(
+    url: string,
+    ttlSeconds: number = CACHE_TTL,
+    cacheKey?: string,
+  ): Promise<T> {
+    const key = cacheKey || `github_raw_get:${url}`;
+    const rawEntry = this.cacheService.getRawEntry<T>(key);
+
+    if (rawEntry && Date.now() <= rawEntry.expiresAt) {
+      return rawEntry.data;
+    }
+
+    const etag = rawEntry?.etag;
+    const headers: Record<string, string> = {};
+    if (etag) {
+      headers['If-None-Match'] = etag;
+    }
+
+    try {
+      const response = await this.getWithRetry<T>(url, {
+        headers,
+        validateStatus: (status) =>
+          (status >= 200 && status < 300) || status === 304,
+      });
+
+      if (response.status === 304) {
+        if (rawEntry) {
+          this.cacheService.set(key, rawEntry.data, ttlSeconds, etag);
+          return rawEntry.data;
+        }
+      }
+
+      const newEtag = response.headers ? response.headers['etag'] : undefined;
+      this.cacheService.set(key, response.data, ttlSeconds, newEtag);
+      return response.data;
+    } catch (error) {
+      if (rawEntry) {
+        this.logger.warn(
+          `GitHub API request failed, falling back to cached entry for: ${url}`,
+        );
+        return rawEntry.data;
+      }
+      throw error;
+    }
+  }
+
   private async fetchAllPages(url: string): Promise<any[]> {
     const results: any[] = [];
     let page = 1;
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
-        `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
-      );
+      const pageUrl = `${url}${separator}per_page=100&page=${page}`;
+      const data = await this.githubGet<any[]>(pageUrl);
 
-      const data = response.data;
       if (!Array.isArray(data) || data.length === 0) break;
 
       results.push(...data);
@@ -78,12 +200,10 @@ export class GithubService {
 
     while (true) {
       const separator = url.includes('?') ? '&' : '?';
-      const response = await axios.get(
-        `${url}${separator}per_page=100&page=${page}`,
-        { headers: this.headers },
-      );
+      const pageUrl = `${url}${separator}per_page=100&page=${page}`;
+      const data = await this.githubGet<any>(pageUrl);
 
-      const items = response.data.items || [];
+      const items = data.items || [];
       if (items.length === 0) break;
 
       results.push(...items);
@@ -148,9 +268,8 @@ export class GithubService {
     if (cached !== null) return cached;
 
     try {
-      const response = await axios.get(
+      const response = await this.getWithRetry(
         `${this.baseUrl}/repos/${this.orgName}/${repoName}/pulls?state=all&per_page=1`,
-        { headers: this.headers },
       );
 
       let count = 0;
@@ -171,34 +290,19 @@ export class GithubService {
     }
   }
 
-  async getOrgRepos(): Promise<any[]>;
-  async getOrgRepos(page: number, perPage: number): Promise<any[]>;
   async getOrgRepos(page?: number, perPage?: number): Promise<any[]> {
     if (page !== undefined && perPage !== undefined) {
       const cacheKey = `org_repos_${this.orgName}_p${page}_pp${perPage}`;
-      const cached = this.cacheService.get<any[]>(cacheKey);
-      if (cached) return cached;
-
-      let repos: any[];
       try {
-        const response = await axios.get(
-          `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-          { headers: this.headers },
-        );
-        repos = response.data;
+        const url = `${this.baseUrl}/orgs/${this.orgName}/repos?per_page=${perPage}&page=${page}`;
+        return await this.githubGet<any[]>(url, CACHE_TTL, cacheKey);
       } catch (error) {
         if (error instanceof AxiosError && error.response?.status === 404) {
-          const response = await axios.get(
-            `${this.baseUrl}/users/${this.orgName}/repos?per_page=${perPage}&page=${page}`,
-            { headers: this.headers },
-          );
-          repos = response.data;
-        } else {
-          throw error;
+          const url = `${this.baseUrl}/users/${this.orgName}/repos?per_page=${perPage}&page=${page}`;
+          return await this.githubGet<any[]>(url, CACHE_TTL, cacheKey);
         }
+        throw error;
       }
-      this.cacheService.set(cacheKey, repos, CACHE_TTL);
-      return repos;
     }
 
     const cacheKey = `org_repos_${this.orgName}`;
@@ -229,17 +333,9 @@ export class GithubService {
    */
   async getRepo(repoName: string): Promise<GithubRepo | null> {
     const cacheKey = `repo_${this.orgName}_${repoName}`;
-    const cached = this.cacheService.get<GithubRepo>(cacheKey);
-    if (cached) return cached;
-
+    const url = `${this.baseUrl}/repos/${this.orgName}/${repoName}`;
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/repos/${this.orgName}/${repoName}`,
-        { headers: this.headers },
-      );
-      const repo = response.data;
-      this.cacheService.set(cacheKey, repo, CACHE_TTL);
-      return repo;
+      return await this.githubGet<GithubRepo>(url, CACHE_TTL, cacheKey);
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.status === 404) {
         return null;
@@ -258,9 +354,8 @@ export class GithubService {
     if (cached) return cached;
 
     try {
-      const response = await axios.get(
+      const response = await this.getWithRetry(
         `${this.baseUrl}/repos/${this.orgName}/${repoName}/stats/commit_activity`,
-        { headers: this.headers },
       );
 
       // Handle 202 Accepted or empty: Try fallback to participation stats
@@ -296,9 +391,8 @@ export class GithubService {
     if (cached) return cached;
 
     try {
-      const response = await axios.get(
+      const response = await this.getWithRetry(
         `${this.baseUrl}/repos/${this.orgName}/${repoName}/stats/participation`,
-        { headers: this.headers },
       );
 
       if (response.data && response.data.all) {
@@ -324,17 +418,9 @@ export class GithubService {
    */
   async getLatestRelease(repoName: string): Promise<any | null> {
     const cacheKey = `latest_release_${this.orgName}_${repoName}`;
-    const cached = this.cacheService.get<any>(cacheKey);
-    if (cached) return cached;
-
+    const url = `${this.baseUrl}/repos/${this.orgName}/${repoName}/releases/latest`;
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/repos/${this.orgName}/${repoName}/releases/latest`,
-        { headers: this.headers },
-      );
-      const release = response.data;
-      this.cacheService.set(cacheKey, release, CACHE_TTL);
-      return release;
+      return await this.githubGet(url, CACHE_TTL, cacheKey);
     } catch (error: unknown) {
       if (error instanceof AxiosError && error.response?.status === 404) {
         return null;
@@ -377,17 +463,13 @@ export class GithubService {
    */
   async getRepoLanguages(repoName: string): Promise<Record<string, number>> {
     const cacheKey = `languages_${this.orgName}_${repoName}`;
-    const cached = this.cacheService.get<Record<string, number>>(cacheKey);
-    if (cached) return cached;
-
+    const url = `${this.baseUrl}/repos/${this.orgName}/${repoName}/languages`;
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/repos/${this.orgName}/${repoName}/languages`,
-        { headers: this.headers },
+      return await this.githubGet<Record<string, number>>(
+        url,
+        CACHE_TTL,
+        cacheKey,
       );
-      const languages = response.data;
-      this.cacheService.set(cacheKey, languages, CACHE_TTL);
-      return languages;
     } catch (error: unknown) {
       const axiosErr = error instanceof AxiosError ? error : null;
       this.logger.error(
@@ -451,11 +533,9 @@ export class GithubService {
         // Note: Search API results for PRs don't include merged_at at the top level usually
         if (pr.state === 'closed' && !pr.merged_at && pr.pull_request?.url) {
           try {
-            const response = await axios.get(pr.pull_request.url, {
-              headers: this.headers,
-            });
-            if (response.data.merged_at) {
-              pr.merged_at = response.data.merged_at;
+            const data = await this.githubGet<any>(pr.pull_request.url, 3600);
+            if (data.merged_at) {
+              pr.merged_at = data.merged_at;
             }
           } catch {
             // Ignore errors for individual PR fetches to avoid failing the whole request
@@ -477,14 +557,8 @@ export class GithubService {
 
   async getPublicUserProfile(username: string): Promise<any> {
     const cacheKey = `user_profile_${username}`;
-    const cached = this.cacheService.get<any>(cacheKey);
-    if (cached) return cached;
-
-    const response = await axios.get(`${this.baseUrl}/users/${username}`, {
-      headers: this.headers,
-    });
-    this.cacheService.set(cacheKey, response.data);
-    return response.data;
+    const url = `${this.baseUrl}/users/${username}`;
+    return this.githubGet(url, 3600 * 24 * 7, cacheKey); // cache for 7 days
   }
 
   async getUserFollowersAndFollowing(username: string): Promise<{
@@ -502,16 +576,13 @@ export class GithubService {
 
     try {
       // ✅ Correct source of truth: GitHub profile fields (not list endpoints capped at 30)
-      const userResponse = await axios.get(
+      const response = await this.getWithRetry(
         `${this.baseUrl}/users/${username}`,
-        {
-          headers: this.headers,
-        },
       );
 
       const result = {
-        followers: userResponse.data?.followers ?? 0,
-        following: userResponse.data?.following ?? 0,
+        followers: response.data?.followers ?? 0,
+        following: response.data?.following ?? 0,
       };
 
       this.cacheService.set(cacheKey, result);
