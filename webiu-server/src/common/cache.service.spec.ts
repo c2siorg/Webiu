@@ -194,4 +194,38 @@ describe('CacheService', () => {
       expect(service.getEtag('key')).toBe('"etag-v1"');
     });
   });
+
+  describe('getRawEntry()', () => {
+    it('should return undefined if key does not exist', () => {
+      expect(service.getRawEntry('nonexistent')).toBeUndefined();
+    });
+
+    it('should return cache entry with data and etag, even if expired', () => {
+      jest.useFakeTimers();
+      jest.setSystemTime(0);
+
+      service.set('key', 'value', 10, '"etag-v1"');
+      const entry = service.getRawEntry('key');
+      expect(entry).toBeDefined();
+      expect(entry?.data).toBe('value');
+      expect(entry?.etag).toBe('"etag-v1"');
+
+      // Advance time past expiry
+      jest.advanceTimersByTime(11_000);
+
+      // getRawEntry should still return the entry before eviction
+      const expiredEntry = service.getRawEntry('key');
+      expect(expiredEntry).toBeDefined();
+      expect(expiredEntry?.data).toBe('value');
+      expect(expiredEntry?.etag).toBe('"etag-v1"');
+
+      // get() should return null and evict the entry
+      expect(service.get('key')).toBeNull();
+
+      // Now getRawEntry should return undefined
+      expect(service.getRawEntry('key')).toBeUndefined();
+
+      jest.useRealTimers();
+    });
+  });
 });

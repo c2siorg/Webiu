@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-interface CacheEntry<T> {
+export interface CacheEntry<T> {
   data: T;
   expiresAt: number;
   /** ETag header value returned by GitHub for this response, if any. */
@@ -71,6 +71,13 @@ export class CacheService {
     }
 
     return entry.etag;
+  }
+
+  /**
+   * Expose cached items (even if expired) for ETag verification/conditional requests.
+   */
+  getRawEntry<T = unknown>(key: string): CacheEntry<T> | undefined {
+    return this.cache.get(key) as CacheEntry<T> | undefined;
   }
 
   set<T = unknown>(
