@@ -2,7 +2,7 @@
   <div class="back-navigation">
     <a routerLink="/projects" class="back-link">
       <i class="fas fa-arrow-left"></i>
-      Back to Projects
+      <span>Back to Projects</span>
     </a>
   </div>
 
@@ -33,12 +33,18 @@
   }
 
   @if (!loading && !error && project) {
-    <app-project-orbit [projectName]="projectName!"></app-project-orbit>
+    <div class="project-hero">
+      <app-project-orbit [projectName]="projectName!" [project]="project"></app-project-orbit>
+    </div>
 
-    <app-project-basic-info [project]="project"></app-project-basic-info>
-
-    <app-project-insights [projectName]="projectName!"></app-project-insights>
-
-    <app-project-contributors [projectName]="projectName!"></app-project-contributors>
+    <div class="project-dashboard-grid">
+      <div class="grid-main-column">
+        <app-project-basic-info [project]="project"></app-project-basic-info>
+        <app-project-contributors [projectName]="projectName!"></app-project-contributors>
+      </div>
+      <div class="grid-sidebar-column">
+        <app-project-insights [projectName]="projectName!"></app-project-insights>
+      </div>
+    </div>
   }
 </div>

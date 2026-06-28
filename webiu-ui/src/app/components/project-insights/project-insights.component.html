@@ -1,80 +1,119 @@
 <div class="insights-section">
-  <header class="section-header">
-    <h3>Insights & Metadata</h3>
-    @if (insights) {
-      <div class="badge-row">
-        @if (insights.badges) {
-          <span
-            class="insight-badge"
-            [ngClass]="insights.badges.maturity.label.toLowerCase()"
-            [attr.title]="insights.badges.maturity.description"
-          >
-            {{ insights.badges.maturity.label }}
-          </span>
-          <span
-            class="insight-badge"
-            [ngClass]="insights.badges.maintenance.label.toLowerCase()"
-            [attr.title]="insights.badges.maintenance.description"
-          >
-            {{ insights.badges.maintenance.label }}
-          </span>
-          <span
-            class="insight-badge complexity"
-            [attr.title]="insights.badges.complexity.description"
-          >
-            {{ insights.badges.complexity.label }}
-          </span>
-          <span
-            class="insight-badge activity"
-            [ngClass]="insights.badges.activity_level.label.toLowerCase()"
-            [attr.title]="insights.badges.activity_level.description"
-          >
-            {{ insights.badges.activity_level.label }} Activity
-          </span>
+  <div class="insights-card">
+    <header class="insights-header">
+      <div class="header-title">
+        <h3>Insights & Metadata</h3>
+      </div>
+      @if (insights) {
+        <div class="badge-row">
+          @if (insights.badges) {
+            <span
+              class="insight-badge maturity-badge"
+              [ngClass]="insights.badges.maturity.label.toLowerCase()"
+              [attr.title]="insights.badges.maturity.description"
+            >
+              <span class="badge-dot"></span>
+              {{ insights.badges.maturity.label }}
+            </span>
+            <span
+              class="insight-badge maintenance-badge"
+              [ngClass]="insights.badges.maintenance.label.toLowerCase()"
+              [attr.title]="insights.badges.maintenance.description"
+            >
+              <span class="badge-dot"></span>
+              {{ insights.badges.maintenance.label }}
+            </span>
+            <span
+              class="insight-badge complexity-badge"
+              [attr.title]="insights.badges.complexity.description"
+            >
+              <span class="badge-dot"></span>
+              {{ insights.badges.complexity.label }}
+            </span>
+            <span
+              class="insight-badge activity-badge"
+              [ngClass]="insights.badges.activity_level.label.toLowerCase()"
+              [attr.title]="insights.badges.activity_level.description"
+            >
+              <span class="badge-dot"></span>
+              {{ insights.badges.activity_level.label }}
+            </span>
+          }
+        </div>
+      }
+    </header>
+
+    <div class="insights-content">
+      <!-- Graph Card -->
+      <div class="graph-card">
+        <div class="graph-header">
+          <span class="graph-title">Commit Activity</span>
+          <span class="graph-subtitle">Past 12 months</span>
+        </div>
+        @if (loading) {
+          <div class="loading-overlay">
+            <div class="skeleton-line graph"></div>
+          </div>
+        } @else if (error) {
+          <div class="error-state">
+            <span>{{ error }}</span>
+          </div>
+        } @else if (insights) {
+          <div class="graph-wrapper">
+            <app-commit-graph
+              [activity]="insights.commit_activity"
+            ></app-commit-graph>
+          </div>
         }
       </div>
-    }
-  </header>
 
-  <div class="insights-grid">
-    <div class="glass-card graph-card">
-      @if (loading) {
-        <div class="loading-overlay">
-          <div class="skeleton-line graph"></div>
+      <!-- Stats Grid -->
+      @if (insights) {
+        <div class="stats-grid">
+          <div class="stat-item age-stat">
+            <div class="stat-icon">
+              <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-details">
+              <span class="label">Project Age</span>
+              <span class="value">{{ insights.stats.age_years }} Years</span>
+            </div>
+          </div>
+
+          <div class="stat-item commits-stat">
+            <div class="stat-icon">
+              <i class="fas fa-history"></i>
+            </div>
+            <div class="stat-details">
+              <span class="label">Recent Commits</span>
+              <span class="value">{{ insights.stats.recent_commits }}</span>
+            </div>
+          </div>
+
+          <div class="stat-item release-stat">
+            <div class="stat-icon">
+              <i class="fas fa-tag"></i>
+            </div>
+            <div class="stat-details">
+              <span class="label">Latest Release</span>
+              <span class="value">{{ insights.stats.release_recency }}</span>
+            </div>
+          </div>
+
+          <div
+            class="stat-item health-stat"
+            [ngClass]="insights.stats.health.toLowerCase()"
+          >
+            <div class="stat-icon">
+              <i class="fas fa-heartbeat"></i>
+            </div>
+            <div class="stat-details">
+              <span class="label">Repo Health</span>
+              <span class="value">{{ insights.stats.health }}</span>
+            </div>
+          </div>
         </div>
-      } @else if (error) {
-        <div class="error-state">
-          <span>{{ error }}</span>
-        </div>
-      } @else if (insights) {
-        <app-commit-graph
-          [activity]="insights.commit_activity"
-        ></app-commit-graph>
       }
     </div>
-
-    @if (insights) {
-      <div class="stats-row">
-        <div class="stat-item glass-card">
-          <span class="label">Project Age</span>
-          <span class="value">{{ insights.stats.age_years }} Years</span>
-        </div>
-        <div class="stat-item glass-card">
-          <span class="label">Recent Commits</span>
-          <span class="value">{{ insights.stats.recent_commits }}</span>
-        </div>
-        <div class="stat-item glass-card">
-          <span class="label">Latest Release</span>
-          <span class="value">{{ insights.stats.release_recency }}</span>
-        </div>
-        <div
-          class="stat-item glass-card"
-          [ngClass]="insights.stats.health.toLowerCase()"
-        >
-          <span class="label">Repository Health</span>
-          <span class="value">{{ insights.stats.health }}</span>
-        </div>
-      </div>
-    }
   </div>
 </div>
