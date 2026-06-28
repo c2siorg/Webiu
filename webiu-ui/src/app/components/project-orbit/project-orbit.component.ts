@@ -1,22 +1,123 @@
-import {
-  Component,
-  ElementRef,
-  ViewChild,
-  AfterViewInit,
-  OnDestroy,
-  NgZone,
-  Input,
-  PLATFORM_ID,
-  inject,
-} from '@angular/core';
-import { isPlatformBrowser, CommonModule } from '@angular/common';
-import * as THREE from 'three';
+import { Component, Input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Project } from '../../page/projects/project.model';
 
 @Component({
   selector: 'app-project-orbit',
   standalone: true,
   imports: [CommonModule],
-  template: `<canvas #orbitCanvas class="orbit-canvas"></canvas>`,
+  template: `
+    <div class="network-container">
+      <svg viewBox="0 0 1000 340" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+        <!-- Define Glow Filters -->
+        <defs>
+          <filter id="glow-issues" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+          <filter id="glow-forks" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+          <filter id="glow-stars" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+          <filter id="glow-lang" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="5" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+
+        <!-- Static Connection Path Underlays -->
+        <path d="M 500 170 Q 350 110 200 80" class="connection-line" />
+        <path d="M 500 170 Q 350 230 200 260" class="connection-line" />
+        <path d="M 500 170 Q 650 110 800 80" class="connection-line" />
+        <path d="M 500 170 Q 650 230 800 260" class="connection-line" />
+
+        <!-- Animated Pulse Overlay Lines -->
+        <path d="M 500 170 Q 350 110 200 80" class="pulse-line pulse-issues" />
+        <path d="M 500 170 Q 350 230 200 260" class="pulse-line pulse-forks" />
+        <path d="M 500 170 Q 650 110 800 80" class="pulse-line pulse-stars" />
+        <path d="M 500 170 Q 650 230 800 260" class="pulse-line pulse-lang" />
+
+        <!-- Center Node: Repository Core -->
+        <foreignObject x="380" y="110" width="240" height="120">
+          <div class="float-wrapper float-core">
+            <div class="node-card core-card">
+              <div class="core-icon">
+                <i class="fab fa-github"></i>
+              </div>
+              <div class="core-info">
+                <h4 class="project-title" [title]="projectName">{{ projectName }}</h4>
+                <span class="core-tag">Repository Core</span>
+              </div>
+            </div>
+          </div>
+        </foreignObject>
+
+        <!-- Node 1: Open Issues -->
+        <foreignObject x="100" y="35" width="200" height="90">
+          <div class="float-wrapper float-issues">
+            <div class="node-card issues-card">
+              <div class="card-icon">
+                <i class="fas fa-exclamation-circle"></i>
+              </div>
+              <div class="card-stats">
+                <span class="stat-value">{{ project?.open_issues_count ?? 0 }}</span>
+                <span class="stat-label">Open Issues</span>
+              </div>
+            </div>
+          </div>
+        </foreignObject>
+
+        <!-- Node 2: Forks -->
+        <foreignObject x="100" y="215" width="200" height="90">
+          <div class="float-wrapper float-forks">
+            <div class="node-card forks-card">
+              <div class="card-icon">
+                <i class="fas fa-code-branch"></i>
+              </div>
+              <div class="card-stats">
+                <span class="stat-value">{{ project?.forks_count ?? 0 }}</span>
+                <span class="stat-label">Forks</span>
+              </div>
+            </div>
+          </div>
+        </foreignObject>
+
+        <!-- Node 3: Stars -->
+        <foreignObject x="700" y="35" width="200" height="90">
+          <div class="float-wrapper float-stars">
+            <div class="node-card stars-card">
+              <div class="card-icon">
+                <i class="fas fa-star"></i>
+              </div>
+              <div class="card-stats">
+                <span class="stat-value">{{ project?.stargazers_count ?? 0 }}</span>
+                <span class="stat-label">Stars</span>
+              </div>
+            </div>
+          </div>
+        </foreignObject>
+
+        <!-- Node 4: Primary Language -->
+        <foreignObject x="700" y="215" width="200" height="90">
+          <div class="float-wrapper float-lang">
+            <div class="node-card lang-card">
+              <div class="card-icon">
+                <i class="fas fa-code"></i>
+              </div>
+              <div class="card-stats">
+                <span class="stat-value">{{ project?.language || 'N/A' }}</span>
+                <span class="stat-label">Language</span>
+              </div>
+            </div>
+          </div>
+        </foreignObject>
+      </svg>
+    </div>
+  `,
   styles: [
     `
       :host {
@@ -26,261 +127,286 @@ import * as THREE from 'three';
         position: relative;
         overflow: hidden;
         border-radius: var(--radius-lg);
-        background: rgba(255, 255, 255, 0.01);
+        background: radial-gradient(circle at 50% 50%, rgba(30, 41, 59, 0.4) 0%, rgba(15, 23, 42, 0.75) 100%),
+                    linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px) 0 0 / 20px 20px,
+                    linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px) 0 0 / 20px 20px;
         border: 1px solid var(--border);
+        box-sizing: border-box;
       }
-      .orbit-canvas {
+
+      .network-container {
         width: 100%;
         height: 100%;
+        padding: 10px;
+        box-sizing: border-box;
+      }
+
+      svg {
         display: block;
+        overflow: visible;
+      }
+
+      /* Connection lines */
+      .connection-line {
+        stroke: rgba(255, 255, 255, 0.06);
+        stroke-width: 2;
+        fill: none;
+      }
+
+      /* Pulse animations traveling along curves */
+      .pulse-line {
+        stroke-width: 2.5;
+        fill: none;
+        stroke-dasharray: 8 60;
+        animation: pulse-flow 4s linear infinite;
+      }
+
+      .pulse-issues {
+        stroke: #ff6b6b;
+        filter: url(#glow-issues);
+        animation-duration: 3.5s;
+      }
+
+      .pulse-forks {
+        stroke: #ffbe0b;
+        filter: url(#glow-forks);
+        animation-duration: 4.5s;
+        animation-delay: 0.5s;
+      }
+
+      .pulse-stars {
+        stroke: #ffd166;
+        filter: url(#glow-stars);
+        animation-duration: 4s;
+        animation-delay: 1s;
+      }
+
+      .pulse-lang {
+        stroke: #06d6a0;
+        filter: url(#glow-lang);
+        animation-duration: 5s;
+        animation-delay: 1.5s;
+      }
+
+      @keyframes pulse-flow {
+        from {
+          stroke-dashoffset: 0;
+        }
+        to {
+          stroke-dashoffset: -136;
+        }
+      }
+
+      /* Floating animations for the wrappers */
+      .float-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .float-core {
+        animation: float-core-anim 7s ease-in-out infinite;
+      }
+
+      .float-issues {
+        animation: float-node-anim 6s ease-in-out infinite;
+      }
+
+      .float-forks {
+        animation: float-node-anim 6.5s ease-in-out infinite 0.7s;
+      }
+
+      .float-stars {
+        animation: float-node-anim 7.2s ease-in-out infinite 0.3s;
+      }
+
+      .float-lang {
+        animation: float-node-anim 5.8s ease-in-out infinite 1.1s;
+      }
+
+      @keyframes float-core-anim {
+        0%, 100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-3px) rotate(0.5deg);
+        }
+      }
+
+      @keyframes float-node-anim {
+        0%, 100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-5px);
+        }
+      }
+
+      /* HTML elements inside SVG foreignObject */
+      .node-card {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding: 12px 18px;
+        border-radius: 12px;
+        background: rgba(15, 23, 42, 0.45);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: #f8fafc;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        height: calc(100% - 2px);
+        width: calc(100% - 2px);
+        box-sizing: border-box;
+        cursor: default;
+      }
+
+      .node-card:hover {
+        transform: scale(1.04) translateY(-2px);
+        background: rgba(30, 41, 59, 0.6);
+        border-color: rgba(255, 255, 255, 0.16);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
+      }
+
+      /* Core Node styling */
+      .core-card {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.15) 0%, rgba(168, 85, 247, 0.08) 100%);
+        border-color: rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 25px rgba(99, 102, 241, 0.12);
+        justify-content: center;
+        text-align: center;
+        gap: 16px;
+      }
+
+      .core-card:hover {
+        border-color: rgba(99, 102, 241, 0.5);
+        box-shadow: 0 8px 35px rgba(99, 102, 241, 0.25);
+      }
+
+      .core-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        color: #818cf8;
+        filter: drop-shadow(0 0 8px rgba(129, 140, 248, 0.4));
+      }
+
+      .core-info {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        overflow: hidden;
+      }
+
+      .project-title {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #ffffff;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        overflow: hidden;
+        max-width: 140px;
+      }
+
+      .core-tag {
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #94a3b8;
+        font-weight: 500;
+      }
+
+      /* Metric card icons and themes */
+      .card-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        font-size: 18px;
+        flex-shrink: 0;
+        transition: transform 0.3s ease;
+      }
+
+      .node-card:hover .card-icon {
+        transform: scale(1.1);
+      }
+
+      .card-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .stat-value {
+        font-size: 18px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #ffffff;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        color: #94a3b8;
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
+      /* Node-specific colors */
+      .issues-card {
+        border-left: 3px solid #ff6b6b;
+      }
+      .issues-card .card-icon {
+        background: rgba(255, 107, 107, 0.12);
+        color: #ff6b6b;
+      }
+      .issues-card:hover {
+        box-shadow: 0 8px 30px rgba(255, 107, 107, 0.15);
+      }
+
+      .forks-card {
+        border-left: 3px solid #ffbe0b;
+      }
+      .forks-card .card-icon {
+        background: rgba(255, 190, 11, 0.12);
+        color: #ffbe0b;
+      }
+      .forks-card:hover {
+        box-shadow: 0 8px 30px rgba(255, 190, 11, 0.15);
+      }
+
+      .stars-card {
+        border-left: 3px solid #ffd166;
+      }
+      .stars-card .card-icon {
+        background: rgba(255, 209, 102, 0.12);
+        color: #ffd166;
+      }
+      .stars-card:hover {
+        box-shadow: 0 8px 30px rgba(255, 209, 102, 0.15);
+      }
+
+      .lang-card {
+        border-left: 3px solid #06d6a0;
+      }
+      .lang-card .card-icon {
+        background: rgba(6, 214, 160, 0.12);
+        color: #06d6a0;
+      }
+      .lang-card:hover {
+        box-shadow: 0 8px 30px rgba(6, 214, 160, 0.15);
       }
     `,
   ],
 })
-export class ProjectOrbitComponent implements AfterViewInit, OnDestroy {
+export class ProjectOrbitComponent {
   @Input() projectName = 'Repository';
-  @ViewChild('orbitCanvas', { static: false })
-  canvasRef!: ElementRef<HTMLCanvasElement>;
-
-  private renderer!: THREE.WebGLRenderer;
-  private scene!: THREE.Scene;
-  private camera!: THREE.PerspectiveCamera;
-  private animationId = 0;
-  private isBrowser: boolean;
-  private observer!: IntersectionObserver;
-  private isAnimating = false;
-
-  private mouse = { x: 0, y: 0, targetX: 0, targetY: 0 };
-  private orbitGroup!: THREE.Group;
-  private clock = new THREE.Clock();
-
-  // Planets
-  private planets: {
-    mesh: THREE.Mesh;
-    angle: number;
-    speed: number;
-    radius: number;
-  }[] = [];
-
-  private ngZone = inject(NgZone);
-  private el = inject(ElementRef);
-  private platformId = inject(PLATFORM_ID);
-
-  constructor() {
-    this.isBrowser = isPlatformBrowser(this.platformId);
-  }
-
-  ngAfterViewInit(): void {
-    if (!this.isBrowser) return;
-
-    this.ngZone.runOutsideAngular(() => {
-      this.initScene();
-
-      window.addEventListener('resize', this.resizeListener, { passive: true });
-      window.addEventListener('mousemove', this.mouseMoveListener, { passive: true });
-
-      this.observer = new IntersectionObserver(
-        (entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              if (!this.isAnimating) {
-                this.isAnimating = true;
-                this.animate();
-              }
-            } else {
-              if (this.isAnimating) {
-                this.isAnimating = false;
-                if (this.animationId) {
-                  cancelAnimationFrame(this.animationId);
-                  this.animationId = 0;
-                }
-              }
-            }
-          });
-        },
-        { threshold: 0.05 }
-      );
-
-      this.observer.observe(this.el.nativeElement);
-    });
-  }
-
-  ngOnDestroy(): void {
-    if (this.isBrowser) {
-      window.removeEventListener('resize', this.resizeListener);
-      window.removeEventListener('mousemove', this.mouseMoveListener);
-      if (this.observer) {
-        this.observer.disconnect();
-      }
-    }
-    if (this.animationId) {
-      cancelAnimationFrame(this.animationId);
-    }
-    if (this.renderer) {
-      this.renderer.dispose();
-    }
-  }
-
-  private mouseMoveListener = (event: MouseEvent) => {
-    if (!this.isBrowser) return;
-    const rect = this.canvasRef.nativeElement.getBoundingClientRect();
-    const x = event.clientX - rect.left;
-    const y = event.clientY - rect.top;
-    this.mouse.targetX = (x / rect.width - 0.5) * 2;
-    this.mouse.targetY = (y / rect.height - 0.5) * 2;
-  };
-
-  private resizeListener = () => {
-    if (!this.isBrowser || !this.camera || !this.renderer) return;
-    const canvas = this.canvasRef.nativeElement;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-    this.camera.aspect = w / h;
-    this.camera.updateProjectionMatrix();
-    this.renderer.setSize(w, h);
-  };
-
-  private initScene(): void {
-    const canvas = this.canvasRef.nativeElement;
-    const w = canvas.clientWidth;
-    const h = canvas.clientHeight;
-
-    try {
-      this.renderer = new THREE.WebGLRenderer({
-        canvas,
-        alpha: true,
-        antialias: true,
-      });
-      this.renderer.setSize(w, h);
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
-    } catch (e) {
-      console.warn('WebGL is not supported or failed to initialize:', e);
-      return;
-    }
-
-    this.scene = new THREE.Scene();
-
-    this.camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 100);
-    this.camera.position.z = 7;
-    this.camera.position.y = 2.5;
-    this.camera.lookAt(0, 0, 0);
-
-    this.orbitGroup = new THREE.Group();
-    this.scene.add(this.orbitGroup);
-
-    this.createSolarSystem();
-  }
-
-  private createSolarSystem(): void {
-    // 1. Center sun (Repository Core)
-    const sunGeo = new THREE.IcosahedronGeometry(0.7, 1);
-    const sunMat = new THREE.MeshBasicMaterial({
-      color: 0x7b8cff, // Soft Indigo
-      wireframe: true,
-      transparent: true,
-      opacity: 0.8,
-    });
-    const sun = new THREE.Mesh(sunGeo, sunMat);
-    this.orbitGroup.add(sun);
-
-    // Mini glowing nucleus inside sun
-    const coreGeo = new THREE.SphereGeometry(0.28, 16, 16);
-    const coreMat = new THREE.MeshBasicMaterial({
-      color: 0xc8ff4d, // Neon Moss
-      transparent: true,
-      opacity: 0.9,
-    });
-    const core = new THREE.Mesh(coreGeo, coreMat);
-    this.orbitGroup.add(core);
-
-    // 2. Orbiting items (Planets)
-    const planetData = [
-      { name: 'Issues', radius: 1.4, size: 0.12, color: 0xff7d61, speed: 0.8 },
-      { name: 'PRs', radius: 2.1, size: 0.14, color: 0x7b8cff, speed: 0.5 },
-      { name: 'Contributors', radius: 2.8, size: 0.16, color: 0xc8ff4d, speed: 0.35 },
-      { name: 'Languages', radius: 3.5, size: 0.1, color: 0xffffff, speed: 0.2 },
-    ];
-
-    planetData.forEach((data, index) => {
-      // Orbit Ring line
-      const curve = new THREE.EllipseCurve(0, 0, data.radius, data.radius, 0, 2 * Math.PI, false, 0);
-      const points = curve.getPoints(64);
-      const ringGeo = new THREE.BufferGeometry().setFromPoints(
-        points.map((p) => new THREE.Vector3(p.x, 0, p.y))
-      );
-      const ringMat = new THREE.LineBasicMaterial({
-        color: data.color,
-        transparent: true,
-        opacity: 0.15,
-      });
-      const ring = new THREE.Line(ringGeo, ringMat);
-      this.orbitGroup.add(ring);
-
-      // Planet Mesh
-      const planetGeo = new THREE.SphereGeometry(data.size, 16, 16);
-      const planetMat = new THREE.MeshBasicMaterial({
-        color: data.color,
-        transparent: true,
-        opacity: 0.9,
-      });
-      const planet = new THREE.Mesh(planetGeo, planetMat);
-
-      // Set initial angle
-      const initialAngle = (index * Math.PI) / 2;
-      planet.position.x = Math.cos(initialAngle) * data.radius;
-      planet.position.z = Math.sin(initialAngle) * data.radius;
-
-      this.orbitGroup.add(planet);
-
-      this.planets.push({
-        mesh: planet,
-        angle: initialAngle,
-        speed: data.speed,
-        radius: data.radius,
-      });
-    });
-  }
-
-  private animate = (): void => {
-    if (!this.isAnimating || !this.renderer || !this.scene || !this.camera) return;
-    this.animationId = requestAnimationFrame(this.animate);
-
-    const elapsed = this.clock.getElapsedTime();
-
-    // Mouse movement response
-    this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.05;
-    this.mouse.y += (this.mouse.targetY - this.mouse.y) * 0.05;
-
-    // Slow rotation of central core
-    const sun = this.orbitGroup.children[0] as THREE.Mesh;
-    if (sun) {
-      sun.rotation.y = elapsed * 0.2;
-      sun.rotation.z = elapsed * 0.1;
-    }
-
-    // Pulse core scale
-    const core = this.orbitGroup.children[1] as THREE.Mesh;
-    if (core) {
-      const s = 1 + Math.sin(elapsed * 3) * 0.08;
-      core.scale.set(s, s, s);
-    }
-
-    // Rotate the entire group subtly based on mouse
-    this.orbitGroup.rotation.y = this.mouse.x * 0.35;
-    this.orbitGroup.rotation.x = this.mouse.y * 0.25;
-
-    // Update orbiting planets
-    this.planets.forEach((p) => {
-      p.angle += p.speed * 0.015;
-      p.mesh.position.x = Math.cos(p.angle) * p.radius;
-      p.mesh.position.z = Math.sin(p.angle) * p.radius;
-
-      // Pulse orbits
-      if (p.mesh.material instanceof THREE.MeshBasicMaterial) {
-        p.mesh.material.opacity = 0.8 + Math.sin(elapsed * 4 + p.radius) * 0.15;
-      }
-    });
-
-    this.renderer.render(this.scene, this.camera);
-  };
+  @Input() project?: Project;
 }

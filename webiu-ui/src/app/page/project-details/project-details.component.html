@@ -33,7 +33,7 @@
   }
 
   @if (!loading && !error && project) {
-    <app-project-orbit [projectName]="projectName!"></app-project-orbit>
+    <app-project-orbit [projectName]="projectName!" [project]="project"></app-project-orbit>
 
     <app-project-basic-info [project]="project"></app-project-basic-info>
 
