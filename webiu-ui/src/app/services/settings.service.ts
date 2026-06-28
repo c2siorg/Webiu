@@ -31,4 +31,10 @@ export class SettingsService {
       withCredentials: true,
     });
   }
+
+  getDashboardSummary(): Observable<any> {
+    return this.http.get<any>(`${environment.serverUrl}/admin/dashboard`, {
+      withCredentials: true,
+    });
+  }
 }
