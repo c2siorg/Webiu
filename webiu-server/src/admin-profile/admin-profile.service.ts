@@ -51,7 +51,21 @@ export class AdminProfileService {
     const oldUsername = admin.username;
     admin.username = trimmed;
     admin.tokenVersion = (admin.tokenVersion || 1) + 1;
-    const savedAdmin = await this.adminRepository.save(admin);
+
+    let savedAdmin: Admin;
+    try {
+      savedAdmin = await this.adminRepository.save(admin);
+    } catch (err: any) {
+      if (
+        err?.code === '23505' ||
+        err?.message?.includes('unique') ||
+        err?.message?.includes('UNIQUE') ||
+        err?.message?.includes('duplicate key')
+      ) {
+        throw new BadRequestException('Username is already taken.');
+      }
+      throw err;
+    }
 
     if (adminId) {
       await this.auditLogService.createLog({

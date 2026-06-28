@@ -93,6 +93,22 @@ describe('AdminProfileService', () => {
       expect(mockAdmin.username).toBe('new-name');
       expect(adminRepositoryMock.save).toHaveBeenCalledWith(mockAdmin);
     });
+
+    it('should throw BadRequestException if database throws unique key constraint error on save', async () => {
+      const mockAdmin = { username: 'admin', id: '123' } as Admin;
+      adminRepositoryMock.findOne
+        .mockResolvedValueOnce(null)
+        .mockResolvedValueOnce(mockAdmin);
+      const dbError = new Error(
+        'duplicate key value violates unique constraint',
+      );
+      (dbError as any).code = '23505';
+      adminRepositoryMock.save.mockRejectedValue(dbError);
+
+      await expect(service.updateUsername('admin', 'new-name')).rejects.toThrow(
+        BadRequestException,
+      );
+    });
   });
 
   describe('updatePassword', () => {

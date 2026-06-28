@@ -33,8 +33,9 @@ export class CredentialService {
     const isMatch = await bcrypt.compare(password, admin.passwordHash);
 
     if (isMatch) {
-      admin.lastLoginAt = new Date();
-      await this.adminRepository.save(admin);
+      const lastLoginAt = new Date();
+      await this.adminRepository.update(admin.id, { lastLoginAt });
+      admin.lastLoginAt = lastLoginAt;
     }
 
     return isMatch;
