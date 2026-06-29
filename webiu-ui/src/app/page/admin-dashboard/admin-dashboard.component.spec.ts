@@ -37,6 +37,23 @@ describe('AdminDashboardComponent', () => {
                 'site.maintenance_mode': 'false',
               },
             })),
+            getDashboardSummary: jasmine.createSpy().and.returnValue(of({
+              repositories: 27,
+              contributors: 1582,
+              programs: 4,
+              ideas: 18,
+              mentors: 11,
+              publishedIdeas: 12,
+              draftIdeas: 6,
+              maintenanceMode: false,
+              activeGsocYear: 2026,
+              showIdeasPage: true,
+              registrationOpen: true,
+              lastRepositorySync: new Date('2026-06-29T00:00:00Z'),
+              syncHealth: 'Healthy',
+              environment: 'test',
+              recentAuditEvents: [],
+            })),
             syncRepositories: jasmine.createSpy().and.returnValue(of({
               message: 'Repositories synchronized successfully.',
             })),
@@ -68,7 +85,7 @@ describe('AdminDashboardComponent', () => {
   });
 
   it('should load settings on init', () => {
-    expect(settingsService.getSettings).toHaveBeenCalled();
+    expect(settingsService.getDashboardSummary).toHaveBeenCalled();
     expect(component.currentYear).toBe(2026);
     expect(component.showIdeasPage).toBe(true);
     expect(component.registrationOpen).toBe(true);
@@ -105,4 +122,3 @@ describe('AdminDashboardComponent', () => {
     expect(component.isSyncing).toBe(false);
   });
 });
-

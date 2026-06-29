@@ -346,6 +346,20 @@ sequenceDiagram
 
 ---
 
+### G. Administrative Dashboard & Platform Insights
+To provide administrators with a centralized control center, WebiU exposes an aggregated dashboard summary endpoint.
+
+The dashboard service integrates data across multiple modules:
+1. **Concurrency**: To maintain fast load times, `DashboardService` executes independent queries concurrently (using `Promise.all`), avoiding sequential database lookups.
+2. **Aggregated Statuses**:
+   - **Counts**: Collects total counts of repositories, contributors, GSoC programs, project ideas, and mentors.
+   - **Ideas Breakdown**: Returns the respective counts of ideas in `PUBLISHED` vs. `DRAFT` status.
+   - **Runtime Settings**: Retrieves dynamic configuration parameters (active GSoC year, maintenance mode) directly from database system settings.
+   - **Sync Health**: Scans active repository synchronization records for failures (`syncStatus === 'failed'`). If failures exist, it reports `Warning`, otherwise `Healthy`.
+3. **Audit Log Integration**: Collects the top 5 most recent administrator operations from the audit logging pipeline, formatting details (timestamp, action, target) and joining the acting administrator's username.
+
+---
+
 ## 5. Deployment Architectures
 
 ### A. Backend Deployment (Render.com)

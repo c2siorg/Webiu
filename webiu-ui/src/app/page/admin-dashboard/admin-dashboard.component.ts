@@ -20,35 +20,43 @@ export class AdminDashboardComponent implements OnInit {
   private router = inject(Router);
   private toastr = inject(ToastrService);
 
+  // Aggregated data payload
+  dashboardData: any = null;
+  
+  // Legacy / backup properties
   currentYear = 2026;
+  maintenanceMode = false;
   showIdeasPage = true;
   registrationOpen = true;
-  maintenanceMode = false;
   
   isLoading = true;
+  hasError = false;
   isSyncing = false;
   isSunVisible = true;
 
   ngOnInit(): void {
     this.isSunVisible = !this.themeService.isDarkMode();
-    this.loadSettings();
+    this.loadDashboardData();
   }
 
-  loadSettings(): void {
-    this.settingsService.getSettings().subscribe({
-      next: (res) => {
-        if (res?.success && res?.settings) {
-          const s = res.settings;
-          this.currentYear = Number(s['gsoc.current_year']) || 2026;
-          this.showIdeasPage = s['gsoc.show_ideas_page'] === true || s['gsoc.show_ideas_page'] === 'true';
-          this.registrationOpen = s['gsoc.registration_open'] === true || s['gsoc.registration_open'] === 'true';
-          this.maintenanceMode = s['site.maintenance_mode'] === true || s['site.maintenance_mode'] === 'true';
+  loadDashboardData(): void {
+    this.isLoading = true;
+    this.hasError = false;
+    this.settingsService.getDashboardSummary().subscribe({
+      next: (data) => {
+        this.dashboardData = data;
+        if (data) {
+          this.currentYear = data.activeGsocYear || 2026;
+          this.maintenanceMode = data.maintenanceMode || false;
+          this.showIdeasPage = data.showIdeasPage !== false;
+          this.registrationOpen = data.registrationOpen !== false;
         }
         this.isLoading = false;
       },
       error: () => {
-        this.toastr.error('Failed to load live settings on dashboard overview.');
+        this.toastr.error('Failed to load live administrative dashboard overview.');
         this.isLoading = false;
+        this.hasError = true;
       },
     });
   }
@@ -61,6 +69,7 @@ export class AdminDashboardComponent implements OnInit {
       next: (res) => {
         this.toastr.success(res.message || 'Repositories and contributors synchronized successfully.');
         this.isSyncing = false;
+        this.loadDashboardData(); // Refresh the dashboard stats live
       },
       error: (err) => {
         const errorMsg = err.error?.message || 'Failed to sync repositories.';

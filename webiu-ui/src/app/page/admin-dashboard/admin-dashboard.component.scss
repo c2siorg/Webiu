@@ -1,5 +1,486 @@
-:host {
-  display: block;
+@import '../admin/admin-shared.scss';
+
+// Layout & Grid Overrides
+.dashboard-content-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
 }
 
-@import '../admin/admin-shared.scss';
+// Stats Deck Customizations
+.dashboard-stats-deck {
+  .stat-card {
+    transition: all var(--transition);
+    
+    &.hover-glow:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+  }
+
+  .stat-icon-wrapper {
+    &.lime {
+      background: rgba(132, 204, 22, 0.1);
+      color: #84cc16;
+    }
+    &.purple {
+      background: rgba(168, 85, 247, 0.1);
+      color: #a855f7;
+    }
+    &.orange {
+      background: rgba(249, 115, 22, 0.1);
+      color: #f97316;
+    }
+    &.cyan {
+      background: rgba(6, 182, 212, 0.1);
+      color: #06b6d4;
+    }
+  }
+}
+
+// Split Layout
+.dashboard-split-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl);
+  align-items: start;
+
+  @media (min-width: 900px) {
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--spacing-2xl);
+  }
+}
+
+.split-col-left {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+// Premium Cards Styling
+.insight-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-xl);
+  transition: all var(--transition);
+
+  &:hover {
+    border-color: rgba(123, 140, 255, 0.15);
+    box-shadow: var(--shadow-md);
+  }
+
+  .card-title-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+
+    .title-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+
+      .status-icon {
+        font-size: var(--font-size-base);
+        color: var(--accent-purple);
+      }
+
+      h3 {
+        font-size: var(--font-size-base);
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0;
+      }
+    }
+
+    .health-badge {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
+      
+      &.healthy {
+        background: rgba(34, 197, 94, 0.1);
+        color: #22c55e;
+        border: 1px solid rgba(34, 197, 94, 0.2);
+      }
+
+      &.warning {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+        border: 1px solid rgba(239, 68, 68, 0.2);
+      }
+    }
+  }
+
+  .card-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing);
+  }
+}
+
+// Sync Status Widget specifics
+.sync-status-card {
+  .sync-metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .metric-label {
+      font-size: var(--font-size-xs);
+      color: var(--text-secondary);
+      font-weight: 500;
+    }
+
+    .metric-value {
+      font-size: var(--font-size-xs);
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+  }
+}
+
+// Status Grid specifics
+.status-grid-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--spacing);
+
+  .status-box {
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    transition: all var(--transition-fast);
+
+    &:hover {
+      background: var(--surface);
+      border-color: rgba(123, 140, 255, 0.25);
+    }
+
+    .box-label {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .box-value {
+      font-size: var(--font-size-sm);
+      font-weight: 700;
+      color: var(--text-primary);
+
+      &.maintenance-active {
+        color: #ef4444;
+      }
+      
+      &.accent-text {
+        color: var(--accent-purple);
+      }
+
+      &.uppercase {
+        text-transform: uppercase;
+      }
+    }
+  }
+}
+
+// Activity timeline specific styles
+.activity-feed-card {
+  .view-all-link {
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    color: var(--accent-purple);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: transform var(--transition-fast);
+
+    &:hover {
+      transform: translateX(4px);
+    }
+  }
+
+  .empty-activity {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 1rem;
+    color: var(--text-muted);
+    text-align: center;
+
+    .empty-icon {
+      font-size: 2rem;
+      margin-bottom: 0.75rem;
+      opacity: 0.4;
+    }
+
+    p {
+      font-size: var(--font-size-xs);
+      margin: 0;
+    }
+  }
+
+  .activity-timeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    position: relative;
+
+    &::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 10px;
+      bottom: 10px;
+      width: 2px;
+      background: var(--border);
+    }
+
+    .activity-item {
+      position: relative;
+      padding-left: 28px;
+      margin-bottom: 20px;
+
+      &:last-child {
+        margin-bottom: 0;
+      }
+
+      .activity-marker {
+        position: absolute;
+        left: 3px;
+        top: 6px;
+        width: 10px;
+        height: 10px;
+        border-radius: var(--radius-full);
+        background: var(--accent-purple);
+        border: 2px solid var(--surface);
+        box-shadow: 0 0 0 2px rgba(123, 140, 255, 0.2);
+        z-index: 1;
+        transition: all var(--transition-fast);
+      }
+
+      &:hover .activity-marker {
+        background: var(--accent-lime);
+        box-shadow: 0 0 8px var(--accent-lime);
+      }
+
+      .activity-details {
+        background: var(--surface-raised);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 12px;
+        transition: all var(--transition-fast);
+
+        &:hover {
+          border-color: rgba(123, 140, 255, 0.2);
+          transform: translateX(4px);
+        }
+
+        .activity-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 6px;
+
+          .activity-admin {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-primary);
+
+            i {
+              color: var(--accent-purple);
+            }
+          }
+
+          .activity-time {
+            font-size: 10px;
+            color: var(--text-muted);
+          }
+        }
+
+        .activity-text {
+          font-size: 11px;
+          color: var(--text-secondary);
+          margin: 0 0 4px 0;
+
+          strong {
+            color: var(--text-primary);
+          }
+
+          .entity-badge {
+            background: rgba(123, 140, 255, 0.1);
+            color: var(--accent-purple);
+            padding: 1px 6px;
+            border-radius: var(--radius-sm);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+          }
+        }
+
+        .activity-date-detail {
+          font-size: 9px;
+          color: var(--text-muted);
+        }
+      }
+    }
+  }
+}
+
+// Development Badge Styling
+.welcome-card {
+  .welcome-badge {
+    &.dev-badge {
+      background: rgba(249, 115, 22, 0.1);
+      color: #f97316;
+      border-color: rgba(249, 115, 22, 0.2);
+    }
+  }
+}
+
+// Shimmer Skeleton styles
+.skeleton-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2xl);
+  width: 100%;
+}
+
+.skeleton-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.skeleton-split-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-xl);
+  
+  @media (min-width: 900px) {
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--spacing-2xl);
+  }
+}
+
+.skeleton-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  height: 90px;
+  position: relative;
+  overflow: hidden;
+
+  &.tall {
+    height: 250px;
+  }
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.05),
+      transparent
+    );
+    animation: skeleton-shimmer 1.5s infinite;
+  }
+}
+
+// Error Panel
+.error-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  text-align: center;
+
+  .error-icon {
+    font-size: 2.5rem;
+    color: #ef4444;
+    margin-bottom: 1rem;
+    text-shadow: 0 0 15px rgba(239, 68, 68, 0.2);
+  }
+
+  h3 {
+    font-size: var(--font-size-base);
+    color: var(--text-primary);
+    margin: 0 0 0.5rem 0;
+  }
+
+  p {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    max-width: 320px;
+    margin: 0 0 1.5rem 0;
+  }
+}
+
+// Actions Deck Hover Glows
+.dashboard-actions-deck {
+  .action-card {
+    transition: all var(--transition);
+
+    &.hover-glow:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.15);
+      border-color: rgba(99, 102, 241, 0.3);
+    }
+  }
+}
+
+// Animations
+@keyframes skeleton-shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.spin-icon {
+  animation: spin 1.2s linear infinite;
+}
+
+.animated-entry {
+  opacity: 0;
+  transform: translateY(12px);
+  animation: fadeInUp 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

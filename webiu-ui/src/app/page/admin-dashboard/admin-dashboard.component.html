@@ -42,133 +42,361 @@
   </header>
 
   <!-- Main Content Area -->
-  <main class="admin-main-wrapper">
-    <div class="welcome-card">
+  <main class="admin-main-wrapper fade-in-up">
+    
+    <!-- Welcome Control Card -->
+    <div class="welcome-card animated-entry">
       <div class="welcome-text">
-        <h2>Welcome to the WebiU Administration Panel!</h2>
-        <p>Manage platform configurations, synchronize external project sources, and monitor runtime platform settings dynamically.</p>
+        <h2>Welcome back, Administrator!</h2>
+        <p>Operational control center for WebiU: monitor sync health, view active logs, and adjust runtime portal settings.</p>
       </div>
-      <div class="welcome-badge">
-        <i class="fa-solid fa-shield-halved"></i> Control Center
+      <div class="welcome-badge" [class.dev-badge]="dashboardData?.environment !== 'production'">
+        <i class="fa-solid fa-server"></i> {{ dashboardData?.environment | titlecase }} Environment
       </div>
     </div>
 
-    <!-- Statistics Section with Live Metrics -->
-    <section class="stats-section">
-      <div class="section-header">
-        <div>
-          <h2>Live Configuration Metrics</h2>
-          <p class="section-desc">Real-time parameters loaded from WebiU's database settings.</p>
+    <!-- Loading Skeleton State -->
+    @if (isLoading) {
+      <div class="skeleton-wrapper">
+        <div class="skeleton-stats-grid">
+          @for (i of [1, 2, 3, 4, 5]; track i) {
+            <div class="skeleton-card"></div>
+          }
+        </div>
+        <div class="skeleton-split-layout">
+          <div class="skeleton-card tall"></div>
+          <div class="skeleton-card tall"></div>
         </div>
       </div>
-      
-      <div class="stats-grid">
-        <!-- Active Year Card -->
-        <div class="stat-card">
-          <div class="stat-icon-wrapper active">
-            <i class="fa-solid fa-calendar-check"></i>
-          </div>
-          <div class="stat-info">
-            <h3>Active GSoC Year</h3>
-            <p class="stat-value">{{ currentYear }}</p>
-            <span class="stat-desc">Primary cycle identifier</span>
-          </div>
-        </div>
+    }
 
-        <!-- Ideas Page Card -->
-        <div class="stat-card">
-          <div class="stat-icon-wrapper" [class.active]="showIdeasPage" [class.inactive]="!showIdeasPage">
-            <i class="fa-solid fa-lightbulb"></i>
-          </div>
-          <div class="stat-info">
-            <h3>Ideas Page Status</h3>
-            <p class="stat-value" [class.text-success]="showIdeasPage" [class.text-muted]="!showIdeasPage">
-              {{ showIdeasPage ? 'Visible' : 'Hidden' }}
-            </p>
-            <span class="stat-desc">Public visibility status</span>
-          </div>
-        </div>
-
-        <!-- Registration Card -->
-        <div class="stat-card">
-          <div class="stat-icon-wrapper" [class.active]="registrationOpen" [class.inactive]="!registrationOpen">
-            <i class="fa-solid fa-user-plus"></i>
-          </div>
-          <div class="stat-info">
-            <h3>Registration Status</h3>
-            <p class="stat-value" [class.text-success]="registrationOpen" [class.text-muted]="!registrationOpen">
-              {{ registrationOpen ? 'Open' : 'Closed' }}
-            </p>
-            <span class="stat-desc">Accepting new participants</span>
-          </div>
-        </div>
-
-        <!-- Platform Status Card -->
-        <div class="stat-card">
-          <div class="stat-icon-wrapper" [class.warning]="maintenanceMode" [class.active]="!maintenanceMode">
-            <i class="fa-solid fa-screwdriver-wrench"></i>
-          </div>
-          <div class="stat-info">
-            <h3>Platform Status</h3>
-            <p class="stat-value" [class.text-warning]="maintenanceMode" [class.text-success]="!maintenanceMode">
-              {{ maintenanceMode ? 'Maintenance' : 'Normal' }}
-            </p>
-            <span class="stat-desc">System operational mode</span>
-          </div>
-        </div>
+    <!-- Error State Fallback -->
+    @if (!isLoading && hasError) {
+      <div class="error-panel">
+        <i class="fa-solid fa-triangle-exclamation error-icon"></i>
+        <h3>Unable to load Administrative Data</h3>
+        <p>Please check your connection to the API server and try refreshing the page.</p>
+        <button (click)="loadDashboardData()" class="btn-action btn-secondary-action">
+          <i class="fa-solid fa-rotate-right"></i> Retry
+        </button>
       </div>
-    </section>
+    }
 
-    <!-- Quick Actions Deck -->
-    <section class="quick-actions-section">
-      <div class="section-header">
-        <div>
-          <h2>Quick Actions</h2>
-          <p class="section-desc">Common administrative operations to manage WebiU behavior.</p>
-        </div>
-      </div>
-      
-      <div class="actions-grid">
-        <!-- Manual Repository Sync -->
-        <div class="action-card">
-          <div class="action-card-header">
-            <div class="action-icon-wrapper">
-              <i class="fa-solid fa-rotate icon-accent"></i>
+    <!-- Live Aggregated Dashboard Data -->
+    @if (!isLoading && !hasError) {
+      <div class="dashboard-content-grid">
+        
+        <!-- 1. Statistics Cards Deck -->
+        <section class="stats-section animated-entry" style="animation-delay: 0.1s;">
+          <div class="stats-grid dashboard-stats-deck">
+            <!-- Repositories Count Card -->
+            <div class="stat-card hover-glow">
+              <div class="stat-icon-wrapper active">
+                <i class="fa-solid fa-folder-open"></i>
+              </div>
+              <div class="stat-info">
+                <h3>Repositories</h3>
+                <p class="stat-value">{{ dashboardData?.repositories }}</p>
+                <span class="stat-desc">Synchronized codebases</span>
+              </div>
             </div>
-            <h3>Sync GitHub Repositories</h3>
+
+            <!-- Contributors Count Card -->
+            <div class="stat-card hover-glow">
+              <div class="stat-icon-wrapper active lime">
+                <i class="fa-solid fa-users"></i>
+              </div>
+              <div class="stat-info">
+                <h3>Contributors</h3>
+                <p class="stat-value">{{ dashboardData?.contributors }}</p>
+                <span class="stat-desc">Active contributors</span>
+              </div>
+            </div>
+
+            <!-- GSoC Program Cycles Count Card -->
+            <div class="stat-card hover-glow">
+              <div class="stat-icon-wrapper active purple">
+                <i class="fa-solid fa-calendar-days"></i>
+              </div>
+              <div class="stat-info">
+                <h3>Programs</h3>
+                <p class="stat-value">{{ dashboardData?.programs }}</p>
+                <span class="stat-desc">GSoC year cycles</span>
+              </div>
+            </div>
+
+            <!-- GSoC Projects / Ideas Count Card -->
+            <div class="stat-card hover-glow">
+              <div class="stat-icon-wrapper active orange">
+                <i class="fa-solid fa-lightbulb"></i>
+              </div>
+              <div class="stat-info">
+                <h3>GSoC Ideas</h3>
+                <p class="stat-value">{{ dashboardData?.ideas }}</p>
+                <span class="stat-desc">
+                  {{ dashboardData?.publishedIdeas }} Active / {{ dashboardData?.draftIdeas }} Drafts
+                </span>
+              </div>
+            </div>
+
+            <!-- GSoC Mentors Count Card -->
+            <div class="stat-card hover-glow">
+              <div class="stat-icon-wrapper active cyan">
+                <i class="fa-solid fa-user-tie"></i>
+              </div>
+              <div class="stat-info">
+                <h3>Mentors</h3>
+                <p class="stat-value">{{ dashboardData?.mentors }}</p>
+                <span class="stat-desc">Registered advisors</span>
+              </div>
+            </div>
           </div>
-          <p class="action-description">
-            Triggers an on-demand synchronization cycle. This connects to GitHub API, pulls the latest repository metadata, contributor contribution statistics, and updates local database entities.
-          </p>
-          <div class="action-btn-wrapper">
-            <button (click)="onSync()" [disabled]="isSyncing" class="btn-action btn-primary-action">
-              @if (isSyncing) {
-                <i class="fa-solid fa-circle-notch fa-spin"></i> Syncing...
-              } @else {
-                <i class="fa-solid fa-rotate"></i> Sync Now
-              }
-            </button>
+        </section>
+
+        <!-- 2. Dual-Column Operational split -->
+        <div class="dashboard-split-layout">
+          
+          <!-- Left Column: Sync Details & Settings -->
+          <div class="split-col-left animated-entry" style="animation-delay: 0.2s;">
+            
+            <!-- Synchronization Status Widget -->
+            <div class="insight-card sync-status-card">
+              <div class="card-title-header">
+                <div class="title-left">
+                  <i class="fa-solid fa-rotate-right status-icon" [class.spin-icon]="isSyncing"></i>
+                  <h3>Synchronization Status</h3>
+                </div>
+                <span class="health-badge" [class.healthy]="dashboardData?.syncHealth === 'Healthy'" [class.warning]="dashboardData?.syncHealth !== 'Healthy'">
+                  {{ dashboardData?.syncHealth }}
+                </span>
+              </div>
+              <div class="card-body">
+                <div class="sync-metric-item">
+                  <span class="metric-label">Last Webhook Event</span>
+                  <span class="metric-value">
+                    {{ dashboardData?.lastWebhookAt ? (dashboardData?.lastWebhookAt | date:'medium') : 'No webhook events yet' }}
+                  </span>
+                </div>
+                <div class="sync-metric-item">
+                  <span class="metric-label">Last Reconciliation</span>
+                  <span class="metric-value">
+                    {{ dashboardData?.lastReconciliationAt ? (dashboardData?.lastReconciliationAt | date:'medium') : 'No reconciliation run yet' }}
+                  </span>
+                </div>
+                <div class="sync-metric-item">
+                  <span class="metric-label">Last General Sync</span>
+                  <span class="metric-value">
+                    {{ dashboardData?.lastRepositorySync ? (dashboardData?.lastRepositorySync | date:'medium') : 'Pending initial sync' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Platform Settings Status Widget -->
+            <div class="insight-card platform-status-card">
+              <div class="card-title-header">
+                <div class="title-left">
+                  <i class="fa-solid fa-sliders status-icon"></i>
+                  <h3>Platform Status</h3>
+                </div>
+              </div>
+              <div class="card-body status-grid-layout">
+                <div class="status-box">
+                  <span class="box-label">Maintenance Mode</span>
+                  <span class="box-value" [class.maintenance-active]="dashboardData?.maintenanceMode">
+                    {{ dashboardData?.maintenanceMode ? 'ACTIVE' : 'DISABLED' }}
+                  </span>
+                </div>
+                <div class="status-box">
+                  <span class="box-label">Active GSoC Year</span>
+                  <span class="box-value accent-text">{{ dashboardData?.activeGsocYear }}</span>
+                </div>
+                <div class="status-box">
+                  <span class="box-label">Node Environment</span>
+                  <span class="box-value uppercase">{{ dashboardData?.environment }}</span>
+                </div>
+                <div class="status-box">
+                  <span class="box-label">App Release</span>
+                  <span class="box-value font-mono">v2.0.0</span>
+                </div>
+              </div>
+            </div>
+
           </div>
+
+          <!-- Right Column: Recent Activity Logs -->
+          <div class="split-col-right animated-entry" style="animation-delay: 0.3s;">
+            <div class="insight-card activity-feed-card">
+              <div class="card-title-header">
+                <div class="title-left">
+                  <i class="fa-solid fa-list-check status-icon"></i>
+                  <h3>Recent Activity Log</h3>
+                </div>
+                <a routerLink="/admin/audit" class="view-all-link">
+                  View All <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+              <div class="card-body">
+                @if (!dashboardData?.recentAuditEvents?.length) {
+                  <div class="empty-activity">
+                    <i class="fa-solid fa-inbox empty-icon"></i>
+                    <p>No recent administrative activities recorded.</p>
+                  </div>
+                }
+                
+                @if (dashboardData?.recentAuditEvents?.length) {
+                  <ul class="activity-timeline">
+                    @for (log of dashboardData.recentAuditEvents; track log.id) {
+                      <li class="activity-item">
+                        <div class="activity-marker"></div>
+                        <div class="activity-details">
+                          <div class="activity-header">
+                            <span class="activity-admin">
+                              <i class="fa-solid fa-circle-user"></i> {{ log.admin?.username || 'System' }}
+                            </span>
+                            <span class="activity-time">{{ log.createdAt | date:'shortTime' }}</span>
+                          </div>
+                          <p class="activity-text">
+                            Executed <strong>{{ log.action | uppercase }}</strong> on 
+                            <span class="entity-badge">{{ log.entityType }}</span>
+                          </p>
+                          <span class="activity-date-detail">{{ log.createdAt | date:'mediumDate' }}</span>
+                        </div>
+                      </li>
+                    }
+                  </ul>
+                }
+              </div>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Configure Platform Settings -->
-        <div class="action-card">
-          <div class="action-card-header">
-            <div class="action-icon-wrapper">
-              <i class="fa-solid fa-sliders icon-accent"></i>
+        <!-- 3. Quick Actions Board -->
+        <section class="quick-actions-section animated-entry" style="animation-delay: 0.4s;">
+          <div class="section-header">
+            <div>
+              <h2>Quick Actions</h2>
+              <p class="section-desc">Shortcuts to manage platform configurations, modules, and audits.</p>
             </div>
-            <h3>Configure Settings</h3>
           </div>
-          <p class="action-description">
-            Edit platform metadata, configure SEO meta fields, toggle ideas pages visibility, open/close registrations, customize branding parameters, or enable maintenance page banners.
-          </p>
-          <div class="action-btn-wrapper">
-            <a routerLink="/admin/settings" class="btn-action btn-secondary-action">
-              <i class="fa-solid fa-gears"></i> Edit Settings
-            </a>
+          
+          <div class="actions-grid dashboard-actions-deck">
+            <!-- Trigger Manual Sync -->
+            <div class="action-card hover-glow">
+              <div class="action-card-header">
+                <div class="action-icon-wrapper">
+                  <i class="fa-solid fa-rotate icon-accent"></i>
+                </div>
+                <h3>Sync GitHub Repositories</h3>
+              </div>
+              <p class="action-description">
+                Triggers an on-demand synchronization cycle. Pulls repository metrics and contributor contribution statistics.
+              </p>
+              <div class="action-btn-wrapper">
+                <button (click)="onSync()" [disabled]="isSyncing" class="btn-action btn-primary-action">
+                  @if (isSyncing) {
+                    <span><i class="fa-solid fa-circle-notch fa-spin"></i> Syncing...</span>
+                  } @else {
+                    <span><i class="fa-solid fa-rotate"></i> Sync Now</span>
+                  }
+                </button>
+              </div>
+            </div>
+
+            <!-- Edit Settings -->
+            <div class="action-card hover-glow">
+              <div class="action-card-header">
+                <div class="action-icon-wrapper">
+                  <i class="fa-solid fa-gears icon-accent"></i>
+                </div>
+                <h3>Manage Settings</h3>
+              </div>
+              <p class="action-description">
+                Edit system settings, modify current year cycles, toggle public ideas visibility, or activate maintenance mode.
+              </p>
+              <div class="action-btn-wrapper">
+                <a routerLink="/admin/settings" class="btn-action btn-secondary-action">
+                  <i class="fa-solid fa-sliders"></i> Edit Settings
+                </a>
+              </div>
+            </div>
+
+            <!-- Manage GSoC Programs -->
+            <div class="action-card hover-glow">
+              <div class="action-card-header">
+                <div class="action-icon-wrapper">
+                  <i class="fa-solid fa-calendar-days icon-accent"></i>
+                </div>
+                <h3>Manage GSoC Years</h3>
+              </div>
+              <p class="action-description">
+                Add new GSoC programs, specify year labels, and manage public registration dates for each program cycle.
+              </p>
+              <div class="action-btn-wrapper">
+                <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="btn-action btn-secondary-action">
+                  <i class="fa-solid fa-calendar-check"></i> Manage Programs
+                </a>
+              </div>
+            </div>
+
+            <!-- Manage GSoC Ideas -->
+            <div class="action-card hover-glow">
+              <div class="action-card-header">
+                <div class="action-icon-wrapper">
+                  <i class="fa-solid fa-lightbulb icon-accent"></i>
+                </div>
+                <h3>Manage Project Ideas</h3>
+              </div>
+              <p class="action-description">
+                Formulate project ideas, assign difficulty, set durations, assign mentors, and publish them to public pages.
+              </p>
+              <div class="action-btn-wrapper">
+                <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="btn-action btn-secondary-action">
+                  <i class="fa-solid fa-pencil"></i> Edit Ideas
+                </a>
+              </div>
+            </div>
+
+            <!-- Manage Mentors -->
+            <div class="action-card hover-glow">
+              <div class="action-card-header">
+                <div class="action-icon-wrapper">
+                  <i class="fa-solid fa-user-tie icon-accent"></i>
+                </div>
+                <h3>Manage GSoC Mentors</h3>
+              </div>
+              <p class="action-description">
+                Add mentoring records, set contact details, specify Slack handles, and link mentors to appropriate project ideas.
+              </p>
+              <div class="action-btn-wrapper">
+                <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'mentors'}" class="btn-action btn-secondary-action">
+                  <i class="fa-solid fa-users-gear"></i> Manage Mentors
+                </a>
+              </div>
+            </div>
+
+            <!-- View Logs -->
+            <div class="action-card hover-glow">
+              <div class="action-card-header">
+                <div class="action-icon-wrapper">
+                  <i class="fa-solid fa-list-check icon-accent"></i>
+                </div>
+                <h3>View Audit Trail</h3>
+              </div>
+              <p class="action-description">
+                Inspect administrative activity logs, track settings overrides, password changes, and resource adjustments.
+              </p>
+              <div class="action-btn-wrapper">
+                <a routerLink="/admin/audit" class="btn-action btn-secondary-action">
+                  <i class="fa-solid fa-glasses"></i> Open Audit Logs
+                </a>
+              </div>
+            </div>
           </div>
-        </div>
+        </section>
+
       </div>
-    </section>
+    }
   </main>
 </div>

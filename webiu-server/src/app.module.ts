@@ -22,6 +22,7 @@ import { SystemSettingModule } from './system-setting/system-setting.module';
 import { GsocModule } from './gsoc/gsoc.module';
 import { AdminProfileModule } from './admin-profile/admin-profile.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 
 @Module({
   imports: [
@@ -60,6 +61,7 @@ import { AuditLogModule } from './audit-log/audit-log.module';
     GsocModule,
     AdminProfileModule,
     AuditLogModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [
