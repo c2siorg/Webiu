@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { getHomepageDetails, HomepageFeaturedData } from '../../common/data/homepage';
 import { HttpClient } from '@angular/common/http';
 import { SearchService } from '../../services/search.service';
+import { HeroNoiseBackgroundComponent } from '../../components/hero-noise-background/hero-noise-background.component';
 import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
 import { ParallaxDirective } from '../../shared/parallax.directive';
 import { CountUpDirective } from '../../shared/count-up.directive';
@@ -14,6 +15,7 @@ import { CountUpDirective } from '../../shared/count-up.directive';
   imports: [
     CommonModule,
     RouterModule,
+    HeroNoiseBackgroundComponent,
     RevealOnScrollDirective,
     ParallaxDirective,
     CountUpDirective,

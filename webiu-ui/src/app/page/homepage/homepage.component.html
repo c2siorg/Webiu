@@ -4,12 +4,8 @@
   <section class="hero-section">
     <div class="hero-bg-grid" appParallax [speed]="0.1"></div>
 
-    <!-- Custom 3D Three.js Noise Background — deferred so Three.js (507KB) is NOT in the critical path -->
-    @defer (on idle) {
-      <app-hero-noise-background class="hero-3d-core" appParallax [speed]="0.4" [mouseFactor]="15"></app-hero-noise-background>
-    } @placeholder {
-      <div class="hero-3d-core hero-3d-placeholder" aria-hidden="true"></div>
-    }
+    <!-- Custom 3D Three.js Noise Background — loads immediately with hero -->
+    <app-hero-noise-background class="hero-3d-core" appParallax [speed]="0.4" [mouseFactor]="15"></app-hero-noise-background>
 
     <div class="hero-container hero-container--centered" appParallax [speed]="0.2">
       <div class="hero-eyebrow" appRevealOnScroll [immediate]="true" direction="center">
