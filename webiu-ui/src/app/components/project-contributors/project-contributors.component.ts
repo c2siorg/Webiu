@@ -71,7 +71,7 @@ export class ProjectContributorsComponent implements OnInit {
   }
 
   getProfileUrl(username: string): string {
-    return `${this.repoBase}/pulls?q=author%3A${encodeURIComponent(username)}`;
+    return `https://github.com/${username}`;
   }
 
   toggleView(): void {
