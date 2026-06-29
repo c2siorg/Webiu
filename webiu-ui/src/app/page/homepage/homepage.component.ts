@@ -8,6 +8,7 @@ import { SearchService } from '../../services/search.service';
 import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
 import { ParallaxDirective } from '../../shared/parallax.directive';
 import { CountUpDirective } from '../../shared/count-up.directive';
+import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/data/language-colors';
 
 @Component({
   selector: 'app-homepage',
@@ -42,20 +43,7 @@ export class HomepageComponent implements OnInit {
     this.searchService.open();
   }
 
-  // Get language color for projects
   getLanguageColor(language: string): string {
-    const languageColors: Record<string, string> = {
-      JavaScript: '#f1e05a',
-      TypeScript: '#2b7489',
-      Python: '#3572A5',
-      Java: '#b07219',
-      'C++': '#f34b7d',
-      Go: '#00ADD8',
-      Rust: '#dea584',
-      Ruby: '#701516',
-      PHP: '#4F5D95',
-      Swift: '#ffac45',
-    };
-    return languageColors[language] || '#333';
+    return LANGUAGE_COLORS[language] ?? DEFAULT_LANGUAGE_COLOR;
   }
 }
