@@ -64,6 +64,15 @@ export class Repository {
   @Column({ type: 'timestamp', nullable: true })
   lastReconciliationAt: Date | null;
 
+  @Column({ default: 'public' })
+  visibility: string;
+
+  @Column({ default: false })
+  isArchived: boolean;
+
+  @Column({ nullable: true })
+  language: string | null;
+
   @OneToMany(() => RepositoryContributor, (rc) => rc.repository)
   repositoryContributors: RepositoryContributor[];
 }

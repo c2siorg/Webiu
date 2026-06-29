@@ -6,6 +6,8 @@ import { RepositoryContributor } from '../database/entities/repository-contribut
 import { AuthModule } from '../auth/auth.module';
 import { AnalyticsController } from './analytics.controller';
 import { ContributorAnalyticsService } from './contributor-analytics.service';
+import { RepositoryAnalyticsController } from './repository-analytics.controller';
+import { RepositoryAnalyticsService } from './repository-analytics.service';
 
 @Module({
   imports: [
@@ -16,7 +18,7 @@ import { ContributorAnalyticsService } from './contributor-analytics.service';
     ]),
     AuthModule,
   ],
-  controllers: [AnalyticsController],
-  providers: [ContributorAnalyticsService],
+  controllers: [AnalyticsController, RepositoryAnalyticsController],
+  providers: [ContributorAnalyticsService, RepositoryAnalyticsService],
 })
 export class AnalyticsModule {}

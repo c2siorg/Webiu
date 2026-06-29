@@ -105,6 +105,9 @@ export class RepositorySyncService implements OnApplicationBootstrap {
     repo.topics = gitRepo.topics || [];
     repo.stars = gitRepo.stargazers_count;
     repo.forks = gitRepo.forks_count;
+    repo.visibility = gitRepo.private ? 'private' : 'public';
+    repo.isArchived = gitRepo.archived || false;
+    repo.language = gitRepo.language || null;
     repo.lastSyncedAt = new Date();
     repo.isActive = !gitRepo.archived;
     repo.syncStatus = 'success';
