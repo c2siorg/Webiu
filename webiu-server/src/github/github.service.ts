@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { CacheService } from '../common/cache.service';
 import axios, { AxiosError } from 'axios';
@@ -123,7 +127,7 @@ export class GithubService {
       }
     }
 
-    throw new Error(
+    throw new InternalServerErrorException(
       `GitHub request to ${url} failed after ${maxRetries} attempts`,
     );
   }

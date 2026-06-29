@@ -79,7 +79,9 @@ export class GithubGraphqlService {
       );
 
       if (!response.data?.data) {
-        throw new Error('Invalid response from GitHub API');
+        throw new InternalServerErrorException(
+          'Invalid response from GitHub API',
+        );
       }
 
       const prs = response.data.data.search.nodes;
