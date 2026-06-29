@@ -1,10 +1,16 @@
 <div class="navbar">
   <a [routerLink]="['/']" class="logo-link" (click)="preventReload($event)">
-    <img
-      src="../../../assets/c2silogo-dark_no_bg.png"
-      alt="C2SI Logo"
-      class="logo"
-    />
+    <picture>
+      <source srcset="assets/c2silogo-dark_no_bg.webp" type="image/webp" />
+      <img
+        src="assets/c2silogo-dark_no_bg.png"
+        alt="C2SI Logo"
+        class="logo"
+        width="104"
+        height="52"
+        fetchpriority="high"
+      />
+    </picture>
   </a>
 
   @if (isMenuOpen) {
@@ -28,11 +34,16 @@
     <!-- Sidebar Header (mobile only) -->
     <div class="sidebar-header">
       <a [routerLink]="['/']" class="logo-link" (click)="closeMenu()">
-        <img
-          src="../../../assets/c2silogo-dark_no_bg.png"
-          alt="C2SI Logo"
-          class="logo"
-        />
+        <picture>
+          <source srcset="assets/c2silogo-dark_no_bg.webp" type="image/webp" />
+          <img
+            src="assets/c2silogo-dark_no_bg.png"
+            alt="C2SI Logo"
+            class="logo"
+            width="104"
+            height="52"
+          />
+        </picture>
       </a>
       <button
         class="sidebar-close-btn"

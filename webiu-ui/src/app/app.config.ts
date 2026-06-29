@@ -3,7 +3,7 @@ import { ApplicationConfig, isDevMode } from '@angular/core';
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { routes } from './app.routes';
 import { globalErrorInterceptor } from './common/interceptors/error.interceptor';
-import { provideAnimations } from '@angular/platform-browser/animations';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideToastr } from 'ngx-toastr';
 import { provideServiceWorker } from '@angular/service-worker';
 
@@ -14,7 +14,7 @@ export const appConfig: ApplicationConfig = {
       withInMemoryScrolling({ scrollPositionRestoration: 'top' }),
     ),
     provideHttpClient(withFetch(), withInterceptors([globalErrorInterceptor])),
-    provideAnimations(),
+    provideAnimationsAsync(),
     provideToastr({
       timeOut: 3000,
       positionClass: 'toast-top-right',

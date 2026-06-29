@@ -52,6 +52,23 @@
   height: 100%;
   z-index: 2; /* Overlaps text underneath */
   pointer-events: none;
+  /* Smooth fade-in when @defer resolves — Three.js canvas dissolves in organically */
+  animation: hero3dFadeIn 0.8s ease-out both;
+}
+
+/* Keyframe for the Three.js canvas smooth appearance */
+@keyframes hero3dFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* Placeholder div shown while Three.js (507KB) is deferred.
+   Transparent so the dot-grid background remains visible. */
+.hero-3d-placeholder {
+  display: block;
+  background: transparent;
+  /* No animation on placeholder — it's invisible and causes no layout shift */
+  animation: none;
 }
 
 .hero-container--centered {
@@ -363,6 +380,8 @@
   color: var(--text-primary);
   letter-spacing: -0.03em;
   line-height: 1;
+  min-width: 2.5ch;
+  font-variant-numeric: tabular-nums;
 }
 
 .hero-metric-label {
@@ -527,6 +546,7 @@
   color: var(--text-secondary);
   line-height: 1.6;
   flex: 1;
+  min-height: 4.8em;
 }
 
 .project-footer {

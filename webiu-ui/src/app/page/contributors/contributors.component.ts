@@ -7,7 +7,7 @@ import { debounceTime } from 'rxjs/operators';
 import { Contributor } from '../../common/data/contributor';
 
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
@@ -23,7 +23,6 @@ interface ContributionRange {
   selector: 'app-contributors',
   standalone: true,
   imports: [
-    HttpClientModule,
     ReactiveFormsModule,
     ProfileCardComponent,
     LoadingSpinnerComponent,

@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { Project, ProjectResponse } from './project.model';
@@ -15,7 +15,6 @@ import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive
   selector: 'app-projects',
   standalone: true,
   imports: [
-    HttpClientModule,
     FormsModule,
     ProjectsCardComponent,
     LoadingSpinnerComponent,

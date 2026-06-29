@@ -1,9 +1,8 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { getHomepageDetails } from '../../common/data/homepage';
+import { getHomepageDetails, HomepageFeaturedData } from '../../common/data/homepage';
 import { HttpClient } from '@angular/common/http';
-import { HeroNoiseBackgroundComponent } from '../../components/hero-noise-background/hero-noise-background.component';
 import { SearchService } from '../../services/search.service';
 import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
 import { ParallaxDirective } from '../../shared/parallax.directive';
@@ -15,7 +14,6 @@ import { CountUpDirective } from '../../shared/count-up.directive';
   imports: [
     CommonModule,
     RouterModule,
-    HeroNoiseBackgroundComponent,
     RevealOnScrollDirective,
     ParallaxDirective,
     CountUpDirective,
@@ -29,11 +27,11 @@ export class HomepageComponent implements OnInit {
   private searchService = inject(SearchService);
 
   ngOnInit() {
-    this.http.get<any>('assets/data/projects.json').subscribe({
+    this.http.get<HomepageFeaturedData>('assets/data/homepage-featured.json').subscribe({
       next: (data) => {
         this.homepageData = getHomepageDetails(data);
       },
-      error: (err) => console.error('Failed to load projects', err)
+      error: (err) => console.error('Failed to load homepage featured data', err),
     });
   }
 
@@ -42,7 +40,6 @@ export class HomepageComponent implements OnInit {
     this.searchService.open();
   }
 
-  // Get language color for projects
   getLanguageColor(language: string): string {
     const languageColors: Record<string, string> = {
       JavaScript: '#f1e05a',

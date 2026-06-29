@@ -13,14 +13,62 @@
 
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com"/>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous"/>
     <link rel="preconnect" href="https://api.fontshare.com"/>
+    <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin="anonymous"/>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin="anonymous"/>
 
-    <!-- Geist (Primary) + Caveat (Accent) from Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Caveat:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+    <!-- Preload hero display font (Clash Display 600) for faster LCP text paint -->
+    <link
+      rel="preload"
+      href="https://cdn.fontshare.com/wf/FPDAZ2S6SW4QMSRIIKNNGTPM6VIXYMKO/5HNPQ453FRLIQWV2FNOBUU3FKTDZQVSG/Z3MGHFHX6DCTLQ55LJYRJ5MDCZPMFZU6.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin="anonymous"
+    />
 
-    <!-- Clash Display (Hero/Display) from Fontshare -->
-    <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=swap" rel="stylesheet"/>
+    <!--
+      Geist (Primary) + Caveat (Accent) — Non-blocking font load.
+      display=optional reduces CLS from font swap on slow connections.
+    -->
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Caveat:wght@400;500;600;700&display=optional"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Caveat:wght@400;500;600;700&display=optional"/>
+    </noscript>
+
+    <!-- Clash Display (Hero/Display) — Non-blocking, optional display -->
+    <link
+      rel="stylesheet"
+      href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=optional"
+      media="print"
+      onload="this.media='all'"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&display=optional"/>
+    </noscript>
+
+    <!--
+      FontAwesome Free 6.7.2 — Non-blocking load (matches npm version exactly).
+      Icons are used across admin dashboard AND public project pages.
+      Loading non-blockingly means it NEVER delays LCP — icons render after CSS loads.
+      The <noscript> fallback preserves icons without JS.
+    -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      media="print"
+      onload="this.media='all'"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <noscript>
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" crossorigin="anonymous"/>
+    </noscript>
 
     <link rel="manifest" href="manifest.webmanifest">
     <meta name="theme-color" content="#07090D">
@@ -30,3 +78,4 @@
     <noscript>Please enable JavaScript to continue using this application.</noscript>
   </body>
 </html>
+
