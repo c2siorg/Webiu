@@ -55,6 +55,9 @@ export class RepositoryReconciliationService {
           const sortedGitTopics = [...gitTopics].sort().join(',');
           const sortedDbTopics = [...dbTopics].sort().join(',');
           const expectedActive = !gitRepo.archived;
+          const expectedVisibility = gitRepo.private ? 'private' : 'public';
+          const expectedIsArchived = gitRepo.archived || false;
+          const expectedLanguage = gitRepo.language || null;
 
           if (
             dbRepo.name !== gitRepo.name ||
@@ -63,7 +66,10 @@ export class RepositoryReconciliationService {
             sortedDbTopics !== sortedGitTopics ||
             dbRepo.stars !== gitRepo.stargazers_count ||
             dbRepo.forks !== gitRepo.forks_count ||
-            dbRepo.isActive !== expectedActive
+            dbRepo.isActive !== expectedActive ||
+            dbRepo.visibility !== expectedVisibility ||
+            dbRepo.isArchived !== expectedIsArchived ||
+            dbRepo.language !== expectedLanguage
           ) {
             isDrifted = true;
           }

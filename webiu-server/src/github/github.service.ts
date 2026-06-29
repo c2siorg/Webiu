@@ -495,9 +495,8 @@ export class GithubService {
     }
 
     try {
-      const contributors = await this.fetchAllPages(
-        `${this.baseUrl}/repos/${orgName}/${repoName}/contributors`,
-      );
+      const pageUrl = `${this.baseUrl}/repos/${orgName}/${repoName}/contributors?per_page=100&page=1`;
+      const contributors = await this.githubGet<any[]>(pageUrl);
       this.cacheService.set(cacheKey, contributors, 600);
       return contributors;
     } catch {

@@ -43,4 +43,10 @@ export class SettingsService {
       withCredentials: true,
     });
   }
+
+  getRepositoryAnalytics(): Observable<any> {
+    return this.http.get<any>(`${environment.serverUrl}/admin/repositories`, {
+      withCredentials: true,
+    });
+  }
 }

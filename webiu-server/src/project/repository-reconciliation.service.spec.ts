@@ -187,6 +187,9 @@ describe('RepositoryReconciliationService', () => {
         topics: ['same'],
         stargazers_count: 10,
         forks_count: 4,
+        private: false,
+        archived: false,
+        language: 'TypeScript',
       },
     ];
 
@@ -199,6 +202,9 @@ describe('RepositoryReconciliationService', () => {
       stars: 10,
       forks: 4,
       isActive: true,
+      visibility: 'public',
+      isArchived: false,
+      language: 'TypeScript',
     } as RepositoryEntity;
 
     mockGithubService.getAllOrgReposSorted.mockResolvedValue(gitRepos);

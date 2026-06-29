@@ -113,6 +113,15 @@ export const routes: Routes = [
     canActivate: [adminAuthGuard],
   },
   {
+    path: 'admin/repositories',
+    title: 'Repository Intelligence | WebiU',
+    loadComponent: () =>
+      import('./page/admin-repositories/admin-repositories.component').then(
+        (m) => m.AdminRepositoriesComponent,
+      ),
+    canActivate: [adminAuthGuard],
+  },
+  {
     path: 'admin/settings',
     title: 'Admin Settings | WebiU',
     loadComponent: () =>

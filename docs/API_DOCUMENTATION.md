@@ -54,13 +54,16 @@ All responses are formatted in JSON. Endpoints are divided into public clientsid
    * [POST /admin/gsoc/mentors](#post-admingsocmentors)
    * [PATCH /admin/gsoc/mentors/:id](#patch-admingsocmentorsid)
    * [DELETE /admin/gsoc/mentors/:id](#delete-admingsocmentorsid)
-8. [Audit Trail Endpoints](#8-audit-trail-endpoints)
-   * [GET /admin/audit](#get-adminaudit)
-   * [GET /admin/audit/:id](#get-adminauditid)
-9. [Health & Diagnostics](#9-health--diagnostics)
-   * [GET /health](#get-health)
-   * [GET /ready](#get-ready)
-10. [Importing into Postman](#importing-into-postman)
+ 8. [Audit Trail Endpoints](#8-audit-trail-endpoints)
+    * [GET /admin/audit](#get-adminaudit)
+    * [GET /admin/audit/:id](#get-adminauditid)
+ 9. [Analytics & Intelligence Endpoints](#9-analytics--intelligence-endpoints)
+    * [GET /admin/contributors](#get-admincontributors)
+    * [GET /admin/repositories](#get-adminrepositories)
+ 10. [Health & Diagnostics](#10-health--diagnostics)
+    * [GET /health](#get-health)
+    * [GET /ready](#get-ready)
+ 11. [Importing into Postman](#11-importing-into-postman)
 
 ---
 
@@ -571,7 +574,88 @@ These routes allow administrators to inspect dynamic configuration logs and prof
 
 ---
 
-## 9. Health & Diagnostics
+## 9. Analytics & Intelligence Endpoints
+
+These routes gather statistics and compute rankings and datasets to power the administrative intelligence dashboards.
+
+### `GET /admin/contributors`
+* **Access**: Admin Restricted (`AdminGuard` checks cookie)
+* **Purpose**: Compiles all contributor statistics and participation patterns.
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "metrics": {
+      "totalContributors": 245,
+      "activeRepositories": 30,
+      "averageContributorsPerRepo": 8.17,
+      "averageContributionsPerContributor": 14.52,
+      "topContributorContributionCount": 412,
+      "largestRepositoryCommunity": 42
+    },
+    "leaderboard": [],
+    "repositoryParticipation": [],
+    "contributionDistribution": [],
+    "communityInsights": {},
+    "explorer": [],
+    "recentContributors": []
+  }
+  ```
+
+### `GET /admin/repositories`
+* **Access**: Admin Restricted (`AdminGuard` checks cookie)
+* **Purpose**: Compiles consolidated repository statistics, rankings, distributions, and explorer details.
+* **Success Response (200 OK)**:
+  ```json
+  {
+    "metrics": {
+      "totalRepositories": 32,
+      "publicRepositories": 28,
+      "privateRepositories": 4,
+      "archivedRepositories": 2,
+      "totalContributors": 245,
+      "totalStars": 1482,
+      "totalForks": 312,
+      "averageContributorsPerRepo": 7.66,
+      "averageStarsPerRepo": 46.31,
+      "averageForksPerRepo": 9.75
+    },
+    "popularRepositories": [
+      {
+        "id": "7b50302b-8a88-466c-8f83-eb718ba726c2",
+        "name": "webiu",
+        "description": "GSoC Portal Dashboard UI",
+        "stars": 412,
+        "forks": 85,
+        "visibility": "public",
+        "isArchived": false,
+        "language": "TypeScript",
+        "topics": ["angular", "rxjs", "gsoc"],
+        "contributorCount": 42
+      }
+    ],
+    "repositoryParticipation": [],
+    "forkDistribution": [],
+    "topicDistribution": [],
+    "languageDistribution": [],
+    "visibilityDistribution": {
+      "public": 28,
+      "private": 4,
+      "archived": 2
+    },
+    "communityInsights": {
+      "mostStarredRepo": { "name": "webiu", "stars": 412 },
+      "mostForkedRepo": { "name": "webiu", "forks": 85 },
+      "largestCommunityRepo": { "name": "webiu", "contributorCount": 42 },
+      "leastActiveRepo": { "name": "scratchpad", "contributorCount": 0 },
+      "archivedRepoCount": 2
+    },
+    "explorer": []
+  }
+  ```
+
+---
+
+## 10. Health & Diagnostics
 
 ### `GET /health`
 * **Access**: Public
@@ -597,7 +681,7 @@ These routes allow administrators to inspect dynamic configuration logs and prof
 
 ---
 
-## 10. Importing into Postman
+## 11. Importing into Postman
 
 A pre-configured Postman Collection file with all these endpoints mapped out is located at:
 ```

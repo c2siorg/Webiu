@@ -402,6 +402,47 @@ Key features of this pipeline include:
 
 ---
 
+### I. Admin Repository Intelligence & Aggregated Analytics Flow
+To empower maintainers to monitor overall repository health, popularity index, visibility, and technology stack distributions without client-side calculation overhead, WebiU implements a dedicated repository intelligence analytics pipeline.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Administrator
+    participant UI as AdminRepositoriesComponent
+    participant Server as RepositoryAnalyticsController
+    participant Service as RepositoryAnalyticsService
+    participant DB as PostgreSQL (TypeORM)
+
+    Admin->>UI: Open /admin/repositories page
+    UI->>Server: GET /admin/repositories (with Cookie)
+    Note over Server: AdminGuard decodes session cookie<br/>validates active role permissions
+    Server->>Service: getRepositoryAnalytics()
+    
+    rect rgb(30, 30, 45)
+        Note over Service: Concurrently execute SQL Aggregations
+        Service->>DB: Count total, public, private, and archived repositories
+        Service->>DB: Calculate average stars, forks, and contributors per repo
+        Service->>DB: Fetch top 10 popular repositories (stars DESC)
+        Service->>DB: Query fork, contributor, topic, and language distributions
+        Service->>DB: Fetch health insights (most starred, most forked, largest community)
+        Service->>DB: Query complete explorer list with counts
+        DB-->>Service: Return aggregated record results
+    end
+    
+    Service->>Server: Return consolidated analytics object
+    Server-->>UI: 200 OK (Single JSON Payload)
+    Note over UI: Bind metrics to count-up directive<br/>Render Chart.js canvases (Amber stars, Purple contributors, Cyan forks, Lime languages)
+    UI-->>Admin: Render premium analytics dashboard
+```
+
+Key features of this pipeline include:
+1. **Consolidated Response Pipeline**: Aggregates total metrics, leaderboard rankings, multiple chart distributions (Popularity, Contributor, Fork, Topic, Language, and Visibility), highlighted health anomalies, and complete searchable table details in a single request.
+2. **Dynamic Database Mapping**: Synchronizes visibility, archived states, and repository technologies (primary language, topics array) from GitHub directly into TypeORM entity fields during regular webhooks and reconciliation runs.
+3. **Flexible Chart Updates**: Automatically registers to WebiU's custom reactive theme service, letting the dashboard redraw Chart.js canvas elements cleanly when administrators switch between light and dark modes.
+
+---
+
 ## 5. Deployment Architectures
 
 ### A. Backend Deployment (Render.com)

@@ -1,0 +1,565 @@
+<div class="admin-panel-container">
+  <!-- Top Navigation Bar -->
+  <header class="admin-navbar">
+    <div class="navbar-left">
+      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      <span class="brand-name">WebiU Admin</span>
+    </div>
+    
+    <div class="navbar-center" role="tablist">
+      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </a>
+      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-gears"></i> Settings
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Years
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-lightbulb"></i> Ideas
+      </a>
+      <a routerLink="/admin/contributors" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-users-gear"></i> Contributors
+      </a>
+      <a routerLink="/admin/repositories" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-database"></i> Repositories
+      </a>
+      <a routerLink="/admin/profile" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-user-gear"></i> Profile
+      </a>
+      <a routerLink="/admin/audit" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-list-check"></i> Audit Logs
+      </a>
+    </div>
+    
+    <div class="navbar-right">
+      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
+      </button>
+      <a routerLink="/admin/profile" class="user-badge" title="Manage Profile">
+        <i class="fa-solid fa-user-shield"></i>
+      </a>
+      <button (click)="onLogout()" class="btn-navbar-logout" title="Sign Out">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Analytics Workspace -->
+  <main class="admin-main-wrapper">
+    
+    <!-- Hero / Header -->
+    <div class="welcome-card fade-in">
+      <div class="welcome-text">
+        <h2>Repository Intelligence Dashboard</h2>
+        <p>
+          Analyze repository health, monitor community participation, check technology stack distributions, and inspect repository health insights.
+        </p>
+      </div>
+      <div class="welcome-badge">
+        <i class="fa-solid fa-chart-line"></i> Repository Insights
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-state-wrapper">
+        <div class="spinner"></div>
+        <p>Compiling repository intelligence and statistics...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (hasError && !isLoading) {
+      <div class="error-state-wrapper">
+        <i class="fa-solid fa-circle-exclamation error-icon"></i>
+        <h3>Failed to Load Analytics</h3>
+        <p>An error occurred while communicating with the repository database layer.</p>
+        <button (click)="loadAnalyticsData()" class="btn-retry">
+          <i class="fa-solid fa-arrows-rotate"></i> Retry
+        </button>
+      </div>
+    }
+
+    <!-- Main Live Analytics Dashboard Content -->
+    @if (!isLoading && !hasError && analyticsData) {
+      <div class="analytics-dashboard-grid">
+
+        <!-- SECTION 1: Repository Metrics Cards -->
+        <section class="stats-grid">
+          <!-- Total Repos -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper blue">
+              <i class="fa-solid fa-boxes-stacked"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Total Repositories</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.totalRepositories" [duration]="1.5">0</span>
+              <span class="stat-desc">Tracked repos</span>
+            </div>
+          </div>
+
+          <!-- Public Repos -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper lime">
+              <i class="fa-solid fa-globe"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Public Repos</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.publicRepositories" [duration]="1.5">0</span>
+              <span class="stat-desc">Open source</span>
+            </div>
+          </div>
+
+          <!-- Private Repos -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper orange">
+              <i class="fa-solid fa-lock"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Private Repos</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.privateRepositories" [duration]="1.5">0</span>
+              <span class="stat-desc">Restricted access</span>
+            </div>
+          </div>
+
+          <!-- Archived Repos -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper danger">
+              <i class="fa-solid fa-box-archive"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Archived Repos</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.archivedRepositories" [duration]="1.5">0</span>
+              <span class="stat-desc">Read-only archives</span>
+            </div>
+          </div>
+
+          <!-- Total Contributors -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper purple">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Total Contributors</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.totalContributors" [duration]="1.5">0</span>
+              <span class="stat-desc">Platform developers</span>
+            </div>
+          </div>
+
+          <!-- Total Stars -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper warning">
+              <i class="fa-solid fa-star"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Total Stars</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.totalStars" [duration]="1.5">0</span>
+              <span class="stat-desc">GitHub stars</span>
+            </div>
+          </div>
+
+          <!-- Total Forks -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper cyan">
+              <i class="fa-solid fa-code-fork"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Total Forks</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.totalForks" [duration]="1.5">0</span>
+              <span class="stat-desc">GitHub forks</span>
+            </div>
+          </div>
+
+          <!-- Avg Contributors / Repo -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper active">
+              <i class="fa-solid fa-users-rectangle"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Avg Contributors / Repo</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.averageContributorsPerRepo" [duration]="1.5">0</span>
+              <span class="stat-desc">Community engagement</span>
+            </div>
+          </div>
+
+          <!-- Avg Stars / Repo -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper yellow">
+              <i class="fa-solid fa-award"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Avg Stars / Repo</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.averageStarsPerRepo" [duration]="1.5">0</span>
+              <span class="stat-desc">Popularity index</span>
+            </div>
+          </div>
+
+          <!-- Avg Forks / Repo -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper teal">
+              <i class="fa-solid fa-share-nodes"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Avg Forks / Repo</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.averageForksPerRepo" [duration]="1.5">0</span>
+              <span class="stat-desc">Forks density</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 2: Most Popular Repositories -->
+        <section class="section-container">
+          <div class="section-header">
+            <h3><i class="fa-solid fa-fire text-amber"></i> Most Popular Repositories</h3>
+            <span class="section-badge">Ranked by Stars</span>
+          </div>
+          
+          <div class="leaderboard-grid">
+            @for (repo of analyticsData.popularRepositories; track repo.id; let idx = $index) {
+              <div class="leaderboard-card hover-glow-subtle">
+                <div class="leaderboard-badge" [class.rank-1]="idx === 0" [class.rank-2]="idx === 1" [class.rank-3]="idx === 2">
+                  #{{ idx + 1 }}
+                </div>
+                <div class="card-details">
+                  <h4>{{ repo.name }}</h4>
+                  <p class="repo-desc">{{ repo.description || 'No description provided.' }}</p>
+                  
+                  <div class="repo-meta">
+                    <span class="meta-item text-amber"><i class="fa-solid fa-star"></i> {{ repo.stars }} stars</span>
+                    <span class="meta-item text-cyan"><i class="fa-solid fa-code-fork"></i> {{ repo.forks }} forks</span>
+                    <span class="meta-item text-purple"><i class="fa-solid fa-users"></i> {{ repo.contributorCount }} contributors</span>
+                  </div>
+
+                  @if (repo.topics && repo.topics.length > 0) {
+                    <div class="repo-topics">
+                      @for (topic of repo.topics.slice(0, 4); track topic) {
+                        <span class="topic-tag">{{ topic }}</span>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- SECTION 3: Community Participation Charts -->
+        <section class="dashboard-row-grid">
+          <div class="chart-card hover-glow-subtle">
+            <div class="chart-header">
+              <h4><i class="fa-solid fa-chart-bar text-purple"></i> Contributor Distribution</h4>
+              <p>Top repositories by developer engagement</p>
+            </div>
+            <div class="chart-body">
+              @if (contributorChartData) {
+                <canvas baseChart
+                        [data]="contributorChartData"
+                        [options]="contributorChartOptions"
+                        [type]="'bar'">
+                </canvas>
+              }
+            </div>
+          </div>
+
+          <div class="chart-card hover-glow-subtle">
+            <div class="chart-header">
+              <h4><i class="fa-solid fa-chart-column text-cyan"></i> Fork Distribution</h4>
+              <p>Repositories with most community forks</p>
+            </div>
+            <div class="chart-body">
+              @if (forkChartData) {
+                <canvas baseChart
+                        [data]="forkChartData"
+                        [options]="forkChartOptions"
+                        [type]="'bar'">
+                </canvas>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 4: Repository Technologies -->
+        <section class="dashboard-row-grid">
+          <div class="chart-card hover-glow-subtle">
+            <div class="chart-header">
+              <h4><i class="fa-solid fa-chart-pie text-lime"></i> Topic Distribution</h4>
+              <p>Most common repository metadata topics</p>
+            </div>
+            <div class="chart-body small-chart">
+              @if (topicChartData) {
+                <canvas baseChart
+                        [data]="topicChartData"
+                        [options]="topicChartOptions"
+                        [type]="'doughnut'">
+                </canvas>
+              }
+            </div>
+          </div>
+
+          <div class="chart-card hover-glow-subtle">
+            <div class="chart-header">
+              <h4><i class="fa-solid fa-code text-lime"></i> Repository Language Distribution</h4>
+              <p>Primary technology breakdown</p>
+            </div>
+            <div class="chart-body">
+              @if (languageChartData) {
+                <canvas baseChart
+                        [data]="languageChartData"
+                        [options]="languageChartOptions"
+                        [type]="'bar'">
+                </canvas>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 5: Repository Health Insights -->
+        <section class="insights-row-grid">
+          <!-- Insight Cards -->
+          <div class="insights-panel">
+            <div class="insights-header">
+              <h4><i class="fa-solid fa-heart-pulse text-rose"></i> Repository Health Insights</h4>
+              <p>Key highlights and anomalies</p>
+            </div>
+            
+            <div class="insights-list">
+              <!-- Most Starred -->
+              <div class="insight-item">
+                <div class="insight-icon text-amber bg-amber-soft">
+                  <i class="fa-solid fa-star"></i>
+                </div>
+                <div class="insight-text">
+                  <h5>Most Popular Project</h5>
+                  <p>
+                    <strong>{{ analyticsData.communityInsights.mostStarredRepo?.name || 'N/A' }}</strong> leads the organization with 
+                    <strong>{{ analyticsData.communityInsights.mostStarredRepo?.stars || 0 }} stars</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Most Forked -->
+              <div class="insight-item">
+                <div class="insight-icon text-cyan bg-cyan-soft">
+                  <i class="fa-solid fa-code-fork"></i>
+                </div>
+                <div class="insight-text">
+                  <h5>Most Forked Project</h5>
+                  <p>
+                    <strong>{{ analyticsData.communityInsights.mostForkedRepo?.name || 'N/A' }}</strong> has been cloned/forked 
+                    <strong>{{ analyticsData.communityInsights.mostForkedRepo?.forks || 0 }} times</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Largest Community -->
+              <div class="insight-item">
+                <div class="insight-icon text-purple bg-purple-soft">
+                  <i class="fa-solid fa-users"></i>
+                </div>
+                <div class="insight-text">
+                  <h5>Largest Developer Community</h5>
+                  <p>
+                    <strong>{{ analyticsData.communityInsights.largestCommunityRepo?.name || 'N/A' }}</strong> has the largest engagement with 
+                    <strong>{{ analyticsData.communityInsights.largestCommunityRepo?.contributorCount || 0 }} active contributors</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Least Active -->
+              <div class="insight-item">
+                <div class="insight-icon text-warning bg-warning-soft">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="insight-text">
+                  <h5>Attention Needed</h5>
+                  <p>
+                    <strong>{{ analyticsData.communityInsights.leastActiveRepo?.name || 'N/A' }}</strong> has low activity with 
+                    <strong>{{ analyticsData.communityInsights.leastActiveRepo?.contributorCount || 0 }} contributors</strong>.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Popularity Rank -->
+              <div class="insight-item">
+                <div class="insight-icon text-rose bg-rose-soft">
+                  <i class="fa-solid fa-box-archive"></i>
+                </div>
+                <div class="insight-text">
+                  <h5>Archived Status</h5>
+                  <p>
+                    There are <strong>{{ analyticsData.communityInsights.archivedRepoCount || 0 }} archived</strong> repositories in the ecosystem.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Visibility distribution Pie Chart -->
+          <div class="chart-card hover-glow-subtle visibility-chart-card">
+            <div class="chart-header">
+              <h4><i class="fa-solid fa-chart-pie text-cyan"></i> Visibility Distribution</h4>
+              <p>Public vs Private vs Archived Repositories</p>
+            </div>
+            <div class="chart-body small-chart">
+              @if (visibilityChartData) {
+                <canvas baseChart
+                        [data]="visibilityChartData"
+                        [options]="visibilityChartOptions"
+                        [type]="'pie'">
+                </canvas>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 6: Repository Explorer (Table) -->
+        <section class="explorer-section-card hover-glow-subtle">
+          <div class="explorer-header">
+            <div class="header-titles">
+              <h4>Repository Explorer</h4>
+              <p>Search, filter, and inspect complete repository metadata</p>
+            </div>
+            <div class="explorer-actions">
+              <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" 
+                       [(ngModel)]="searchText" 
+                       (ngModelChange)="currentPage = 1"
+                       placeholder="Search repository, topics, language..." 
+                       class="explorer-search-input" />
+              </div>
+            </div>
+          </div>
+
+          <div class="table-scroll-container">
+            <table class="explorer-table">
+              <thead>
+                <tr>
+                  <th (click)="setSort('name')" class="sortable-header">
+                    Repository 
+                    @if (sortKey === 'name') {
+                      <i class="fa-solid" [class.fa-arrow-up-short-wide]="sortAscending" [class.fa-arrow-down-wide-short]="!sortAscending"></i>
+                    }
+                  </th>
+                  <th (click)="setSort('visibility')" class="sortable-header">
+                    Visibility
+                    @if (sortKey === 'visibility') {
+                      <i class="fa-solid" [class.fa-arrow-up-short-wide]="sortAscending" [class.fa-arrow-down-wide-short]="!sortAscending"></i>
+                    }
+                  </th>
+                  <th (click)="setSort('stars')" class="sortable-header text-right">
+                    Stars
+                    @if (sortKey === 'stars') {
+                      <i class="fa-solid" [class.fa-arrow-up-short-wide]="sortAscending" [class.fa-arrow-down-wide-short]="!sortAscending"></i>
+                    }
+                  </th>
+                  <th (click)="setSort('forks')" class="sortable-header text-right">
+                    Forks
+                    @if (sortKey === 'forks') {
+                      <i class="fa-solid" [class.fa-arrow-up-short-wide]="sortAscending" [class.fa-arrow-down-wide-short]="!sortAscending"></i>
+                    }
+                  </th>
+                  <th (click)="setSort('contributorCount')" class="sortable-header text-right">
+                    Contributors
+                    @if (sortKey === 'contributorCount') {
+                      <i class="fa-solid" [class.fa-arrow-up-short-wide]="sortAscending" [class.fa-arrow-down-wide-short]="!sortAscending"></i>
+                    }
+                  </th>
+                  <th>Language</th>
+                  <th>Topics</th>
+                  <th class="text-center">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                @if (getPaginatedExplorerList().length === 0) {
+                  <tr>
+                    <td colspan="8" class="empty-table-state">
+                      <i class="fa-solid fa-folder-open text-muted empty-icon"></i>
+                      <p>No repositories match your search query.</p>
+                    </td>
+                  </tr>
+                } @else {
+                  @for (repo of getPaginatedExplorerList(); track repo.id) {
+                    <tr [class.is-archived]="repo.isArchived">
+                      <td class="font-semibold">
+                        <div class="repo-name-cell">
+                          @if (repo.isArchived) {
+                            <i class="fa-solid fa-box-archive text-rose archive-indicator-icon" title="Archived"></i>
+                          }
+                          {{ repo.name }}
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge-status" [class.public]="repo.visibility === 'public'" [class.private]="repo.visibility === 'private'" [class.archived]="repo.isArchived">
+                          {{ repo.isArchived ? 'Archived' : (repo.visibility | titlecase) }}
+                        </span>
+                      </td>
+                      <td class="text-right font-mono">{{ repo.stars | number }}</td>
+                      <td class="text-right font-mono">{{ repo.forks | number }}</td>
+                      <td class="text-right font-mono">{{ repo.contributorCount | number }}</td>
+                      <td>
+                        @if (repo.language) {
+                          <span class="language-tag">{{ repo.language }}</span>
+                        } @else {
+                          <span class="text-muted font-light">-</span>
+                        }
+                      </td>
+                      <td>
+                        <div class="table-topics-wrapper">
+                          @for (topic of repo.topics.slice(0, 3); track topic) {
+                            <span class="topic-tag">{{ topic }}</span>
+                          }
+                          @if (repo.topics.length > 3) {
+                            <span class="topic-tag-more" [title]="repo.topics.slice(3).join(', ')">+{{ repo.topics.length - 3 }}</span>
+                          }
+                        </div>
+                      </td>
+                      <td class="text-center">
+                        <a [href]="'https://github.com/c2siorg/' + repo.name" 
+                           target="_blank" 
+                           class="btn-table-action" 
+                           title="Inspect on GitHub">
+                          <i class="fa-brands fa-github"></i> View
+                        </a>
+                      </td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination Footer -->
+          @if (getFilteredExplorerList().length > 0) {
+            <div class="explorer-pagination">
+              <span class="pagination-summary">
+                Showing <strong>{{ (currentPage - 1) * pageSize + 1 }}</strong> - 
+                <strong>{{ Math.min(currentPage * pageSize, getFilteredExplorerList().length) }}</strong> of 
+                <strong>{{ getFilteredExplorerList().length }}</strong> repositories
+              </span>
+              
+              <div class="pagination-controls">
+                <button [disabled]="currentPage === 1" 
+                        (click)="onPageChange(currentPage - 1)" 
+                        class="btn-pagination">
+                  <i class="fa-solid fa-chevron-left"></i> Previous
+                </button>
+                
+                <span class="page-indicator">Page {{ currentPage }} of {{ getTotalPages() }}</span>
+                
+                <button [disabled]="currentPage === getTotalPages()" 
+                        (click)="onPageChange(currentPage + 1)" 
+                        class="btn-pagination">
+                  Next <i class="fa-solid fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+          }
+        </section>
+
+      </div>
+    }
+  </main>
+</div>

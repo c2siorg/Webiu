@@ -593,6 +593,50 @@
             ]
         },
         {
+            "name": "Admin Analytics",
+            "description": "Endpoints for retrieving administrator dashboards intelligence and metrics.",
+            "item": [
+                {
+                    "name": "Get Contributor Analytics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/contributors",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "contributors"
+                            ]
+                        },
+                        "description": "Returns consolidated analytics metrics, leaderboard rankings, participation distributions, and explorer details for contributors."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Repository Analytics",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/admin/repositories",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "admin",
+                                "repositories"
+                            ]
+                        },
+                        "description": "Returns consolidated analytics metrics, rankings, distributions (stars, forks, languages, topics), and explorer details for repositories."
+                    },
+                    "response": []
+                }
+            ]
+        },
+        {
             "name": "Admin Profile",
             "description": "Endpoints for retrieving administrator profile and rotating credentials.",
             "item": [
