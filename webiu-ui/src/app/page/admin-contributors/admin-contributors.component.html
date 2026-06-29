@@ -1,0 +1,464 @@
+<div class="admin-panel-container">
+  <!-- Top Navigation Bar -->
+  <header class="admin-navbar">
+    <div class="navbar-left">
+      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+      <span class="brand-name">WebiU Admin</span>
+    </div>
+    
+    <div class="navbar-center" role="tablist">
+      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-chart-pie"></i> Dashboard
+      </a>
+      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-gears"></i> Settings
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-calendar-days"></i> GSoC Years
+      </a>
+      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
+        <i class="fa-solid fa-lightbulb"></i> Ideas
+      </a>
+      <a routerLink="/admin/contributors" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-users-gear"></i> Contributors
+      </a>
+      <a routerLink="/admin/profile" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-user-gear"></i> Profile
+      </a>
+      <a routerLink="/admin/audit" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-list-check"></i> Audit Logs
+      </a>
+    </div>
+    
+    <div class="navbar-right">
+      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
+      </button>
+      <a routerLink="/admin/profile" class="user-badge" title="Manage Profile">
+        <i class="fa-solid fa-user-shield"></i>
+      </a>
+      <button (click)="onLogout()" class="btn-navbar-logout" title="Sign Out">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Analytics Workspace -->
+  <main class="admin-main-wrapper">
+    
+    <!-- Hero / Header -->
+    <div class="welcome-card fade-in">
+      <div class="welcome-text">
+        <h2>Contributor Intelligence Dashboard</h2>
+        <p>
+          Gather operational insights, track community participation across active repositories, analyze leaderboard rankings, and review contribution patterns.
+        </p>
+      </div>
+      <div class="welcome-badge">
+        <i class="fa-solid fa-brain"></i> Platform Analytics
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="loading-state-wrapper">
+        <div class="spinner"></div>
+        <p>Compiling contributor analytics and statistics...</p>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (hasError && !isLoading) {
+      <div class="error-state-wrapper">
+        <i class="fa-solid fa-circle-exclamation error-icon"></i>
+        <h3>Failed to Load Analytics</h3>
+        <p>An error occurred while communicating with the database analytics layer.</p>
+        <button (click)="loadAnalyticsData()" class="btn-retry">
+          <i class="fa-solid fa-arrows-rotate"></i> Retry
+        </button>
+      </div>
+    }
+
+    <!-- Main Live Analytics Dashboard Content -->
+    @if (!isLoading && !hasError && analyticsData) {
+      <div class="analytics-dashboard-grid">
+
+        <!-- SECTION 1: Platform Metrics Cards -->
+        <section class="stats-grid">
+          <!-- Total Contributors -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper lime">
+              <i class="fa-solid fa-users"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Total Contributors</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.totalContributors" [duration]="1.5">0</span>
+              <span class="stat-desc">Registered community</span>
+            </div>
+          </div>
+
+          <!-- Active Repositories -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper purple">
+              <i class="fa-solid fa-folder-open"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Active Repos</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.activeRepositories" [duration]="1.5">0</span>
+              <span class="stat-desc">Participating projects</span>
+            </div>
+          </div>
+
+          <!-- Avg Contributors per Repo -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper orange">
+              <i class="fa-solid fa-chart-simple"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Avg Contributors / Repo</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.averageContributorsPerRepo" [duration]="1.5">0</span>
+              <span class="stat-desc">Community density</span>
+            </div>
+          </div>
+
+          <!-- Avg Contributions per Contributor -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper cyan">
+              <i class="fa-solid fa-chart-line"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Avg Contributions / User</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.averageContributionsPerContributor" [duration]="1.5">0</span>
+              <span class="stat-desc">Contributions per dev</span>
+            </div>
+          </div>
+
+          <!-- Top Contributor Total Count -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper active">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Top Dev Contributions</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.topContributorContributionCount" [duration]="1.5">0</span>
+              <span class="stat-desc">Record holder total</span>
+            </div>
+          </div>
+
+          <!-- Largest Community Size -->
+          <div class="stat-card hover-glow">
+            <div class="stat-icon-wrapper warning">
+              <i class="fa-solid fa-people-group"></i>
+            </div>
+            <div class="stat-info">
+              <h3>Max Repo Community</h3>
+              <span class="stat-value" [appCountUp]="analyticsData.metrics.largestRepositoryCommunity" [duration]="1.5">0</span>
+              <span class="stat-desc">Largest single community</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 2 & 3: Charts Layout Grid -->
+        <section class="charts-layout-row">
+          <!-- Repository Participation -->
+          <div class="chart-container-card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-chart-bar font-purple"></i> Repository Participation</h3>
+              <span class="subtitle">Contributors per repository</span>
+            </div>
+            <div class="chart-wrapper">
+              @if (repoParticipationChartData) {
+                <canvas baseChart
+                        [data]="repoParticipationChartData"
+                        [options]="repoParticipationChartOptions"
+                        [type]="'bar'">
+                </canvas>
+              }
+            </div>
+          </div>
+
+          <!-- Contribution Distribution -->
+          <div class="chart-container-card">
+            <div class="card-header">
+              <h3><i class="fa-solid fa-chart-column font-lime"></i> Contribution Distribution</h3>
+              <span class="subtitle">Dev counts per contribution range</span>
+            </div>
+            <div class="chart-wrapper">
+              @if (distChartData) {
+                <canvas baseChart
+                        [data]="distChartData"
+                        [options]="distChartOptions"
+                        [type]="'bar'">
+                </canvas>
+              }
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 4: Community Insights Grid -->
+        <section class="insights-section">
+          <div class="section-title">
+            <h2>Community Insights</h2>
+            <p class="section-desc">Automated evaluations of overall contributor health</p>
+          </div>
+          
+          <div class="insights-grid">
+            <!-- Most Active Contributor -->
+            <div class="insight-card hover-glow">
+              <div class="insight-icon-wrapper active">
+                <i class="fa-solid fa-trophy"></i>
+              </div>
+              <div class="insight-card-body">
+                <h4>Most Active Contributor</h4>
+                @if (analyticsData.communityInsights.mostActiveContributor) {
+                  <div class="insight-dev-profile">
+                    <img [src]="analyticsData.communityInsights.mostActiveContributor.avatarUrl" alt="Avatar" />
+                    <div>
+                      <h5>{{ analyticsData.communityInsights.mostActiveContributor.username }}</h5>
+                      <p class="stat">
+                        <strong>{{ analyticsData.communityInsights.mostActiveContributor.totalContributions }}</strong> contributions
+                      </p>
+                      <p class="sub">Across {{ analyticsData.communityInsights.mostActiveContributor.repoCount }} repositories</p>
+                    </div>
+                  </div>
+                } @else {
+                  <p class="empty-insight">No contributions recorded yet</p>
+                }
+              </div>
+            </div>
+
+            <!-- Repository with Largest Community -->
+            <div class="insight-card hover-glow">
+              <div class="insight-icon-wrapper lime">
+                <i class="fa-solid fa-folder-closed"></i>
+              </div>
+              <div class="insight-card-body">
+                <h4>Largest Community Project</h4>
+                @if (analyticsData.communityInsights.largestCommunityRepo) {
+                  <div class="insight-content">
+                    <h5>{{ analyticsData.communityInsights.largestCommunityRepo.name }}</h5>
+                    <p class="stat">
+                      <strong>{{ analyticsData.communityInsights.largestCommunityRepo.contributorCount }}</strong> contributors
+                    </p>
+                    <p class="sub">Leading community hotspot</p>
+                  </div>
+                } @else {
+                  <p class="empty-insight">No repository communities found</p>
+                }
+              </div>
+            </div>
+
+            <!-- Repository with Highest Avg Contributions -->
+            <div class="insight-card hover-glow">
+              <div class="insight-icon-wrapper warning">
+                <i class="fa-solid fa-bolt-lightning"></i>
+              </div>
+              <div class="insight-card-body">
+                <h4>Highest Contribution Rate</h4>
+                @if (analyticsData.communityInsights.highestAverageContributionsRepo) {
+                  <div class="insight-content">
+                    <h5>{{ analyticsData.communityInsights.highestAverageContributionsRepo.name }}</h5>
+                    <p class="stat">
+                      <strong>{{ analyticsData.communityInsights.highestAverageContributionsRepo.avgContributions }}</strong> contributions/dev
+                    </p>
+                    <p class="sub">Highest average workload</p>
+                  </div>
+                } @else {
+                  <p class="empty-insight">No calculations available</p>
+                }
+              </div>
+            </div>
+
+            <!-- Contributor working across most repositories -->
+            <div class="insight-card hover-glow">
+              <div class="insight-icon-wrapper cyan">
+                <i class="fa-solid fa-globe"></i>
+              </div>
+              <div class="insight-card-body">
+                <h4>Cross-Repo Champion</h4>
+                @if (analyticsData.communityInsights.crossRepoContributor) {
+                  <div class="insight-dev-profile">
+                    <img [src]="analyticsData.communityInsights.crossRepoContributor.avatarUrl" alt="Avatar" />
+                    <div>
+                      <h5>{{ analyticsData.communityInsights.crossRepoContributor.username }}</h5>
+                      <p class="stat">
+                        <strong>{{ analyticsData.communityInsights.crossRepoContributor.repoCount }}</strong> repositories
+                      </p>
+                      <p class="sub">With {{ analyticsData.communityInsights.crossRepoContributor.totalContributions }} total contributions</p>
+                    </div>
+                  </div>
+                } @else {
+                  <p class="empty-insight">No cross-repo contributions yet</p>
+                }
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 5: Contributor Leaderboard -->
+        <section class="leaderboard-section">
+          <div class="section-title">
+            <h2>Top Contributors</h2>
+            <p class="section-desc">Maintainer leaderboard ranked by contribution volume</p>
+          </div>
+          
+          <div class="leaderboard-grid">
+            @for (dev of analyticsData.leaderboard; track dev.id; let idx = $index) {
+              <div class="leaderboard-card hover-glow">
+                <div class="rank-badge" [class.gold]="idx === 0" [class.silver]="idx === 1" [class.bronze]="idx === 2">
+                  #{{ idx + 1 }}
+                </div>
+                <img [src]="dev.avatarUrl" alt="Avatar" class="avatar" />
+                <div class="info">
+                  <h4>{{ dev.username }}</h4>
+                  <a [href]="dev.profileUrl" target="_blank" class="github-link">
+                    <i class="fa-brands fa-github"></i> github profile
+                  </a>
+                </div>
+                <div class="stats">
+                  <span class="value">{{ dev.totalContributions }}</span>
+                  <span class="label">contributions</span>
+                </div>
+                <div class="repos">
+                  @for (repo of dev.repos; track repo) {
+                    <span class="repo-badge">{{ repo }}</span>
+                  }
+                </div>
+              </div>
+            } @empty {
+              <div class="empty-card">
+                <p>No leaderboard information compiled.</p>
+              </div>
+            }
+          </div>
+        </section>
+
+        <!-- SECTION 6 & 7: Explorer & Recent split grid -->
+        <section class="explorer-recent-row">
+          
+          <!-- Contributor Explorer Table -->
+          <div class="explorer-card">
+            <div class="explorer-header">
+              <div>
+                <h3>Contributor Explorer</h3>
+                <span class="subtitle">Search, sort, and inspect the entire community directory</span>
+              </div>
+              <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                <input type="text" [(ngModel)]="searchText" (ngModelChange)="currentPage = 1" placeholder="Search developer or repository..." class="search-input" />
+              </div>
+            </div>
+
+            <div class="data-table-container">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Avatar</th>
+                    <th (click)="setSort('username')" class="sortable">
+                      Username 
+                      @if (sortKey === 'username') {
+                        <i class="fa-solid" [class.fa-chevron-up]="sortAscending" [class.fa-chevron-down]="!sortAscending"></i>
+                      }
+                    </th>
+                    <th>Repositories Contributed</th>
+                    <th (click)="setSort('totalContributions')" class="sortable">
+                      Contributions
+                      @if (sortKey === 'totalContributions') {
+                        <i class="fa-solid" [class.fa-chevron-up]="sortAscending" [class.fa-chevron-down]="!sortAscending"></i>
+                      }
+                    </th>
+                    <th (click)="setSort('repoCount')" class="sortable">
+                      Joined Repos
+                      @if (sortKey === 'repoCount') {
+                        <i class="fa-solid" [class.fa-chevron-up]="sortAscending" [class.fa-chevron-down]="!sortAscending"></i>
+                      }
+                    </th>
+                    <th>Profile</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (c of getPaginatedExplorerList(); track c.id) {
+                    <tr>
+                      <td>
+                        <img [src]="c.avatarUrl" alt="Avatar" class="table-avatar" />
+                      </td>
+                      <td class="font-bold">{{ c.username }}</td>
+                      <td>
+                        <div class="repo-tags-cell">
+                          @for (r of c.repos; track r) {
+                            <span class="table-repo-tag">{{ r }}</span>
+                          } @empty {
+                            <span class="text-muted italic">none</span>
+                          }
+                        </div>
+                      </td>
+                      <td class="font-bold">{{ c.totalContributions }}</td>
+                      <td>{{ c.repoCount }}</td>
+                      <td>
+                        <a [href]="c.profileUrl" target="_blank" class="table-github-link">
+                          <i class="fa-brands fa-github"></i> GitHub
+                        </a>
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="6" class="empty-row">No contributors match your search criteria.</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Table Pagination Controls -->
+            <div class="table-pagination">
+              <div class="pagination-info">
+                Showing {{ getFilteredExplorerList().length > 0 ? (currentPage - 1) * pageSize + 1 : 0 }} to
+                {{ Math.min(currentPage * pageSize, getFilteredExplorerList().length) }} of
+                {{ getFilteredExplorerList().length }} contributors
+              </div>
+              <div class="pagination-buttons">
+                <button (click)="onPageChange(currentPage - 1)" [disabled]="currentPage === 1" class="btn-page">
+                  <i class="fa-solid fa-angle-left"></i> Prev
+                </button>
+                <span class="page-number">Page {{ currentPage }} of {{ getTotalPages() }}</span>
+                <button (click)="onPageChange(currentPage + 1)" [disabled]="currentPage === getTotalPages()" class="btn-page">
+                  Next <i class="fa-solid fa-angle-right"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Contributors List -->
+          <div class="recent-card">
+            <div class="recent-header">
+              <h3>Recent Synchronization</h3>
+              <span class="subtitle">Latest contributors recorded in database</span>
+            </div>
+
+            <div class="recent-list">
+              @for (c of analyticsData.recentContributors; track c.id) {
+                <div class="recent-item">
+                  <img [src]="c.avatarUrl" alt="Avatar" />
+                  <div class="recent-info">
+                    <h5>{{ c.username }}</h5>
+                    <span class="time">Synced {{ c.createdAt | date:'mediumDate' }}</span>
+                  </div>
+                  <a [href]="c.profileUrl" target="_blank" class="btn-github-link" title="Open GitHub Profile">
+                    <i class="fa-brands fa-github"></i>
+                  </a>
+                </div>
+              } @empty {
+                <div class="empty-recent">
+                  <p>No recent synchronization logs.</p>
+                </div>
+              }
+            </div>
+          </div>
+
+        </section>
+
+      </div>
+    }
+
+  </main>
+</div>

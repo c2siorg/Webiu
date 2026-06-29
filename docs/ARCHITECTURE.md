@@ -360,6 +360,48 @@ The dashboard service integrates data across multiple modules:
 
 ---
 
+### H. Admin Contributor Intelligence & Aggregated Analytics Flow
+To empower maintainers to monitor overall community health, track rankings, and review contribution patterns without client-side calculation overhead, WebiU implements a dedicated contributor intelligence analytics pipeline.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Admin as Administrator
+    participant UI as AdminContributorsComponent
+    participant Server as AnalyticsController
+    participant Service as ContributorAnalyticsService
+    participant DB as PostgreSQL (TypeORM)
+
+    Admin->>UI: Open /admin/contributors page
+    UI->>Server: GET /admin/contributors (with Cookie)
+    Note over Server: AdminGuard decodes session cookie<br/>validates active role permissions
+    Server->>Service: getContributorAnalytics()
+    
+    rect rgb(30, 30, 45)
+        Note over Service: Concurrently execute SQL Aggregations
+        Service->>DB: Count total contributors & active repositories
+        Service->>DB: Calculate average contributors per repository
+        Service->>DB: Calculate average contributions per contributor
+        Service->>DB: Fetch top contributor total and largest community size
+        Service->>DB: Query top 10 leaderboard & explorer list with counts
+        Service->>DB: Fetch distribution buckets & community insights
+        Service->>DB: List 10 most recent synced contributors (createdAt DESC)
+        DB-->>Service: Return aggregated record results
+    end
+    
+    Service->>Server: Return consolidated analytics object
+    Server-->>UI: 200 OK (Single JSON Payload)
+    Note over UI: Bind metrics to count-up directive<br/>Render Chart.js canvases (Participation & Distribution)
+    UI-->>Admin: Render premium analytics dashboard
+```
+
+Key features of this pipeline include:
+1. **SQL-Driven Aggregation**: Heavily groups and aggregates statistics (leaderboard metrics, buckets calculation, community sizes, average contributions) directly inside the database using optimized TypeORM QueryBuilder operations, ensuring high performance even with large contributor pools.
+2. **Single Payload Execution**: Consolidates all metrics, charts data (repository participation horizontal bar, bucket distribution vertical bar), insights, top lists, paginated explorer mapping, and recent logs in one single payload, minimizing network round-trip overhead.
+3. **Adaptive Visual Theme**: Dynamically translates HSL design tokens and listens to theme changes to redraw Chart.js canvas elements, rendering seamless dark-mode visual elements that align with the rest of WebiU's premium UI.
+
+---
+
 ## 5. Deployment Architectures
 
 ### A. Backend Deployment (Render.com)
