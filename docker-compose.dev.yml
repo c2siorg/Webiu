@@ -13,7 +13,7 @@ services:
     volumes:
       - ./webiu-server:/usr/src/app
       - server_node_modules:/usr/src/app/node_modules
-    command: [ "sh", "-c", "npm install && npm run start:dev" ]
+    command: [ "sh", "-c", "npm install --legacy-peer-deps && npm run start:dev" ]
 
   webiu-ui:
     image: node:20-alpine
@@ -24,7 +24,7 @@ services:
       - ui_node_modules:/usr/src/app/node_modules
     ports:
       - 4200:4200
-    command: [ "sh", "-c", "npm install && npx ng serve --host 0.0.0.0" ]
+    command: [ "sh", "-c", "npm install --legacy-peer-deps && npx ng serve --host 0.0.0.0" ]
     depends_on:
       - webiu-server
 

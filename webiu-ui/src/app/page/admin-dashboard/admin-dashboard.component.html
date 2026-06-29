@@ -19,6 +19,9 @@
       <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
         <i class="fa-solid fa-lightbulb"></i> Ideas
       </a>
+      <a routerLink="/admin/contributors" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-users-gear"></i> Contributors
+      </a>
       <a routerLink="/admin/profile" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
         <i class="fa-solid fa-user-gear"></i> Profile
       </a>
@@ -372,6 +375,24 @@
               <div class="action-btn-wrapper">
                 <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'mentors'}" class="btn-action btn-secondary-action">
                   <i class="fa-solid fa-users-gear"></i> Manage Mentors
+                </a>
+              </div>
+            </div>
+
+            <!-- Contributor Insights -->
+            <div class="action-card hover-glow">
+              <div class="action-card-header">
+                <div class="action-icon-wrapper">
+                  <i class="fa-solid fa-users-gear icon-accent"></i>
+                </div>
+                <h3>Contributor Analytics</h3>
+              </div>
+              <p class="action-description">
+                Analyze contributor distributions, repository communities, track rankings, and view community health metrics.
+              </p>
+              <div class="action-btn-wrapper">
+                <a routerLink="/admin/contributors" class="btn-action btn-secondary-action">
+                  <i class="fa-solid fa-chart-line"></i> View Intelligence
                 </a>
               </div>
             </div>

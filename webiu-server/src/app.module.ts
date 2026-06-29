@@ -23,6 +23,7 @@ import { GsocModule } from './gsoc/gsoc.module';
 import { AdminProfileModule } from './admin-profile/admin-profile.module';
 import { AuditLogModule } from './audit-log/audit-log.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     AdminProfileModule,
     AuditLogModule,
     DashboardModule,
+    AnalyticsModule,
   ],
   controllers: [AppController],
   providers: [

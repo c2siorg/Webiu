@@ -19,6 +19,9 @@
       <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
         <i class="fa-solid fa-lightbulb"></i> Ideas
       </a>
+      <a routerLink="/admin/contributors" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
+        <i class="fa-solid fa-users-gear"></i> Contributors
+      </a>
       <a routerLink="/admin/profile" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
         <i class="fa-solid fa-user-gear"></i> Profile
       </a>

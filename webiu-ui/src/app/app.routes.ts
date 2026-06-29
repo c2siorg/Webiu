@@ -104,6 +104,15 @@ export const routes: Routes = [
     canActivate: [adminAuthGuard],
   },
   {
+    path: 'admin/contributors',
+    title: 'Contributor Intelligence | WebiU',
+    loadComponent: () =>
+      import('./page/admin-contributors/admin-contributors.component').then(
+        (m) => m.AdminContributorsComponent,
+      ),
+    canActivate: [adminAuthGuard],
+  },
+  {
     path: 'admin/settings',
     title: 'Admin Settings | WebiU',
     loadComponent: () =>
