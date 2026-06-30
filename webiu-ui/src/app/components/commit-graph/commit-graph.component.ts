@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges } from '@angular/core';
+import { Component, Input, OnChanges, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CommitWeek } from '../../page/projects/project.model';
 
@@ -7,6 +7,7 @@ let nextGraphId = 0;
 @Component({
   selector: 'app-commit-graph',
   standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [CommonModule],
   templateUrl: './commit-graph.component.html',
   styleUrls: ['./commit-graph.component.scss'],

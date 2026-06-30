@@ -1,0 +1,29 @@
+{
+  "projectCount": 10,
+  "featured": [
+    {
+      "name": "Scan8",
+      "description": "Scan8 is a Kubernetes-based rapid URL/File scan system that allows to submit a list of URLs/files and take out the scan results.",
+      "language": "Python",
+      "topics": ["gsoc", "python", "security"],
+      "stars": 18,
+      "link": "https://github.com/c2siorg/Scan8"
+    },
+    {
+      "name": "Webiu",
+      "description": "A modern web platform for managing and showcasing open-source projects, contributors, and publications.",
+      "language": "TypeScript",
+      "topics": ["angular", "nestjs", "web-platform"],
+      "stars": 8,
+      "link": "https://github.com/c2siorg/Webiu"
+    },
+    {
+      "name": "OpenMF",
+      "description": "An Open Source Mobile Forensics Investigation Tool for Android Platform",
+      "language": "JavaScript",
+      "topics": ["forensics", "mobile", "android"],
+      "stars": 2,
+      "link": "https://github.com/c2siorg/OpenMF"
+    }
+  ]
+}

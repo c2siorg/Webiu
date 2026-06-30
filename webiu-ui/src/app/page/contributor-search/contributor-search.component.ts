@@ -1,19 +1,18 @@
 import { Component, OnInit, inject, PLATFORM_ID, DestroyRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { ToastrService } from 'ngx-toastr';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { firstValueFrom } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
-import { formatDistanceToNow } from 'date-fns';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 
 @Component({
   selector: 'app-contributor-search',
   standalone: true,
-  imports: [FormsModule, CommonModule, LoadingSpinnerComponent, HttpClientModule],
+  imports: [FormsModule, CommonModule, LoadingSpinnerComponent],
   templateUrl: './contributor-search.component.html',
   styleUrls: ['./contributor-search.component.scss'],
 })
@@ -215,9 +214,26 @@ export class ContributorSearchComponent implements OnInit {
     }
   }
 
-  formatLastUpdated(date: string) {
+  formatLastUpdated(date: string): string {
     const updatedAt = new Date(date);
-    return formatDistanceToNow(updatedAt, { addSuffix: true });
+    const now = new Date();
+    const diffMs = updatedAt.getTime() - now.getTime();
+    const diffSec = Math.round(diffMs / 1000);
+    const diffMin = Math.round(diffSec / 60);
+    const diffHr  = Math.round(diffMin / 60);
+    const diffDay = Math.round(diffHr / 24);
+    const diffMon = Math.round(diffDay / 30);
+    const diffYr  = Math.round(diffDay / 365);
+
+    // Use native Intl.RelativeTimeFormat — same output as date-fns formatDistanceToNow
+    const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
+
+    if (Math.abs(diffSec) < 60)  return rtf.format(diffSec, 'second');
+    if (Math.abs(diffMin) < 60)  return rtf.format(diffMin, 'minute');
+    if (Math.abs(diffHr)  < 24)  return rtf.format(diffHr,  'hour');
+    if (Math.abs(diffDay) < 30)  return rtf.format(diffDay, 'day');
+    if (Math.abs(diffMon) < 12)  return rtf.format(diffMon, 'month');
+    return rtf.format(diffYr, 'year');
   }
   get hasData(): boolean {
     return (

@@ -29,17 +29,40 @@
   ],
   "dataGroups": [
     {
-      "name": "api-data",
+      "name": "api-projects",
       "urls": [
-        "**/api/projects/**",
-        "**/api/contributor/**",
-        "https://api.github.com/**"
+        "**/api/v1/projects/**"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 50,
+        "maxAge": "1h",
+        "timeout": "5s"
+      }
+    },
+    {
+      "name": "api-contributors",
+      "urls": [
+        "**/api/v1/contributor/**",
+        "**/api/v1/user/**"
       ],
       "cacheConfig": {
         "strategy": "freshness",
-        "maxSize": 100,
-        "maxAge": "1d",
+        "maxSize": 50,
+        "maxAge": "30m",
         "timeout": "5s"
+      }
+    },
+    {
+      "name": "api-settings",
+      "urls": [
+        "**/api/v1/settings/public"
+      ],
+      "cacheConfig": {
+        "strategy": "performance",
+        "maxSize": 5,
+        "maxAge": "10m",
+        "timeout": "3s"
       }
     }
   ]
