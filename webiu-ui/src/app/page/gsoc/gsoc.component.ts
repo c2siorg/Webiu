@@ -1,5 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, SecurityContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { GsocService, GsocProgram, GsocIdea } from '../../services/gsoc.service';
 
 const MOCK_PROGRAM: GsocProgram = {
@@ -108,11 +109,13 @@ const MOCK_IDEAS: GsocIdea[] = [
 })
 export class GsocComponent implements OnInit {
   private gsocService = inject(GsocService);
+  private sanitizer = inject(DomSanitizer);
 
   program: GsocProgram | null = null;
   ideas: GsocIdea[] = [];
   activeProjectIndex: number | null = null;
   isLoading = true;
+  safeIntroHtml: SafeHtml = '';
 
   // Search & Filter State
   searchQuery = '';
@@ -132,6 +135,7 @@ export class GsocComponent implements OnInit {
       next: (progRes) => {
         if (progRes.success && progRes.program) {
           this.program = progRes.program;
+          this.safeIntroHtml = this.getSafeHtml(this.program.introHtml);
           
           // Load published project ideas corresponding to the current year
           this.gsocService.getCurrentIdeas().subscribe({
@@ -152,6 +156,7 @@ export class GsocComponent implements OnInit {
           });
         } else {
           this.program = MOCK_PROGRAM;
+          this.safeIntroHtml = this.getSafeHtml(MOCK_PROGRAM.introHtml);
           this.ideas = MOCK_IDEAS;
           this.extractAvailableTechs();
           this.isLoading = false;
@@ -159,11 +164,18 @@ export class GsocComponent implements OnInit {
       },
       error: () => {
         this.program = MOCK_PROGRAM;
+        this.safeIntroHtml = this.getSafeHtml(MOCK_PROGRAM.introHtml);
         this.ideas = MOCK_IDEAS;
         this.extractAvailableTechs();
         this.isLoading = false;
       }
     });
+  }
+
+  getSafeHtml(html: string | undefined): SafeHtml {
+    const rawHtml = html || '';
+    const sanitized = this.sanitizer.sanitize(SecurityContext.HTML, rawHtml) || '';
+    return this.sanitizer.bypassSecurityTrustHtml(sanitized);
   }
 
   extractAvailableTechs(): void {
