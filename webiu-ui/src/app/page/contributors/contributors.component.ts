@@ -97,7 +97,7 @@ export class ContributorsComponent implements OnInit {
       .subscribe({
         next: (res) => {
           this.contributors = res || [];
-          this.fetchFollowerData();
+          this.handleProfileResponse(this.contributors);
         },
         error: () => {
           this.handleProfileResponse([]);
@@ -105,35 +105,55 @@ export class ContributorsComponent implements OnInit {
       });
   }
 
-  fetchFollowerData() {
-    if (!this.contributors || this.contributors.length === 0) {
-      this.isLoading = false;
+  fetchFollowerDataForVisible() {
+    if (!this.displayProfiles || this.displayProfiles.length === 0) {
       return;
     }
 
-    const usernames = this.contributors.map((c) => c.login);
+    const missingUsernames = this.displayProfiles
+      .filter((c) => c.followers === undefined)
+      .map((c) => c.login);
+
+    if (missingUsernames.length === 0) {
+      return;
+    }
 
     this.http
       .post<Record<string, { followers: number; following: number }>>(
         `${environment.serverUrl}/api/v1/user/batch-social`,
-        { usernames },
+        { usernames: missingUsernames },
       )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (data) => {
           this.contributors.forEach((contributor) => {
-            const social = data[contributor.login];
-            contributor.followers = social?.followers ?? 0;
-            contributor.following = social?.following ?? 0;
+            if (data[contributor.login]) {
+              const social = data[contributor.login];
+              contributor.followers = social?.followers ?? 0;
+              contributor.following = social?.following ?? 0;
+            }
           });
-          this.profiles = [...this.contributors];
-          this.handleProfileResponse(this.profiles);
-          this.isLoading = false;
+          this.displayProfiles.forEach((contributor) => {
+            if (data[contributor.login]) {
+              const social = data[contributor.login];
+              contributor.followers = social?.followers ?? 0;
+              contributor.following = social?.following ?? 0;
+            }
+          });
         },
         error: () => {
-          this.profiles = [...this.contributors];
-          this.handleProfileResponse(this.profiles);
-          this.isLoading = false;
+          this.contributors.forEach((contributor) => {
+            if (missingUsernames.includes(contributor.login)) {
+              contributor.followers = 0;
+              contributor.following = 0;
+            }
+          });
+          this.displayProfiles.forEach((contributor) => {
+            if (missingUsernames.includes(contributor.login)) {
+              contributor.followers = 0;
+              contributor.following = 0;
+            }
+          });
         },
       });
   }
@@ -220,6 +240,8 @@ export class ContributorsComponent implements OnInit {
       startIndex,
       startIndex + this.profilesPerPage,
     );
+
+    this.fetchFollowerDataForVisible();
   }
 
   nextPage() {

@@ -3,6 +3,6 @@ export interface Contributor {
   repos: string[];
   avatar_url: string;
   contributions: number;
-  followers: number;
-  following: number;
+  followers?: number;
+  following?: number;
 }

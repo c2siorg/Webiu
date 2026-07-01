@@ -6,6 +6,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
+import { GithubGraphqlService } from '../github/github.graphql.service';
 import { CacheService } from '../common/cache.service';
 import { AxiosError } from 'axios';
 
@@ -28,6 +29,7 @@ export class ProjectService {
 
   constructor(
     private githubService: GithubService,
+    private githubGraphqlService: GithubGraphqlService,
     private cacheService: CacheService,
   ) {}
 
@@ -398,22 +400,21 @@ export class ProjectService {
   }
 
   private async enrichWithPullCounts(repos: any[]): Promise<any[]> {
-    const BATCH_SIZE = 10;
-    const enriched: any[] = [];
-    for (let i = 0; i < repos.length; i += BATCH_SIZE) {
-      const batch = repos.slice(i, i + BATCH_SIZE);
-      const batchResults = await Promise.all(
-        batch.map(async (repo) => {
-          try {
-            const count = await this.githubService.getRepoPullCount(repo.name);
-            return { ...repo, pull_requests: count };
-          } catch {
-            return { ...repo, pull_requests: 0 };
-          }
-        }),
+    if (repos.length === 0) return [];
+
+    const repoNames = repos.map((r) => r.name);
+    try {
+      const countsMap =
+        await this.githubGraphqlService.getBulkPullCounts(repoNames);
+      return repos.map((repo) => ({
+        ...repo,
+        pull_requests: countsMap[repo.name] ?? 0,
+      }));
+    } catch (error: any) {
+      this.logger.error(
+        `Error enriching with pull counts in bulk: ${error.message}`,
       );
-      enriched.push(...batchResults);
+      return repos.map((repo) => ({ ...repo, pull_requests: 0 }));
     }
-    return enriched;
   }
 }

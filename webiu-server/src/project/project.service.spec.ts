@@ -7,6 +7,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { ProjectService } from './project.service';
 import { GithubService } from '../github/github.service';
+import { GithubGraphqlService } from '../github/github.graphql.service';
 import { CacheService } from '../common/cache.service';
 
 describe('ProjectService', () => {
@@ -23,12 +24,17 @@ describe('ProjectService', () => {
     getRepoLanguages: jest.fn(),
   };
 
+  const mockGithubGraphqlService = {
+    getBulkPullCounts: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ProjectService,
         CacheService,
         { provide: GithubService, useValue: mockGithubService },
+        { provide: GithubGraphqlService, useValue: mockGithubGraphqlService },
         { provide: ConfigService, useValue: { get: jest.fn() } },
       ],
     }).compile();
@@ -56,9 +62,10 @@ describe('ProjectService', () => {
         { name: 'repo1' },
         { name: 'repo2' },
       ]);
-      mockGithubService.getRepoPullCount
-        .mockResolvedValueOnce(2)
-        .mockResolvedValueOnce(1);
+      mockGithubGraphqlService.getBulkPullCounts.mockResolvedValue({
+        repo1: 2,
+        repo2: 1,
+      });
 
       const result = await service.getAllProjects(1, 10);
 
@@ -73,7 +80,9 @@ describe('ProjectService', () => {
       mockGithubService.getAllOrgReposSorted.mockResolvedValue([
         { name: 'repo1' },
       ]);
-      mockGithubService.getRepoPullCount.mockResolvedValue(0);
+      mockGithubGraphqlService.getBulkPullCounts.mockResolvedValue({
+        repo1: 0,
+      });
 
       await service.getAllProjects(1, 10);
       await service.getAllProjects(1, 10);
@@ -87,14 +96,14 @@ describe('ProjectService', () => {
         { name: 'repo1' },
         { name: 'repo2' },
       ]);
-      mockGithubService.getRepoPullCount
-        .mockRejectedValueOnce(new Error('fail'))
-        .mockResolvedValueOnce(1);
+      mockGithubGraphqlService.getBulkPullCounts.mockRejectedValue(
+        new Error('fail'),
+      );
 
       const result = await service.getAllProjects(1, 10);
 
       expect(result.repositories[0].pull_requests).toBe(0);
-      expect(result.repositories[1].pull_requests).toBe(1);
+      expect(result.repositories[1].pull_requests).toBe(0);
     });
 
     it('should throw InternalServerErrorException on total failure', async () => {

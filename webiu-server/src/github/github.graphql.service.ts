@@ -100,4 +100,70 @@ export class GithubGraphqlService {
       );
     }
   }
+
+  async getBulkPullCounts(
+    repoNames: string[],
+  ): Promise<Record<string, number>> {
+    const results: Record<string, number> = {};
+    const missingRepos: string[] = [];
+
+    for (const name of repoNames) {
+      const cacheKey = `pull_count_${this.orgName}_${name}`;
+      const cached = this.cacheService.get<number>(cacheKey);
+      if (cached !== null && cached !== undefined) {
+        results[name] = cached;
+      } else {
+        missingRepos.push(name);
+      }
+    }
+
+    if (missingRepos.length === 0) {
+      return results;
+    }
+
+    const aliases = missingRepos.map((name, index) => {
+      return `repo_${index}: repository(owner: "${this.orgName}", name: "${name}") { pulls { totalCount } }`;
+    });
+
+    const query = `query {
+      ${aliases.join('\n      ')}
+    }`;
+
+    try {
+      const response = await axios.post(
+        this.endpoint,
+        { query },
+        {
+          headers: this.headers,
+          timeout: AXIOS_TIMEOUT,
+        },
+      );
+
+      if (response.data?.errors) {
+        this.logger.warn(
+          `GraphQL errors in getBulkPullCounts: ${JSON.stringify(response.data.errors)}`,
+        );
+      }
+
+      const data = response.data?.data || {};
+      missingRepos.forEach((name, index) => {
+        const key = `repo_${index}`;
+        const count = data[key]?.pulls?.totalCount ?? 0;
+
+        const cacheKey = `pull_count_${this.orgName}_${name}`;
+        this.cacheService.set(cacheKey, count, 600);
+
+        results[name] = count;
+      });
+    } catch (error: any) {
+      this.logger.error(
+        `Failed to fetch bulk pull counts via GraphQL: ${error.message}`,
+      );
+      missingRepos.forEach((name) => {
+        results[name] = 0;
+      });
+    }
+
+    return results;
+  }
 }

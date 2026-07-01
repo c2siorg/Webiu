@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { getHomepageDetails, HomepageFeaturedData } from '../../common/data/homepage';
+import { getLanguageColor } from '../../common/utils/language-colors';
 import { HttpClient } from '@angular/common/http';
 import { SearchService } from '../../services/search.service';
 import { HeroNoiseBackgroundComponent } from '../../components/hero-noise-background/hero-noise-background.component';
@@ -42,19 +43,5 @@ export class HomepageComponent implements OnInit {
     this.searchService.open();
   }
 
-  getLanguageColor(language: string): string {
-    const languageColors: Record<string, string> = {
-      JavaScript: '#f1e05a',
-      TypeScript: '#2b7489',
-      Python: '#3572A5',
-      Java: '#b07219',
-      'C++': '#f34b7d',
-      Go: '#00ADD8',
-      Rust: '#dea584',
-      Ruby: '#701516',
-      PHP: '#4F5D95',
-      Swift: '#ffac45',
-    };
-    return languageColors[language] || '#333';
-  }
+  getLanguageColor = getLanguageColor;
 }

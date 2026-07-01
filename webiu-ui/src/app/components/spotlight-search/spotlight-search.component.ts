@@ -12,9 +12,10 @@ import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { ProjectCacheService } from '../../services/project-cache.service';
 import { Project } from '../../page/projects/project.model';
+import { SearchService } from '../../services/search.service';
+import { getLanguageColor } from '../../common/utils/language-colors';
 import { Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
-import { SearchService } from '../../services/search.service';
 
 @Component({
   selector: 'app-spotlight-search',
@@ -379,19 +380,5 @@ export class SpotlightSearchComponent implements OnInit, OnDestroy {
     this.router.navigate(['/project', project.name]);
   }
 
-  getLanguageColor(language: string): string {
-    const languageColors: Record<string, string> = {
-      JavaScript: '#f1e05a',
-      TypeScript: '#2b7489',
-      Python: '#3572A5',
-      Java: '#b07219',
-      'C++': '#f34b7d',
-      Go: '#00ADD8',
-      Rust: '#dea584',
-      Ruby: '#701516',
-      PHP: '#4F5D95',
-      Swift: '#ffac45',
-    };
-    return languageColors[language] || '#7B8CFF';
-  }
+  getLanguageColor = getLanguageColor;
 }
