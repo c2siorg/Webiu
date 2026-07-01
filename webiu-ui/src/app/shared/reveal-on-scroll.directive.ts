@@ -17,6 +17,7 @@ export class RevealOnScrollDirective implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone);
   private observer?: IntersectionObserver;
+  private activeTween?: any;
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -55,7 +56,7 @@ export class RevealOnScrollDirective implements OnInit, OnDestroy {
           (entries) => {
             entries.forEach((entry) => {
               if (entry.isIntersecting) {
-                gsap.to(nativeEl, {
+                this.activeTween = gsap.to(nativeEl, {
                   opacity: 1,
                   scale: 1,
                   x: 0,
@@ -85,5 +86,8 @@ export class RevealOnScrollDirective implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    if (this.activeTween) {
+      this.activeTween.kill();
+    }
   }
 }

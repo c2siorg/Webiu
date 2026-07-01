@@ -14,6 +14,7 @@ export class CountUpDirective implements OnInit, OnDestroy {
   private platformId = inject(PLATFORM_ID);
   private ngZone = inject(NgZone);
   private observer?: IntersectionObserver;
+  private activeTween?: any;
 
   ngOnInit(): void {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -46,7 +47,7 @@ export class CountUpDirective implements OnInit, OnDestroy {
             entries.forEach((entry) => {
               if (entry.isIntersecting) {
                 const counter = { val: 0 };
-                gsap.to(counter, {
+                this.activeTween = gsap.to(counter, {
                   val: numericVal,
                   duration: this.duration,
                   ease: 'power2.out',
@@ -74,5 +75,8 @@ export class CountUpDirective implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.observer?.disconnect();
+    if (this.activeTween) {
+      this.activeTween.kill();
+    }
   }
 }

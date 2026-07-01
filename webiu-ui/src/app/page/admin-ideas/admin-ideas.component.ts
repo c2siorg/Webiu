@@ -1,7 +1,8 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive, ActivatedRoute } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GsocService, GsocProgram, GsocIdea, GsocMentor } from '../../services/gsoc.service';
 import { AuthService } from '../../services/auth.service';
 import { ThemeService } from '../../services/theme.service';
@@ -21,6 +22,7 @@ export class AdminIdeasComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private toastr = inject(ToastrService);
+  private destroyRef = inject(DestroyRef);
 
   // UI state
   activeTab: 'programs' | 'ideas' | 'mentors' = 'programs';
@@ -80,15 +82,17 @@ export class AdminIdeasComponent implements OnInit {
     this.isSunVisible = !this.themeService.isDarkMode();
     
     // Listen to query parameters to change tab dynamically
-    this.route.queryParams.subscribe((params) => {
-      if (params['tab'] === 'ideas') {
-        this.activeTab = 'ideas';
-      } else if (params['tab'] === 'mentors') {
-        this.activeTab = 'mentors';
-      } else {
-        this.activeTab = 'programs';
-      }
-    });
+    this.route.queryParams
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        if (params['tab'] === 'ideas') {
+          this.activeTab = 'ideas';
+        } else if (params['tab'] === 'mentors') {
+          this.activeTab = 'mentors';
+        } else {
+          this.activeTab = 'programs';
+        }
+      });
 
     this.loadAllData();
   }
