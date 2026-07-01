@@ -29,41 +29,56 @@ export class ParallaxDirective implements OnInit, OnDestroy {
     void loadGsap().then((gsap) => {
       this.ngZone.runOutsideAngular(() => {
         if (this.speed !== 0) {
+          let ticking = false;
           this.scrollListener = () => {
-            const scrollY = window.scrollY;
-            const targetY = scrollY * this.speed + this.currentMouseY;
+            if (!ticking) {
+              window.requestAnimationFrame(() => {
+                const scrollY = window.scrollY;
+                const targetY = scrollY * this.speed + this.currentMouseY;
 
-            gsap.to(nativeEl, {
-              y: targetY,
-              duration: 0.1,
-              ease: 'none',
-              overwrite: 'auto',
-            });
+                gsap.to(nativeEl, {
+                  y: targetY,
+                  duration: 0.1,
+                  ease: 'none',
+                  overwrite: 'auto',
+                });
+                ticking = false;
+              });
+              ticking = true;
+            }
           };
           window.addEventListener('scroll', this.scrollListener, { passive: true });
         }
 
         if (this.mouseFactor > 0) {
+          let mouseTicking = false;
           this.mouseListener = (event: MouseEvent) => {
-            const { clientX, clientY } = event;
-            const width = window.innerWidth;
-            const height = window.innerHeight;
+            const clientX = event.clientX;
+            const clientY = event.clientY;
+            if (!mouseTicking) {
+              window.requestAnimationFrame(() => {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
 
-            const normX = clientX / width - 0.5;
-            const normY = clientY / height - 0.5;
+                const normX = clientX / width - 0.5;
+                const normY = clientY / height - 0.5;
 
-            this.currentMouseX = -normX * this.mouseFactor;
-            this.currentMouseY = -normY * this.mouseFactor;
+                this.currentMouseX = -normX * this.mouseFactor;
+                this.currentMouseY = -normY * this.mouseFactor;
 
-            const scrollOffset = window.scrollY * this.speed;
+                const scrollOffset = window.scrollY * this.speed;
 
-            gsap.to(nativeEl, {
-              x: this.currentMouseX,
-              y: scrollOffset + this.currentMouseY,
-              duration: 0.8,
-              ease: 'power2.out',
-              overwrite: 'auto',
-            });
+                gsap.to(nativeEl, {
+                  x: this.currentMouseX,
+                  y: scrollOffset + this.currentMouseY,
+                  duration: 0.8,
+                  ease: 'power2.out',
+                  overwrite: 'auto',
+                });
+                mouseTicking = false;
+              });
+              mouseTicking = true;
+            }
           };
           window.addEventListener('mousemove', this.mouseListener, { passive: true });
         }
