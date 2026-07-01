@@ -3,10 +3,12 @@ import {
   CanActivate,
   ExecutionContext,
   UnauthorizedException,
+  Optional,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { ConfigService } from '@nestjs/config';
 import { Admin } from '../../database/entities/admin.entity';
 
 @Injectable()
@@ -15,10 +17,53 @@ export class AdminGuard implements CanActivate {
     private readonly jwtService: JwtService,
     @InjectRepository(Admin)
     private readonly adminRepository: Repository<Admin>,
+    @Optional() private readonly configService?: ConfigService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
+
+    // CSRF Protection: Validate Request Source for mutating methods
+    const method = request.method;
+    const isMutating = ['POST', 'PUT', 'DELETE', 'PATCH'].includes(method);
+    if (isMutating) {
+      const origin = request.headers.origin;
+      const referer = request.headers.referer;
+      const frontendUrl = this.configService
+        ? this.configService.get<string>(
+            'FRONTEND_BASE_URL',
+            'http://localhost:4200',
+          )
+        : 'http://localhost:4200';
+      const allowedOrigins = frontendUrl
+        .split(',')
+        .map((url) => url.trim().replace(/\/$/, '').toLowerCase());
+
+      let isValidSource = false;
+      if (origin) {
+        const cleanOrigin = origin.replace(/\/$/, '').toLowerCase();
+        isValidSource = allowedOrigins.includes(cleanOrigin);
+      } else if (referer) {
+        try {
+          const refererUrl = new URL(referer);
+          const cleanReferer =
+            `${refererUrl.protocol}//${refererUrl.host}`.toLowerCase();
+          isValidSource = allowedOrigins.includes(cleanReferer);
+        } catch {
+          isValidSource = false;
+        }
+      } else {
+        // Non-browser client request (no origin/referer), allow it
+        isValidSource = true;
+      }
+
+      if (!isValidSource) {
+        throw new UnauthorizedException(
+          'CSRF verification failed: invalid request source',
+        );
+      }
+    }
+
     const cookieHeader = request.headers.cookie;
 
     const token = this.extractCookie(cookieHeader, 'admin_session');
