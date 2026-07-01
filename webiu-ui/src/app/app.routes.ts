@@ -1,4 +1,4 @@
-import { Routes, RouterModule } from '@angular/router';
+import { Routes } from '@angular/router';
 import { adminAuthGuard } from './common/guards/admin-auth.guard';
 
 export const routes: Routes = [
@@ -62,14 +62,6 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./page/opportunities/opportunities.component').then(
         (m) => m.OpportunitiesComponent,
-      ),
-  },
-  {
-    path: 'idea',
-    title: 'GSoC Project Idea | WebiU',
-    loadComponent: () =>
-      import('./page/gsoc-project-idea/gsoc-project-idea.component').then(
-        (m) => m.GsocProjectIdeaComponent,
       ),
   },
   {
@@ -166,8 +158,3 @@ export const routes: Routes = [
       ),
   },
 ];
-
-export const AppRoutingModule = RouterModule.forRoot(routes, {
-  scrollPositionRestoration: 'enabled',
-  anchorScrolling: 'enabled',
-});

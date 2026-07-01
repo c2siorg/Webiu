@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, shareReplay } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 @Injectable({
@@ -9,9 +9,15 @@ import { environment } from '../../environments/environment';
 export class SettingsService {
   private http = inject(HttpClient);
   private apiUrl = `${environment.serverUrl}/admin/settings`;
+  private publicSettings$: Observable<any> | null = null;
 
   getPublicSettings(): Observable<any> {
-    return this.http.get<any>(`${environment.serverUrl}/admin/settings/public`);
+    if (!this.publicSettings$) {
+      this.publicSettings$ = this.http.get<any>(`${environment.serverUrl}/admin/settings/public`).pipe(
+        shareReplay(1)
+      );
+    }
+    return this.publicSettings$;
   }
 
   getSettings(): Observable<any> {
@@ -21,6 +27,7 @@ export class SettingsService {
   }
 
   updateSettings(settings: Record<string, any>): Observable<any> {
+    this.publicSettings$ = null;
     return this.http.patch<any>(this.apiUrl, settings, {
       withCredentials: true,
     });

@@ -107,8 +107,10 @@ export class ContributorSearchComponent implements OnInit {
       this.filteredIssues = [...this.issues];
       this.filteredPullRequests = [...this.pullRequests];
       this.toastr.success(`Found developer data for ${this.username}`, 'Success');
-    } catch {
-      // Global error interceptor will handle the notification
+    } catch (err: any) {
+      const msg = err?.userMessage || err?.error?.message || 'Failed to fetch contributor data. Please check the username and try again.';
+      this.errorMessage = msg;
+      this.toastr.error(msg, 'Error');
     } finally {
       this.loading = false;
     }
@@ -217,7 +219,7 @@ export class ContributorSearchComponent implements OnInit {
   formatLastUpdated(date: string): string {
     const updatedAt = new Date(date);
     const now = new Date();
-    const diffMs = updatedAt.getTime() - now.getTime();
+    const diffMs = now.getTime() - updatedAt.getTime();
     const diffSec = Math.round(diffMs / 1000);
     const diffMin = Math.round(diffSec / 60);
     const diffHr  = Math.round(diffMin / 60);
@@ -228,12 +230,12 @@ export class ContributorSearchComponent implements OnInit {
     // Use native Intl.RelativeTimeFormat — same output as date-fns formatDistanceToNow
     const rtf = new Intl.RelativeTimeFormat('en', { numeric: 'auto' });
 
-    if (Math.abs(diffSec) < 60)  return rtf.format(diffSec, 'second');
-    if (Math.abs(diffMin) < 60)  return rtf.format(diffMin, 'minute');
-    if (Math.abs(diffHr)  < 24)  return rtf.format(diffHr,  'hour');
-    if (Math.abs(diffDay) < 30)  return rtf.format(diffDay, 'day');
-    if (Math.abs(diffMon) < 12)  return rtf.format(diffMon, 'month');
-    return rtf.format(diffYr, 'year');
+    if (diffSec < 60)  return rtf.format(-diffSec, 'second');
+    if (diffMin < 60)  return rtf.format(-diffMin, 'minute');
+    if (diffHr  < 24)  return rtf.format(-diffHr,  'hour');
+    if (diffDay < 30)  return rtf.format(-diffDay, 'day');
+    if (diffMon < 12)  return rtf.format(-diffMon, 'month');
+    return rtf.format(-diffYr, 'year');
   }
   get hasData(): boolean {
     return (
