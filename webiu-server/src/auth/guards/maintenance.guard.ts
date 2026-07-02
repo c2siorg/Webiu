@@ -10,6 +10,7 @@ import { Repository } from 'typeorm';
 import { GqlExecutionContext } from '@nestjs/graphql';
 import { Admin } from '../../database/entities/admin.entity';
 import { SystemSettingService } from '../../system-setting/system-setting.service';
+import { extractCookie } from '../../common/utils/cookie-helper';
 
 @Injectable()
 export class MaintenanceGuard implements CanActivate {
@@ -52,7 +53,7 @@ export class MaintenanceGuard implements CanActivate {
 
     // Check if the request is from an authenticated admin
     const cookieHeader = req.headers?.cookie;
-    const token = this.extractCookie(cookieHeader, 'admin_session');
+    const token = extractCookie(cookieHeader, 'admin_session');
     if (token) {
       try {
         const decoded = this.jwtService.verify(token);
@@ -75,20 +76,5 @@ export class MaintenanceGuard implements CanActivate {
     throw new ServiceUnavailableException(
       'Site is currently undergoing maintenance. Please try again later.',
     );
-  }
-
-  private extractCookie(
-    cookieHeader: string | undefined,
-    name: string,
-  ): string | null {
-    if (!cookieHeader) return null;
-    const cookies = cookieHeader.split(';').map((c) => c.trim());
-    for (const cookie of cookies) {
-      const [key, ...valueParts] = cookie.split('=');
-      if (key === name) {
-        return valueParts.join('=');
-      }
-    }
-    return null;
   }
 }

@@ -10,6 +10,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ConfigService } from '@nestjs/config';
 import { Admin } from '../../database/entities/admin.entity';
+import { extractCookie } from '../../common/utils/cookie-helper';
 
 @Injectable()
 export class AdminGuard implements CanActivate {
@@ -66,7 +67,7 @@ export class AdminGuard implements CanActivate {
 
     const cookieHeader = request.headers.cookie;
 
-    const token = this.extractCookie(cookieHeader, 'admin_session');
+    const token = extractCookie(cookieHeader, 'admin_session');
     if (!token) {
       throw new UnauthorizedException('Authentication session missing');
     }
@@ -106,20 +107,5 @@ export class AdminGuard implements CanActivate {
         'Authentication session is invalid or expired',
       );
     }
-  }
-
-  private extractCookie(
-    cookieHeader: string | undefined,
-    name: string,
-  ): string | null {
-    if (!cookieHeader) return null;
-    const cookies = cookieHeader.split(';').map((c) => c.trim());
-    for (const cookie of cookies) {
-      const [key, ...valueParts] = cookie.split('=');
-      if (key === name) {
-        return valueParts.join('=');
-      }
-    }
-    return null;
   }
 }

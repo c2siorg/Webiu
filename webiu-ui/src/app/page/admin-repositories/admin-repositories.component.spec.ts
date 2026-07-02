@@ -123,37 +123,37 @@ describe('AdminRepositoriesComponent', () => {
 
   it('should filter explorer list based on search text', () => {
     component.searchText = 'repo-two';
-    const filtered = component.getFilteredExplorerList();
+    const filtered = component.filteredRepositories;
     expect(filtered.length).toBe(1);
     expect(filtered[0].name).toBe('repo-two');
   });
 
   it('should sort explorer list correctly', () => {
     // default sort by name ascending: repo-one then repo-two
-    let list = component.getFilteredExplorerList();
+    let list = component.filteredRepositories;
     expect(list[0].name).toBe('repo-one');
 
     // change sort to stars descending
-    component.setSort('stars');
+    component.onSort('stars');
     component.sortAscending = false;
-    list = component.getFilteredExplorerList();
+    list = component.filteredRepositories;
     expect(list[0].name).toBe('repo-one'); // repo-one has 100, repo-two has 20
 
     // change sort to stars ascending
     component.sortAscending = true;
-    list = component.getFilteredExplorerList();
+    list = component.filteredRepositories;
     expect(list[0].name).toBe('repo-two'); // repo-two has 20, repo-one has 100
   });
 
   it('should support pagination correctly', () => {
     component.pageSize = 1;
     expect(component.getTotalPages()).toBe(2);
-    expect(component.getPaginatedExplorerList().length).toBe(1);
-    expect(component.getPaginatedExplorerList()[0].name).toBe('repo-one');
+    expect(component.paginatedRepositories.length).toBe(1);
+    expect(component.paginatedRepositories[0].name).toBe('repo-one');
 
     component.onPageChange(2);
     expect(component.currentPage).toBe(2);
-    expect(component.getPaginatedExplorerList()[0].name).toBe('repo-two');
+    expect(component.paginatedRepositories[0].name).toBe('repo-two');
   });
 
   it('should call authService.logout and navigate on logout success', () => {

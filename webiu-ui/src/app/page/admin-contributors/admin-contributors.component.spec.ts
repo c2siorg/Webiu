@@ -110,37 +110,37 @@ describe('AdminContributorsComponent', () => {
 
   it('should filter explorer list based on search text', () => {
     component.searchText = 'bob';
-    const filtered = component.getFilteredExplorerList();
+    const filtered = component.filteredContributors;
     expect(filtered.length).toBe(1);
     expect(filtered[0].username).toBe('bob');
   });
 
   it('should sort explorer list correctly', () => {
     // default sort by username ascending: alice then bob
-    let list = component.getFilteredExplorerList();
+    let list = component.filteredContributors;
     expect(list[0].username).toBe('alice');
 
     // change sort to totalContributions descending
-    component.setSort('totalContributions');
+    component.onSort('totalContributions');
     component.sortAscending = false;
-    list = component.getFilteredExplorerList();
+    list = component.filteredContributors;
     expect(list[0].username).toBe('alice'); // alice has 80, bob has 60
 
     // change sort to totalContributions ascending
     component.sortAscending = true;
-    list = component.getFilteredExplorerList();
+    list = component.filteredContributors;
     expect(list[0].username).toBe('bob'); // bob has 60, alice has 80
   });
 
   it('should support pagination correctly', () => {
     component.pageSize = 1;
-    expect(component.getTotalPages()).toBe(2);
-    expect(component.getPaginatedExplorerList().length).toBe(1);
-    expect(component.getPaginatedExplorerList()[0].username).toBe('alice');
+    expect(component.totalExplorerPages).toBe(2);
+    expect(component.paginatedContributors.length).toBe(1);
+    expect(component.paginatedContributors[0].username).toBe('alice');
 
     component.onPageChange(2);
     expect(component.currentPage).toBe(2);
-    expect(component.getPaginatedExplorerList()[0].username).toBe('bob');
+    expect(component.paginatedContributors[0].username).toBe('bob');
   });
 
   it('should call authService.logout and navigate on logout success', () => {

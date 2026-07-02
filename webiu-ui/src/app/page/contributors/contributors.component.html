@@ -92,7 +92,7 @@
       </p>
     }
 
-    @if (!isLoading && displayProfiles && displayProfiles.length > 0) {
+    @if (!isLoading && displayProfiles && displayProfiles.length > 0 && totalPages > 1) {
       <div class="pagination-container">
         <div class="pagination">
           <button

@@ -1,5 +1,5 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { Router, RouterModule, RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 import { NavbarComponent } from './components/navbar/navbar.component';
 import { FooterComponent } from './components/footer/footer.component';
 import { BackToTopComponent } from './components/back-to-top/back-to-top.component';
@@ -16,7 +16,6 @@ import { SpotlightSearchComponent } from './components/spotlight-search/spotligh
     FooterComponent,
     BackToTopComponent,
     SpotlightSearchComponent,
-    RouterModule,
   ],
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.scss'],

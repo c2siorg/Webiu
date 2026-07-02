@@ -252,7 +252,7 @@
                 
                 @if (dashboardData?.recentAuditEvents?.length) {
                   <ul class="activity-timeline">
-                    @for (log of dashboardData.recentAuditEvents; track log.id) {
+                    @for (log of dashboardData?.recentAuditEvents || []; track log.id) {
                       <li class="activity-item">
                         <div class="activity-marker"></div>
                         <div class="activity-details">

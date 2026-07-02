@@ -1,54 +1,62 @@
 <div class="admin-login-container">
-  <div class="glass-card">
-    <div class="logo-wrapper">
-      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="logo" />
+  @if (isCheckingSession) {
+    <div class="session-loader">
+      <span class="spinner"></span>
+      <p>Verifying session...</p>
     </div>
-    
-    <h2>Administrator Access</h2>
-    <p class="subtitle">Please authenticate to access the administration panel</p>
-
-    <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
-      <div class="form-group">
-        <label for="username">Username</label>
-        <div class="input-wrapper">
-          <i class="fa-solid fa-user input-icon"></i>
-          <input
-            type="text"
-            id="username"
-            name="username"
-            [(ngModel)]="username"
-            placeholder="Enter admin username"
-            required
-            #usernameInput="ngModel"
-          />
-        </div>
+  } @else {
+    <div class="glass-card">
+      <div class="logo-wrapper">
+        <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="logo" />
       </div>
+      
+      <h2>Administrator Access</h2>
+      <p class="subtitle">Please authenticate to access the administration panel</p>
 
-      <div class="form-group">
-        <label for="password">Password</label>
-        <div class="input-wrapper">
-          <i class="fa-solid fa-lock input-icon"></i>
-          <input
-            type="password"
-            id="password"
-            name="password"
-            [(ngModel)]="password"
-            placeholder="Enter admin password"
-            required
-            #passwordInput="ngModel"
-          />
+      <form (ngSubmit)="onSubmit()" #loginForm="ngForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-user input-icon"></i>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              [(ngModel)]="username"
+              placeholder="Enter admin username"
+              required
+              #usernameInput="ngModel"
+            />
+          </div>
         </div>
-      </div>
 
-      <button type="submit" class="btn-submit" [disabled]="isLoading">
-        @if (isLoading) {
-          <span class="spinner"></span> Authenticating...
-        } @else {
-          Authenticate
-        }
-      </button>
-    </form>
-    
-    <a routerLink="/" class="back-home">← Back to Main Website</a>
-  </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrapper">
+            <i class="fa-solid fa-lock input-icon"></i>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              [(ngModel)]="password"
+              placeholder="Enter admin password"
+              required
+              autocomplete="current-password"
+              #passwordInput="ngModel"
+            />
+          </div>
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading">
+          @if (isLoading) {
+            <span class="spinner"></span> Authenticating...
+          } @else {
+            Authenticate
+          }
+        </button>
+      </form>
+      
+      <a routerLink="/" class="back-home">← Back to Main Website</a>
+    </div>
+  }
 </div>

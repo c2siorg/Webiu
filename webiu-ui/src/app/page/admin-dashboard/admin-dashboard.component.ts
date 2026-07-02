@@ -1,10 +1,33 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { AuthService } from '../../services/auth.service';
 import { SettingsService } from '../../services/settings.service';
-import { ThemeService } from '../../services/theme.service';
-import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AdminBaseComponent } from '../admin-base/admin-base.component';
+
+export interface DashboardSummary {
+  activeGsocYear: number;
+  maintenanceMode: boolean;
+  showIdeasPage: boolean;
+  registrationOpen: boolean;
+  totalProjects: number;
+  totalContributors: number;
+  totalIdeas: number;
+  totalMentors: number;
+  lastRepositorySync?: string | Date;
+  recentAuditEvents?: any[];
+  programs?: number;
+  repositories?: number;
+  contributors?: number;
+  ideas?: number;
+  publishedIdeas?: number;
+  draftIdeas?: number;
+  mentors?: number;
+  syncHealth?: string;
+  lastWebhookAt?: string | Date;
+  lastReconciliationAt?: string | Date;
+  environment?: string;
+}
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -13,18 +36,14 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './admin-dashboard.component.html',
   styleUrls: ['./admin-dashboard.component.scss'],
 })
-export class AdminDashboardComponent implements OnInit {
-  private authService = inject(AuthService);
+export class AdminDashboardComponent extends AdminBaseComponent implements OnInit {
   private settingsService = inject(SettingsService);
-  private themeService = inject(ThemeService);
-  private router = inject(Router);
-  private toastr = inject(ToastrService);
 
   // Aggregated data payload
-  dashboardData: any = null;
+  dashboardData: DashboardSummary | null = null;
   
   // Legacy / backup properties
-  currentYear = 2026;
+  currentYear = new Date().getFullYear();
   maintenanceMode = false;
   showIdeasPage = true;
   registrationOpen = true;
@@ -32,67 +51,53 @@ export class AdminDashboardComponent implements OnInit {
   isLoading = true;
   hasError = false;
   isSyncing = false;
-  isSunVisible = true;
 
-  ngOnInit(): void {
-    this.isSunVisible = !this.themeService.isDarkMode();
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.loadDashboardData();
   }
 
   loadDashboardData(): void {
     this.isLoading = true;
     this.hasError = false;
-    this.settingsService.getDashboardSummary().subscribe({
-      next: (data) => {
-        this.dashboardData = data;
-        if (data) {
-          this.currentYear = data.activeGsocYear || 2026;
-          this.maintenanceMode = data.maintenanceMode || false;
-          this.showIdeasPage = data.showIdeasPage !== false;
-          this.registrationOpen = data.registrationOpen !== false;
-        }
-        this.isLoading = false;
-      },
-      error: () => {
-        this.toastr.error('Failed to load live administrative dashboard overview.');
-        this.isLoading = false;
-        this.hasError = true;
-      },
-    });
+    this.settingsService.getDashboardSummary()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.dashboardData = data;
+          if (data) {
+            this.currentYear = data.activeGsocYear || new Date().getFullYear();
+            this.maintenanceMode = data.maintenanceMode || false;
+            this.showIdeasPage = data.showIdeasPage !== false;
+            this.registrationOpen = data.registrationOpen !== false;
+          }
+          this.isLoading = false;
+        },
+        error: () => {
+          this.toastr.error('Failed to load live administrative dashboard overview.');
+          this.isLoading = false;
+          this.hasError = true;
+        },
+      });
   }
 
   onSync(): void {
     this.isSyncing = true;
     this.toastr.info('Starting manual repository synchronization...', 'Sync Started');
 
-    this.settingsService.syncRepositories().subscribe({
-      next: (res) => {
-        this.toastr.success(res.message || 'Repositories and contributors synchronized successfully.');
-        this.isSyncing = false;
-        this.loadDashboardData(); // Refresh the dashboard stats live
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to sync repositories.';
-        this.toastr.error(errorMsg);
-        this.isSyncing = false;
-      },
-    });
-  }
-
-  onLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.toastr.success('Logged out successfully');
-        this.router.navigate(['/admin']);
-      },
-      error: () => {
-        this.toastr.error('Logout failed, please try again');
-      },
-    });
-  }
-
-  toggleMode(): void {
-    this.themeService.toggleDarkMode();
-    this.isSunVisible = !this.themeService.isDarkMode();
+    this.settingsService.syncRepositories()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.toastr.success(res.message || 'Repositories and contributors synchronized successfully.');
+          this.isSyncing = false;
+          this.loadDashboardData(); // Refresh the dashboard stats live
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Failed to sync repositories.';
+          this.toastr.error(errorMsg);
+          this.isSyncing = false;
+        },
+      });
   }
 }

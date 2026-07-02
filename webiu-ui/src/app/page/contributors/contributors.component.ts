@@ -8,7 +8,6 @@ import { Contributor } from '../../common/data/contributor';
 
 import { ProfileCardComponent } from '../../components/profile-card/profile-card.component';
 import { HttpClient } from '@angular/common/http';
-import { CommmonUtilService } from '../../common/service/commmon-util.service';
 import { environment } from '../../../environments/environment';
 import { LoadingSpinnerComponent } from '../../shared/loading-spinner/loading-spinner.component';
 import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
@@ -57,7 +56,6 @@ export class ContributorsComponent implements OnInit {
   totalPages = 1;
 
   private http = inject(HttpClient);
-  private commonUtil = inject(CommmonUtilService);
   private router = inject(Router);
   private metaService = inject(Meta);
   private destroyRef = inject(DestroyRef);
@@ -160,7 +158,6 @@ export class ContributorsComponent implements OnInit {
 
   handleProfileResponse(profiles: Contributor[]) {
     this.profiles = profiles;
-    this.commonUtil.commonProfiles = this.profiles;
     this.allRepos = this.getUniqueRepos();
     this.totalPages = Math.ceil(
       (this.profiles.length || 0) / this.profilesPerPage,

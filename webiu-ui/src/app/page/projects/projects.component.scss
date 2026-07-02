@@ -246,3 +246,27 @@ app-loading-spinner {
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+
+.no-projects-found {
+  padding: 80px 24px;
+  text-align: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  max-width: 600px;
+  margin: 40px auto;
+  animation: fadeInUp var(--transition-slow) cubic-bezier(0.16, 1, 0.3, 1);
+
+  .no-projects-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .no-projects-desc {
+    font-size: var(--font-size-base);
+    color: var(--text-secondary);
+  }
+}

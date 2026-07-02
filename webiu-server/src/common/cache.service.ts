@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleDestroy } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 export interface CacheEntry<T> {
@@ -9,10 +9,12 @@ export interface CacheEntry<T> {
 }
 
 @Injectable()
-export class CacheService {
+export class CacheService implements OnModuleDestroy {
   private readonly logger = new Logger(CacheService.name);
   private cache = new Map<string, CacheEntry<unknown>>();
   private readonly defaultTtl: number;
+  private readonly maxLimit = 1000;
+  private readonly sweepInterval: NodeJS.Timeout;
 
   constructor(private configService: ConfigService) {
     const raw = this.configService.get<string>('CACHE_TTL_SECONDS');
@@ -26,6 +28,34 @@ export class CacheService {
       this.defaultTtl = parsed;
     } else {
       this.defaultTtl = 300;
+    }
+
+    // Set up a background sweep every 60 seconds to purge expired entries
+    this.sweepInterval = setInterval(() => {
+      this.sweepExpired();
+    }, 60000);
+    if (this.sweepInterval && typeof this.sweepInterval.unref === 'function') {
+      this.sweepInterval.unref();
+    }
+  }
+
+  onModuleDestroy(): void {
+    if (this.sweepInterval) {
+      clearInterval(this.sweepInterval);
+    }
+  }
+
+  private sweepExpired(): void {
+    const now = Date.now();
+    let purgedCount = 0;
+    for (const [key, entry] of this.cache.entries()) {
+      if (now > entry.expiresAt) {
+        this.cache.delete(key);
+        purgedCount++;
+      }
+    }
+    if (purgedCount > 0) {
+      this.logger.debug(`Purged ${purgedCount} expired cache entries.`);
     }
   }
 
@@ -87,6 +117,15 @@ export class CacheService {
     etag?: string,
   ): void {
     const ttl = ttlSeconds ?? this.defaultTtl;
+
+    // FIFO Eviction: if limit reached and key is new, remove oldest key
+    if (!this.cache.has(key) && this.cache.size >= this.maxLimit) {
+      const oldestKey = this.cache.keys().next().value;
+      if (oldestKey !== undefined) {
+        this.cache.delete(oldestKey);
+      }
+    }
+
     this.cache.set(key, {
       data,
       expiresAt: Date.now() + ttl * 1000,

@@ -18,7 +18,7 @@ import { Admin } from '../database/entities/admin.entity';
 import { AuditLogService } from '../audit-log/audit-log.service';
 import { UseGuards } from '@nestjs/common';
 import { AdminGuard } from './guards/admin.guard';
-import { getCookieOptions } from '../common/utils/cookie-helper';
+import { getCookieOptions, extractCookie } from '../common/utils/cookie-helper';
 import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
@@ -105,7 +105,7 @@ export class AuthController {
   @Get('me')
   async checkSession(@Req() request: Request) {
     const cookieHeader = request.headers.cookie;
-    const token = this.extractCookie(cookieHeader, 'admin_session');
+    const token = extractCookie(cookieHeader, 'admin_session');
 
     if (!token) {
       return { authenticated: false };
@@ -127,20 +127,5 @@ export class AuthController {
     } catch {}
 
     return { authenticated: false };
-  }
-
-  private extractCookie(
-    cookieHeader: string | undefined,
-    name: string,
-  ): string | null {
-    if (!cookieHeader) return null;
-    const cookies = cookieHeader.split(';').map((c) => c.trim());
-    for (const cookie of cookies) {
-      const [key, ...valueParts] = cookie.split('=');
-      if (key === name) {
-        return valueParts.join('=');
-      }
-    }
-    return null;
   }
 }

@@ -24,7 +24,7 @@
         </div>
         <span class="hero-handwritten-note">
           <svg class="handwritten-arrow" width="34" height="24" viewBox="0 0 34 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 23C8.5 19 18.5 10 27 1M27 1H17M27 1V9" stroke="var(--accent-lime)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1 23C8.5 19 18.5 10 27 1M27 1H17M27 1V9" stroke="var(--arrow-stroke-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           Open Science Lab
         </span>
@@ -32,8 +32,7 @@
 
       <p class="hero-description" appRevealOnScroll [immediate]="true" direction="center">{{ homepageData.hero.description }}</p>
       
-      <!-- Premium Hero Search Trigger -->
-      <div class="hero-search-trigger" (click)="triggerSearch($event)" tabindex="0" (keydown.enter)="triggerSearch($event)" appRevealOnScroll [immediate]="true" direction="center">
+      <div class="hero-search-trigger" (click)="triggerSearch($event)" tabindex="0" (keydown.enter)="triggerSearch($event)" role="button" aria-label="Search projects" appRevealOnScroll [immediate]="true" direction="center">
         <div class="hero-search-trigger-content">
           <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -194,7 +193,7 @@
                 <span class="pub-authors">{{ pub.description }}</span>
               </div>
             </div>
-            <a [href]="pub.link" target="_blank" class="pub-arrow" rel="noopener noreferrer" aria-label="Open publication">→</a>
+            <a [href]="pub.link" target="_blank" class="pub-arrow" rel="noopener noreferrer" aria-label="Open publication"><span aria-hidden="true">→</span></a>
           </div>
         }
       </div>
