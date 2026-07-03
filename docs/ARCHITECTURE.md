@@ -6,9 +6,10 @@ This document describes the high-level architecture, module design, data models,
 
 ## 1. High-Level Architecture Overview
 
-WebiU 2.0 acts as a persistent database-backed aggregator and proxy for the **GitHub API (`api.github.com`)**. 
+WebiU 2.0 acts as a persistent database-backed aggregator and proxy for the **GitHub API (`api.github.com`)**.
 
 ### How WebiU Interacts with GitHub
+
 Instead of querying GitHub directly on every user action (which leads to slow page loads and rapid API rate limit exhaustion), WebiU employs a hybrid persistence-and-proxy model:
 
 1. **Persistent Catalog**: Organization repositories, basic metrics (stars, forks), and the contributor leaderboard are stored in a local **PostgreSQL** database.
@@ -207,7 +208,8 @@ erDiagram
 ## 4. Key Architectural Flows
 
 ### A. Administrator Authentication & Session Flow
-We removed social OAuth flows to ensure administrative credentials are isolated and self-hosted. 
+
+We removed social OAuth flows to ensure administrative credentials are isolated and self-hosted.
 
 Admin login uses credentials validated against the `admins` table. Upon success, a signed JWT is returned in an **HttpOnly, SameSite=Lax** session cookie named `admin_session`. The browser automatically includes this cookie in subsequent API requests.
 
@@ -223,7 +225,7 @@ sequenceDiagram
     Note over Server: Validates password (bcrypt)
     Note over Server: Signs JWT token
     Server-->>Browser: Set-Cookie: admin_session=JWT (HttpOnly) & 200 OK
-    
+
     Note over Browser: User visits /admin/settings
     Browser->>Server: GET /admin/gsoc/programs (Cookie included)
     Note over Server: AdminGuard verifies JWT signature
@@ -231,6 +233,7 @@ sequenceDiagram
 ```
 
 ### B. Admin Profile & Session Invalidation Flow
+
 Administrators can update their username or password. To ensure high security, any change to these credentials immediately invalidates all active sessions by clearing the HttpOnly session cookie (`admin_session`), forcing the user to log in again.
 
 ```mermaid
@@ -242,7 +245,7 @@ sequenceDiagram
     Note over Browser: User visits /admin/profile
     Browser->>Server: GET /admin/profile (Cookie included)
     Server-->>Browser: Return Profile Details
-    
+
     Note over Browser: User updates Password
     Browser->>Server: PATCH /admin/profile/password { currentPassword, newPassword, confirmPassword }
     Server->>DB: Query Admin details
@@ -258,7 +261,8 @@ sequenceDiagram
 ---
 
 ### C. GitHub Webhook Ingest Flow
-When a repository is modified on GitHub (e.g. created, edited, renamed, archived, or deleted), GitHub pushes a webhook event to our server. 
+
+When a repository is modified on GitHub (e.g. created, edited, renamed, archived, or deleted), GitHub pushes a webhook event to our server.
 
 We verify the event source using a secure token payload hash check (`HMAC-SHA256`) before committing any changes to the database.
 
@@ -289,9 +293,11 @@ sequenceDiagram
 ---
 
 ### D. Background Reconciliation & Drift Recovery
+
 If the server is down or a webhook delivery fails, database "drift" can occur. To recover from this, a background NestJS scheduler cron job executes every 12 hours.
 
 The cron job:
+
 1. Downloads the full repository list from GitHub.
 2. Compares properties (stars, forks, description, topics, archiving) with PostgreSQL records.
 3. Synchronizes drifted properties and upserts missing records.
@@ -300,23 +306,27 @@ The cron job:
 ---
 
 ### E. Dynamic Configuration & System Settings
-Instead of hardcoding details like the active year or site metadata, settings are stored in the database. 
+
+Instead of hardcoding details like the active year or site metadata, settings are stored in the database.
 
 The backend bootstrap phase seeds default keys. An admin can edit these keys dynamically from the admin panel, updating the site settings in real-time without server restarts or code updates.
 
 Supported keys include:
-* `gsoc.current_year`: Configures the public GSoC program view.
-* `gsoc.show_ideas_page`: Globally toggles project ideas visibility.
-* `gsoc.registration_open`: Shows/hides GSoC registration.
-* `site.title` & `site.description`: Configures layout SEO headers.
-* `site.maintenance_mode`: Toggles a public-facing holding screen.
+
+- `gsoc.current_year`: Configures the public GSoC program view.
+- `gsoc.show_ideas_page`: Globally toggles project ideas visibility.
+- `gsoc.registration_open`: Shows/hides GSoC registration.
+- `site.title` & `site.description`: Configures layout SEO headers.
+- `site.maintenance_mode`: Toggles a public-facing holding screen.
 
 ---
 
 ### F. Audit Logging & Administrative Activity Tracking
+
 To maintain accountability and operational visibility, WebiU tracks all major configuration modifications, security transactions, and GSoC CMS updates.
 
 The audit pipeline runs synchronously with write requests:
+
 1. When an admin makes a request (e.g. `PATCH /admin/settings`), `AdminGuard` decodes the token and attaches the admin's database primary key (`id`) to the request context.
 2. The service queries the current state of the entity before applying updates.
 3. Upon successfully writing changes to the database, `AuditLogService` is invoked to create a log entry documenting the administrator ID, action key (e.g., `SETTING_UPDATED`), entity descriptors, previous state string, and updated state string.
@@ -347,9 +357,11 @@ sequenceDiagram
 ---
 
 ### G. Administrative Dashboard & Platform Insights
+
 To provide administrators with a centralized control center, WebiU exposes an aggregated dashboard summary endpoint.
 
 The dashboard service integrates data across multiple modules:
+
 1. **Concurrency**: To maintain fast load times, `DashboardService` executes independent queries concurrently (using `Promise.all`), avoiding sequential database lookups.
 2. **Aggregated Statuses**:
    - **Counts**: Collects total counts of repositories, contributors, GSoC programs, project ideas, and mentors.
@@ -361,6 +373,7 @@ The dashboard service integrates data across multiple modules:
 ---
 
 ### H. Admin Contributor Intelligence & Aggregated Analytics Flow
+
 To empower maintainers to monitor overall community health, track rankings, and review contribution patterns without client-side calculation overhead, WebiU implements a dedicated contributor intelligence analytics pipeline.
 
 ```mermaid
@@ -376,7 +389,7 @@ sequenceDiagram
     UI->>Server: GET /admin/contributors (with Cookie)
     Note over Server: AdminGuard decodes session cookie<br/>validates active role permissions
     Server->>Service: getContributorAnalytics()
-    
+
     rect rgb(30, 30, 45)
         Note over Service: Concurrently execute SQL Aggregations
         Service->>DB: Count total contributors & active repositories
@@ -388,7 +401,7 @@ sequenceDiagram
         Service->>DB: List 10 most recent synced contributors (createdAt DESC)
         DB-->>Service: Return aggregated record results
     end
-    
+
     Service->>Server: Return consolidated analytics object
     Server-->>UI: 200 OK (Single JSON Payload)
     Note over UI: Bind metrics to count-up directive<br/>Render Chart.js canvases (Participation & Distribution)
@@ -396,6 +409,7 @@ sequenceDiagram
 ```
 
 Key features of this pipeline include:
+
 1. **SQL-Driven Aggregation**: Heavily groups and aggregates statistics (leaderboard metrics, buckets calculation, community sizes, average contributions) directly inside the database using optimized TypeORM QueryBuilder operations, ensuring high performance even with large contributor pools.
 2. **Single Payload Execution**: Consolidates all metrics, charts data (repository participation horizontal bar, bucket distribution vertical bar), insights, top lists, paginated explorer mapping, and recent logs in one single payload, minimizing network round-trip overhead.
 3. **Adaptive Visual Theme**: Dynamically translates HSL design tokens and listens to theme changes to redraw Chart.js canvas elements, rendering seamless dark-mode visual elements that align with the rest of WebiU's premium UI.
@@ -403,6 +417,7 @@ Key features of this pipeline include:
 ---
 
 ### I. Admin Repository Intelligence & Aggregated Analytics Flow
+
 To empower maintainers to monitor overall repository health, popularity index, visibility, and technology stack distributions without client-side calculation overhead, WebiU implements a dedicated repository intelligence analytics pipeline.
 
 ```mermaid
@@ -418,7 +433,7 @@ sequenceDiagram
     UI->>Server: GET /admin/repositories (with Cookie)
     Note over Server: AdminGuard decodes session cookie<br/>validates active role permissions
     Server->>Service: getRepositoryAnalytics()
-    
+
     rect rgb(30, 30, 45)
         Note over Service: Concurrently execute SQL Aggregations
         Service->>DB: Count total, public, private, and archived repositories
@@ -429,7 +444,7 @@ sequenceDiagram
         Service->>DB: Query complete explorer list with counts
         DB-->>Service: Return aggregated record results
     end
-    
+
     Service->>Server: Return consolidated analytics object
     Server-->>UI: 200 OK (Single JSON Payload)
     Note over UI: Bind metrics to count-up directive<br/>Render Chart.js canvases (Amber stars, Purple contributors, Cyan forks, Lime languages)
@@ -437,6 +452,7 @@ sequenceDiagram
 ```
 
 Key features of this pipeline include:
+
 1. **Consolidated Response Pipeline**: Aggregates total metrics, leaderboard rankings, multiple chart distributions (Popularity, Contributor, Fork, Topic, Language, and Visibility), highlighted health anomalies, and complete searchable table details in a single request.
 2. **Dynamic Database Mapping**: Synchronizes visibility, archived states, and repository technologies (primary language, topics array) from GitHub directly into TypeORM entity fields during regular webhooks and reconciliation runs.
 3. **Flexible Chart Updates**: Automatically registers to WebiU's custom reactive theme service, letting the dashboard redraw Chart.js canvas elements cleanly when administrators switch between light and dark modes.
@@ -446,23 +462,27 @@ Key features of this pipeline include:
 ## 5. Deployment Architectures
 
 ### A. Backend Deployment (Render.com)
-The backend container runs on Render as a Web Service.
-* **Working Directory Context**: Set `Root Directory` in Render to `webiu-server`. This ensures commands run inside the NestJS project folder.
-* **Build Command**: `npm install && npm run build`
-* **Start Command**: `npm run start:prod`
-* **Health Checks**: Configure the Render health check path to `/health`. Render polls this during builds and only redirects user traffic once a `200 OK` response is received.
-* **Database Connection**: Ensure `DATABASE_SSL=true` is set on Render to support encrypted database connections.
 
-### B. Frontend Deployment (GitHub Pages)
-The frontend is compiled into static HTML/CSS/JS files and hosted on GitHub Pages.
-* **Build Action**: Built using `npx ng build --configuration production --base-href=/Webiu/`.
-* **Custom API URL Injection**:
-  * By default, the production build points to `https://api.c2si.org`.
-  * You can override the API URL at build-time by supplying the `--define.API_URL` parameter to the Angular compiler:
+The backend container runs on Render as a Web Service.
+
+- **Working Directory Context**: Set `Root Directory` in Render to `webiu-server`. This ensures commands run inside the NestJS project folder.
+- **Build Command**: `npm install && npm run build`
+- **Start Command**: `npm run start:prod`
+- **Health Checks**: Configure the Render health check path to `/health`. Render polls this during builds and only redirects user traffic once a `200 OK` response is received.
+- **Database Connection**: Ensure `DATABASE_SSL=true` is set on Render to support encrypted database connections.
+
+### B. Frontend Deployment (GitHub Pages via GitHub Actions)
+
+The Angular SPA is built and published automatically by the `deploy-pages.yml` GitHub Actions workflow. It compiles the app, copies `index.html` to `404.html` for SPA routing, and deploys it directly to GitHub Pages.
+
+- **Build Action**: Built using `npx ng build --configuration production --base-href=/Webiu/`.
+- **Custom API URL Injection**:
+  - By default, the production build points to `https://api.c2si.org`.
+  - You can override the API URL at build-time by supplying the `--define.API_URL` parameter to the Angular compiler:
     ```bash
     npx ng build --configuration production --define.API_URL="\"https://my-custom-api.com\""
     ```
-* **SPA Routing Fallback (`404.html`)**:
-  * Since GitHub Pages is a static file server, refreshing or directly entering a deep subroute (like `/projects` or `/admin`) returns a `404 Not Found` page instead of routing it to Angular.
-  * **Solution**: Our build workflow copies `index.html` to `404.html` in the build output (`cp dist/webiu/browser/index.html dist/webiu/browser/404.html`).
-  * When GitHub Pages encounters a subroute refresh, it serves `404.html`. The browser loads the Angular bundle, reads the URL path, and resolves the correct client component dynamically.
+- **SPA Routing Fallback (`404.html`)**:
+  - Since GitHub Pages is a static file server, refreshing or directly entering a deep subroute (like `/projects` or `/admin`) returns a `404 Not Found` page instead of routing it to Angular.
+  - **Solution**: Our build workflow copies `index.html` to `404.html` in the build output (`cp dist/webiu/browser/index.html dist/webiu/browser/404.html`).
+  - When GitHub Pages encounters a subroute refresh, it serves `404.html`. The browser loads the Angular bundle, reads the URL path, and resolves the correct client component dynamically.
