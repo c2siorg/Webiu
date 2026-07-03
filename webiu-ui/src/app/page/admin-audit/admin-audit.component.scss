@@ -3,3 +3,299 @@
 }
 
 @import '../admin/admin-shared.scss';
+
+// ── Audit Log Detail Modal ────────────────────────────────────────────────────
+
+.audit-detail-modal {
+  max-width: 1100px;
+  width: 95vw;
+}
+
+// Header title layout
+.audit-modal-title {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  h2 {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
+  }
+}
+
+.audit-modal-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius);
+  background: var(--accent-purple-dim);
+  color: var(--accent-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.audit-modal-subtitle {
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin: 2px 0 0 0;
+}
+
+// Modal body spacing
+.audit-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+// ── Meta chips ────────────────────────────────────────────────────────────────
+.audit-meta-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.audit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+
+// Action chip colours by event type
+.chip-created  { background: var(--success-dim);         color: var(--success);        border-color: var(--success); }
+.chip-deleted  { background: var(--error-dim);           color: var(--error);          border-color: var(--error); }
+.chip-updated  { background: var(--warning-dim);         color: var(--warning);        border-color: var(--warning); }
+.chip-auth     { background: var(--accent-purple-dim);   color: var(--accent-purple);  border-color: var(--accent-purple); }
+.chip-status   { background: var(--accent-coral-dim);    color: var(--accent-coral);   border-color: var(--accent-coral); }
+.chip-default  { background: var(--surface-raised);      color: var(--text-secondary); border-color: var(--border); }
+
+// Non-action chips
+.chip-entity {
+  background: var(--surface-raised);
+  color: var(--text-primary);
+  border-color: var(--border);
+}
+
+.chip-user {
+  background: var(--accent-purple-dim);
+  color: var(--accent-purple);
+  border-color: var(--accent-purple);
+}
+
+.chip-time {
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  border-color: var(--border);
+  font-weight: 600;
+  letter-spacing: 0;
+}
+
+// ── Entity ID row ─────────────────────────────────────────────────────────────
+.audit-entity-id-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  flex-wrap: wrap;
+}
+
+.audit-field-label {
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  white-space: nowrap;
+
+  i { margin-right: 4px; }
+}
+
+.audit-entity-id-value {
+  font-family: 'Fira Mono', 'Cascadia Code', monospace;
+  font-size: var(--font-size-sm);
+  color: var(--accent-purple);
+  background: var(--accent-purple-dim);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+}
+
+// ── Diff grid (Before / After side by side) ───────────────────────────────────
+.audit-diff-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-lg);
+
+  @media (min-width: 700px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.audit-diff-section {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.audit-diff-header {
+  padding: 10px 16px;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.audit-diff-old .audit-diff-header {
+  color: var(--error);
+  background: var(--error-dim);
+  border-color: var(--error);
+}
+
+.audit-diff-new .audit-diff-header {
+  color: var(--success);
+  background: var(--success-dim);
+  border-color: var(--success);
+}
+
+// ── Key-value table ───────────────────────────────────────────────────────────
+.audit-kv-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.audit-kv-row {
+  display: grid;
+  // Mobile: stack key above value
+  grid-template-columns: 1fr;
+  gap: 2px;
+  align-items: baseline;
+  padding: 9px 16px;
+  border-bottom: 1px solid var(--border);
+  font-size: var(--font-size-sm);
+  transition: background var(--transition-fast);
+
+  // Tablet: side-by-side with narrower key
+  @media (min-width: 480px) {
+    grid-template-columns: 130px 1fr;
+    gap: 12px;
+  }
+
+  // Desktop: full-width key column
+  @media (min-width: 900px) {
+    grid-template-columns: 180px 1fr;
+  }
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  &:nth-child(even) {
+    background: var(--surface-raised);
+  }
+}
+
+.audit-kv-key {
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: none;
+  letter-spacing: 0;
+  font-family: 'Fira Mono', 'Cascadia Code', monospace;
+  font-size: 0.78rem;
+  word-break: break-word;
+}
+
+.audit-kv-value {
+  color: var(--text-primary);
+  word-break: break-word;
+
+  &.kv-null {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.audit-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: var(--spacing-xl);
+  color: var(--text-muted);
+  text-align: center;
+  font-size: var(--font-size-sm);
+
+  i {
+    font-size: 1.6rem;
+    opacity: 0.5;
+  }
+}
+
+// ── Fallback raw pre ──────────────────────────────────────────────────────────
+.audit-raw-pre {
+  padding: 14px;
+  margin: 0;
+  font-family: 'Fira Mono', 'Cascadia Code', monospace;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--text-primary);
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-x: auto;
+  background: var(--surface-raised);
+}
+
+// ── Audit table badge styles ───────────────────────────────────────────────────
+.action-badge {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+
+  &[data-action*="CREATED"]   { background: var(--success-dim);       color: var(--success);       border-color: var(--success); }
+  &[data-action*="DELETED"]   { background: var(--error-dim);         color: var(--error);         border-color: var(--error); }
+  &[data-action*="UPDATED"]   { background: var(--warning-dim);       color: var(--warning);       border-color: var(--warning); }
+  &[data-action*="CHANGED"]   { background: var(--warning-dim);       color: var(--warning);       border-color: var(--warning); }
+  &[data-action*="LOGIN"]     { background: var(--accent-purple-dim); color: var(--accent-purple); border-color: var(--accent-purple); }
+  &[data-action*="PUBLISHED"] { background: var(--success-dim);       color: var(--success);       border-color: var(--success); }
+  &[data-action*="ARCHIVED"]  { background: var(--accent-coral-dim);  color: var(--accent-coral);  border-color: var(--accent-coral); }
+  &[data-action*="REORDERED"] { background: var(--accent-purple-dim); color: var(--accent-purple); border-color: var(--accent-purple); }
+}
+
+.entity-badge {
+  display: inline-block;
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-raised);
+  color: var(--text-secondary);
+  border: 1px solid var(--border);
+  text-transform: capitalize;
+}

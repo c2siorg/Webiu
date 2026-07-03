@@ -1,0 +1,33 @@
+<nav class="admin-sidebar" [class.opened]="opened" [class.overlay-mode]="isOverlay" role="navigation" aria-label="Admin sidebar">
+  @if (opened && isOverlay) {
+    <div class="sidebar-backdrop" role="button" tabindex="0" (click)="onBackdropClick()" (keydown.enter)="onBackdropClick()"></div>
+  }
+  
+  <div class="sidebar-brand">
+    <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
+    <div class="brand-text">
+      <span class="brand-title">C2SI Portal</span>
+      <span class="brand-subtitle">Operations Center</span>
+    </div>
+  </div>
+
+  <ul class="nav-list">
+    @for (item of navItems; track item.label) {
+      <li class="nav-item">
+        <a [routerLink]="item.route"
+           routerLinkActive="active"
+           [routerLinkActiveOptions]="{exact:true}"
+           (click)="isOverlay && closeRequested.emit()"
+           class="nav-link"
+           role="button"
+           tabindex="0"
+           (keydown.enter)="isOverlay && closeRequested.emit()">
+          <i class="{{ item.icon }} nav-icon"></i>
+          <span class="nav-label">{{ item.label }}</span>
+        </a>
+      </li>
+    }
+  </ul>
+
+
+</nav>

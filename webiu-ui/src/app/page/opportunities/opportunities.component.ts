@@ -1,7 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { OpportunitiesData } from '../../common/data/opportunities';
 import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive';
+import { OpportunityService, Opportunity } from '../../services/opportunity.service';
 
 @Component({
   selector: 'app-opportunities',
@@ -9,13 +10,27 @@ import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive
   imports: [CommonModule, RevealOnScrollDirective],
   templateUrl: './opportunities.component.html',
   styleUrl: './opportunities.component.scss'
-})
-export class OpportunitiesComponent {
+  })
+export class OpportunitiesComponent implements OnInit {
+  private opportunityService = inject(OpportunityService);
+  
   data = OpportunitiesData;
+  opportunities: Opportunity[] = [];
 
-  applyFor(title: string) {
-    const subject = encodeURIComponent(`Application for ${title}`);
-    const body = encodeURIComponent(`Hi C2SI Team,\n\nI'm interested in applying for the ${title} role. Attached is my resume.\n\nThank you!`);
-    window.location.href = `mailto:research@c2si.org?subject=${subject}&body=${body}`;
+  ngOnInit() {
+    this.opportunityService.getPublicOpportunities().subscribe({
+      next: (res) => {
+        if (res.success) {
+          this.opportunities = res.opportunities;
+        }
+      },
+      error: (err) => console.error('Failed to load opportunities:', err)
+    });
+  }
+
+  applyFor(url: string) {
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
   }
 }

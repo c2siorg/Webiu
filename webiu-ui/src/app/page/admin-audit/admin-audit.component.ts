@@ -1,5 +1,4 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditService } from '../../services/audit.service';
@@ -25,7 +24,7 @@ export interface AuditLogEntry {
 @Component({
   selector: 'app-admin-audit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-audit.component.html',
   styleUrls: ['./admin-audit.component.scss'],
 })
@@ -161,13 +160,55 @@ export class AdminAuditComponent extends AdminBaseComponent implements OnInit {
     }
   }
 
-  formatJson(value: string | null): string {
-    if (!value) return 'N/A';
+   
+  formatJson(value: any): string {
+    if (value === null || value === undefined) return 'N/A';
+    if (typeof value === 'object') return JSON.stringify(value, null, 2);
+    if (typeof value !== 'string') return String(value);
     try {
       const parsed = JSON.parse(value);
       return JSON.stringify(parsed, null, 2);
     } catch {
       return value;
     }
+  }
+
+  parseJsonEntries(value: string | null): { key: string; display: string; isArray: boolean; isNull: boolean }[] {
+    if (!value) return [];
+    try {
+      const parsed = JSON.parse(value);
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return [];
+      return Object.entries(parsed).map(([key, val]) => ({
+        key,
+        display: Array.isArray(val)
+          ? (val as unknown[]).join(', ') || '—'
+          : val === null || val === undefined
+            ? '—'
+            : String(val),
+        isArray: Array.isArray(val),
+        isNull: val === null || val === undefined
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  isValidJson(value: string | null): boolean {
+    if (!value) return false;
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
+    } catch {
+      return false;
+    }
+  }
+
+  getActionColor(action: string): string {
+    if (action.includes('CREATED')) return 'created';
+    if (action.includes('DELETED') || action.includes('REMOVED')) return 'deleted';
+    if (action.includes('UPDATED') || action.includes('CHANGED')) return 'updated';
+    if (action.includes('LOGIN') || action.includes('LOGOUT')) return 'auth';
+    if (action.includes('PUBLISHED') || action.includes('ARCHIVED')) return 'status';
+    return 'default';
   }
 }

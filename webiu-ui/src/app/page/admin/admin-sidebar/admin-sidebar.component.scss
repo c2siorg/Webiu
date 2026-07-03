@@ -1,0 +1,199 @@
+:host {
+  --sidebar-width: 260px;
+  display: block;
+}
+
+.admin-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--surface);
+  color: var(--text-primary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-lg) var(--spacing);
+  z-index: 1000;
+  transform: translateX(-100%);
+  transition: transform var(--transition-normal) cubic-bezier(0.4, 0, 0.2, 1),
+              background var(--transition-normal),
+              border-color var(--transition-normal);
+
+  &.opened {
+    transform: translateX(0);
+  }
+
+  [data-theme="dark"] & {
+    background: rgba(26, 27, 30, 0.95);
+    border-right-color: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(15px);
+  }
+}
+
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: -1;
+  transition: opacity var(--transition-normal) ease;
+}
+
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: 0 var(--spacing-sm) var(--spacing-lg);
+  margin-bottom: var(--spacing);
+
+  .brand-logo {
+    height: 40px;
+    width: auto;
+    transition: filter var(--transition-normal);
+
+    :host-context([data-theme="dark"]) & {
+      filter: invert(1);
+    }
+  }
+
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .brand-title {
+    font-weight: 700;
+    font-size: 1.15rem;
+    letter-spacing: -0.015em;
+    color: var(--text-primary);
+  }
+
+  .brand-subtitle {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+}
+
+.nav-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  flex: 1;
+}
+
+.nav-item {
+  width: 100%;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing);
+  color: var(--text-secondary);
+  text-decoration: none;
+  padding: var(--spacing-sm) var(--spacing);
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: background var(--transition-fast), color var(--transition-fast);
+  cursor: pointer;
+  border: 1px solid transparent;
+
+  .nav-icon {
+    font-size: 1.1rem;
+    width: 20px;
+    text-align: center;
+    transition: transform var(--transition-fast);
+  }
+
+  &:hover, &:focus-visible {
+    background: var(--surface-hover);
+    color: var(--text-primary);
+    outline: none;
+
+    .nav-icon {
+      transform: scale(1.1);
+    }
+  }
+
+  &.active {
+    background: rgba(147, 51, 234, 0.08);
+    color: var(--accent-purple);
+    border-color: rgba(147, 51, 234, 0.15);
+    font-weight: 600;
+
+    .nav-icon {
+      color: var(--accent-purple);
+      transform: scale(1.05);
+    }
+
+    [data-theme="dark"] & {
+      background: rgba(168, 85, 247, 0.12);
+      color: #c084fc;
+      border-color: rgba(168, 85, 247, 0.25);
+
+      .nav-icon {
+        color: #c084fc;
+      }
+    }
+  }
+}
+
+.sidebar-footer {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-sm) var(--spacing-sm) 0;
+
+  .footer-divider {
+    height: 1px;
+    background: var(--border-color);
+    margin-bottom: var(--spacing-sm);
+    width: 100%;
+
+    [data-theme="dark"] & {
+      background: rgba(255, 255, 255, 0.08);
+    }
+  }
+
+  .system-status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-muted);
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      box-shadow: 0 0 8px rgba(16, 185, 129, 0.6);
+    }
+  }
+
+  .system-version {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+  }
+}
+
+/* Screen adjustments */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    box-shadow: var(--shadow-xl);
+  }
+}

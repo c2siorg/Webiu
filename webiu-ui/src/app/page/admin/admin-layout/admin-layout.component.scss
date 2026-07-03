@@ -1,0 +1,199 @@
+:host {
+  display: block;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+.admin-layout {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  background: var(--background);
+  color: var(--text-primary);
+  transition: background var(--transition-normal);
+
+  --sidebar-width: 260px;
+}
+
+.admin-main-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+  transition: margin-left var(--transition-normal) cubic-bezier(0.4, 0, 0.2, 1);
+  margin-left: var(--sidebar-width);
+}
+
+.admin-layout.sidebar-collapsed .admin-main-content {
+  margin-left: 0;
+}
+
+/* Mobile responsive layout overrides */
+.admin-layout.mobile-mode .admin-main-content {
+  margin-left: 0;
+}
+
+.admin-top-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 70px;
+  padding: 0 var(--spacing-lg);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border-color);
+  backdrop-filter: blur(10px);
+  z-index: 10;
+  transition: background var(--transition-normal), border var(--transition-normal);
+
+  [data-theme="dark"] & {
+    background: rgba(26, 27, 30, 0.8);
+    border-bottom-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+
+    .toggle-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-fast), color var(--transition-fast);
+
+      &:hover {
+        background: var(--surface-hover);
+        color: var(--text-primary);
+      }
+    }
+
+    .header-title {
+      font-weight: 600;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+    }
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing);
+
+    .btn-theme-toggle {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.15rem;
+      cursor: pointer;
+      width: 40px;
+      height: 40px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background var(--transition-fast), color var(--transition-fast);
+
+      &:hover {
+        background: var(--surface-hover);
+        color: var(--text-primary);
+      }
+    }
+
+    .user-badge {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      background: var(--surface-raised);
+      border-radius: var(--radius-pill);
+      color: var(--text-primary);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border: 1px solid var(--border-color);
+      transition: background var(--transition-fast);
+
+      i {
+        color: var(--accent-purple);
+      }
+
+      span {
+        display: inline;
+      }
+
+      &:hover {
+        background: var(--surface-hover);
+      }
+    }
+
+    .btn-logout {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      background: rgba(239, 68, 68, 0.1);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: var(--radius-sm);
+      font-weight: 500;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: background var(--transition-fast), border-color var(--transition-fast);
+
+      &:hover {
+        background: rgba(239, 68, 68, 0.18);
+        border-color: rgba(239, 68, 68, 0.35);
+      }
+    }
+  }
+}
+
+.page-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-xl);
+  background: var(--background);
+
+  /* Scrollbar Styling */
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--border-color);
+    border-radius: 4px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+}
+
+@media (max-width: 768px) {
+  .admin-top-header {
+    padding: 0 var(--spacing);
+    
+    .header-right {
+      .user-badge span {
+        display: none;
+      }
+    }
+  }
+
+  .page-container {
+    padding: var(--spacing);
+  }
+}
