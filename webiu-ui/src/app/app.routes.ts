@@ -87,67 +87,78 @@ export const routes: Routes = [
       import('./page/admin/admin.component').then((m) => m.AdminComponent),
   },
   {
-    path: 'admin/dashboard',
-    title: 'Admin Dashboard | WebiU',
+    path: 'admin',
     loadComponent: () =>
-      import('./page/admin-dashboard/admin-dashboard.component').then(
-        (m) => m.AdminDashboardComponent,
+      import('./page/admin/admin-layout/admin-layout.component').then(
+        (m) => m.AdminLayoutComponent,
       ),
     canActivate: [adminAuthGuard],
-  },
-  {
-    path: 'admin/contributors',
-    title: 'Contributor Intelligence | WebiU',
-    loadComponent: () =>
-      import('./page/admin-contributors/admin-contributors.component').then(
-        (m) => m.AdminContributorsComponent,
-      ),
-    canActivate: [adminAuthGuard],
-  },
-  {
-    path: 'admin/repositories',
-    title: 'Repository Intelligence | WebiU',
-    loadComponent: () =>
-      import('./page/admin-repositories/admin-repositories.component').then(
-        (m) => m.AdminRepositoriesComponent,
-      ),
-    canActivate: [adminAuthGuard],
-  },
-  {
-    path: 'admin/settings',
-    title: 'Admin Settings | WebiU',
-    loadComponent: () =>
-      import('./page/admin-settings/admin-settings.component').then(
-        (m) => m.AdminSettingsComponent,
-      ),
-    canActivate: [adminAuthGuard],
-  },
-  {
-    path: 'admin/ideas',
-    title: 'Admin GSoC Management | WebiU',
-    loadComponent: () =>
-      import('./page/admin-ideas/admin-ideas.component').then(
-        (m) => m.AdminIdeasComponent,
-      ),
-    canActivate: [adminAuthGuard],
-  },
-  {
-    path: 'admin/profile',
-    title: 'Admin Profile | WebiU',
-    loadComponent: () =>
-      import('./page/admin-profile/admin-profile.component').then(
-        (m) => m.AdminProfileComponent,
-      ),
-    canActivate: [adminAuthGuard],
-  },
-  {
-    path: 'admin/audit',
-    title: 'Admin Audit Logs | WebiU',
-    loadComponent: () =>
-      import('./page/admin-audit/admin-audit.component').then(
-        (m) => m.AdminAuditComponent,
-      ),
-    canActivate: [adminAuthGuard],
+    children: [
+      {
+        path: 'dashboard',
+        title: 'Admin Dashboard | WebiU',
+        loadComponent: () =>
+          import('./page/admin-dashboard/admin-dashboard.component').then(
+            (m) => m.AdminDashboardComponent,
+          ),
+      },
+      {
+        path: 'contributors',
+        title: 'Contributor Intelligence | WebiU',
+        loadComponent: () =>
+          import('./page/admin-contributors/admin-contributors.component').then(
+            (m) => m.AdminContributorsComponent,
+          ),
+      },
+      {
+        path: 'opportunities',
+        title: 'Admin Opportunities | WebiU',
+        loadComponent: () =>
+          import('./page/admin-opportunities/admin-opportunities.component').then(
+            (m) => m.AdminOpportunitiesComponent,
+          ),
+      },
+      {
+        path: 'repositories',
+        title: 'Repository Intelligence | WebiU',
+        loadComponent: () =>
+          import('./page/admin-repositories/admin-repositories.component').then(
+            (m) => m.AdminRepositoriesComponent,
+          ),
+      },
+      {
+        path: 'settings',
+        title: 'Admin Settings | WebiU',
+        loadComponent: () =>
+          import('./page/admin-settings/admin-settings.component').then(
+            (m) => m.AdminSettingsComponent,
+          ),
+      },
+      {
+        path: 'ideas',
+        title: 'Admin GSoC Management | WebiU',
+        loadComponent: () =>
+          import('./page/admin-ideas/admin-ideas.component').then(
+            (m) => m.AdminIdeasComponent,
+          ),
+      },
+      {
+        path: 'profile',
+        title: 'Admin Profile | WebiU',
+        loadComponent: () =>
+          import('./page/admin-profile/admin-profile.component').then(
+            (m) => m.AdminProfileComponent,
+          ),
+      },
+      {
+        path: 'audit',
+        title: 'Admin Audit Logs | WebiU',
+        loadComponent: () =>
+          import('./page/admin-audit/admin-audit.component').then(
+            (m) => m.AdminAuditComponent,
+          ),
+      },
+    ],
   },
   {
     path: '**',

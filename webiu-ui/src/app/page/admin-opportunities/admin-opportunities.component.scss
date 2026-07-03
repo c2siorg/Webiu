@@ -1,0 +1,273 @@
+:host {
+  display: block;
+}
+
+@import '../admin/admin-shared.scss';
+
+/* --- Beautiful spacing and layout overrides for the table --- */
+.data-table-container {
+  margin-top: 1.5rem;
+  border-radius: var(--radius-xl) !important;
+  box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.25) !important;
+  border: 1px solid var(--border) !important;
+  
+  .data-table {
+    th {
+      padding: 18px 24px !important;
+      font-size: var(--font-size-xs) !important;
+      font-weight: 700 !important;
+      background: var(--surface-raised) !important;
+      letter-spacing: 0.08em !important;
+    }
+    
+    td {
+      padding: 20px 24px !important;
+      vertical-align: middle;
+      font-size: var(--font-size-sm);
+    }
+    
+    tr {
+      &:hover td {
+        background: var(--surface-raised) !important;
+      }
+    }
+  }
+}
+
+.actions-cell {
+  display: flex;
+  gap: 8px;
+  
+  .btn-table-action {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+    font-size: var(--font-size-sm);
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-sm);
+    }
+
+    &.btn-preview:hover {
+      color: var(--accent-lime);
+      border-color: var(--accent-lime);
+      background: var(--accent-lime-dim);
+    }
+
+    &.btn-edit:hover {
+      color: var(--accent-purple);
+      border-color: var(--accent-purple);
+      background: var(--accent-purple-dim);
+    }
+
+    &.btn-delete:hover {
+      color: var(--error);
+      border-color: var(--error);
+      background: var(--error-dim);
+    }
+  }
+}
+
+/* --- Premium Modal and Input Overrides --- */
+.modal-card {
+  max-width: 680px !important; /* Make modal wider for more breathing room */
+  border-radius: var(--radius-xl) !important;
+  border: 1px solid var(--border-strong) !important;
+  
+  .modal-body {
+    padding: var(--spacing-2xl) !important;
+  }
+}
+
+/* Ensure date-picker calendar icon is visible in dark/light themes and inputs are not cut off */
+.form-control {
+  font-size: var(--font-size-sm) !important;
+  border-radius: var(--radius) !important;
+  border: 1px solid var(--border) !important;
+  padding: 12px 16px !important;
+  background: var(--surface-raised) !important;
+  color: var(--text-primary) !important;
+  transition: all var(--transition-fast);
+  color-scheme: light dark; /* Automatically adjusts picker controls */
+
+  &:focus {
+    border-color: var(--accent-purple) !important;
+    background: var(--surface) !important;
+    box-shadow: 0 0 0 3px var(--accent-purple-dim) !important;
+  }
+}
+
+/* Specific layout adjustments to prevent truncation of inputs */
+.form-row-3 {
+  grid-template-columns: 1fr 1.3fr 1.3fr !important; /* Allocate less space to Status, more to dates */
+  gap: 16px !important;
+}
+
+select.form-control {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px !important;
+}
+
+input[type="datetime-local"].form-control {
+  &::-webkit-calendar-picker-indicator {
+    filter: var(--calendar-icon-filter, invert(0.5));
+    cursor: pointer;
+    opacity: 0.8;
+    
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
+/* --- Technology Stack Chips --- */
+.stack-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-purple-dim);
+  color: var(--accent-purple);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border: 1px solid var(--accent-purple-dim);
+
+  .btn-remove-chip {
+    background: transparent;
+    border: none;
+    color: var(--accent-purple);
+    font-size: 16px;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0;
+
+    &:hover {
+      color: var(--error);
+    }
+  }
+}
+
+.stack-input-wrapper {
+  display: flex;
+  gap: 8px;
+
+  .btn-add-stack {
+    background: var(--accent-purple);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    padding: 0 20px;
+    font-size: var(--font-size-sm);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+
+    &:hover {
+      filter: brightness(1.1);
+      box-shadow: 0 4px 12px var(--accent-purple-dim);
+    }
+  }
+}
+
+.order-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+
+  .btn-order-arrow {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px 8px;
+    font-size: 12px;
+    transition: all var(--transition-fast);
+
+    &:hover:not(:disabled) {
+      color: var(--accent-purple);
+      transform: scale(1.1);
+    }
+
+    &:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+  }
+}
+
+.preview-body {
+  .preview-hero {
+    background: var(--surface-raised);
+    padding: 24px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+
+    .preview-badge {
+      display: inline-block;
+      background: var(--accent-purple-dim);
+      color: var(--accent-purple);
+      font-size: var(--font-size-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: var(--radius-sm);
+      margin-bottom: var(--spacing-sm);
+    }
+
+    h1 {
+      font-size: var(--font-size-2xl);
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0 0 var(--spacing-sm) 0;
+    }
+
+    .preview-short-desc {
+      font-size: var(--font-size-md);
+      color: var(--text-secondary);
+      margin: 0;
+      line-height: var(--line-height-base);
+    }
+  }
+
+  .preview-stack-chip {
+    display: inline-block;
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    border: 1px solid var(--border);
+    margin-right: 8px;
+    margin-bottom: 8px;
+  }
+
+  .raw-markdown-preview {
+    background: var(--surface-raised);
+    padding: var(--spacing);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    overflow-x: auto;
+    margin: 0;
+  }
+}
+

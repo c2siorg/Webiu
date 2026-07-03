@@ -21,6 +21,7 @@ html {
 
 /* ── Light Theme Tokens ──────────────────────────────────────── */
 :root {
+  --calendar-icon-filter: invert(0.2);
   /* Backgrounds */
   --bg:                 #F7F7F2;
   --surface:            #FFFFFF;
@@ -159,6 +160,7 @@ html {
 
 /* ── Dark Theme Tokens ───────────────────────────────────────── */
 [data-theme="dark"] {
+  --calendar-icon-filter: invert(1);
   --bg:                 #07090D;
   --surface:            #10141A;
   --surface-raised:     #161C26;

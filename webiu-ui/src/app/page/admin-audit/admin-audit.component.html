@@ -1,52 +1,4 @@
 <div class="admin-panel-container">
-  <!-- Top Navigation Bar -->
-  <header class="admin-navbar">
-    <div class="navbar-left">
-      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
-      <span class="brand-name">WebiU Admin</span>
-    </div>
-    
-    <div class="navbar-center" role="tablist">
-      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-chart-pie"></i> Dashboard
-      </a>
-      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-gears"></i> Settings
-      </a>
-      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="nav-tab" routerLinkActive="active" role="tab">
-        <i class="fa-solid fa-calendar-days"></i> GSoC Years
-      </a>
-      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
-        <i class="fa-solid fa-lightbulb"></i> Ideas
-      </a>
-      <a routerLink="/admin/contributors" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-users-gear"></i> Contributors
-      </a>
-      <a routerLink="/admin/repositories" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-database"></i> Repositories
-      </a>
-      <a routerLink="/admin/profile" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-user-gear"></i> Profile
-      </a>
-      <a routerLink="/admin/audit" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-list-check"></i> Audit Logs
-      </a>
-    </div>
-    
-    <div class="navbar-right">
-      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
-        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
-      </button>
-      <a routerLink="/admin/profile" class="user-badge" title="Manage Profile">
-        <i class="fa-solid fa-user-shield"></i>
-        <span>Administrator</span>
-      </a>
-      <button (click)="onLogout()" class="btn-navbar-logout" title="Log out of panel">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </button>
-    </div>
-  </header>
-
   <!-- Main Content Area -->
   <main class="admin-main-wrapper">
     <div class="content-header-title">
@@ -195,75 +147,132 @@
 
 <!-- Details Modal -->
 @if (showModal && selectedLog) {
-  <div class="modal-backdrop" (click)="onBackdropClick($event)" (keydown.enter)="closeModal()" tabindex="0" role="button" aria-label="Close modal">
-    <div class="modal-card">
+  <div class="modal-overlay" (click)="onBackdropClick($event)" (keydown.escape)="closeModal()" tabindex="-1" role="dialog" aria-modal="true" aria-label="Log Entry Details">
+    <div class="modal-card large-modal audit-detail-modal" role="document" (click)="$event.stopPropagation()" (keydown.escape)="closeModal()">
+
+      <!-- Header -->
       <div class="modal-header">
-        <h2>
-          <i class="fa-solid fa-circle-info"></i> Log Entry Details
-        </h2>
-        <button (click)="closeModal()" class="btn-close-modal">
+        <div class="audit-modal-title">
+          <span class="audit-modal-icon"><i class="fa-solid fa-scroll"></i></span>
+          <div>
+            <h2>Log Entry Details</h2>
+            <p class="audit-modal-subtitle">Immutable audit record — read only</p>
+          </div>
+        </div>
+        <button (click)="closeModal()" class="btn-close-modal" aria-label="Close">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
 
-      <div class="modal-body">
-        <div class="meta-grid">
-          <div class="meta-item">
-            <span class="meta-label">Action</span>
-            <span class="action-badge" [attr.data-action]="selectedLog.action">
-              {{ selectedLog.action }}
-            </span>
-          </div>
+      <!-- Body -->
+      <div class="modal-body audit-modal-body">
 
-          <div class="meta-item">
-            <span class="meta-label">Entity</span>
-            <span class="entity-badge">{{ selectedLog.entityType }}</span>
-          </div>
-
-          <div class="meta-item">
-            <span class="meta-label">Entity ID</span>
-            <code>{{ selectedLog.entityId || 'N/A' }}</code>
-          </div>
-
-          <div class="meta-item">
-            <span class="meta-label">Timestamp</span>
-            <span>{{ selectedLog.createdAt | date:'medium' }}</span>
-          </div>
-
-          <div class="meta-item">
-            <span class="meta-label">Administrator</span>
-            <span class="user-chip">
-              <i class="fa-solid fa-user-shield"></i>
-              {{ selectedLog.admin?.username || 'System / Seed' }}
-            </span>
-          </div>
+        <!-- Meta chips row -->
+        <div class="audit-meta-chips">
+          <span class="audit-chip chip-action chip-{{ getActionColor(selectedLog.action) }}">
+            <i class="fa-solid fa-bolt-lightning"></i>
+            {{ selectedLog.action }}
+          </span>
+          <span class="audit-chip chip-entity">
+            <i class="fa-solid fa-cube"></i>
+            {{ selectedLog.entityType }}
+          </span>
+          <span class="audit-chip chip-user">
+            <i class="fa-solid fa-user-shield"></i>
+            {{ selectedLog.admin?.username || 'System' }}
+          </span>
+          <span class="audit-chip chip-time">
+            <i class="fa-solid fa-clock"></i>
+            {{ selectedLog.createdAt | date:'medium' }}
+          </span>
         </div>
 
-        @if (selectedLog.metadata) {
-          <div class="diff-block">
-            <h3>Log Metadata</h3>
-            <pre><code>{{ selectedLog.metadata | json }}</code></pre>
+        <!-- Entity ID row -->
+        @if (selectedLog.entityId) {
+          <div class="audit-entity-id-row">
+            <span class="audit-field-label"><i class="fa-solid fa-fingerprint"></i> Entity ID</span>
+            <code class="audit-entity-id-value">{{ selectedLog.entityId }}</code>
           </div>
         }
 
-        <div class="diff-container">
-          <div class="diff-block">
-            <h3>Old State</h3>
-            <pre class="json-code"><code>{{ formatJson(selectedLog.oldValue) }}</code></pre>
+        <!-- Metadata block -->
+        @if (selectedLog.metadata) {
+          <div class="audit-diff-section">
+            <div class="audit-diff-header">
+              <i class="fa-solid fa-tag"></i> Metadata
+            </div>
+            <div class="audit-kv-table">
+              @for (entry of parseJsonEntries(formatJson(selectedLog.metadata)); track entry.key) {
+                <div class="audit-kv-row">
+                  <span class="audit-kv-key">{{ entry.key }}</span>
+                  <span class="audit-kv-value" [class.kv-null]="entry.isNull">{{ entry.display }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Old State / New State side by side -->
+        <div class="audit-diff-grid">
+
+          <!-- Old State -->
+          <div class="audit-diff-section audit-diff-old">
+            <div class="audit-diff-header">
+              <i class="fa-solid fa-clock-rotate-left"></i> Before Change
+            </div>
+            @if (!selectedLog.oldValue || selectedLog.oldValue === 'null') {
+              <div class="audit-empty-state">
+                <i class="fa-solid fa-circle-dashed"></i>
+                <span>No previous state — this was a creation event.</span>
+              </div>
+            } @else if (isValidJson(selectedLog.oldValue)) {
+              <div class="audit-kv-table">
+                @for (entry of parseJsonEntries(selectedLog.oldValue); track entry.key) {
+                  <div class="audit-kv-row">
+                    <span class="audit-kv-key">{{ entry.key }}</span>
+                    <span class="audit-kv-value" [class.kv-null]="entry.isNull">{{ entry.display }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <pre class="audit-raw-pre">{{ formatJson(selectedLog.oldValue) }}</pre>
+            }
           </div>
 
-          <div class="diff-block">
-            <h3>New State</h3>
-            <pre class="json-code"><code>{{ formatJson(selectedLog.newValue) }}</code></pre>
+          <!-- New State -->
+          <div class="audit-diff-section audit-diff-new">
+            <div class="audit-diff-header">
+              <i class="fa-solid fa-circle-check"></i> After Change
+            </div>
+            @if (!selectedLog.newValue || selectedLog.newValue === 'null') {
+              <div class="audit-empty-state">
+                <i class="fa-solid fa-trash-can"></i>
+                <span>No new state — this was a deletion event.</span>
+              </div>
+            } @else if (isValidJson(selectedLog.newValue)) {
+              <div class="audit-kv-table">
+                @for (entry of parseJsonEntries(selectedLog.newValue); track entry.key) {
+                  <div class="audit-kv-row">
+                    <span class="audit-kv-key">{{ entry.key }}</span>
+                    <span class="audit-kv-value" [class.kv-null]="entry.isNull">{{ entry.display }}</span>
+                  </div>
+                }
+              </div>
+            } @else {
+              <pre class="audit-raw-pre">{{ formatJson(selectedLog.newValue) }}</pre>
+            }
           </div>
+
         </div>
       </div>
 
+      <!-- Footer -->
       <div class="modal-footer">
-        <button (click)="closeModal()" class="btn-primary">
-          Close Details
+        <button (click)="closeModal()" class="btn-cancel">
+          <i class="fa-solid fa-xmark"></i> Close
         </button>
       </div>
+
     </div>
   </div>
 }

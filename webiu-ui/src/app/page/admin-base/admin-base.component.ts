@@ -13,9 +13,19 @@ export abstract class AdminBaseComponent implements OnInit {
   protected destroyRef = inject(DestroyRef);
 
   isSunVisible = true;
+  sidebarOpened = false;
+  isDesktop = window.innerWidth >= 768;
 
   ngOnInit(): void {
     this.isSunVisible = this.themeService.isLightMode();
+    // Watch for window resize to adjust sidebar overlay state
+    window.addEventListener('resize', () => {
+      this.isDesktop = window.innerWidth >= 768;
+    });
+  }
+
+  toggleSidebar(): void {
+    this.sidebarOpened = !this.sidebarOpened;
   }
 
   toggleMode(): void {
