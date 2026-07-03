@@ -53,20 +53,21 @@ You should see `{ "status": "ok" }`.
 
 ### 3.1 How the CI workflow works
 
-- The file **`.github/workflows/deploy-pages.yml`** runs on every push to the **`main`** branch.
+- The file **`.github/workflows/deploy-pages.yml`** runs on every push to the **`webiu-2026-gsoc`** branch, and can also be triggered manually from the Actions tab.
 - Steps performed:
   1. **Checkout** repository.
   2. **Set up Node** and install dependencies (`npm ci`).
   3. **Build** the Angular app with the correct base‑href (`npx ng build --configuration production --base-href=/Webiu/`).
   4. **Copy** `index.html` → `404.html` so deep‑link refreshes work on the static host.
-  5. **Deploy** the `dist/webiu/browser` folder to the `gh-pages` branch using `peaceiris/actions-gh-pages`.
-- **Result:** GitHub Pages serves the `gh-pages` branch automatically; no manual `ng build` or `npm run deploy` is needed.
+  5. **Upload Artifact** – packages the built files via `actions/upload-pages-artifact`.
+  6. **Deploy to GitHub Pages** – deploys directly via `actions/deploy-pages` (no intermediate `gh-pages` branch needed).
+- **Result:** GitHub Pages serves the build directly; no manual `ng build` or `npm run deploy` is ever required.
 
 ### 3.2 Repository Settings (once)
 
 1. Navigate to **Settings → Pages**.
-2. Source: **Deploy from a branch** → `gh-pages`.
-3. Custom domain (optional) – set if you have a vanity domain.
+2. Under **Build and deployment → Source**, select **GitHub Actions** from the dropdown.
+3. Custom domain (optional) – configure if you have a vanity domain.
 
 ### 3.3 Overriding the API endpoint (optional)
 
@@ -80,7 +81,37 @@ The PA can set the secret under **Settings → Secrets and variables → Actions
 
 ---
 
-## 4️⃣ End‑to‑End Validation
+## 4️⃣ GitHub Pages – Environment Protection Rules
+
+> **Why this matters** – GitHub has a per-environment allowlist that controls which branches are permitted to deploy to GitHub Pages. If a branch is not in this list the deployment will be rejected with:
+> `Branch "webiu-2026-gsoc" is not allowed to deploy to github-pages due to environment protection rules.`
+
+### 4.1 Granting deployment permission to a branch
+
+This is a **one-time, admin-only setting**. The repo owner or admin must do the following:
+
+1. Open the `c2siorg/Webiu` repository on GitHub.
+2. Go to **Settings → Environments**.
+3. Click on the **`github-pages`** environment.
+4. Under **Deployment branches and tags**, click **Add deployment branch or tag rule**.
+5. Type `webiu-2026-gsoc` (or whatever branch the workflow runs from) and confirm.
+
+That's it — the rule is saved instantly. No code change is needed.
+
+### 4.2 Re-running the workflow after the fix
+
+After the branch is added to the allowlist:
+
+1. Go to the **Actions** tab of the repository.
+2. Find the failed **Deploy to GitHub Pages** run.
+3. Click **Re-run jobs** → **Re-run all jobs**.
+4. The workflow will succeed and the live site will be published.
+
+> **Alternatively**, push a new commit to `webiu-2026-gsoc` and the workflow triggers automatically.
+
+---
+
+## 5️⃣ End‑to‑End Validation
 
 1. Open the live site: `https://<github‑username>.github.io/Webiu/`.
 2. Verify that the UI loads and makes successful calls to the backend (`/api/...`).
@@ -90,7 +121,7 @@ The PA can set the secret under **Settings → Secrets and variables → Actions
 
 ---
 
-## 5️⃣ Trouble‑shooting Common Issues
+## 6️⃣ Trouble‑shooting Common Issues
 
 - **GitHub Actions fails on `npm ci`** – ensure the repo contains a valid `package-lock.json` and that the Node version used in the workflow matches the one declared in `engines`.
 - **404 on deep links** – make sure the workflow copies `index.html` to `404.html` (line 466‑467 in `ARCHITECTURE.md`).
@@ -99,13 +130,14 @@ The PA can set the secret under **Settings → Secrets and variables → Actions
 
 ---
 
-## 6️⃣ Summary Checklist (for the PA)
+## 7️⃣ Summary Checklist (for the PA)
 
 - [ ] Render PostgreSQL created → `DATABASE_URL` stored.
 - [ ] Render Web Service configured (`webiu-server` root, build/start commands, env vars, health check).
-- [ ] GitHub repository **Pages** source set to `gh-pages`.
+- [ ] **Settings → Pages** source set to **GitHub Actions**.
+- [ ] **Settings → Environments → github-pages** → `webiu-2026-gsoc` branch added to the deployment allowlist.
 - [ ] GitHub Actions secret `CUSTOM_API_URL` (optional) added if needed.
-- [ ] Deploy a test commit to `main` – watch the **Actions** tab for successful `deploy-pages` run.
-- [ ] Verify live site and backend health.
+- [ ] Push a commit to `webiu-2026-gsoc` (or manually trigger the workflow) → confirm the **Actions** tab shows a green `deploy-pages` run.
+- [ ] Verify the live site loads and backend health endpoint returns `{ "status": "ok" }`.
 
 With these steps completed, the WebiU stack is fully operational in production.
