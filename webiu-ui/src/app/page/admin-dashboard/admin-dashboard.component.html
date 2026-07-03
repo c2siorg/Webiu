@@ -172,30 +172,34 @@
                   <i class="fa-solid fa-rotate-right status-icon" [class.spin-icon]="isSyncing"></i>
                   <h3>Synchronization Status</h3>
                 </div>
-                <span class="health-badge" [class.healthy]="dashboardData?.syncHealth === 'Healthy'" [class.warning]="dashboardData?.syncHealth !== 'Healthy'">
-                  {{ dashboardData?.syncHealth }}
-                </span>
+                @if (dashboardData) {
+  <span class="health-badge" [class.healthy]="dashboardData.syncHealth === 'Healthy'" [class.warning]="dashboardData.syncHealth !== 'Healthy'">
+    {{ dashboardData.syncHealth }}
+  </span>
+}
               </div>
-              <div class="card-body">
-                <div class="sync-metric-item">
-                  <span class="metric-label">Last Webhook Event</span>
-                  <span class="metric-value">
-                    {{ dashboardData?.lastWebhookAt ? (dashboardData?.lastWebhookAt | date:'medium') : 'No webhook events yet' }}
-                  </span>
-                </div>
-                <div class="sync-metric-item">
-                  <span class="metric-label">Last Reconciliation</span>
-                  <span class="metric-value">
-                    {{ dashboardData?.lastReconciliationAt ? (dashboardData?.lastReconciliationAt | date:'medium') : 'No reconciliation run yet' }}
-                  </span>
-                </div>
-                <div class="sync-metric-item">
-                  <span class="metric-label">Last General Sync</span>
-                  <span class="metric-value">
-                    {{ dashboardData?.lastRepositorySync ? (dashboardData?.lastRepositorySync | date:'medium') : 'Pending initial sync' }}
-                  </span>
-                </div>
-              </div>
+              @if (dashboardData) {
+  <div class="card-body">
+    <div class="sync-metric-item">
+      <span class="metric-label">Last Webhook Event</span>
+      <span class="metric-value">
+        {{ dashboardData.lastWebhookAt ? (dashboardData.lastWebhookAt | date:'medium') : 'No webhook events yet' }}
+      </span>
+    </div>
+    <div class="sync-metric-item">
+      <span class="metric-label">Last Reconciliation</span>
+      <span class="metric-value">
+        {{ dashboardData.lastReconciliationAt ? (dashboardData.lastReconciliationAt | date:'medium') : 'No reconciliation run yet' }}
+      </span>
+    </div>
+    <div class="sync-metric-item">
+      <span class="metric-label">Last General Sync</span>
+      <span class="metric-value">
+        {{ dashboardData.lastRepositorySync ? (dashboardData.lastRepositorySync | date:'medium') : 'Pending initial sync' }}
+      </span>
+    </div>
+  </div>
+}
             </div>
 
             <!-- Platform Settings Status Widget -->
@@ -243,35 +247,36 @@
                 </a>
               </div>
               <div class="card-body">
-                @if (!dashboardData?.recentAuditEvents?.length) {
-                  <div class="empty-activity">
-                    <i class="fa-solid fa-inbox empty-icon"></i>
-                    <p>No recent administrative activities recorded.</p>
-                  </div>
-                }
-                
-                @if (dashboardData?.recentAuditEvents?.length) {
-                  <ul class="activity-timeline">
-                    @for (log of dashboardData.recentAuditEvents; track log.id) {
-                      <li class="activity-item">
-                        <div class="activity-marker"></div>
-                        <div class="activity-details">
-                          <div class="activity-header">
-                            <span class="activity-admin">
-                              <i class="fa-solid fa-circle-user"></i> {{ log.admin?.username || 'System' }}
-                            </span>
-                            <span class="activity-time">{{ log.createdAt | date:'shortTime' }}</span>
-                          </div>
-                          <p class="activity-text">
-                            Executed <strong>{{ log.action | uppercase }}</strong> on 
-                            <span class="entity-badge">{{ log.entityType }}</span>
-                          </p>
-                          <span class="activity-date-detail">{{ log.createdAt | date:'mediumDate' }}</span>
-                        </div>
-                      </li>
-                    }
-                  </ul>
-                }
+                @if (dashboardData) {
+  @if (!dashboardData.recentAuditEvents?.length) {
+    <div class="empty-activity">
+      <i class="fa-solid fa-inbox empty-icon"></i>
+      <p>No recent administrative activities recorded.</p>
+    </div>
+  }
+  @if (dashboardData.recentAuditEvents?.length) {
+    <ul class="activity-timeline">
+      @for (log of dashboardData.recentAuditEvents || []; track log.id) {
+        <li class="activity-item">
+          <div class="activity-marker"></div>
+          <div class="activity-details">
+            <div class="activity-header">
+              <span class="activity-admin">
+                <i class="fa-solid fa-circle-user"></i> {{ log.admin?.username || 'System' }}
+              </span>
+              <span class="activity-time">{{ log.createdAt | date:'shortTime' }}</span>
+            </div>
+            <p class="activity-text">
+              Executed <strong>{{ log.action | uppercase }}</strong> on 
+              <span class="entity-badge">{{ log.entityType }}</span>
+            </p>
+            <span class="activity-date-detail">{{ log.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+}
               </div>
             </div>
           </div>

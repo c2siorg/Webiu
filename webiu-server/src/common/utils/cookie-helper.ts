@@ -24,3 +24,21 @@ export function getCookieOptions(configService: ConfigService): CookieOptions {
     path: '/',
   };
 }
+
+/**
+ * Centralized utility to extract a cookie value from a Cookie header string.
+ */
+export function extractCookie(
+  cookieHeader: string | undefined,
+  name: string,
+): string | null {
+  if (!cookieHeader) return null;
+  const cookies = cookieHeader.split(';').map((c) => c.trim());
+  for (const cookie of cookies) {
+    const [key, ...valueParts] = cookie.split('=');
+    if (key === name) {
+      return valueParts.join('=');
+    }
+  }
+  return null;
+}

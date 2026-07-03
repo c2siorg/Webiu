@@ -1,8 +1,6 @@
 import { Component, OnInit, inject, DestroyRef } from '@angular/core';
 import { Meta } from '@angular/platform-browser';
 
-import { HttpClient } from '@angular/common/http';
-import { ToastrService } from 'ngx-toastr';
 import { ProjectsCardComponent } from '../../components/projects-card/projects-card.component';
 import { Project, ProjectResponse } from './project.model';
 import { FormsModule } from '@angular/forms';
@@ -35,10 +33,8 @@ export class ProjectsComponent implements OnInit {
   searchError: string | null = null;
 
   private metaService = inject(Meta);
-  private toastr = inject(ToastrService);
   private destroyRef = inject(DestroyRef);
   private projectCacheService = inject(ProjectCacheService);
-  private http = inject(HttpClient);
   private fallbackData: ProjectResponse | null = null;
 
   ngOnInit(): void {
@@ -114,7 +110,7 @@ export class ProjectsComponent implements OnInit {
             );
             this.isLoading = false;
           } else {
-            this.http.get<ProjectResponse>('assets/data/projects.json').subscribe({
+            this.projectCacheService.getFallbackProjects().subscribe({
               next: (data: ProjectResponse) => {
                 this.fallbackData = data;
                 this.serverTotal = data.total;

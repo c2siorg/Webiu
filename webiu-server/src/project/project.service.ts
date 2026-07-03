@@ -13,6 +13,22 @@ import { AxiosError } from 'axios';
 const CACHE_TTL = 300; // 5 minutes
 const INSIGHTS_CACHE_TTL = 3600; // 1 hour
 
+export interface GithubRepo {
+  name: string;
+  description?: string;
+  html_url: string;
+  language?: string;
+  topics?: string[];
+  created_at?: string | Date;
+  updated_at?: string | Date;
+  stargazers_count?: number;
+  forks_count?: number;
+  size?: number;
+  license?: { spdx_id: string } | null;
+  open_issues_count?: number;
+  pull_requests?: number;
+}
+
 // Badge thresholds for project insights
 const MATURITY_MIN_STARS = 50;
 const MATURITY_MIN_AGE_YEARS = 1;
@@ -399,7 +415,9 @@ export class ProjectService {
     }
   }
 
-  private async enrichWithPullCounts(repos: any[]): Promise<any[]> {
+  private async enrichWithPullCounts(
+    repos: GithubRepo[],
+  ): Promise<GithubRepo[]> {
     if (repos.length === 0) return [];
 
     const repoNames = repos.map((r) => r.name);

@@ -16,6 +16,7 @@ export class AdminComponent implements OnInit {
   username = '';
   password = '';
   isLoading = false;
+  isCheckingSession = true;
 
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -23,12 +24,17 @@ export class AdminComponent implements OnInit {
 
   ngOnInit(): void {
     // Redirect to dashboard if already logged in
+    this.isCheckingSession = true;
     this.authService.checkSession().subscribe({
       next: (res) => {
+        this.isCheckingSession = false;
         if (res.authenticated) {
           this.router.navigate(['/admin/dashboard']);
         }
       },
+      error: () => {
+        this.isCheckingSession = false;
+      }
     });
   }
 
@@ -42,8 +48,8 @@ export class AdminComponent implements OnInit {
     this.authService.login({ username: this.username, password: this.password }).subscribe({
       next: () => {
         this.toastr.success('Logged in successfully');
-        this.router.navigate(['/admin/dashboard']);
         this.isLoading = false;
+        this.router.navigate(['/admin/dashboard']);
       },
       error: (err) => {
         const msg = err.error?.message || 'Invalid administrator credentials';

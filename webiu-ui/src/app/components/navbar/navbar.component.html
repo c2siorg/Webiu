@@ -1,4 +1,4 @@
-<div class="navbar">
+<nav class="navbar" aria-label="Main Navigation">
   <a [routerLink]="['/']" class="logo-link" (click)="preventReload($event)">
     <picture>
       <source srcset="assets/c2silogo-dark_no_bg.webp" type="image/webp" />
@@ -18,6 +18,7 @@
       class="menu-overlay"
       (click)="closeMenu()"
       (keydown.enter)="closeMenu()"
+      (keydown.space)="closeMenu(); $event.preventDefault()"
       tabindex="0"
       role="button"
       [attr.aria-label]="'Close menu'"
@@ -55,104 +56,83 @@
       </button>
     </div>
 
-    <div
+    <a
       class="navbar__menu__items"
-      routerLink="/"
+      [routerLink]="['/']"
       [class.active]="isRouteActive('/')"
-      (click)="navigateTo('/')"
-      (keydown.enter)="navigateTo('/')"
-      tabindex="0"
-      role="link"
+      (click)="closeMenu()"
       [attr.aria-label]="'Home'"
     >
       <img src="../../../assets/home.svg" alt="Home Icon" class="menu-icon" />
       <p>Home</p>
-    </div>
+    </a>
 
-    <div
+    <a
       class="navbar__menu__items"
-      routerLink="/projects"
+      [routerLink]="['/projects']"
       [class.active]="isRouteActive('/projects')"
-      (click)="navigateTo('/projects')"
-      (keydown.enter)="navigateTo('/projects')"
-      tabindex="0"
-      role="link"
+      (click)="closeMenu()"
       [attr.aria-label]="'Projects'"
     >
       <img src="../../../assets/projects.svg" alt="Projects Icon" class="menu-icon" />
       <p>Projects</p>
-    </div>
+    </a>
 
-    <div
+    <a
       class="navbar__menu__items"
-      routerLink="/publications"
+      [routerLink]="['/publications']"
       [class.active]="isRouteActive('/publications')"
-      (click)="navigateTo('/publications')"
-      (keydown.enter)="navigateTo('/publications')"
-      tabindex="0"
-      role="link"
+      (click)="closeMenu()"
       [attr.aria-label]="'Publications'"
     >
       <img src="../../../assets/publications.svg" alt="Publications Icon" class="menu-icon" />
       <p>Publications</p>
-    </div>
+    </a>
 
-    <div
+    <a
       class="navbar__menu__items"
-      routerLink="/contributors"
+      [routerLink]="['/contributors']"
       [class.active]="isRouteActive('/contributors')"
-      (click)="navigateTo('/contributors')"
-      (keydown.enter)="navigateTo('/contributors')"
-      tabindex="0"
-      role="link"
+      (click)="closeMenu()"
       [attr.aria-label]="'Contributors'"
     >
       <img src="../../../assets/contributors.svg" alt="Contributors Icon" class="menu-icon" />
       <p>Contributors</p>
-    </div>
+    </a>
 
-    <div
+    <a
       class="navbar__menu__items"
-      routerLink="/community"
+      [routerLink]="['/community']"
       [class.active]="isRouteActive('/community')"
-      (click)="navigateTo('/community')"
-      (keydown.enter)="navigateTo('/community')"
-      tabindex="0"
-      role="link"
+      (click)="closeMenu()"
       [attr.aria-label]="'Community'"
     >
       <img src="../../../assets/community.svg" alt="Community Icon" class="menu-icon" />
       <p>Community</p>
-    </div>
+    </a>
 
-    <div
+    <a
       class="navbar__menu__items"
-      routerLink="/opportunities"
+      [routerLink]="['/opportunities']"
       [class.active]="isRouteActive('/opportunities')"
-      (click)="navigateTo('/opportunities')"
-      (keydown.enter)="navigateTo('/opportunities')"
-      tabindex="0"
-      role="link"
+      (click)="closeMenu()"
       [attr.aria-label]="'Opportunities'"
     >
       <img src="../../../assets/opportunities.svg" alt="Opportunities Icon" class="menu-icon" />
       <p>Opportunities</p>
-    </div>
+    </a>
 
     @if (showIdeasPage) {
-      <div
+      <a
         class="navbar__menu__items"
-        routerLink="/gsoc"
+        [routerLink]="['/gsoc']"
         [class.active]="isRouteActive('/gsoc')"
-        (click)="navigateTo('/gsoc')"
-        (keydown.enter)="navigateTo('/gsoc')"
-        tabindex="0"
-        role="link"
+        (click)="closeMenu()"
         [attr.aria-label]="'Google Summer of Code'"
       >
         <img src="../../../assets/gsoc.svg" alt="GSoC Icon" class="menu-icon" />
         <p>GSoC {{ currentYearShort }}</p>
-      </div>
+      </a>
     }
   </div>
 
@@ -196,12 +176,11 @@
         <div class="hamburger-icon" [class.open]="isMenuOpen">
           <span></span>
           <span></span>
-          <span></span>
         </div>
       </div>
     </div>
   </div>
-</div>
+</nav>
 
 <!-- Mobile Bottom Navigation Bar -->
 <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
@@ -209,10 +188,7 @@
     <a
       class="mobile-bottom-nav__item"
       [class.active]="isRouteActive('/')"
-      (click)="navigateTo('/')"
-      (keydown.enter)="navigateTo('/')"
-      role="link"
-      tabindex="0"
+      [routerLink]="['/']"
       aria-label="Home"
     >
       <img src="../../../assets/home.svg" alt="Home" />
@@ -221,10 +197,7 @@
     <a
       class="mobile-bottom-nav__item"
       [class.active]="isRouteActive('/projects')"
-      (click)="navigateTo('/projects')"
-      (keydown.enter)="navigateTo('/projects')"
-      role="link"
-      tabindex="0"
+      [routerLink]="['/projects']"
       aria-label="Projects"
     >
       <img src="../../../assets/projects.svg" alt="Projects" />
@@ -244,10 +217,7 @@
     <a
       class="mobile-bottom-nav__item"
       [class.active]="isRouteActive('/community')"
-      (click)="navigateTo('/community')"
-      (keydown.enter)="navigateTo('/community')"
-      role="link"
-      tabindex="0"
+      [routerLink]="['/community']"
       aria-label="Community"
     >
       <img src="../../../assets/community.svg" alt="Community" />
@@ -256,10 +226,7 @@
     <a
       class="mobile-bottom-nav__item"
       [class.active]="isRouteActive('/contributors')"
-      (click)="navigateTo('/contributors')"
-      (keydown.enter)="navigateTo('/contributors')"
-      role="link"
-      tabindex="0"
+      [routerLink]="['/contributors']"
       aria-label="Contributors"
     >
       <img src="../../../assets/contributors.svg" alt="Contributors" />

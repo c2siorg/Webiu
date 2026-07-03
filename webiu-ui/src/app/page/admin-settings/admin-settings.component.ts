@@ -1,11 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { SettingsService } from '../../services/settings.service';
-import { AuthService } from '../../services/auth.service';
-import { ThemeService } from '../../services/theme.service';
-import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AdminBaseComponent } from '../admin-base/admin-base.component';
 
 @Component({
   selector: 'app-admin-settings',
@@ -14,45 +13,42 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './admin-settings.component.html',
   styleUrls: ['./admin-settings.component.scss'],
 })
-export class AdminSettingsComponent implements OnInit {
+export class AdminSettingsComponent extends AdminBaseComponent implements OnInit {
   private settingsService = inject(SettingsService);
-  private authService = inject(AuthService);
-  private themeService = inject(ThemeService);
-  private router = inject(Router);
-  private toastr = inject(ToastrService);
 
-  currentYear = 2026;
+  currentYear = new Date().getFullYear();
   showIdeasPage = true;
   registrationOpen = true;
   siteTitle = 'WebiU';
   siteDescription = '';
   maintenanceMode = false;
   isSaving = false;
-  isSunVisible = true;
 
-  ngOnInit(): void {
-    this.isSunVisible = !this.themeService.isDarkMode();
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.loadSettings();
   }
 
   loadSettings(): void {
-    this.settingsService.getSettings().subscribe({
-      next: (res) => {
-        if (res?.success && res?.settings) {
-          const s = res.settings;
-          this.currentYear = Number(s['gsoc.current_year']) || 2026;
-          this.showIdeasPage = s['gsoc.show_ideas_page'] === true || s['gsoc.show_ideas_page'] === 'true';
-          this.registrationOpen = s['gsoc.registration_open'] === true || s['gsoc.registration_open'] === 'true';
-          this.siteTitle = s['site.title'] || 'WebiU';
-          this.siteDescription = s['site.description'] || '';
-          this.maintenanceMode = s['site.maintenance_mode'] === true || s['site.maintenance_mode'] === 'true';
-        }
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to load system settings';
-        this.toastr.error(errorMsg);
-      },
-    });
+    this.settingsService.getSettings()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (res?.success && res?.settings) {
+            const s = res.settings;
+            this.currentYear = Number(s['gsoc.current_year']) || new Date().getFullYear();
+            this.showIdeasPage = s['gsoc.show_ideas_page'] === true || s['gsoc.show_ideas_page'] === 'true';
+            this.registrationOpen = s['gsoc.registration_open'] === true || s['gsoc.registration_open'] === 'true';
+            this.siteTitle = s['site.title'] || 'WebiU';
+            this.siteDescription = s['site.description'] || '';
+            this.maintenanceMode = s['site.maintenance_mode'] === true || s['site.maintenance_mode'] === 'true';
+          }
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Failed to load system settings';
+          this.toastr.error(errorMsg);
+        },
+      });
   }
 
   onSave(): void {
@@ -66,42 +62,27 @@ export class AdminSettingsComponent implements OnInit {
       'site.maintenance_mode': this.maintenanceMode,
     };
 
-    this.settingsService.updateSettings(updates).subscribe({
-      next: (res) => {
-        this.toastr.success(res.message || 'Settings updated successfully.');
-        this.isSaving = false;
-        if (res?.settings) {
-          const s = res.settings;
-          this.currentYear = Number(s['gsoc.current_year']) || 2026;
-          this.showIdeasPage = s['gsoc.show_ideas_page'] === true;
-          this.registrationOpen = s['gsoc.registration_open'] === true;
-          this.siteTitle = s['site.title'] || 'WebiU';
-          this.siteDescription = s['site.description'] || '';
-          this.maintenanceMode = s['site.maintenance_mode'] === true;
-        }
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to update settings.';
-        this.toastr.error(errorMsg);
-        this.isSaving = false;
-      },
-    });
-  }
-
-  onLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.toastr.success('Logged out successfully');
-        this.router.navigate(['/admin']);
-      },
-      error: () => {
-        this.toastr.error('Logout failed, please try again');
-      },
-    });
-  }
-
-  toggleMode(): void {
-    this.themeService.toggleDarkMode();
-    this.isSunVisible = !this.themeService.isDarkMode();
+    this.settingsService.updateSettings(updates)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.toastr.success(res.message || 'Settings updated successfully.');
+          this.isSaving = false;
+          if (res?.settings) {
+            const s = res.settings;
+            this.currentYear = Number(s['gsoc.current_year']) || new Date().getFullYear();
+            this.showIdeasPage = s['gsoc.show_ideas_page'] === true;
+            this.registrationOpen = s['gsoc.registration_open'] === true;
+            this.siteTitle = s['site.title'] || 'WebiU';
+            this.siteDescription = s['site.description'] || '';
+            this.maintenanceMode = s['site.maintenance_mode'] === true;
+          }
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Failed to update settings.';
+          this.toastr.error(errorMsg);
+          this.isSaving = false;
+        },
+      });
   }
 }

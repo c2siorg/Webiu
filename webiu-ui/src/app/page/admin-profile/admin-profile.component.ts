@@ -1,11 +1,10 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ProfileService } from '../../services/profile.service';
-import { AuthService } from '../../services/auth.service';
-import { ThemeService } from '../../services/theme.service';
-import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AdminBaseComponent } from '../admin-base/admin-base.component';
 
 @Component({
   selector: 'app-admin-profile',
@@ -14,12 +13,8 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './admin-profile.component.html',
   styleUrls: ['./admin-profile.component.scss'],
 })
-export class AdminProfileComponent implements OnInit {
+export class AdminProfileComponent extends AdminBaseComponent implements OnInit {
   private profileService = inject(ProfileService);
-  private authService = inject(AuthService);
-  private themeService = inject(ThemeService);
-  private router = inject(Router);
-  private toastr = inject(ToastrService);
 
   username = '';
   role = 'Administrator';
@@ -34,30 +29,31 @@ export class AdminProfileComponent implements OnInit {
   isLoading = true;
   isSavingUsername = false;
   isSavingPassword = false;
-  isSunVisible = true;
 
-  ngOnInit(): void {
-    this.isSunVisible = !this.themeService.isDarkMode();
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.loadProfile();
   }
 
   loadProfile(): void {
     this.isLoading = true;
-    this.profileService.getProfile().subscribe({
-      next: (res) => {
-        this.username = res.username;
-        this.newUsername = res.username;
-        this.role = res.role || 'administrator';
-        this.createdAt = res.createdAt ? new Date(res.createdAt) : null;
-        this.lastLoginAt = res.lastLoginAt ? new Date(res.lastLoginAt) : null;
-        this.isLoading = false;
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to load profile information.';
-        this.toastr.error(errorMsg);
-        this.isLoading = false;
-      },
-    });
+    this.profileService.getProfile()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.username = res.username;
+          this.newUsername = res.username;
+          this.role = res.role || 'administrator';
+          this.createdAt = res.createdAt ? new Date(res.createdAt) : null;
+          this.lastLoginAt = res.lastLoginAt ? new Date(res.lastLoginAt) : null;
+          this.isLoading = false;
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Failed to load profile information.';
+          this.toastr.error(errorMsg);
+          this.isLoading = false;
+        },
+      });
   }
 
   onUpdateUsername(): void {
@@ -72,18 +68,20 @@ export class AdminProfileComponent implements OnInit {
     }
 
     this.isSavingUsername = true;
-    this.profileService.updateUsername(this.newUsername.trim()).subscribe({
-      next: (res) => {
-        this.toastr.success(res.message || 'Username updated successfully. Please log in again.');
-        this.isSavingUsername = false;
-        this.router.navigate(['/admin']);
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to update username.';
-        this.toastr.error(errorMsg);
-        this.isSavingUsername = false;
-      },
-    });
+    this.profileService.updateUsername(this.newUsername.trim())
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.toastr.success(res.message || 'Username updated successfully. Please log in again.');
+          this.isSavingUsername = false;
+          this.router.navigate(['/admin']);
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Failed to update username.';
+          this.toastr.error(errorMsg);
+          this.isSavingUsername = false;
+        },
+      });
   }
 
   onUpdatePassword(): void {
@@ -109,34 +107,19 @@ export class AdminProfileComponent implements OnInit {
       confirmPassword: this.confirmPassword,
     };
 
-    this.profileService.updatePassword(updateData).subscribe({
-      next: (res) => {
-        this.toastr.success(res.message || 'Password updated successfully. Please log in again.');
-        this.isSavingPassword = false;
-        this.router.navigate(['/admin']);
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to update password.';
-        this.toastr.error(errorMsg);
-        this.isSavingPassword = false;
-      },
-    });
-  }
-
-  onLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.toastr.success('Logged out successfully');
-        this.router.navigate(['/admin']);
-      },
-      error: () => {
-        this.toastr.error('Logout failed, please try again');
-      },
-    });
-  }
-
-  toggleMode(): void {
-    this.themeService.toggleDarkMode();
-    this.isSunVisible = !this.themeService.isDarkMode();
+    this.profileService.updatePassword(updateData)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.toastr.success(res.message || 'Password updated successfully. Please log in again.');
+          this.isSavingPassword = false;
+          this.router.navigate(['/admin']);
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Failed to update password.';
+          this.toastr.error(errorMsg);
+          this.isSavingPassword = false;
+        },
+      });
   }
 }

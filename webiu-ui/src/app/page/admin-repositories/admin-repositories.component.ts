@@ -1,14 +1,13 @@
 import { Component, OnInit, inject, ViewChildren, QueryList } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables, ChartConfiguration } from 'chart.js';
-import { AuthService } from '../../services/auth.service';
 import { SettingsService } from '../../services/settings.service';
-import { ThemeService } from '../../services/theme.service';
-import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CountUpDirective } from '../../shared/count-up.directive';
+import { AdminBaseComponent } from '../admin-base/admin-base.component';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -27,19 +26,14 @@ Chart.register(...registerables);
   templateUrl: './admin-repositories.component.html',
   styleUrls: ['./admin-repositories.component.scss'],
 })
-export class AdminRepositoriesComponent implements OnInit {
-  private authService = inject(AuthService);
+export class AdminRepositoriesComponent extends AdminBaseComponent implements OnInit {
   private settingsService = inject(SettingsService);
-  private themeService = inject(ThemeService);
-  private router = inject(Router);
-  private toastr = inject(ToastrService);
 
   @ViewChildren(BaseChartDirective) chartDirectives?: QueryList<BaseChartDirective>;
 
   analyticsData: any = null;
   isLoading = true;
   hasError = false;
-  isSunVisible = true;
 
   protected readonly Math = Math;
 
@@ -75,273 +69,290 @@ export class AdminRepositoriesComponent implements OnInit {
   public languageChartData?: ChartConfiguration<'bar'>['data'];
   public languageChartOptions?: ChartConfiguration<'bar'>['options'];
 
-  ngOnInit(): void {
-    this.isSunVisible = !this.themeService.isDarkMode();
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.loadAnalyticsData();
   }
 
   loadAnalyticsData(): void {
     this.isLoading = true;
     this.hasError = false;
-    this.settingsService.getRepositoryAnalytics().subscribe({
-      next: (data) => {
-        this.analyticsData = data;
-        this.initCharts(data);
-        this.isLoading = false;
-      },
-      error: () => {
-        this.toastr.error('Failed to load repository intelligence analytics.');
-        this.isLoading = false;
-        this.hasError = true;
-      },
-    });
+    this.settingsService.getRepositoryAnalytics()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.analyticsData = data;
+          this.initCharts(data);
+          this.isLoading = false;
+        },
+        error: () => {
+          this.toastr.error('Failed to load repository intelligence analytics.');
+          this.isLoading = false;
+          this.hasError = true;
+        },
+      });
   }
 
   initCharts(data: any): void {
     const isDark = this.themeService.isDarkMode();
-    this.applyChartThemes(isDark, data);
-  }
-
-  applyChartThemes(isDark: boolean, data: any): void {
-    if (!data) return;
-
     const primaryText = isDark ? '#f8fafc' : '#0f172a';
     const mutedText = isDark ? '#94a3b8' : '#64748b';
     const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
 
-    // Palette Colors
-    const colorStars = isDark ? 'rgba(245, 158, 11, 0.65)' : 'rgba(217, 119, 6, 0.65)'; // Amber
-    const borderStars = isDark ? '#f59e0b' : '#d97706';
+    // Colors
+    const coralBg = isDark ? 'rgba(244, 63, 94, 0.65)' : 'rgba(225, 29, 72, 0.65)';
+    const coralBorder = isDark ? '#f43f5e' : '#e11d48';
 
-    const colorContributors = isDark ? 'rgba(168, 85, 247, 0.65)' : 'rgba(124, 58, 237, 0.65)'; // Purple
-    const borderContributors = isDark ? '#a855f7' : '#7c3aed';
+    const purpleBg = isDark ? 'rgba(168, 85, 247, 0.65)' : 'rgba(124, 58, 237, 0.65)';
+    const purpleBorder = isDark ? '#a855f7' : '#7c3aed';
 
-    const colorForks = isDark ? 'rgba(6, 182, 212, 0.65)' : 'rgba(8, 145, 178, 0.65)'; // Cyan
-    const borderForks = isDark ? '#06b6d4' : '#0891b2';
+    const limeBg = isDark ? 'rgba(132, 204, 22, 0.65)' : 'rgba(101, 163, 13, 0.65)';
+    const limeBorder = isDark ? '#84cc16' : '#65a30d';
 
-    const colorLanguages = isDark ? 'rgba(132, 204, 22, 0.65)' : 'rgba(101, 163, 13, 0.65)'; // Lime
-    const borderLanguages = isDark ? '#84cc16' : '#65a30d';
+    // 1. Popularity Horizontal Chart (Stars)
+    const popLabels = (data.popularity || []).map((r: any) => r.name);
+    const popStars = (data.popularity || []).map((r: any) => r.stars);
 
-    // Doughnut/Pie Palettes (using curated colors)
-    const chartPalette = [
-      isDark ? '#a855f7' : '#7c3aed', // purple
-      isDark ? '#06b6d4' : '#0891b2', // cyan
-      isDark ? '#f59e0b' : '#d97706', // amber
-      isDark ? '#84cc16' : '#65a30d', // lime
-      isDark ? '#ef4444' : '#dc2626', // red
-      isDark ? '#3b82f6' : '#2563eb', // blue
-    ];
-
-    // 1. Popularity Chart (Top Stars)
-    const popRepos = (data.popularRepositories || []).slice(0, 6);
     this.popularityChartData = {
-      labels: popRepos.map((r: any) => r.name),
+      labels: popLabels,
       datasets: [
         {
           label: 'Stars',
-          data: popRepos.map((r: any) => r.stars),
-          backgroundColor: colorStars,
-          borderColor: borderStars,
-          borderWidth: 1,
+          data: popStars,
+          backgroundColor: coralBg,
+          borderColor: coralBorder,
+          borderWidth: 1.5,
           borderRadius: 4,
         },
       ],
     };
+
     this.popularityChartOptions = {
-      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
+      indexAxis: 'y',
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: mutedText }, grid: { color: gridColor } },
-        y: { ticks: { color: primaryText }, grid: { display: false } },
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: mutedText, font: { family: 'Geist', size: 11 } },
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: primaryText, font: { family: 'Geist', size: 11 } },
+        },
       },
     };
 
-    // 2. Contributor Chart (Top Communities)
-    const partRepos = (data.repositoryParticipation || []).slice(0, 6);
+    // 2. Contributor Distribution (Horizontal)
+    const contribLabels = (data.contributorDistribution || []).map((r: any) => r.name);
+    const contribCounts = (data.contributorDistribution || []).map((r: any) => r.contributorCount);
+
     this.contributorChartData = {
-      labels: partRepos.map((r: any) => r.name),
+      labels: contribLabels,
       datasets: [
         {
           label: 'Contributors',
-          data: partRepos.map((r: any) => r.contributorCount),
-          backgroundColor: colorContributors,
-          borderColor: borderContributors,
-          borderWidth: 1,
+          data: contribCounts,
+          backgroundColor: purpleBg,
+          borderColor: purpleBorder,
+          borderWidth: 1.5,
           borderRadius: 4,
         },
       ],
     };
+
     this.contributorChartOptions = {
-      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
+      indexAxis: 'y',
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: mutedText, stepSize: 1 }, grid: { color: gridColor } },
-        y: { ticks: { color: primaryText }, grid: { display: false } },
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: mutedText, font: { family: 'Geist', size: 11 } },
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: primaryText, font: { family: 'Geist', size: 11 } },
+        },
       },
     };
 
-    // 3. Fork Chart
-    const forkRepos = (data.forkDistribution || []).slice(0, 6);
+    // 3. Fork Distribution (Vertical)
+    const forkLabels = (data.forkDistribution || []).map((r: any) => r.name);
+    const forkCounts = (data.forkDistribution || []).map((r: any) => r.forks);
+
     this.forkChartData = {
-      labels: forkRepos.map((r: any) => r.name),
+      labels: forkLabels,
       datasets: [
         {
           label: 'Forks',
-          data: forkRepos.map((r: any) => r.forks),
-          backgroundColor: colorForks,
-          borderColor: borderForks,
-          borderWidth: 1,
+          data: forkCounts,
+          backgroundColor: limeBg,
+          borderColor: limeBorder,
+          borderWidth: 1.5,
           borderRadius: 4,
         },
       ],
     };
+
     this.forkChartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: primaryText }, grid: { display: false } },
-        y: { ticks: { color: mutedText, stepSize: 1 }, grid: { color: gridColor } },
+        x: {
+          grid: { display: false },
+          ticks: { color: primaryText, font: { family: 'Geist', size: 11 } },
+        },
+        y: {
+          grid: { color: gridColor },
+          ticks: { color: mutedText, font: { family: 'Geist', size: 11 } },
+        },
       },
     };
 
-    // 4. Topic Distribution Doughnut Chart
-    const topTopics = (data.topicDistribution || []).slice(0, 6);
+    // 4. Topic Distribution (Doughnut)
+    const topicKeys = Object.keys(data.topicsDistribution || {});
+    const topicVals = Object.values(data.topicsDistribution || {}) as number[];
+
     this.topicChartData = {
-      labels: topTopics.map((t: any) => t.topic),
+      labels: topicKeys,
       datasets: [
         {
-          data: topTopics.map((t: any) => t.count),
-          backgroundColor: chartPalette,
+          data: topicVals,
+          backgroundColor: [
+            '#f43f5e',
+            '#a855f7',
+            '#84cc16',
+            '#06b6d4',
+            '#eab308',
+            '#ec4899',
+            '#3b82f6',
+          ],
           borderWidth: 0,
         },
       ],
     };
+
     this.topicChartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
           position: 'right',
-          labels: { color: primaryText, font: { family: 'Outfit, sans-serif' } },
+          labels: { color: primaryText, font: { family: 'Geist', size: 11 } },
         },
       },
     };
 
-    // 5. Visibility Distribution Pie Chart
-    const visData = data.visibilityDistribution || {};
+    // 5. Visibility Distribution (Pie)
+    const visKeys = Object.keys(data.visibilityDistribution || {});
+    const visVals = Object.values(data.visibilityDistribution || {}) as number[];
+
     this.visibilityChartData = {
-      labels: ['Public', 'Private', 'Archived'],
+      labels: visKeys,
       datasets: [
         {
-          data: [visData.public || 0, visData.private || 0, visData.archived || 0],
-          backgroundColor: [
-            isDark ? '#84cc16' : '#65a30d', // Green for public
-            isDark ? '#f59e0b' : '#d97706', // Yellow for private
-            isDark ? '#ef4444' : '#dc2626', // Red for archived
-          ],
+          data: visVals,
+          backgroundColor: ['#10b981', '#ef4444'],
           borderWidth: 0,
         },
       ],
     };
+
     this.visibilityChartOptions = {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: 'right',
-          labels: { color: primaryText, font: { family: 'Outfit, sans-serif' } },
+          position: 'bottom',
+          labels: { color: primaryText, font: { family: 'Geist', size: 12 } },
         },
       },
     };
 
-    // 6. Language Distribution Horizontal Bar Chart
-    const topLangs = (data.languageDistribution || []).slice(0, 6);
+    // 6. Language Distribution (Horizontal)
+    const langLabels = (data.languagesDistribution || []).map((l: any) => l.language);
+    const langScores = (data.languagesDistribution || []).map((l: any) => l.repoCount);
+
     this.languageChartData = {
-      labels: topLangs.map((l: any) => l.language),
+      labels: langLabels,
       datasets: [
         {
           label: 'Repositories',
-          data: topLangs.map((l: any) => l.count),
-          backgroundColor: colorLanguages,
-          borderColor: borderLanguages,
-          borderWidth: 1,
+          data: langScores,
+          backgroundColor: 'rgba(6, 182, 212, 0.65)',
+          borderColor: '#06b6d4',
+          borderWidth: 1.5,
           borderRadius: 4,
         },
       ],
     };
+
     this.languageChartOptions = {
-      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
+      indexAxis: 'y',
       plugins: { legend: { display: false } },
       scales: {
-        x: { ticks: { color: mutedText, stepSize: 1 }, grid: { color: gridColor } },
-        y: { ticks: { color: primaryText }, grid: { display: false } },
+        x: {
+          grid: { color: gridColor },
+          ticks: { color: mutedText, font: { family: 'Geist', size: 11 } },
+        },
+        y: {
+          grid: { display: false },
+          ticks: { color: primaryText, font: { family: 'Geist', size: 11 } },
+        },
       },
     };
   }
 
-  updateChartConfigs(isDark: boolean): void {
-    if (!this.analyticsData) return;
-    this.applyChartThemes(isDark, this.analyticsData);
+  // --- Repo Explorer logic ---
 
-    // Force chart components update
-    if (this.chartDirectives) {
-      this.chartDirectives.forEach((chart) => chart.update());
-    }
-  }
+  get filteredRepositories(): any[] {
+    if (!this.analyticsData?.explorer) return [];
 
-  // --- Explorer Logic ---
-  getFilteredExplorerList(): any[] {
-    if (!this.analyticsData || !this.analyticsData.explorer) return [];
-
-    let list = [...this.analyticsData.explorer];
-
-    // 1. Search Filter
-    if (this.searchText.trim()) {
-      const searchLower = this.searchText.toLowerCase().trim();
-      list = list.filter(
-        (repo) =>
-          repo.name.toLowerCase().includes(searchLower) ||
-          (repo.description && repo.description.toLowerCase().includes(searchLower)) ||
-          (repo.language && repo.language.toLowerCase().includes(searchLower)) ||
-          (repo.topics && repo.topics.some((t: string) => t.toLowerCase().includes(searchLower)))
+    const search = this.searchText.toLowerCase().trim();
+    const list = this.analyticsData.explorer.filter((r: any) => {
+      return (
+        (r.name || '').toLowerCase().includes(search) ||
+        (r.language || '').toLowerCase().includes(search)
       );
-    }
+    });
 
-    // 2. Sorting
-    list.sort((a, b) => {
-      let valA: any = a[this.sortKey];
-      let valB: any = b[this.sortKey];
+    // Sorting
+    list.sort((a: any, b: any) => {
+      let valA = a[this.sortKey];
+      let valB = b[this.sortKey];
 
-      if (typeof valA === 'string') valA = valA.toLowerCase();
-      if (typeof valB === 'string') valB = valB.toLowerCase();
+      if (valA === undefined) valA = 0;
+      if (valB === undefined) valB = 0;
 
-      if (valA < valB) return this.sortAscending ? -1 : 1;
-      if (valA > valB) return this.sortAscending ? 1 : -1;
-      return 0;
+      if (typeof valA === 'string') {
+        return this.sortAscending
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      } else {
+        return this.sortAscending ? valA - valB : valB - valA;
+      }
     });
 
     return list;
   }
 
-  getPaginatedExplorerList(): any[] {
-    const list = this.getFilteredExplorerList();
+  getTotalPages(): number {
+    return Math.max(1, Math.ceil(this.filteredRepositories.length / this.pageSize));
+  }
+
+  get paginatedRepositories(): any[] {
+    const list = this.filteredRepositories;
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return list.slice(startIndex, startIndex + this.pageSize);
   }
 
-  getTotalPages(): number {
-    const count = this.getFilteredExplorerList().length;
-    return Math.ceil(count / this.pageSize) || 1;
-  }
-
-  setSort(key: string): void {
+  onSort(key: string): void {
     if (this.sortKey === key) {
       this.sortAscending = !this.sortAscending;
     } else {
@@ -357,22 +368,95 @@ export class AdminRepositoriesComponent implements OnInit {
     }
   }
 
-  // --- Theme Toggle & Logout ---
-  toggleMode(): void {
-    this.themeService.toggleDarkMode();
-    this.isSunVisible = !this.themeService.isDarkMode();
-    this.updateChartConfigs(this.themeService.isDarkMode());
+  private updateChartConfigs(isDark: boolean): void {
+    if (!this.analyticsData) return;
+
+    const primaryText = isDark ? '#f8fafc' : '#0f172a';
+    const mutedText = isDark ? '#94a3b8' : '#64748b';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+
+    const coralBg = isDark ? 'rgba(244, 63, 94, 0.65)' : 'rgba(225, 29, 72, 0.65)';
+    const purpleBg = isDark ? 'rgba(168, 85, 247, 0.65)' : 'rgba(124, 58, 237, 0.65)';
+    const limeBg = isDark ? 'rgba(132, 204, 22, 0.65)' : 'rgba(101, 163, 13, 0.65)';
+
+    // Update horizontal star chart
+    if (this.popularityChartOptions?.scales?.['x']) {
+      this.popularityChartOptions.scales['x'].grid = { color: gridColor };
+      this.popularityChartOptions.scales['x'].ticks = { color: mutedText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.popularityChartOptions?.scales?.['y']) {
+      this.popularityChartOptions.scales['y'].ticks = { color: primaryText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.popularityChartData?.datasets?.[0]) {
+      this.popularityChartData.datasets[0].backgroundColor = coralBg;
+    }
+
+    // Update contributor chart
+    if (this.contributorChartOptions?.scales?.['x']) {
+      this.contributorChartOptions.scales['x'].grid = { color: gridColor };
+      this.contributorChartOptions.scales['x'].ticks = { color: mutedText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.contributorChartOptions?.scales?.['y']) {
+      this.contributorChartOptions.scales['y'].ticks = { color: primaryText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.contributorChartData?.datasets?.[0]) {
+      this.contributorChartData.datasets[0].backgroundColor = purpleBg;
+    }
+
+    // Update fork chart
+    if (this.forkChartOptions?.scales?.['x']) {
+      this.forkChartOptions.scales['x'].ticks = { color: primaryText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.forkChartOptions?.scales?.['y']) {
+      this.forkChartOptions.scales['y'].grid = { color: gridColor };
+      this.forkChartOptions.scales['y'].ticks = { color: mutedText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.forkChartData?.datasets?.[0]) {
+      this.forkChartData.datasets[0].backgroundColor = limeBg;
+    }
+
+    // Update doughnut chart
+    if (this.topicChartOptions?.plugins?.legend?.labels) {
+      this.topicChartOptions.plugins.legend.labels.color = primaryText;
+    }
+
+    // Update pie chart
+    if (this.visibilityChartOptions?.plugins?.legend?.labels) {
+      this.visibilityChartOptions.plugins.legend.labels.color = primaryText;
+    }
+
+    // Update language chart
+    if (this.languageChartOptions?.scales?.['x']) {
+      this.languageChartOptions.scales['x'].grid = { color: gridColor };
+      this.languageChartOptions.scales['x'].ticks = { color: mutedText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.languageChartOptions?.scales?.['y']) {
+      this.languageChartOptions.scales['y'].ticks = { color: primaryText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.languageChartData?.datasets?.[0]) {
+      this.languageChartData.datasets[0].backgroundColor = isDark ? 'rgba(6, 182, 212, 0.65)' : 'rgba(0, 172, 193, 0.65)';
+    }
+
+    // Force update chart directives
+    if (this.chartDirectives) {
+      this.chartDirectives.forEach((chart) => chart.update());
+    }
   }
 
-  onLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.toastr.success('Logged out successfully');
-        this.router.navigate(['/admin']);
-      },
-      error: () => {
-        this.toastr.error('Logout failed, please try again');
-      },
-    });
+  getFilteredExplorerList(): any[] {
+    return this.filteredRepositories;
+  }
+
+  getPaginatedExplorerList(): any[] {
+    return this.paginatedRepositories;
+  }
+
+  setSort(key: string): void {
+    this.onSort(key);
+  }
+
+  override toggleMode(): void {
+    super.toggleMode();
+    this.updateChartConfigs(this.themeService.isDarkMode());
   }
 }

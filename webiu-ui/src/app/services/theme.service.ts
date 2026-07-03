@@ -39,4 +39,8 @@ export class ThemeService {
     return true;
   }
 
+  isLightMode(): boolean {
+    return !this.isDarkMode();
+  }
+
 }
