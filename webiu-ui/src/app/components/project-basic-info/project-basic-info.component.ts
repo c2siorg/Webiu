@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Project } from '../../page/projects/project.model';
-import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/data/language-colors';
+import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/utils/language-colors';
 
 interface LanguageEntry {
   name: string;

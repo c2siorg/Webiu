@@ -1,12 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { GithubService } from '../github/github.service';
 
 @Injectable()
 export class UserService {
+  private readonly logger = new Logger(UserService.name);
+
   constructor(private githubService: GithubService) {}
 
   async getFollowersAndFollowing(username: string) {
-    return this.githubService.getUserFollowersAndFollowing(username);
+    try {
+      return await this.githubService.getUserFollowersAndFollowing(username);
+    } catch (error) {
+      this.logger.error(
+        'Error fetching followers and following:',
+        error.response ? error.response.data : error.message,
+      );
+      throw new InternalServerErrorException('Internal server error');
+    }
   }
 
   async batchFollowersAndFollowing(
@@ -37,6 +51,14 @@ export class UserService {
   }
 
   async getUserProfile(username: string) {
-    return this.githubService.getPublicUserProfile(username);
+    try {
+      return await this.githubService.getPublicUserProfile(username);
+    } catch (error) {
+      this.logger.error(
+        'Error fetching user profile:',
+        error.response ? error.response.data : error.message,
+      );
+      throw new InternalServerErrorException('Failed to fetch user profile');
+    }
   }
 }

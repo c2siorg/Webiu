@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
+import { RouterTestingModule } from '@angular/router/testing';
 import { FormsModule } from '@angular/forms';
 import { of, throwError } from 'rxjs';
 import { ToastrService } from 'ngx-toastr';
@@ -15,19 +16,13 @@ describe('AdminComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [FormsModule, AdminComponent],
+      imports: [FormsModule, RouterTestingModule, AdminComponent],
       providers: [
         {
           provide: AuthService,
           useValue: {
             checkSession: jasmine.createSpy().and.returnValue(of({ authenticated: false })),
             login: jasmine.createSpy().and.returnValue(of({ success: true })),
-          },
-        },
-        {
-          provide: Router,
-          useValue: {
-            navigate: jasmine.createSpy(),
           },
         },
         {
@@ -44,6 +39,7 @@ describe('AdminComponent', () => {
     component = fixture.componentInstance;
     authService = TestBed.inject(AuthService);
     router = TestBed.inject(Router);
+    spyOn(router, 'navigate');
     toastr = TestBed.inject(ToastrService);
     fixture.detectChanges();
   });

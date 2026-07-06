@@ -3,7 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Media, socialMedia } from '../../common/data/media';
 import { Contributor } from '../../common/data/contributor';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { RouterModule } from '@angular/router';
 import { CommunityMascotComponent } from '../../components/community-mascot/community-mascot.component';
@@ -15,7 +15,6 @@ import { RevealOnScrollDirective } from '../../shared/reveal-on-scroll.directive
   standalone: true,
   imports: [
     CommonModule,
-    HttpClientModule,
     RouterModule,
     CommunityMascotComponent,
     RevealOnScrollDirective,

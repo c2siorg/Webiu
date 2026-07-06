@@ -3,19 +3,20 @@ import {
   ElementRef,
   HostListener,
   OnInit,
-  OnDestroy,
   ViewChild,
   inject,
   PLATFORM_ID,
+  DestroyRef,
 } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ProjectCacheService } from '../../services/project-cache.service';
 import { Project } from '../../page/projects/project.model';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { SearchService } from '../../services/search.service';
-import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/data/language-colors';
+import { getLanguageColor } from '../../common/utils/language-colors';
+import { Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-spotlight-search',
@@ -245,7 +246,7 @@ import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/data/langu
     `,
   ],
 })
-export class SpotlightSearchComponent implements OnInit, OnDestroy {
+export class SpotlightSearchComponent implements OnInit {
   @ViewChild('searchInput') searchInputRef!: ElementRef<HTMLInputElement>;
 
   isOpen = false;
@@ -253,29 +254,30 @@ export class SpotlightSearchComponent implements OnInit, OnDestroy {
   results: Project[] = [];
   selectedIndex = 0;
   private searchSubject = new Subject<string>();
-  private searchSubscription?: Subscription;
-  private toggleSubscription?: Subscription;
   private isBrowser: boolean;
 
   private projectService = inject(ProjectCacheService);
   private searchService = inject(SearchService);
   private router = inject(Router);
   private platformId = inject(PLATFORM_ID);
+  private destroyRef = inject(DestroyRef);
 
   constructor() {
     this.isBrowser = isPlatformBrowser(this.platformId);
   }
 
   ngOnInit(): void {
-    this.toggleSubscription = this.searchService.isOpen$.subscribe((open) => {
-      if (open) {
-        this.openSearch();
-      } else {
-        this.closeSearch();
-      }
-    });
+    this.searchService.isOpen$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((open) => {
+        if (open) {
+          this.openSearch();
+        } else {
+          this.closeSearch();
+        }
+      });
 
-    this.searchSubscription = this.searchSubject
+    this.searchSubject
       .pipe(
         debounceTime(200),
         distinctUntilChanged(),
@@ -284,21 +286,13 @@ export class SpotlightSearchComponent implements OnInit, OnDestroy {
             return [ { repositories: [], total: 0 } ];
           }
           return this.projectService.searchProjects(q, 1, 6);
-        })
+        }),
+        takeUntilDestroyed(this.destroyRef)
       )
       .subscribe((res) => {
         this.results = res.repositories || [];
         this.selectedIndex = 0;
       });
-  }
-
-  ngOnDestroy(): void {
-    if (this.searchSubscription) {
-      this.searchSubscription.unsubscribe();
-    }
-    if (this.toggleSubscription) {
-      this.toggleSubscription.unsubscribe();
-    }
   }
 
   @HostListener('document:keydown', ['$event'])
@@ -380,7 +374,5 @@ export class SpotlightSearchComponent implements OnInit, OnDestroy {
     this.router.navigate(['/project', project.name]);
   }
 
-  getLanguageColor(language: string): string {
-    return LANGUAGE_COLORS[language] ?? DEFAULT_LANGUAGE_COLOR;
-  }
+  getLanguageColor = getLanguageColor;
 }

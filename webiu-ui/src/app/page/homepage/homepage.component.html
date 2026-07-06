@@ -4,16 +4,16 @@
   <section class="hero-section">
     <div class="hero-bg-grid" appParallax [speed]="0.1"></div>
 
-    <!-- Custom 3D Three.js Noise Background that overlaps the typography -->
+    <!-- Custom 3D Three.js Noise Background — loads immediately with hero -->
     <app-hero-noise-background class="hero-3d-core" appParallax [speed]="0.4" [mouseFactor]="15"></app-hero-noise-background>
 
     <div class="hero-container hero-container--centered" appParallax [speed]="0.2">
-      <div class="hero-eyebrow" appRevealOnScroll [revealDelay]="100" direction="center">
+      <div class="hero-eyebrow" appRevealOnScroll [immediate]="true" direction="center">
         <span class="eyebrow-dot"></span>
         Open Source Intelligence Platform
       </div>
 
-      <h1 class="hero-title" appRevealOnScroll [revealDelay]="200" direction="center">
+      <h1 class="hero-title" appRevealOnScroll [immediate]="true" direction="center">
         <div class="hero-title-row">
           <span class="hero-word hero-word--1">CEYLON</span>
           <span class="hero-word hero-word--2">COMPUTER</span>
@@ -24,16 +24,15 @@
         </div>
         <span class="hero-handwritten-note">
           <svg class="handwritten-arrow" width="34" height="24" viewBox="0 0 34 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M1 23C8.5 19 18.5 10 27 1M27 1H17M27 1V9" stroke="var(--accent-lime)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M1 23C8.5 19 18.5 10 27 1M27 1H17M27 1V9" stroke="var(--arrow-stroke-color)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
           Open Science Lab
         </span>
       </h1>
 
-      <p class="hero-description" appRevealOnScroll [revealDelay]="300" direction="center">{{ homepageData.hero.description }}</p>
+      <p class="hero-description" appRevealOnScroll [immediate]="true" direction="center">{{ homepageData.hero.description }}</p>
       
-      <!-- Premium Hero Search Trigger -->
-      <div class="hero-search-trigger" (click)="triggerSearch($event)" tabindex="0" (keydown.enter)="triggerSearch($event)" appRevealOnScroll [revealDelay]="400" direction="center">
+      <div class="hero-search-trigger" (click)="triggerSearch($event)" tabindex="0" (keydown.enter)="triggerSearch($event)" role="button" aria-label="Search projects" appRevealOnScroll [immediate]="true" direction="center">
         <div class="hero-search-trigger-content">
           <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8"></circle>
@@ -46,7 +45,7 @@
         </div>
       </div>
 
-      <div class="hero-cta" appRevealOnScroll [revealDelay]="500" direction="center">
+      <div class="hero-cta" appRevealOnScroll [immediate]="true" direction="center">
         <a [routerLink]="homepageData.hero.primaryCTA.link" class="btn-primary-hero" id="hero-cta-primary">
           {{ homepageData.hero.primaryCTA.text }}
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -57,7 +56,7 @@
       </div>
 
       <!-- Live Metrics Row -->
-      <div class="hero-metrics" appRevealOnScroll [revealDelay]="600" direction="center">
+      <div class="hero-metrics" appRevealOnScroll [immediate]="true" direction="center">
         @for (stat of homepageData.stats; track stat.label) {
           <div class="hero-metric">
             <span class="hero-metric-value" [appCountUp]="stat.value" [duration]="2.5">{{ stat.value }}</span>
@@ -194,7 +193,7 @@
                 <span class="pub-authors">{{ pub.description }}</span>
               </div>
             </div>
-            <a [href]="pub.link" target="_blank" class="pub-arrow" rel="noopener noreferrer" aria-label="Open publication">→</a>
+            <a [href]="pub.link" target="_blank" class="pub-arrow" rel="noopener noreferrer" aria-label="Open publication"><span aria-hidden="true">→</span></a>
           </div>
         }
       </div>

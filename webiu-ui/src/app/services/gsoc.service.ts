@@ -111,7 +111,7 @@ export class GsocService {
     );
   }
 
-  createIdea(dto: any): Observable<{ success: boolean; idea: GsocIdea; message?: string }> {
+  createIdea(dto: Partial<GsocIdea> & { mentorIds?: string[] }): Observable<{ success: boolean; idea: GsocIdea; message?: string }> {
     return this.http.post<{ success: boolean; idea: GsocIdea; message?: string }>(
       `${this.adminUrl}/ideas`,
       dto,
@@ -119,7 +119,7 @@ export class GsocService {
     );
   }
 
-  updateIdea(id: string, dto: any): Observable<{ success: boolean; idea: GsocIdea; message?: string }> {
+  updateIdea(id: string, dto: Partial<GsocIdea> & { mentorIds?: string[] }): Observable<{ success: boolean; idea: GsocIdea; message?: string }> {
     return this.http.patch<{ success: boolean; idea: GsocIdea; message?: string }>(
       `${this.adminUrl}/ideas/${id}`,
       dto,

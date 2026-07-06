@@ -1,27 +1,37 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AuditService } from '../../services/audit.service';
-import { AuthService } from '../../services/auth.service';
-import { ThemeService } from '../../services/theme.service';
-import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { AdminBaseComponent } from '../admin-base/admin-base.component';
+
+export interface AuditLogEntry {
+  id: string;
+  userId: string;
+  username: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  oldValue: string | null;
+  newValue: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  createdAt: string | Date;
+  admin?: { username: string };
+  metadata?: any;
+}
 
 @Component({
   selector: 'app-admin-audit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, FormsModule],
   templateUrl: './admin-audit.component.html',
   styleUrls: ['./admin-audit.component.scss'],
 })
-export class AdminAuditComponent implements OnInit {
+export class AdminAuditComponent extends AdminBaseComponent implements OnInit {
   private auditService = inject(AuditService);
-  private authService = inject(AuthService);
-  private themeService = inject(ThemeService);
-  private router = inject(Router);
-  private toastr = inject(ToastrService);
 
-  logs: any[] = [];
+  logs: AuditLogEntry[] = [];
   total = 0;
   page = 1;
   limit = 10;
@@ -34,10 +44,8 @@ export class AdminAuditComponent implements OnInit {
   endDate = '';
 
   // Selected Log for Details Modal
-  selectedLog: any = null;
+  selectedLog: AuditLogEntry | null = null;
   showModal = false;
-
-  isSunVisible = true;
   isLoading = false;
 
   actionOptions = [
@@ -67,8 +75,8 @@ export class AdminAuditComponent implements OnInit {
     'profile'
   ];
 
-  ngOnInit(): void {
-    this.isSunVisible = !this.themeService.isDarkMode();
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.loadLogs();
   }
 
@@ -83,23 +91,25 @@ export class AdminAuditComponent implements OnInit {
       endDate: this.endDate || undefined
     };
 
-    this.auditService.getAuditLogs(filters).subscribe({
-      next: (res) => {
-        if (res?.success) {
-          this.logs = res.logs;
-          this.total = res.total;
-          this.page = res.page;
-          this.limit = res.limit;
-          this.totalPages = res.totalPages;
+    this.auditService.getAuditLogs(filters)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (res?.success) {
+            this.logs = res.logs;
+            this.total = res.total;
+            this.page = res.page;
+            this.limit = res.limit;
+            this.totalPages = res.totalPages;
+          }
+          this.isLoading = false;
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Failed to load audit logs';
+          this.toastr.error(errorMsg);
+          this.isLoading = false;
         }
-        this.isLoading = false;
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to load audit logs';
-        this.toastr.error(errorMsg);
-        this.isLoading = false;
-      }
-    });
+      });
   }
 
   applyFilters(): void {
@@ -123,18 +133,20 @@ export class AdminAuditComponent implements OnInit {
   }
 
   viewDetails(logId: string): void {
-    this.auditService.getAuditLogDetails(logId).subscribe({
-      next: (res) => {
-        if (res?.success) {
-          this.selectedLog = res.log;
-          this.showModal = true;
+    this.auditService.getAuditLogDetails(logId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          if (res?.success) {
+            this.selectedLog = res.log;
+            this.showModal = true;
+          }
+        },
+        error: (err) => {
+          const errorMsg = err.error?.message || 'Failed to load log details';
+          this.toastr.error(errorMsg);
         }
-      },
-      error: (err) => {
-        const errorMsg = err.error?.message || 'Failed to load log details';
-        this.toastr.error(errorMsg);
-      }
-    });
+      });
   }
 
   closeModal(): void {
@@ -148,30 +160,55 @@ export class AdminAuditComponent implements OnInit {
     }
   }
 
-  onLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.toastr.success('Logged out successfully');
-        this.router.navigate(['/admin']);
-      },
-      error: () => {
-        this.toastr.error('Logout failed, please try again');
-      },
-    });
-  }
-
-  toggleMode(): void {
-    this.themeService.toggleDarkMode();
-    this.isSunVisible = !this.themeService.isDarkMode();
-  }
-
-  formatJson(value: string | null): string {
-    if (!value) return 'N/A';
+   
+  formatJson(value: any): string {
+    if (value === null || value === undefined) return 'N/A';
+    if (typeof value === 'object') return JSON.stringify(value, null, 2);
+    if (typeof value !== 'string') return String(value);
     try {
       const parsed = JSON.parse(value);
       return JSON.stringify(parsed, null, 2);
     } catch {
       return value;
     }
+  }
+
+  parseJsonEntries(value: string | null): { key: string; display: string; isArray: boolean; isNull: boolean }[] {
+    if (!value) return [];
+    try {
+      const parsed = JSON.parse(value);
+      if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return [];
+      return Object.entries(parsed).map(([key, val]) => ({
+        key,
+        display: Array.isArray(val)
+          ? (val as unknown[]).join(', ') || '—'
+          : val === null || val === undefined
+            ? '—'
+            : String(val),
+        isArray: Array.isArray(val),
+        isNull: val === null || val === undefined
+      }));
+    } catch {
+      return [];
+    }
+  }
+
+  isValidJson(value: string | null): boolean {
+    if (!value) return false;
+    try {
+      const parsed = JSON.parse(value);
+      return typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed);
+    } catch {
+      return false;
+    }
+  }
+
+  getActionColor(action: string): string {
+    if (action.includes('CREATED')) return 'created';
+    if (action.includes('DELETED') || action.includes('REMOVED')) return 'deleted';
+    if (action.includes('UPDATED') || action.includes('CHANGED')) return 'updated';
+    if (action.includes('LOGIN') || action.includes('LOGOUT')) return 'auth';
+    if (action.includes('PUBLISHED') || action.includes('ARCHIVED')) return 'status';
+    return 'default';
   }
 }

@@ -1,52 +1,4 @@
 <div class="admin-panel-container">
-  <!-- Top Navigation Bar -->
-  <header class="admin-navbar">
-    <div class="navbar-left">
-      <img src="../../../assets/c2silogo-dark_no_bg.png" alt="C2SI Logo" class="brand-logo" />
-      <span class="brand-name">WebiU Admin</span>
-    </div>
-    
-    <div class="navbar-center" role="tablist">
-      <a routerLink="/admin/dashboard" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-chart-pie"></i> Dashboard
-      </a>
-      <a routerLink="/admin/settings" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-gears"></i> Settings
-      </a>
-      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'programs'}" class="nav-tab" routerLinkActive="active" role="tab">
-        <i class="fa-solid fa-calendar-days"></i> GSoC Years
-      </a>
-      <a [routerLink]="['/admin/ideas']" [queryParams]="{tab: 'ideas'}" class="nav-tab" routerLinkActive="active" role="tab">
-        <i class="fa-solid fa-lightbulb"></i> Ideas
-      </a>
-      <a routerLink="/admin/contributors" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-users-gear"></i> Contributors
-      </a>
-      <a routerLink="/admin/repositories" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-database"></i> Repositories
-      </a>
-      <a routerLink="/admin/profile" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-user-gear"></i> Profile
-      </a>
-      <a routerLink="/admin/audit" class="nav-tab" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" role="tab">
-        <i class="fa-solid fa-list-check"></i> Audit Logs
-      </a>
-    </div>
-    
-    <div class="navbar-right">
-      <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
-        <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
-      </button>
-      <a routerLink="/admin/profile" class="user-badge" title="Manage Profile">
-        <i class="fa-solid fa-user-shield"></i>
-        <span>Administrator</span>
-      </a>
-      <button (click)="onLogout()" class="btn-navbar-logout" title="Log out of panel">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </button>
-    </div>
-  </header>
-
   <!-- Main Content Area -->
   <main class="admin-main-wrapper fade-in-up">
     
@@ -172,30 +124,34 @@
                   <i class="fa-solid fa-rotate-right status-icon" [class.spin-icon]="isSyncing"></i>
                   <h3>Synchronization Status</h3>
                 </div>
-                <span class="health-badge" [class.healthy]="dashboardData?.syncHealth === 'Healthy'" [class.warning]="dashboardData?.syncHealth !== 'Healthy'">
-                  {{ dashboardData?.syncHealth }}
-                </span>
+                @if (dashboardData) {
+  <span class="health-badge" [class.healthy]="dashboardData.syncHealth === 'Healthy'" [class.warning]="dashboardData.syncHealth !== 'Healthy'">
+    {{ dashboardData.syncHealth }}
+  </span>
+}
               </div>
-              <div class="card-body">
-                <div class="sync-metric-item">
-                  <span class="metric-label">Last Webhook Event</span>
-                  <span class="metric-value">
-                    {{ dashboardData?.lastWebhookAt ? (dashboardData?.lastWebhookAt | date:'medium') : 'No webhook events yet' }}
-                  </span>
-                </div>
-                <div class="sync-metric-item">
-                  <span class="metric-label">Last Reconciliation</span>
-                  <span class="metric-value">
-                    {{ dashboardData?.lastReconciliationAt ? (dashboardData?.lastReconciliationAt | date:'medium') : 'No reconciliation run yet' }}
-                  </span>
-                </div>
-                <div class="sync-metric-item">
-                  <span class="metric-label">Last General Sync</span>
-                  <span class="metric-value">
-                    {{ dashboardData?.lastRepositorySync ? (dashboardData?.lastRepositorySync | date:'medium') : 'Pending initial sync' }}
-                  </span>
-                </div>
-              </div>
+              @if (dashboardData) {
+  <div class="card-body">
+    <div class="sync-metric-item">
+      <span class="metric-label">Last Webhook Event</span>
+      <span class="metric-value">
+        {{ dashboardData.lastWebhookAt ? (dashboardData.lastWebhookAt | date:'medium') : 'No webhook events yet' }}
+      </span>
+    </div>
+    <div class="sync-metric-item">
+      <span class="metric-label">Last Reconciliation</span>
+      <span class="metric-value">
+        {{ dashboardData.lastReconciliationAt ? (dashboardData.lastReconciliationAt | date:'medium') : 'No reconciliation run yet' }}
+      </span>
+    </div>
+    <div class="sync-metric-item">
+      <span class="metric-label">Last General Sync</span>
+      <span class="metric-value">
+        {{ dashboardData.lastRepositorySync ? (dashboardData.lastRepositorySync | date:'medium') : 'Pending initial sync' }}
+      </span>
+    </div>
+  </div>
+}
             </div>
 
             <!-- Platform Settings Status Widget -->
@@ -243,35 +199,36 @@
                 </a>
               </div>
               <div class="card-body">
-                @if (!dashboardData?.recentAuditEvents?.length) {
-                  <div class="empty-activity">
-                    <i class="fa-solid fa-inbox empty-icon"></i>
-                    <p>No recent administrative activities recorded.</p>
-                  </div>
-                }
-                
-                @if (dashboardData?.recentAuditEvents?.length) {
-                  <ul class="activity-timeline">
-                    @for (log of dashboardData.recentAuditEvents; track log.id) {
-                      <li class="activity-item">
-                        <div class="activity-marker"></div>
-                        <div class="activity-details">
-                          <div class="activity-header">
-                            <span class="activity-admin">
-                              <i class="fa-solid fa-circle-user"></i> {{ log.admin?.username || 'System' }}
-                            </span>
-                            <span class="activity-time">{{ log.createdAt | date:'shortTime' }}</span>
-                          </div>
-                          <p class="activity-text">
-                            Executed <strong>{{ log.action | uppercase }}</strong> on 
-                            <span class="entity-badge">{{ log.entityType }}</span>
-                          </p>
-                          <span class="activity-date-detail">{{ log.createdAt | date:'mediumDate' }}</span>
-                        </div>
-                      </li>
-                    }
-                  </ul>
-                }
+                @if (dashboardData) {
+  @if (!dashboardData.recentAuditEvents?.length) {
+    <div class="empty-activity">
+      <i class="fa-solid fa-inbox empty-icon"></i>
+      <p>No recent administrative activities recorded.</p>
+    </div>
+  }
+  @if (dashboardData.recentAuditEvents?.length) {
+    <ul class="activity-timeline">
+      @for (log of dashboardData.recentAuditEvents || []; track log.id) {
+        <li class="activity-item">
+          <div class="activity-marker"></div>
+          <div class="activity-details">
+            <div class="activity-header">
+              <span class="activity-admin">
+                <i class="fa-solid fa-circle-user"></i> {{ log.admin?.username || 'System' }}
+              </span>
+              <span class="activity-time">{{ log.createdAt | date:'shortTime' }}</span>
+            </div>
+            <p class="activity-text">
+              Executed <strong>{{ log.action | uppercase }}</strong> on 
+              <span class="entity-badge">{{ log.entityType }}</span>
+            </p>
+            <span class="activity-date-detail">{{ log.createdAt | date:'mediumDate' }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+}
               </div>
             </div>
           </div>

@@ -6,11 +6,28 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { GithubService } from '../github/github.service';
+import { GithubGraphqlService } from '../github/github.graphql.service';
 import { CacheService } from '../common/cache.service';
 import { AxiosError } from 'axios';
 
 const CACHE_TTL = 300; // 5 minutes
 const INSIGHTS_CACHE_TTL = 3600; // 1 hour
+
+export interface GithubRepo {
+  name: string;
+  description?: string;
+  html_url: string;
+  language?: string;
+  topics?: string[];
+  created_at?: string | Date;
+  updated_at?: string | Date;
+  stargazers_count?: number;
+  forks_count?: number;
+  size?: number;
+  license?: { spdx_id: string } | null;
+  open_issues_count?: number;
+  pull_requests?: number;
+}
 
 // Badge thresholds for project insights
 const MATURITY_MIN_STARS = 50;
@@ -28,6 +45,7 @@ export class ProjectService {
 
   constructor(
     private githubService: GithubService,
+    private githubGraphqlService: GithubGraphqlService,
     private cacheService: CacheService,
   ) {}
 
@@ -397,23 +415,24 @@ export class ProjectService {
     }
   }
 
-  private async enrichWithPullCounts(repos: any[]): Promise<any[]> {
-    const BATCH_SIZE = 10;
-    const enriched: any[] = [];
-    for (let i = 0; i < repos.length; i += BATCH_SIZE) {
-      const batch = repos.slice(i, i + BATCH_SIZE);
-      const batchResults = await Promise.all(
-        batch.map(async (repo) => {
-          try {
-            const count = await this.githubService.getRepoPullCount(repo.name);
-            return { ...repo, pull_requests: count };
-          } catch {
-            return { ...repo, pull_requests: 0 };
-          }
-        }),
+  private async enrichWithPullCounts(
+    repos: GithubRepo[],
+  ): Promise<GithubRepo[]> {
+    if (repos.length === 0) return [];
+
+    const repoNames = repos.map((r) => r.name);
+    try {
+      const countsMap =
+        await this.githubGraphqlService.getBulkPullCounts(repoNames);
+      return repos.map((repo) => ({
+        ...repo,
+        pull_requests: countsMap[repo.name] ?? 0,
+      }));
+    } catch (error: any) {
+      this.logger.error(
+        `Error enriching with pull counts in bulk: ${error.message}`,
       );
-      enriched.push(...batchResults);
+      return repos.map((repo) => ({ ...repo, pull_requests: 0 }));
     }
-    return enriched;
   }
 }

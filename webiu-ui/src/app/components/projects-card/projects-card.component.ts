@@ -1,15 +1,15 @@
 import { Component, Input, OnInit, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
-import { HttpClientModule, HttpClient } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
-import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/data/language-colors';
+import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/utils/language-colors';
 
 @Component({
   selector: 'app-projects-card',
   standalone: true,
-  imports: [HttpClientModule, CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './projects-card.component.html',
   styleUrls: ['./projects-card.component.scss'],
 })

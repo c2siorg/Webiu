@@ -77,8 +77,8 @@
             [contributions]="profile.contributions"
             [avatar_url]="profile.avatar_url"
             [repos]="profile.repos"
-            [followers]="profile.followers"
-            [following]="profile.following"
+            [followers]="profile.followers ?? 0"
+            [following]="profile.following ?? 0"
             (usernameClick)="onUsernameClick($event)"
             appRevealOnScroll [direction]="i % 3 === 0 ? 'left' : (i % 3 === 2 ? 'right' : 'center')" [revealDelay]="(i % 3) * 120"
           ></app-profile-card>
@@ -92,7 +92,7 @@
       </p>
     }
 
-    @if (!isLoading && displayProfiles && displayProfiles.length > 0) {
+    @if (!isLoading && displayProfiles && displayProfiles.length > 0 && totalPages > 1) {
       <div class="pagination-container">
         <div class="pagination">
           <button

@@ -1,0 +1,35 @@
+<div class="admin-layout" [class.sidebar-collapsed]="!sidebarOpened" [class.mobile-mode]="!isDesktop">
+  <app-admin-sidebar
+    [opened]="sidebarOpened"
+    [isOverlay]="!isDesktop"
+    (closeRequested)="toggleSidebar()">
+  </app-admin-sidebar>
+  
+  <div class="admin-main-content">
+    <header class="admin-top-header">
+      <div class="header-left">
+        <button class="toggle-btn" (click)="toggleSidebar()" aria-label="Toggle Navigation">
+          <i class="fa-solid" [class.fa-bars]="!sidebarOpened" [class.fa-xmark]="sidebarOpened && !isDesktop"></i>
+        </button>
+        <span class="header-title">Admin Operations Panel</span>
+      </div>
+      
+      <div class="header-right">
+        <button (click)="toggleMode()" class="btn-theme-toggle" [title]="isSunVisible ? 'Switch to Dark Mode' : 'Switch to Light Mode'">
+          <i class="fa-solid" [class.fa-moon]="isSunVisible" [class.fa-sun]="!isSunVisible"></i>
+        </button>
+        <a routerLink="/admin/profile" class="user-badge" title="Manage Profile">
+          <i class="fa-solid fa-user-shield"></i>
+          <span>Administrator</span>
+        </a>
+        <button (click)="onLogout()" class="btn-logout" title="Logout of panel">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </header>
+    
+    <main class="page-container">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

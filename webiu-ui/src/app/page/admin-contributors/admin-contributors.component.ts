@@ -1,14 +1,13 @@
 import { Component, OnInit, inject, ViewChild } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { BaseChartDirective } from 'ng2-charts';
 import { Chart, registerables, ChartConfiguration } from 'chart.js';
-import { AuthService } from '../../services/auth.service';
 import { SettingsService } from '../../services/settings.service';
-import { ThemeService } from '../../services/theme.service';
-import { ToastrService } from 'ngx-toastr';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CountUpDirective } from '../../shared/count-up.directive';
+import { AdminBaseComponent } from '../admin-base/admin-base.component';
 
 // Register Chart.js components
 Chart.register(...registerables);
@@ -27,12 +26,8 @@ Chart.register(...registerables);
   templateUrl: './admin-contributors.component.html',
   styleUrls: ['./admin-contributors.component.scss'],
 })
-export class AdminContributorsComponent implements OnInit {
-  private authService = inject(AuthService);
+export class AdminContributorsComponent extends AdminBaseComponent implements OnInit {
   private settingsService = inject(SettingsService);
-  private themeService = inject(ThemeService);
-  private router = inject(Router);
-  private toastr = inject(ToastrService);
 
   @ViewChild(BaseChartDirective) chartDirective?: BaseChartDirective;
 
@@ -41,7 +36,6 @@ export class AdminContributorsComponent implements OnInit {
 
   isLoading = true;
   hasError = false;
-  isSunVisible = true;
 
   // Expose Math to template
   protected readonly Math = Math;
@@ -60,26 +54,28 @@ export class AdminContributorsComponent implements OnInit {
   public distChartData?: ChartConfiguration<'bar'>['data'];
   public distChartOptions?: ChartConfiguration<'bar'>['options'];
 
-  ngOnInit(): void {
-    this.isSunVisible = !this.themeService.isDarkMode();
+  override ngOnInit(): void {
+    super.ngOnInit();
     this.loadAnalyticsData();
   }
 
   loadAnalyticsData(): void {
     this.isLoading = true;
     this.hasError = false;
-    this.settingsService.getContributorAnalytics().subscribe({
-      next: (data) => {
-        this.analyticsData = data;
-        this.initCharts(data);
-        this.isLoading = false;
-      },
-      error: () => {
-        this.toastr.error('Failed to load contributor intelligence analytics.');
-        this.isLoading = false;
-        this.hasError = true;
-      },
-    });
+    this.settingsService.getContributorAnalytics()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (data) => {
+          this.analyticsData = data;
+          this.initCharts(data);
+          this.isLoading = false;
+        },
+        error: () => {
+          this.toastr.error('Failed to load contributor intelligence analytics.');
+          this.isLoading = false;
+          this.hasError = true;
+        },
+      });
   }
 
   initCharts(data: any): void {
@@ -106,36 +102,41 @@ export class AdminContributorsComponent implements OnInit {
           data: repoCounts,
           backgroundColor: purpleColor,
           borderColor: purpleBorderColor,
-          borderWidth: 1,
+          borderWidth: 1.5,
           borderRadius: 4,
         },
       ],
     };
 
     this.repoParticipationChartOptions = {
-      indexAxis: 'y',
       responsive: true,
       maintainAspectRatio: false,
+      indexAxis: 'y',
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
       },
       scales: {
         x: {
-          ticks: { color: mutedText, stepSize: 1 },
           grid: { color: gridColor },
+          ticks: { color: mutedText, font: { family: 'Geist', size: 11 } },
         },
         y: {
-          ticks: { color: primaryText },
           grid: { display: false },
+          ticks: { color: primaryText, font: { family: 'Geist', size: 12, weight: 'bold' } },
         },
       },
     };
 
-    // 2. Contribution Distribution Vertical Chart
-    const distLabels = (data.contributionDistribution || []).map((d: any) => d.range);
-    const distCounts = (data.contributionDistribution || []).map((d: any) => d.count);
+    // 2. Contribution Score Distribution Bar Chart
+    const dist = data.distribution || {};
+    const distLabels = ['1-5', '6-10', '11-50', '51-100', '100+'];
+    const distCounts = [
+      dist['1_5'] || 0,
+      dist['6_10'] || 0,
+      dist['11_50'] || 0,
+      dist['51_100'] || 0,
+      dist['100_plus'] || 0,
+    ];
 
     this.distChartData = {
       labels: distLabels,
@@ -145,7 +146,7 @@ export class AdminContributorsComponent implements OnInit {
           data: distCounts,
           backgroundColor: limeColor,
           borderColor: limeBorderColor,
-          borderWidth: 1,
+          borderWidth: 1.5,
           borderRadius: 4,
         },
       ],
@@ -155,148 +156,143 @@ export class AdminContributorsComponent implements OnInit {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false,
-        },
+        legend: { display: false },
       },
       scales: {
         x: {
-          ticks: { color: primaryText },
           grid: { display: false },
+          ticks: { color: primaryText, font: { family: 'Geist', size: 12 } },
         },
         y: {
-          ticks: { color: mutedText, stepSize: 1 },
           grid: { color: gridColor },
+          ticks: { color: mutedText, font: { family: 'Geist', size: 11 } },
         },
       },
     };
   }
 
-  updateChartConfigs(isDark: boolean): void {
-    if (!this.analyticsData) return;
+  // --- Contributor Explorer logic ---
 
-    const primaryText = isDark ? '#f8fafc' : '#0f172a';
-    const mutedText = isDark ? '#94a3b8' : '#64748b';
-    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+  get filteredContributors(): any[] {
+    if (!this.analyticsData?.explorer) return [];
 
-    const purpleColor = isDark ? 'rgba(168, 85, 247, 0.65)' : 'rgba(124, 58, 237, 0.65)';
-    const purpleBorderColor = isDark ? '#a855f7' : '#7c3aed';
-
-    const limeColor = isDark ? 'rgba(132, 204, 22, 0.65)' : 'rgba(101, 163, 13, 0.65)';
-    const limeBorderColor = isDark ? '#84cc16' : '#65a30d';
-
-    if (this.repoParticipationChartData?.datasets?.[0]) {
-      this.repoParticipationChartData.datasets[0].backgroundColor = purpleColor;
-      this.repoParticipationChartData.datasets[0].borderColor = purpleBorderColor;
-    }
-    if (this.repoParticipationChartOptions?.scales) {
-      if (this.repoParticipationChartOptions.scales['x']) {
-        this.repoParticipationChartOptions.scales['x'].ticks = { color: mutedText };
-        this.repoParticipationChartOptions.scales['x'].grid = { color: gridColor };
-      }
-      if (this.repoParticipationChartOptions.scales['y']) {
-        this.repoParticipationChartOptions.scales['y'].ticks = { color: primaryText };
-      }
-    }
-
-    if (this.distChartData?.datasets?.[0]) {
-      this.distChartData.datasets[0].backgroundColor = limeColor;
-      this.distChartData.datasets[0].borderColor = limeBorderColor;
-    }
-    if (this.distChartOptions?.scales) {
-      if (this.distChartOptions.scales['x']) {
-        this.distChartOptions.scales['x'].ticks = { color: primaryText };
-      }
-      if (this.distChartOptions.scales['y']) {
-        this.distChartOptions.scales['y'].ticks = { color: mutedText };
-        this.distChartOptions.scales['y'].grid = { color: gridColor };
-      }
-    }
-
-    // Force chart components update
-    if (this.chartDirective) {
-      this.chartDirective.update();
-    }
-  }
-
-  // --- Explorer Filter, Sorting & Pagination ---
-
-  getFilteredExplorerList(): any[] {
-    if (!this.analyticsData || !this.analyticsData.explorer) return [];
-
-    let list = [...this.analyticsData.explorer];
-
-    // 1. Search Filter
-    if (this.searchText.trim()) {
-      const searchLower = this.searchText.toLowerCase().trim();
-      list = list.filter(
-        (c) =>
-          c.username.toLowerCase().includes(searchLower) ||
-          (c.repos && c.repos.some((r: string) => r.toLowerCase().includes(searchLower)))
+    const search = this.searchText.toLowerCase().trim();
+    const list = this.analyticsData.explorer.filter((c: any) => {
+      return (
+        (c.username || '').toLowerCase().includes(search) ||
+        (c.login || '').toLowerCase().includes(search)
       );
-    }
+    });
 
-    // 2. Sorting
-    list.sort((a, b) => {
-      let valA: any = a[this.sortKey];
-      let valB: any = b[this.sortKey];
+    // Sorting
+    list.sort((a: any, b: any) => {
+      let valA = a[this.sortKey];
+      let valB = b[this.sortKey];
 
-      // Handle username case-insensitive
-      if (typeof valA === 'string') valA = valA.toLowerCase();
-      if (typeof valB === 'string') valB = valB.toLowerCase();
+      // Handle cases where property might be undefined
+      if (valA === undefined) valA = 0;
+      if (valB === undefined) valB = 0;
 
-      if (valA < valB) return this.sortAscending ? -1 : 1;
-      if (valA > valB) return this.sortAscending ? 1 : -1;
-      return 0;
+      if (typeof valA === 'string') {
+        return this.sortAscending
+          ? valA.localeCompare(valB)
+          : valB.localeCompare(valA);
+      } else {
+        return this.sortAscending ? valA - valB : valB - valA;
+      }
     });
 
     return list;
   }
 
-  getPaginatedExplorerList(): any[] {
-    const list = this.getFilteredExplorerList();
+  get totalExplorerPages(): number {
+    return Math.max(1, Math.ceil(this.filteredContributors.length / this.pageSize));
+  }
+
+  get paginatedContributors(): any[] {
+    const list = this.filteredContributors;
     const startIndex = (this.currentPage - 1) * this.pageSize;
     return list.slice(startIndex, startIndex + this.pageSize);
   }
 
-  getTotalPages(): number {
-    const count = this.getFilteredExplorerList().length;
-    return Math.ceil(count / this.pageSize) || 1;
-  }
-
-  setSort(key: string): void {
+  onSort(key: string): void {
     if (this.sortKey === key) {
       this.sortAscending = !this.sortAscending;
     } else {
       this.sortKey = key;
       this.sortAscending = true;
     }
-    this.currentPage = 1; // reset page on sort
+    this.currentPage = 1;
+  }
+
+  onSearchChange(): void {
+    this.currentPage = 1;
   }
 
   onPageChange(page: number): void {
-    if (page >= 1 && page <= this.getTotalPages()) {
-      this.currentPage = page;
+    if (page < 1 || page > this.totalExplorerPages) return;
+    this.currentPage = page;
+  }
+
+  private updateChartConfigs(isDark: boolean): void {
+    if (!this.analyticsData) return;
+
+    const primaryText = isDark ? '#f8fafc' : '#0f172a';
+    const mutedText = isDark ? '#94a3b8' : '#64748b';
+    const gridColor = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.08)';
+
+    const purpleBg = isDark ? 'rgba(168, 85, 247, 0.65)' : 'rgba(124, 58, 237, 0.65)';
+    const limeBg = isDark ? 'rgba(132, 204, 22, 0.65)' : 'rgba(101, 163, 13, 0.65)';
+
+    // Update options & data datasets
+    if (this.repoParticipationChartOptions?.scales?.['x']) {
+      this.repoParticipationChartOptions.scales['x'].grid = { color: gridColor };
+      this.repoParticipationChartOptions.scales['x'].ticks = { color: mutedText, font: { family: 'Geist', size: 11 } };
     }
+    if (this.repoParticipationChartOptions?.scales?.['y']) {
+      this.repoParticipationChartOptions.scales['y'].ticks = { color: primaryText, font: { family: 'Geist', size: 12, weight: 'bold' } };
+    }
+    if (this.repoParticipationChartData?.datasets?.[0]) {
+      this.repoParticipationChartData.datasets[0].backgroundColor = purpleBg;
+    }
+
+    if (this.distChartOptions?.scales?.['x']) {
+      this.distChartOptions.scales['x'].ticks = { color: primaryText, font: { family: 'Geist', size: 12 } };
+    }
+    if (this.distChartOptions?.scales?.['y']) {
+      this.distChartOptions.scales['y'].grid = { color: gridColor };
+      this.distChartOptions.scales['y'].ticks = { color: mutedText, font: { family: 'Geist', size: 11 } };
+    }
+    if (this.distChartData?.datasets?.[0]) {
+      this.distChartData.datasets[0].backgroundColor = limeBg;
+    }
+
+    // Force update chart directive if exists
+    if (this.chartDirective) {
+      this.chartDirective.update();
+    }
+  }
+
+  getFilteredExplorerList(): any[] {
+    return this.filteredContributors;
+  }
+
+  getPaginatedExplorerList(): any[] {
+    return this.paginatedContributors;
+  }
+
+  setSort(key: string): void {
+    this.onSort(key);
+  }
+
+  getTotalPages(): number {
+    return this.totalExplorerPages;
   }
 
   // --- Auth & Theme Toggle ---
 
-  toggleMode(): void {
-    this.themeService.toggleDarkMode();
-    this.isSunVisible = !this.themeService.isDarkMode();
+  override toggleMode(): void {
+    super.toggleMode();
     this.updateChartConfigs(this.themeService.isDarkMode());
-  }
-
-  onLogout(): void {
-    this.authService.logout().subscribe({
-      next: () => {
-        this.toastr.success('Logged out successfully');
-        this.router.navigate(['/admin']);
-      },
-      error: () => {
-        this.toastr.error('Logout failed, please try again');
-      },
-    });
   }
 }

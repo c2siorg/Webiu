@@ -1,14 +1,14 @@
 import { Directive, ElementRef, OnInit, OnDestroy, Input, inject, PLATFORM_ID, NgZone } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
-import { gsap } from 'gsap';
+import { loadGsap } from './gsap-loader';
 
 @Directive({
   selector: '[appParallax]',
   standalone: true,
 })
 export class ParallaxDirective implements OnInit, OnDestroy {
-  @Input() speed = 0.2; // scroll speed multiplier
-  @Input() mouseFactor = 0; // range in px for mouse parallax displacement
+  @Input() speed = 0.2;
+  @Input() mouseFactor = 0;
 
   private el = inject(ElementRef);
   private platformId = inject(PLATFORM_ID);
@@ -23,53 +23,66 @@ export class ParallaxDirective implements OnInit, OnDestroy {
     if (!isPlatformBrowser(this.platformId)) return;
 
     const nativeEl = this.el.nativeElement;
-
-    // Check prefers-reduced-motion
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (prefersReduced) return;
 
-    this.ngZone.runOutsideAngular(() => {
-      // 1. Scroll-based Parallax
-      if (this.speed !== 0) {
-        this.scrollListener = () => {
-          const scrollY = window.scrollY;
-          const targetY = (scrollY * this.speed) + this.currentMouseY;
+    void loadGsap().then((gsap) => {
+      this.ngZone.runOutsideAngular(() => {
+        if (this.speed !== 0) {
+          let ticking = false;
+          this.scrollListener = () => {
+            if (!ticking) {
+              window.requestAnimationFrame(() => {
+                const scrollY = window.scrollY;
+                const targetY = scrollY * this.speed + this.currentMouseY;
 
-          gsap.to(nativeEl, {
-            y: targetY,
-            duration: 0.1,
-            ease: 'none',
-            overwrite: 'auto',
-          });
-        };
-        window.addEventListener('scroll', this.scrollListener, { passive: true });
-      }
+                gsap.to(nativeEl, {
+                  y: targetY,
+                  duration: 0.1,
+                  ease: 'none',
+                  overwrite: 'auto',
+                });
+                ticking = false;
+              });
+              ticking = true;
+            }
+          };
+          window.addEventListener('scroll', this.scrollListener, { passive: true });
+        }
 
-      // 2. Mouse-based Parallax (Hero only)
-      if (this.mouseFactor > 0) {
-        this.mouseListener = (event: MouseEvent) => {
-          const { clientX, clientY } = event;
-          const width = window.innerWidth;
-          const height = window.innerHeight;
+        if (this.mouseFactor > 0) {
+          let mouseTicking = false;
+          this.mouseListener = (event: MouseEvent) => {
+            const clientX = event.clientX;
+            const clientY = event.clientY;
+            if (!mouseTicking) {
+              window.requestAnimationFrame(() => {
+                const width = window.innerWidth;
+                const height = window.innerHeight;
 
-          const normX = (clientX / width) - 0.5;
-          const normY = (clientY / height) - 0.5;
+                const normX = clientX / width - 0.5;
+                const normY = clientY / height - 0.5;
 
-          this.currentMouseX = -normX * this.mouseFactor;
-          this.currentMouseY = -normY * this.mouseFactor;
+                this.currentMouseX = -normX * this.mouseFactor;
+                this.currentMouseY = -normY * this.mouseFactor;
 
-          const scrollOffset = window.scrollY * this.speed;
+                const scrollOffset = window.scrollY * this.speed;
 
-          gsap.to(nativeEl, {
-            x: this.currentMouseX,
-            y: scrollOffset + this.currentMouseY,
-            duration: 0.8,
-            ease: 'power2.out',
-            overwrite: 'auto',
-          });
-        };
-        window.addEventListener('mousemove', this.mouseListener, { passive: true });
-      }
+                gsap.to(nativeEl, {
+                  x: this.currentMouseX,
+                  y: scrollOffset + this.currentMouseY,
+                  duration: 0.8,
+                  ease: 'power2.out',
+                  overwrite: 'auto',
+                });
+                mouseTicking = false;
+              });
+              mouseTicking = true;
+            }
+          };
+          window.addEventListener('mousemove', this.mouseListener, { passive: true });
+        }
+      });
     });
   }
 

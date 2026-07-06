@@ -1,0 +1,221 @@
+<div class="admin-panel-container">
+  <!-- Main Content Wrapper -->
+  <main class="admin-main-wrapper">
+    <section class="management-section">
+      <div class="section-header">
+        <div>
+          <h1>Opportunity Management</h1>
+          <p class="section-desc">Add, publish, close, and reorder career & contribution opportunities dynamically.</p>
+        </div>
+        <button (click)="openAddModal()" class="btn-add">
+          <i class="fa-solid fa-plus"></i> New Opportunity
+        </button>
+      </div>
+
+      <!-- Loading State -->
+      @if (isLoading) {
+        <div class="skeleton-wrapper">
+          <div class="skeleton-card tall" style="height: 200px;"></div>
+        </div>
+      }
+
+      <!-- Data Table -->
+      @if (!isLoading) {
+        <div class="data-table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Status</th>
+                <th>Opens At</th>
+                <th>Closes At</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (opp of opportunities; track opp.id; let idx = $index) {
+                <tr>
+                  <td>
+                    <div class="order-controls">
+                      <button (click)="moveOpportunity(idx, 'up')" [disabled]="idx === 0" class="btn-order-arrow" title="Move Up">
+                        <i class="fa-solid fa-chevron-up"></i>
+                      </button>
+                      <button (click)="moveOpportunity(idx, 'down')" [disabled]="idx === opportunities.length - 1" class="btn-order-arrow" title="Move Down">
+                        <i class="fa-solid fa-chevron-down"></i>
+                      </button>
+                    </div>
+                  </td>
+                  <td class="font-bold">{{ opp.title }}</td>
+                  <td>{{ opp.opportunityType }}</td>
+                  <td>
+                    <span class="status-badge" [class]="opp.status.toLowerCase()">
+                      {{ opp.status }}
+                    </span>
+                  </td>
+                  <td>{{ opp.opensAt ? (opp.opensAt | date:'short') : 'Immediate' }}</td>
+                  <td>{{ opp.closesAt ? (opp.closesAt | date:'short') : 'Never' }}</td>
+                  <td>
+                    <div class="actions-cell">
+                      <button (click)="openPreview(opp)" class="btn-table-action btn-preview" title="Preview Details">
+                        <i class="fa-solid fa-eye"></i>
+                      </button>
+                      <button (click)="openEditModal(opp)" class="btn-table-action btn-edit" title="Edit Opportunity">
+                        <i class="fa-solid fa-pen"></i>
+                      </button>
+                      <button (click)="deleteOpportunity(opp.id)" class="btn-table-action btn-delete" title="Delete Opportunity">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" class="text-center text-muted py-8">
+                    <i class="fa-solid fa-briefcase d-block mb-2 fs-2"></i>
+                    No opportunities found. Click "New Opportunity" to create one.
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </main>
+</div>
+
+<!-- Modal Form -->
+@if (showModal) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>{{ editingOppId ? 'Edit Opportunity' : 'New Opportunity' }}</h2>
+        <button (click)="showModal = false" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body">
+        <form (ngSubmit)="saveOpportunity()">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="title">Title *</label>
+              <input type="text" id="title" [(ngModel)]="oppForm.title" name="title" required class="form-control" placeholder="e.g. AI Research Fellow" />
+            </div>
+            <div class="form-group">
+              <label for="opportunityType">Opportunity Type *</label>
+              <input type="text" id="opportunityType" [(ngModel)]="oppForm.opportunityType" name="opportunityType" required class="form-control" placeholder="e.g. Research Internship" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="shortDescription">Short Description (for Listing Card) *</label>
+            <textarea id="shortDescription" [(ngModel)]="oppForm.shortDescription" name="shortDescription" required class="form-control" rows="2" placeholder="Brief 1-2 sentence description..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="fullDescription">Full Description (Markdown supported)</label>
+            <textarea id="fullDescription" [(ngModel)]="oppForm.fullDescription" name="fullDescription" class="form-control" rows="6" placeholder="Eligibility criteria, responsibilities, dates, benefits..."></textarea>
+          </div>
+
+          <!-- Preferred Stack Chips input -->
+          <div class="form-group">
+            <label for="newStack">Preferred Technology Stack</label>
+            <div class="stack-input-wrapper">
+              <input type="text" id="newStack" [(ngModel)]="newStackInput" name="newStack" class="form-control" placeholder="e.g. Angular (Press enter or add)" (keydown.enter)="addStack(); $event.preventDefault()" />
+              <button type="button" (click)="addStack()" class="btn-add-stack">Add</button>
+            </div>
+            <div class="chips-container mt-2">
+              @for (stack of oppForm.preferredStacks; track stack) {
+                <span class="stack-chip">
+                  {{ stack }}
+                  <button type="button" (click)="removeStack(stack)" class="btn-remove-chip">&times;</button>
+                </span>
+              }
+            </div>
+          </div>
+
+          <div class="form-row-2 border-top-divider">
+            <div class="form-group">
+              <label for="applyButtonText">Apply Button Text *</label>
+              <input type="text" id="applyButtonText" [(ngModel)]="oppForm.applyButtonText" name="applyButtonText" required class="form-control" placeholder="Apply Now" />
+            </div>
+            <div class="form-group">
+              <label for="applyUrl">Apply Destination URL *</label>
+              <input type="url" id="applyUrl" [(ngModel)]="oppForm.applyUrl" name="applyUrl" required class="form-control" placeholder="https://..." />
+            </div>
+          </div>
+
+          <div class="form-row-3 border-top-divider">
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status" [(ngModel)]="oppForm.status" name="status" class="form-control">
+                <option value="Draft">Draft</option>
+                <option value="Published">Published</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="opensAt">Auto-Publish At (UTC)</label>
+              <input type="datetime-local" id="opensAt" [(ngModel)]="oppForm.opensAt" name="opensAt" class="form-control" />
+            </div>
+            <div class="form-group">
+              <label for="closesAt">Auto-Close At (UTC)</label>
+              <input type="datetime-local" id="closesAt" [(ngModel)]="oppForm.closesAt" name="closesAt" class="form-control" />
+            </div>
+          </div>
+
+          <div class="modal-footer mt-4">
+            <button type="button" (click)="showModal = false" class="btn-cancel">Cancel</button>
+            <button type="submit" class="btn-submit">Save Opportunity</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Preview Modal -->
+@if (showPreview && previewOpp) {
+  <div class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Opportunity Preview</h2>
+        <button (click)="showPreview = false" class="btn-close-modal"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+      <div class="modal-body preview-body">
+        <div class="preview-hero">
+          <span class="preview-badge">{{ previewOpp.opportunityType }}</span>
+          <h1>{{ previewOpp.title }}</h1>
+          <p class="preview-short-desc">{{ previewOpp.shortDescription }}</p>
+        </div>
+
+        @if (previewOpp.preferredStacks && previewOpp.preferredStacks.length > 0) {
+          <div class="preview-stack-section mt-4">
+            <h4>Preferred Stack:</h4>
+            <div class="chips-container">
+              @for (stack of previewOpp.preferredStacks; track stack) {
+                <span class="preview-stack-chip">{{ stack }}</span>
+              }
+            </div>
+          </div>
+        }
+
+        @if (previewOpp.fullDescription) {
+          <div class="preview-full-desc mt-4 border-top-divider pt-4">
+            <h4>Detailed Information:</h4>
+            <pre class="raw-markdown-preview">{{ previewOpp.fullDescription }}</pre>
+          </div>
+        }
+
+        <div class="preview-meta mt-4 border-top-divider pt-4 text-sm text-muted">
+          <div><strong>Apply Button Text:</strong> {{ previewOpp.applyButtonText }}</div>
+          <div><strong>Apply URL:</strong> <a [href]="previewOpp.applyUrl" target="_blank">{{ previewOpp.applyUrl }}</a></div>
+          <div class="mt-2"><strong>Status:</strong> {{ previewOpp.status }}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button (click)="showPreview = false" class="btn-submit">Close Preview</button>
+      </div>
+    </div>
+  </div>
+}

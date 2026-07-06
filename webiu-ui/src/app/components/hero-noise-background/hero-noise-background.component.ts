@@ -57,6 +57,8 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
   private plane!: THREE.Mesh;
   private material!: THREE.MeshStandardMaterial;
   private simplex = new SimplexNoise();
+  private initialX!: Float32Array;
+  private initialY!: Float32Array;
 
   // Lights
   private ambientLight!: THREE.AmbientLight;
@@ -76,6 +78,11 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     if (!this.isBrowser) return;
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) {
+      return;
+    }
 
     this.ngZone.runOutsideAngular(() => {
       this.initScene();
@@ -193,6 +200,16 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     this.plane.rotation.x = -Math.PI / 2.3;
     this.plane.position.set(0, -10, 0); // Raised slightly to fill bottom half of viewport
     this.scene.add(this.plane);
+
+    // Cache initial coordinates for direct array updates in the animation loop
+    const positionAttribute = this.plane.geometry.attributes['position'];
+    const count = positionAttribute.count;
+    this.initialX = new Float32Array(count);
+    this.initialY = new Float32Array(count);
+    for (let i = 0; i < count; i++) {
+      this.initialX[i] = positionAttribute.getX(i);
+      this.initialY[i] = positionAttribute.getY(i);
+    }
 
     // 4. Add Shifting Point Lights
     const dMax = 120;
@@ -313,18 +330,25 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     const xyCoef = 36; // controls noise frequency (larger value = wider, smoother, more curved waves)
     const zCoef = 9;   // controls wave amplitude height (lower value = less pointy peaks)
 
-    for (let i = 0; i < positionAttribute.count; i++) {
-      const x = positionAttribute.getX(i);
-      const y = positionAttribute.getY(i);
+    const count = positionAttribute.count;
+    const array = positionAttribute.array as Float32Array;
+    const initialX = this.initialX;
+    const initialY = this.initialY;
+    const simplex = this.simplex;
+    const timeFactor = time * 0.5;
+
+    for (let i = 0; i < count; i++) {
+      const x = initialX[i];
+      const y = initialY[i];
 
       // Compute smooth undulating wave height with clamped sine mapping for perfectly round peaks
-      const noiseVal = Math.max(-1, Math.min(1, this.simplex.noise2D(
+      const noiseVal = Math.max(-1, Math.min(1, simplex.noise2D(
         x / xyCoef,
-        y / xyCoef + time * 0.5
+        y / xyCoef + timeFactor
       )));
       const z = Math.sin(noiseVal * Math.PI / 2) * zCoef;
 
-      positionAttribute.setZ(i, z);
+      array[i * 3 + 2] = z;
     }
 
     positionAttribute.needsUpdate = true;
