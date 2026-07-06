@@ -13,4 +13,10 @@ export class Contributor {
 
   @Field(() => [String])
   repos: string[];
+
+  @Field(() => Int, { nullable: true })
+  followers?: number;
+
+  @Field(() => Int, { nullable: true })
+  following?: number;
 }
