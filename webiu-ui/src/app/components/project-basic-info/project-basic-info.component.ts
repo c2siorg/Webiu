@@ -1,36 +1,13 @@
 import { Component, Input, OnChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Project } from '../../page/projects/project.model';
+import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/utils/language-colors';
 
 interface LanguageEntry {
   name: string;
   percentage: number;
   color: string;
 }
-
-const LANGUAGE_COLORS: Readonly<Record<string, string>> = {
-  Python: '#3572A5',
-  JavaScript: '#F1E05A',
-  TypeScript: '#3178C6',
-  Java: '#B07219',
-  HTML: '#E34C26',
-  CSS: '#1572B6',
-  SCSS: '#C6538C',
-  'C++': '#00599C',
-  'C#': '#178600',
-  Go: '#00ADD8',
-  Ruby: '#701516',
-  PHP: '#4F5D95',
-  Rust: '#dea584',
-  Swift: '#F05138',
-  Kotlin: '#7F52FF',
-  Dart: '#00B4AB',
-  HCL: '#0298C3',
-  Shell: '#89e051',
-  C: '#555555',
-};
-
-const DEFAULT_LANGUAGE_COLOR = '#607466';
 
 @Component({
   selector: 'app-project-basic-info',

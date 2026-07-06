@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { LANGUAGE_COLORS, DEFAULT_LANGUAGE_COLOR } from '../../common/utils/language-colors';
 
 @Component({
   selector: 'app-projects-card',
@@ -93,18 +94,7 @@ export class ProjectsCardComponent implements OnInit {
   }
 
   getLanguageColor(lang?: string): string {
-    const languageColors: Record<string, string> = {
-      Python: '#3572A5',
-      JavaScript: '#F1E05A',
-      TypeScript: '#2B7489',
-      Java: '#B07219',
-      HTML: '#E34C26',
-      'C++': '#F34B7D',
-      HCL: '#0298C3',
-      Default: '#607466',
-    };
-
-    return languageColors[lang ?? this.language] || languageColors['Default'];
+    return LANGUAGE_COLORS[lang ?? this.language] ?? DEFAULT_LANGUAGE_COLOR;
   }
 
   getFormattedSize(): string {
