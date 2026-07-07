@@ -995,8 +995,8 @@ export class CommunityMascotComponent implements AfterViewInit, OnDestroy {
     if (!this.isAnimating || !this.renderer || !this.scene || !this.camera) return;
     this.animationId = requestAnimationFrame(this.animate);
 
-    const elapsed = this.clock.getElapsedTime();
     const deltaTime = Math.min(this.clock.getDelta(), 0.1); // cap delta time to prevent giant frame leaps
+    const elapsed = this.clock.elapsedTime;
 
     // 1. Mouse movements look-at ease interpolation
     this.mouse.x += (this.mouse.targetX - this.mouse.x) * 0.08;
