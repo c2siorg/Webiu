@@ -63,6 +63,13 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'admin/opportunities',
+    loadComponent: () =>
+      import('./page/admin-opportunities/admin-opportunities.component').then(
+        (m) => m.AdminOpportunitiesComponent,
+      ),
+  },
+  {
     path: 'search',
     loadComponent: () =>
       import('./page/contributor-search/contributor-search.component').then(

@@ -1,0 +1,161 @@
+<div class="admin-opp-page">
+  <div class="admin-container">
+    
+    <!-- Title & Add Button Header -->
+    <div class="admin-header">
+      <div>
+        <h1>Opportunity Management</h1>
+        <p class="subtitle">Create, edit, publish, reorder, and manage community opportunities and openings.</p>
+      </div>
+      @if (!showForm) {
+        <button class="add-btn" (click)="openCreateForm()">
+          <i class="fas fa-plus"></i> Add New Opening
+        </button>
+      }
+    </div>
+
+    <!-- Loading Spinner -->
+    @if (loading) {
+      <div class="loading-container">
+        <div class="spinner"></div>
+        <p>Loading opportunities...</p>
+      </div>
+    }
+
+    <!-- Main List / Table -->
+    @if (!loading && !showForm) {
+      <div class="table-card">
+        @if (opportunities.length === 0) {
+          <div class="empty-state">
+            <h3>No Opportunities Found</h3>
+            <p>Start by adding the first internship, mentorship, or role opening.</p>
+            <button class="add-btn" (click)="openCreateForm()">Add New Opening</button>
+          </div>
+        }
+
+        @if (opportunities.length > 0) {
+          <table class="opp-table">
+            <thead>
+              <tr>
+                <th>Order</th>
+                <th>Title</th>
+                <th>Type</th>
+                <th>Organization</th>
+                <th>Requirements</th>
+                <th>Status</th>
+                <th class="actions-header">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (opp of opportunities; track opp._id; let i = $index) {
+                <tr>
+                  <!-- Order column with Up/Down buttons -->
+                  <td class="order-col">
+                    <span class="order-num">{{ opp.displayOrder }}</span>
+                    <div class="order-buttons">
+                      <button [disabled]="i === 0" (click)="moveUp(i)" class="order-arrow" title="Move Up">▲</button>
+                      <button [disabled]="i === opportunities.length - 1" (click)="moveDown(i)" class="order-arrow" title="Move Down">▼</button>
+                    </div>
+                  </td>
+                  <td><strong>{{ opp.title }}</strong></td>
+                  <td><span class="type-badge">{{ opp.opportunityType }}</span></td>
+                  <td>{{ opp.organization }}</td>
+                  <td>
+                    <div class="tech-stack-row">
+                      @for (req of opp.requirements; track req) {
+                        <span class="tech-chip">{{ req }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    <span class="status-badge" [ngClass]="opp.status.toLowerCase()">
+                      {{ opp.status }}
+                    </span>
+                  </td>
+                  <td class="actions-col">
+                    <button class="action-btn edit" (click)="openEditForm(opp)" title="Edit">Edit</button>
+                    <button class="action-btn delete" (click)="deleteOpportunity(opp._id)" title="Delete">Delete</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
+    }
+
+    <!-- Creation/Modification Form -->
+    @if (showForm) {
+      <div class="form-card">
+        <div class="form-header">
+          <h2>{{ isEditing ? 'Edit Opportunity' : 'Create New Opportunity' }}</h2>
+          <button class="close-btn" (click)="closeForm()">&times;</button>
+        </div>
+
+        <form (ngSubmit)="saveOpportunity()" #oppForm="ngForm">
+          <div class="form-grid">
+            
+            <div class="form-group">
+              <label for="title">Title *</label>
+              <input type="text" id="title" name="title" [(ngModel)]="formModel.title" required placeholder="e.g., Open Source Contributor" />
+            </div>
+
+            <div class="form-group">
+              <label for="type">Opportunity Type *</label>
+              <input type="text" id="type" name="opportunityType" [(ngModel)]="formModel.opportunityType" required placeholder="e.g., Google Summer of Code, Internship" />
+            </div>
+
+            <div class="form-group">
+              <label for="org">Organization *</label>
+              <input type="text" id="org" name="organization" [(ngModel)]="formModel.organization" required placeholder="e.g., Working with C2SI" />
+            </div>
+
+            <div class="form-group">
+              <label for="status">Status</label>
+              <select id="status" name="status" [(ngModel)]="formModel.status">
+                <option value="Draft">Draft</option>
+                <option value="Published">Published</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="desc">Description * (Supports Markdown)</label>
+              <textarea id="desc" name="description" [(ngModel)]="formModel.description" required rows="6" placeholder="Provide details about responsibilities, qualifications, duration..."></textarea>
+            </div>
+
+            <div class="form-group full-width">
+              <label for="reqs">Technology Stack / Requirements (Comma separated)</label>
+              <input type="text" id="reqs" name="requirements" [(ngModel)]="requirementsInput" placeholder="e.g., Python, ReactJS, TypeScript" />
+              <small class="help-text">Type requirements separated by commas. These will render as chips.</small>
+            </div>
+
+            <div class="form-group">
+              <label for="btnText">Apply Button Text</label>
+              <input type="text" id="btnText" name="applyButtonText" [(ngModel)]="formModel.applyButtonText" placeholder="Default: Apply Now" />
+            </div>
+
+            <div class="form-group">
+              <label for="destUrl">Apply Destination URL *</label>
+              <input type="url" id="destUrl" name="applyDestinationUrl" [(ngModel)]="formModel.applyDestinationUrl" required placeholder="e.g., https://github.com/... or Google Form URL" />
+            </div>
+
+            <div class="form-group">
+              <label for="displayOrder">Display Order</label>
+              <input type="number" id="displayOrder" name="displayOrder" [(ngModel)]="formModel.displayOrder" />
+            </div>
+
+          </div>
+
+          <div class="form-actions">
+            <button type="button" class="cancel-btn" (click)="closeForm()">Cancel</button>
+            <button type="submit" class="submit-btn" [disabled]="!oppForm.form.valid">
+              {{ isEditing ? 'Update Opportunity' : 'Create Opportunity' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    }
+
+  </div>
+</div>

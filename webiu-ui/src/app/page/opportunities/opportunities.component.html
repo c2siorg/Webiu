@@ -30,16 +30,36 @@
         <h2 class="main-heading">{{ data.openings.title }}</h2>
         <hr class="divider" />
         
-        @for (opening of data.openings.list; track opening.id) {
-          <div class="opening-card">
-            <h3>{{ opening.id }}. {{ opening.title }}</h3>
-            <p class="org">{{ opening.organization }}</p>
-            <ul>
-              @for (req of opening.requirements; track req) {
-                <li>{{ req }}</li>
-              }
-            </ul>
+        @if (loading) {
+          <div class="loading-state">
+            <p>Loading openings...</p>
           </div>
+        } @else {
+          @if (openings.length > 0) {
+            @for (opening of openings; track opening._id; let idx = $index) {
+              <div class="opening-card">
+                <h3>{{ idx + 1 }}. {{ opening.title }}</h3>
+                <span class="opp-type-badge">{{ opening.opportunityType }}</span>
+                <p class="org">{{ opening.organization }}</p>
+                <p class="description">{{ opening.description }}</p>
+                
+                <div class="tech-stack-container">
+                  @for (req of opening.requirements; track req) {
+                    <span class="tech-chip">{{ req }}</span>
+                  }
+                </div>
+
+                <a [href]="opening.applyDestinationUrl" target="_blank" class="apply-btn">
+                  {{ opening.applyButtonText || 'Apply Now' }}
+                </a>
+              </div>
+            }
+          } @else {
+            <div class="empty-state">
+              <h3>No Openings Available</h3>
+              <p>There are currently no active opportunities. Please check back later or follow our GitHub organization for announcements.</p>
+            </div>
+          }
         }
       </section>
     </div>

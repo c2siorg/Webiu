@@ -14,6 +14,8 @@ import { ProjectModule } from './project/project.module';
 import { ContributorModule } from './contributor/contributor.module';
 import { UserModule } from './user/user.module';
 import { GraphqlResolversModule } from './graphql/graphql.module';
+import { MongooseModule } from '@nestjs/mongoose';
+import { OpportunityModule } from './opportunity/opportunity.module';
 
 @Module({
   imports: [
@@ -41,18 +43,18 @@ import { GraphqlResolversModule } from './graphql/graphql.module';
     }),
     GraphqlResolversModule,
     CommonModule,
-    // MongooseModule can be re-enabled when MongoDB is needed:
-    // MongooseModule.forRootAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: (configService: ConfigService) => ({
-    //     uri: configService.get<string>('MONGODB_URI'),
-    //   }),
-    //   inject: [ConfigService],
-    // }),
+    MongooseModule.forRootAsync({
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => ({
+        uri: configService.get<string>('MONGODB_URI'),
+      }),
+      inject: [ConfigService],
+    }),
     AuthModule,
     ProjectModule,
     ContributorModule,
     UserModule,
+    OpportunityModule,
   ],
   controllers: [AppController],
   providers: [
