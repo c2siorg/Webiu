@@ -70,7 +70,7 @@ async function bootstrap() {
       if (!origin || allowedOrigins.includes(origin.replace(/\/$/, ''))) {
         callback(null, true);
       } else {
-        callback(new Error(`Origin ${origin} not allowed by CORS`));
+        callback(null, false);
       }
     },
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
