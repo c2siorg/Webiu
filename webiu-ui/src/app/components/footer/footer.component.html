@@ -1,72 +1,248 @@
 <footer class="app-footer">
-  <div class="footer-container">
-    <!-- Org Info Column -->
-    <div class="footer-column org-info">
-      <picture>
-        <source srcset="assets/c2silogo-dark_no_bg.webp" type="image/webp" />
-        <img
-          src="assets/c2silogo-dark_no_bg.png"
-          alt="C2SI Logo"
-          class="footer-logo"
-          width="87"
-          height="44"
-          loading="lazy"
-        />
-      </picture>
-      <p class="tagline">Open Source Intelligence Platform powering research, discovery, and community.</p>
-      <div class="footer-badges">
-        <span class="footer-badge">
-          <span class="footer-badge-dot"></span>
-          Live Platform
-        </span>
-      </div>
-      <p class="copyright">&copy; {{ currentYear }} C2SI · SCoRe Lab. All rights reserved.</p>
+  <!-- Top Meta & Garden Row -->
+  <div class="footer-meta-top">
+    <div class="meta-item copyright">
+      &copy; {{ currentYear }} C2SI · SCoRe Lab
+    </div>
+    
+    <!-- The Garden (Swaying SVG Flower Clusters) -->
+    <div class="footer-garden">
+      <!-- Cluster 1: Double Daisy -->
+      <svg viewBox="0 0 40 60" class="flower-svg daisy double">
+        <!-- Tall Daisy -->
+        <path d="M15,60 Q15,30 15,18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M15,45 Q7,42 10,36 Q13,38 15,45" fill="currentColor"/>
+        <circle cx="15" cy="18" r="4.5" fill="currentColor"/>
+        <circle cx="10" cy="18" r="3" fill="currentColor"/>
+        <circle cx="20" cy="18" r="3" fill="currentColor"/>
+        <circle cx="15" cy="13" r="3" fill="currentColor"/>
+        <circle cx="15" cy="23" r="3" fill="currentColor"/>
+        <circle cx="15" cy="18" r="1.5" class="flower-center"/>
+        <!-- Short Daisy -->
+        <path d="M15,60 Q22,45 25,28" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M22,48 Q28,45 25,39 Q21,41 22,48" fill="currentColor"/>
+        <circle cx="25" cy="28" r="4" fill="currentColor"/>
+        <circle cx="21" cy="28" r="2.5" fill="currentColor"/>
+        <circle cx="29" cy="28" r="2.5" fill="currentColor"/>
+        <circle cx="25" cy="24" r="2.5" fill="currentColor"/>
+        <circle cx="25" cy="32" r="2.5" fill="currentColor"/>
+        <circle cx="25" cy="28" r="1.2" class="flower-center"/>
+      </svg>
+      
+      <!-- Cluster 2: Tulip + Daisy -->
+      <svg viewBox="0 0 40 60" class="flower-svg tulip daisy-pair">
+        <!-- Tulip Left -->
+        <path d="M20,60 Q12,40 12,25" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M16,46 Q7,45 11,38 Q14,41 16,46" fill="currentColor"/>
+        <path d="M6,25 C6,31 18,31 18,25 C18,17 16,15 12,20 C8,15 6,17 6,25 Z" fill="currentColor"/>
+        <!-- Daisy Right -->
+        <path d="M20,60 Q24,45 26,34" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M22,48 Q30,48 27,42 Q23,43 22,48" fill="currentColor"/>
+        <circle cx="26" cy="34" r="4" fill="currentColor"/>
+        <circle cx="22" cy="34" r="2.5" fill="currentColor"/>
+        <circle cx="30" cy="34" r="2.5" fill="currentColor"/>
+        <circle cx="26" cy="30" r="2.5" fill="currentColor"/>
+        <circle cx="26" cy="38" r="2.5" fill="currentColor"/>
+        <circle cx="26" cy="34" r="1.2" class="flower-center"/>
+      </svg>
+
+      <!-- Cluster 3: Tall Daisy with leaves/thorns and a small bud -->
+      <svg viewBox="0 0 40 60" class="flower-svg daisy tall-daisy-bud">
+        <!-- Small Bud Right -->
+        <path d="M20,60 Q27,52 32,46" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M32,46 C29,46 29,40 32,37 C35,40 35,46 32,46 Z" fill="currentColor"/>
+        <!-- Tall Daisy -->
+        <path d="M20,60 Q20,30 20,12" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M20,48 Q10,48 14,42 Q17,45 20,48" fill="currentColor"/>
+        <path d="M20,36 Q28,34 25,28 Q21,30 20,36" fill="currentColor"/>
+        <path d="M20,28 Q12,26 15,20 Q18,22 20,28" fill="currentColor"/>
+        <circle cx="20" cy="12" r="5" fill="currentColor"/>
+        <circle cx="14" cy="12" r="3.5" fill="currentColor"/>
+        <circle cx="26" cy="12" r="3.5" fill="currentColor"/>
+        <circle cx="20" cy="6" r="3.5" fill="currentColor"/>
+        <circle cx="20" cy="18" r="3.5" fill="currentColor"/>
+        <circle cx="20" cy="12" r="1.5" class="flower-center"/>
+      </svg>
+
+      <!-- Cluster 4: Triple Daisy -->
+      <svg viewBox="0 0 40 60" class="flower-svg daisy triple">
+        <!-- Tall Center Daisy -->
+        <path d="M20,60 Q20,35 20,20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <circle cx="20" cy="20" r="4.5" fill="currentColor"/>
+        <circle cx="15" cy="20" r="3" fill="currentColor"/>
+        <circle cx="25" cy="20" r="3" fill="currentColor"/>
+        <circle cx="20" cy="15" r="3" fill="currentColor"/>
+        <circle cx="20" cy="25" r="3" fill="currentColor"/>
+        <circle cx="20" cy="20" r="1.5" class="flower-center"/>
+        <!-- Left Daisy -->
+        <path d="M20,60 Q13,48 10,32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="10" cy="32" r="3.5" fill="currentColor"/>
+        <circle cx="6" cy="32" r="2.2" fill="currentColor"/>
+        <circle cx="14" cy="32" r="2.2" fill="currentColor"/>
+        <circle cx="10" cy="28" r="2.2" fill="currentColor"/>
+        <circle cx="10" cy="36" r="2.2" fill="currentColor"/>
+        <circle cx="10" cy="32" r="1" class="flower-center"/>
+        <!-- Right Daisy -->
+        <path d="M20,60 Q27,48 30,32" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <circle cx="30" cy="32" r="3.5" fill="currentColor"/>
+        <circle cx="26" cy="32" r="2.2" fill="currentColor"/>
+        <circle cx="34" cy="32" r="2.2" fill="currentColor"/>
+        <circle cx="30" cy="28" r="2.2" fill="currentColor"/>
+        <circle cx="30" cy="36" r="2.2" fill="currentColor"/>
+        <circle cx="30" cy="32" r="1" class="flower-center"/>
+      </svg>
+
+      <!-- Cluster 5: Tulip + Bud -->
+      <svg viewBox="0 0 40 60" class="flower-svg tulip single-tulip-bud">
+        <!-- Bud Left -->
+        <path d="M20,60 Q13,54 8,48" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <path d="M8,48 C5,48 5,43 8,40 C11,43 11,48 8,48 Z" fill="currentColor"/>
+        <!-- Tulip Center -->
+        <path d="M20,60 Q22,35 22,20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M21,42 Q28,40 26,34 Q22,36 21,42" fill="currentColor"/>
+        <path d="M21,30 Q14,26 17,20 Q19,23 21,30" fill="currentColor"/>
+        <path d="M16,20 C16,26 28,26 28,20 C28,13 25,11 22,16 C19,11 16,13 16,20 Z" fill="currentColor"/>
+      </svg>
+
+      <!-- Cluster 6: Daisy + Tulip -->
+      <svg viewBox="0 0 40 60" class="flower-svg daisy-tulip-pair">
+        <!-- Daisy Left -->
+        <path d="M20,60 Q15,42 12,24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M15,44 Q7,40 11,34 Q14,37 15,44" fill="currentColor"/>
+        <circle cx="12" cy="24" r="4.5" fill="currentColor"/>
+        <circle cx="7.5" cy="24" r="3" fill="currentColor"/>
+        <circle cx="16.5" cy="24" r="3" fill="currentColor"/>
+        <circle cx="12" cy="19.5" r="3" fill="currentColor"/>
+        <circle cx="12" cy="28.5" r="3" fill="currentColor"/>
+        <circle cx="12" cy="24" r="1.5" class="flower-center"/>
+        <!-- Tulip Right -->
+        <path d="M20,60 Q25,40 32,23" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M27,42 Q36,44 32,38 Q29,39 27,42" fill="currentColor"/>
+        <path d="M26,23 C26,29 38,29 38,23 C38,15 35,13 32,18 C29,13 26,15 26,23 Z" fill="currentColor"/>
+      </svg>
+
+      <!-- Cluster 7: Daisy + 2 Buds -->
+      <svg viewBox="0 0 40 60" class="flower-svg daisy-buds-pair">
+        <!-- Bud Left Low -->
+        <path d="M20,60 Q13,54 8,48" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+        <path d="M8,48 C5,48 5,43 8,40 C11,43 11,48 8,48 Z" fill="currentColor"/>
+        <!-- Bud Right Mid -->
+        <path d="M20,60 Q26,45 32,36" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M32,36 C29,36 29,30 32,27 C35,30 35,36 32,36 Z" fill="currentColor"/>
+        <!-- Daisy Center -->
+        <path d="M20,60 Q20,32 20,20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+        <path d="M20,40 Q28,38 25,32 Q21,34 20,40" fill="currentColor"/>
+        <circle cx="20" cy="20" r="4.5" fill="currentColor"/>
+        <circle cx="15.5" cy="20" r="3" fill="currentColor"/>
+        <circle cx="24.5" cy="20" r="3" fill="currentColor"/>
+        <circle cx="20" cy="15.5" r="3" fill="currentColor"/>
+        <circle cx="20" cy="24.5" r="3" fill="currentColor"/>
+        <circle cx="20" cy="20" r="1.5" class="flower-center"/>
+      </svg>
     </div>
 
-    <!-- Navigation Column -->
-    <div class="footer-column">
-      <h3>Explore</h3>
-      <ul>
-        <li><a routerLink="/projects" routerLinkActive="active">Projects</a></li>
-        <li><a routerLink="/contributors" routerLinkActive="active">Contributors</a></li>
-        <li><a routerLink="/publications" routerLinkActive="active">Publications</a></li>
-        <li><a routerLink="/search" routerLinkActive="active">Search</a></li>
-      </ul>
-    </div>
-
-    <!-- Community Column -->
-    <div class="footer-column">
-      <h3>Community</h3>
-      <ul>
-        <li><a routerLink="/community" routerLinkActive="active">Community</a></li>
-        <li><a routerLink="/opportunities" routerLinkActive="active">Opportunities</a></li>
-        <li><a routerLink="/gsoc" routerLinkActive="active">GSoC Hub</a></li>
-      </ul>
-    </div>
-
-    <!-- Connect Column -->
-    <div class="footer-column">
-      <h3>Connect</h3>
-      <ul>
-        <li>
-          <a href="https://github.com/c2siorg" target="_blank" rel="noopener noreferrer">GitHub</a>
-        </li>
-        <li>
-          <a href="https://www.linkedin.com/company/c2siorg/" target="_blank" rel="noopener noreferrer">LinkedIn</a>
-        </li>
-        <li>
-          <a href="https://scorelab.org/" target="_blank" rel="noopener noreferrer">SCoRe Lab</a>
-        </li>
-        <li>
-          <a href="mailto:gsoc@c2si.com">Email Us</a>
-        </li>
-      </ul>
+    <div class="meta-item status">
+      <span class="footer-badge-dot"></span> Powered by open source, no plans to stop
     </div>
   </div>
 
-  <!-- Footer Bottom Bar -->
-  <div class="footer-bottom">
-    <p class="footer-bottom-text">Built with Angular · Open Source on <a href="https://github.com/c2siorg/Webiu" target="_blank" rel="noopener noreferrer">GitHub</a></p>
-    <p class="footer-tech">Made with <span>♥</span> by the C2SI community <span class="handwritten" style="font-size: 1.2rem; color: var(--accent-lime); margin-left: 8px; display: inline-block; transform: rotate(-2deg); vertical-align: middle;">Built by contributors.</span></p>
+  <!-- The Main Full-Width Footer Card -->
+  <div class="footer-card">
+    <!-- Huge blended background branding -->
+    <div class="footer-bg-text">Ceylon Computer Sci Int.</div>
+
+    <!-- 3-Column Navigation Grid -->
+    <div class="footer-columns-grid">
+      <!-- Column 1: Explore -->
+      <div class="footer-col">
+        <h3>Explore</h3>
+        <ul>
+          <li>
+            <a routerLink="/projects" routerLinkActive="active">
+              <i class="fas fa-project-diagram"></i> Projects
+            </a>
+          </li>
+          <li>
+            <a routerLink="/contributors" routerLinkActive="active">
+              <i class="fas fa-users"></i> Contributors
+            </a>
+          </li>
+          <li>
+            <a routerLink="/publications" routerLinkActive="active">
+              <i class="fas fa-book"></i> Publications
+            </a>
+          </li>
+          <li>
+            <a routerLink="/search" routerLinkActive="active">
+              <i class="fas fa-search"></i> Search
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Column 2: Community -->
+      <div class="footer-col">
+        <h3>Community</h3>
+        <ul>
+          <li>
+            <a routerLink="/community" routerLinkActive="active">
+              <i class="fas fa-comments"></i> Community
+            </a>
+          </li>
+          <li>
+            <a routerLink="/opportunities" routerLinkActive="active">
+              <i class="fas fa-briefcase"></i> Opportunities
+            </a>
+          </li>
+          <li>
+            <a routerLink="/gsoc" routerLinkActive="active">
+              <i class="fas fa-graduation-cap"></i> GSoC Hub
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Column 3: Connect -->
+      <div class="footer-col">
+        <h3>Connect</h3>
+        <ul>
+          <li>
+            <a href="https://github.com/c2siorg" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-github"></i> GitHub
+            </a>
+          </li>
+          <li>
+            <a href="https://www.linkedin.com/company/c2siorg/" target="_blank" rel="noopener noreferrer">
+              <i class="fab fa-linkedin"></i> LinkedIn
+            </a>
+          </li>
+          <li>
+            <a href="https://scorelab.org/" target="_blank" rel="noopener noreferrer">
+              <i class="fas fa-globe"></i> SCoRe Lab
+            </a>
+          </li>
+          <li>
+            <a href="mailto:gsoc@c2si.com">
+              <i class="fas fa-envelope"></i> Email Us
+            </a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Footer Bottom Details inside Card -->
+    <div class="footer-bottom-row">
+      <div class="bottom-item tech">
+        Built with Angular &middot; Open Source on <a href="https://github.com/c2siorg/Webiu" target="_blank" rel="noopener noreferrer">GitHub</a>
+      </div>
+      <div class="bottom-item credits">
+        Made with <span>♥</span> by the C2SI community
+      </div>
+      <div class="bottom-item actions">
+        <a href="#" (click)="scrollToTop($event)" class="back-to-top-btn">
+          <i class="fas fa-arrow-up"></i> Back to top
+        </a>
+      </div>
+    </div>
   </div>
 </footer>

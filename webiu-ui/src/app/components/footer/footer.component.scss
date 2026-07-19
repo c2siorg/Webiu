@@ -1,88 +1,225 @@
 /* ─────────────────────────────────────────────────────────────
    WebiU 2.0 — Footer Component
+   Garden & Glowing Card Theme (Full Viewport Width)
    ───────────────────────────────────────────────────────────── */
 
 .app-footer {
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  margin-top: auto;
-}
-
-.footer-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 56px clamp(1rem, 5vw, 2rem) 32px;
-  display: grid;
-  grid-template-columns: 1.6fr 1fr 1fr 1fr;
-  gap: 40px;
-  align-items: flex-start;
-}
-
-/* Org info column */
-.org-info {
+  position: relative;
+  background: var(--bg);
+  padding: 60px 0 0;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
-.footer-logo {
-  height: 44px;
-  width: auto;
-  object-fit: contain;
-}
-
-.tagline {
-  font-size: var(--font-size-sm);
-  color: var(--text-secondary);
-  line-height: 1.7;
-  max-width: 240px;
-}
-
-.footer-badges {
+/* ── Top Meta & Garden Row ── */
+.footer-meta-top {
   display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 clamp(1rem, 5vw, 2.5rem) 12px;
+  position: relative;
 }
 
-.footer-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 4px 10px;
-  border-radius: var(--radius-full);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  background: var(--accent-lime-dim);
-  color: #4a6b00;
-  border: 1px solid rgba(199, 244, 100, 0.3);
+.meta-item {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  opacity: 0.8;
+  padding-bottom: 4px;
 }
 
-[data-theme="dark"] .footer-badge {
-  color: var(--accent-lime);
-}
-
+/* ── Status Pulse Dot ── */
 .footer-badge-dot {
-  width: 6px;
-  height: 6px;
+  display: inline-block;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   background: var(--accent-lime);
-  animation: pulse-badge 2s infinite;
+  position: relative;
+  margin-right: 6px;
+  vertical-align: middle;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    border-radius: 50%;
+    background: var(--accent-lime);
+    animation: ping-dot 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
 }
 
-@keyframes pulse-badge {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(0.85); }
+@keyframes ping-dot {
+  75%, 100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
 }
 
-.copyright {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-  margin-top: auto;
+/* ── The Garden (Swaying SVG Flower Clusters) ── */
+.footer-garden {
+  display: flex;
+  align-items: flex-end;
+  gap: clamp(8px, 1.8vw, 18px);
+  z-index: 10;
+  pointer-events: auto;
+  position: absolute;
+  bottom: -2px;
+  left: 50%;
+  transform: translateX(-50%);
 }
 
-/* Nav columns */
-.footer-column {
+.flower-svg {
+  height: clamp(48px, 5.2vw, 66px);
+  width: auto;
+  color: var(--accent-purple);
+  transform-origin: 50% 100%;
+  transition: color var(--transition), filter var(--transition), transform var(--transition);
+  animation: sway 4.5s ease-in-out infinite alternate;
+
+  /* Custom scaling and animations to mimic original reference heights */
+  &.double {
+    height: clamp(48px, 5.2vw, 64px);
+    animation-delay: -0.4s;
+    animation-duration: 4.2s;
+  }
+  
+  &.daisy-pair {
+    height: clamp(46px, 5.0vw, 62px);
+    animation-delay: -1.2s;
+    animation-duration: 4.8s;
+  }
+
+  &.tall-daisy-bud {
+    height: clamp(56px, 6.0vw, 74px);
+    animation-delay: -2.0s;
+    animation-duration: 3.8s;
+  }
+
+  &.triple {
+    height: clamp(44px, 4.8vw, 60px);
+    animation-delay: -0.7s;
+    animation-duration: 5.2s;
+  }
+
+  &.single-tulip-bud {
+    height: clamp(50px, 5.4vw, 66px);
+    animation-delay: -2.5s;
+    animation-duration: 4.5s;
+  }
+
+  &.daisy-tulip-pair {
+    height: clamp(48px, 5.2vw, 64px);
+    animation-delay: -1.5s;
+    animation-duration: 5.0s;
+  }
+
+  &.daisy-buds-pair {
+    height: clamp(46px, 5.0vw, 62px);
+    animation-delay: -0.9s;
+    animation-duration: 4.0s;
+  }
+
+  /* Center dot of daisy */
+  .flower-center {
+    fill: var(--bg);
+    transition: fill var(--transition);
+  }
+
+  /* Hover interactivity */
+  &:hover {
+    cursor: pointer;
+    color: var(--accent-lime) !important;
+    filter: drop-shadow(0 0 8px var(--accent-lime));
+    transform: scale(1.15);
+    animation: sway-hover 0.5s ease-in-out infinite alternate;
+
+    .flower-center {
+      fill: var(--accent-coral) !important;
+    }
+  }
+}
+
+/* ── The Main Footer Card (Full Width) ── */
+.footer-card {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  border-radius: 24px 24px 0 0;
+  padding: 80px clamp(1rem, 5vw, 2.5rem) 40px;
+  box-sizing: border-box;
+  z-index: 2;
+
+  /* Standard Dark Mode Card Styles using Predefined Variables */
+  border-top: 2px solid var(--accent-purple);
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  background: linear-gradient(180deg, var(--accent-purple-dim) 0%, var(--surface) 50%, var(--bg) 100%);
+  box-shadow: 0 -12px 40px -15px var(--accent-purple-dim);
+}
+
+/* Light Theme Overrides */
+:host-context([data-theme="light"]) {
+  .footer-card {
+    border-top: 2px solid var(--accent-purple);
+    background: linear-gradient(180deg, var(--accent-purple-dim) 0%, var(--surface-raised) 50%, var(--surface) 100%);
+    box-shadow: 0 -10px 30px -18px var(--accent-purple-dim);
+  }
+
+  .footer-bg-text {
+    color: var(--text-primary);
+    opacity: 0.02;
+  }
+
+  .flower-svg {
+    .flower-center {
+      fill: #FFFFFF;
+    }
+  }
+}
+
+/* ── Huge Blended Background Branding ── */
+.footer-bg-text {
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'Clash Display', 'Geist', system-ui, sans-serif;
+  font-size: clamp(2.5rem, 7.8vw, 7.2rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text-primary);
+  opacity: 0.02;
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+  text-align: center;
+  user-select: none;
+}
+
+/* ── Centered Columns Grid ── */
+.footer-columns-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 48px;
+  margin-bottom: 56px;
+  position: relative;
+  z-index: 3;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.footer-col {
   h3 {
     font-family: 'Geist', system-ui, sans-serif;
     font-size: var(--font-size-xs);
@@ -90,27 +227,40 @@
     color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.1em;
-    margin-bottom: 16px;
+    margin-bottom: 20px;
   }
 
   ul {
     list-style: none;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
 
     li a {
+      font-family: 'Geist', system-ui, sans-serif;
       font-size: var(--font-size-sm);
       color: var(--text-secondary);
       text-decoration: none;
-      transition: color var(--transition-fast);
-      display: flex;
+      transition: all var(--transition-fast);
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
+
+      i {
+        font-size: 14px;
+        color: var(--text-muted);
+        transition: color var(--transition-fast), transform var(--transition-fast);
+      }
 
       &:hover {
         color: var(--accent-purple);
+        transform: translateX(4px);
         opacity: 1;
+
+        i {
+          color: var(--accent-lime);
+          transform: scale(1.1);
+        }
       }
 
       &.active {
@@ -121,78 +271,113 @@
   }
 }
 
-/* Footer bottom bar */
-.footer-bottom {
-  border-top: 1px solid var(--border);
-  padding: 16px clamp(1rem, 5vw, 2rem);
-  max-width: 1200px;
-  margin: 0 auto;
+/* ── Bottom Row Details inside Card ── */
+.footer-bottom-row {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  flex-wrap: wrap;
+  align-items: center;
+  border-top: 1px solid var(--border);
+  padding-top: 24px;
+  position: relative;
+  z-index: 3;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.footer-bottom-text {
-  font-size: var(--font-size-xs);
+.bottom-item {
+  font-size: 12px;
   color: var(--text-muted);
-}
-
-.footer-tech {
-  font-size: var(--font-size-xs);
-  color: var(--text-muted);
-
-  span {
-    color: var(--accent-coral);
-    margin: 0 2px;
-  }
 
   a {
     color: var(--text-muted);
     text-decoration: none;
-    &:hover { color: var(--accent-purple); opacity: 1; }
+    transition: color var(--transition-fast);
+    font-weight: 500;
+
+    &:hover {
+      color: var(--accent-purple);
+      opacity: 1;
+    }
+  }
+
+  span {
+    color: var(--accent-coral);
+    animation: heartbeat 1.6s infinite ease-in-out;
+    display: inline-block;
   }
 }
 
-/* Responsive */
+.back-to-top-btn {
+  font-family: 'Geist', system-ui, sans-serif;
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all var(--transition-fast);
+
+  i {
+    transition: transform var(--transition-fast);
+  }
+
+  &:hover {
+    color: var(--accent-coral);
+    opacity: 1;
+
+    i {
+      transform: translateY(-3px);
+    }
+  }
+}
+
+/* ── Keyframes ── */
+@keyframes sway {
+  0% { transform: rotate(-5.5deg) scaleY(0.96); }
+  100% { transform: rotate(5.5deg) scaleY(1.02); }
+}
+
+@keyframes sway-hover {
+  0% { transform: rotate(-12deg) scale(1.15); }
+  100% { transform: rotate(12deg) scale(1.15); }
+}
+
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.22); }
+}
+
+/* ── Responsive Styling ── */
 @media (max-width: 960px) {
-  .footer-container {
-    grid-template-columns: 1fr 1fr;
+  .footer-meta-top {
+    justify-content: center;
+  }
+
+  .meta-item {
+    display: none; /* Hide side texts to focus layout on flowers */
+  }
+
+  .footer-columns-grid {
+    gap: 28px;
+    padding: 0 16px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-card {
+    padding: 60px 20px 24px;
+  }
+
+  .footer-columns-grid {
+    grid-template-columns: 1fr;
     gap: 32px;
   }
 
-  .org-info {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 600px) {
-  .footer-container {
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-    padding-top: 40px;
-    padding-bottom: 24px;
-  }
-
-  .org-info {
-    grid-column: 1 / -1;
-  }
-
-  .footer-bottom {
+  .footer-bottom-row {
     flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-}
-
-/* Dark theme overrides */
-:host-context([data-theme="dark"]) {
-  .app-footer {
-    background: var(--surface);
-    border-top-color: var(--border);
-  }
-  .footer-logo {
-    filter: invert(1);
+    gap: 12px;
+    text-align: center;
   }
 }
