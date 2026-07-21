@@ -67,42 +67,22 @@ The behavior is identical. The difference is that `npx` fetches the CLI from you
 
 ---
 
-## SYSTEM ARCHITECTURE
+## ARCHITECTURE & WORKFLOW PIPELINE
 
-Webiu follows a decoupled architecture with three components:
+1. **Initialization Phase (`webiu init`)**
+   - User runs interactive CLI setup wizard in terminal.
+   - Selects Organization metadata, DB strategy (Docker Postgres / Remote / SQLite), branding accent theme, and deployment target via dropdown menus.
 
-```
-+-----------------------------------------------------------------------+
-|               webiu init  (Interactive Setup Wizard)                  |
-+-----------------------------------------------------------------------+
-                                    |
-                                    v
-+-----------------------------------------------------------------------+
-|                    INTERACTIVE TERMINAL DROPDOWNS                     |
-|  - Organization Metadata and Name                                     |
-|  - Database Engine (PostgreSQL Container / Remote / SQLite)           |
-|  - UI Branding Accent Color Theme                                     |
-|  - Cloud Deployment Target Platform                                   |
-+-----------------------------------------------------------------------+
-                                    |
-                                    v
-+-----------------------------------------------------------------------+
-|              PROJECT CLONING AND CONFIGURATION                        |
-|  - Clones Webiu source from GitHub                                    |
-|  - Injects .env files for backend (webiu-server)                      |
-|  - Configures Angular runtime assets (webiu-ui/src/assets/config.json)|
-+-----------------------------------------------------------------------+
-                                    |
-                   +----------------+----------------+
-                   |                                 |
-                   v                                 v
-+-----------------------------------+ +-------------------------------+
-|         webiu dev                 | |       webiu deploy            |
-| Concurrently launches:            | | Interactively generates       |
-|   Frontend  ->  http://localhost:4200| Render, Railway, or Docker |
-|   Backend   ->  http://localhost:3000| deployment configuration   |
-+-----------------------------------+ +-------------------------------+
-```
+2. **Scaffolding & Configuration Phase**
+   - CLI automatically clones latest Webiu source code into a clean project directory.
+   - Injects root `.env` and `webiu-server/.env` with database and secret credentials.
+   - Configures Angular runtime settings in `webiu-ui/src/assets/config.json`.
+
+3. **Development Phase (`webiu dev`)**
+   - Concurrently launches Angular Frontend (`http://localhost:4200`) and NestJS API Backend (`http://localhost:3000`) with live hot-reloading.
+
+4. **Deployment Phase (`webiu deploy`)**
+   - Interactively scaffolds tailored Infrastructure-as-Code manifests for Render, Railway, Vercel, or production Docker Compose.
 
 ---
 
@@ -146,22 +126,6 @@ Generates production-ready deployment configuration files for your target platfo
 
 ```bash
 webiu deploy
-```
-
-```
-+-----------------------------------------------------------------------+
-|                         webiu deploy                                  |
-+-----------------------------------------------------------------------+
-                                    |
-        +--------------------------+--------------------------+
-        |                          |                          |
-        v                          v                          v
-+-------------------+   +--------------------+   +--------------------+
-|  RENDER PLATFORM  |   |  RAILWAY PLATFORM  |   |  DOCKER SELF-HOST  |
-| Generates         |   | Generates          |   | Generates          |
-| render.yaml       |   | railway.json       |   | docker-compose.    |
-|                   |   |                    |   | prod.yml           |
-+-------------------+   +--------------------+   +--------------------+
 ```
 
 Supported platforms and what gets generated:
