@@ -1,6 +1,6 @@
 {
   "name": "create-webiu",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "CLI tool to generate, configure, and deploy Webiu community portal applications",
   "keywords": [
     "webiu",

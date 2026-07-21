@@ -159,26 +159,29 @@ export async function initCommand(options: { name?: string }) {
 
     // ── Step 6: Print next steps ──────────────────────────────────────────
     console.log(`
-${chalk.bold.yellow('================================================')}
-${chalk.bold.green('   Your Webiu portal is ready! Here is what')}
-${chalk.bold.green('   to do next:                               ')}
-${chalk.bold.yellow('================================================')}
+${chalk.bold.yellow('===================================================================')}
+${chalk.bold.green('   Your Webiu portal is ready! Here is what to do next:            ')}
+${chalk.bold.yellow('===================================================================')}
 
-  ${chalk.cyan('cd')} ${projectName}
+  ${chalk.bold('1. Enter your project directory:')}
+     ${chalk.cyan(`cd ${projectName}`)}
 
-  ${chalk.bold('Install dependencies:')}
-  ${chalk.cyan('cd webiu-server && npm install')}
-  ${chalk.cyan('cd ../webiu-ui   && npm install')}
-  ${chalk.cyan('cd ..')}
+  ${chalk.bold('2. Install all dependencies:')}
+     ${chalk.cyan('cd webiu-server && npm install && cd ../webiu-ui && npm install && cd ..')}
 
-  ${chalk.bold('Start development servers:')}
-  ${chalk.cyan('npx webiu dev')}
+  ${chalk.bold('3. Start development servers:')}
+     ${chalk.cyan('npx webiu dev')}
+     ${chalk.gray('   Frontend UI  ->  http://localhost:4200')}
+     ${chalk.gray('   Backend API  ->  http://localhost:3000')}
 
-  ${chalk.bold('Generate deployment files:')}
-  ${chalk.cyan('npx webiu deploy')}
+  ${chalk.bold('4. Generate deployment files:')}
+     ${chalk.cyan('npx webiu deploy')}
 
-  ${chalk.bold('View all commands:')}
-  ${chalk.cyan('npx webiu help')}
+${chalk.bold.yellow('-------------------------------------------------------------------')}
+${chalk.bold('  TIP: To use "webiu" directly without "npx" every time:')}
+  ${chalk.cyan('npm install -g create-webiu')}
+  ${chalk.gray('  Then you can simply type: webiu init, webiu dev, webiu help, etc.')}
+${chalk.bold.yellow('===================================================================')}
 `)
   } catch (err: any) {
     spinner.fail(chalk.red('Scaffolding failed!'))

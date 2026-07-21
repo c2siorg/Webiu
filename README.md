@@ -1,103 +1,118 @@
 # WEBIU CLI (`create-webiu`)
 
-> **The Official Command Line Interface & Scaffolding Engine for Webiu Community Portals.**
+> The Official Command Line Interface and Scaffolding Engine for Webiu Community Portals.
 
 [![NPM Version](https://img.shields.io/npm/v/create-webiu.svg)](https://www.npmjs.com/package/create-webiu)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## 🌟 EXECUTIVE SUMMARY
+## WHAT IS WEBIU?
 
-**Webiu** is an open-source community portal platform built to streamline developer community engagement, member management, project showcases, and open-source contribution tracking.
+**Webiu** is an open-source community portal platform built to help organizations showcase their projects, manage memberships, and track open-source contributions. It is built on **Angular** (frontend) and **NestJS** (backend API with GraphQL support).
 
-Historically, deploying a Webiu instance required manual repository cloning, manual environment file (`.env`) creation, manual Angular configuration edits, and local PostgreSQL container setup. 
-
-With **`create-webiu`**, the entire process is condensed into a single interactive terminal CLI. Developers can initialize, customize, test locally, and scaffold production cloud deployments (Render, Railway, Vercel, Docker) directly from command line selection menus without touching raw configuration boilerplate! XD
+Previously, setting up Webiu required manually cloning the repository, hand-editing environment files, configuring Angular, and managing Docker containers one by one. This CLI removes all of that friction. XD
 
 ---
 
-## 📐 SYSTEM ARCHITECTURE
+## START HERE -- YOUR FIRST 5 COMMANDS
 
-Webiu follows a decoupled microservice-like architecture composed of an **Angular Single Page Application (`webiu-ui`)**, a **NestJS Backend REST & GraphQL API (`webiu-server`)**, and the **TypeScript CLI Engine (`create-webiu`)**.
+If you are brand new to Webiu, open your terminal and follow these steps in order:
+
+```
+STEP 1 -- Install the CLI globally (run this once, ever)
+---------------------------------------------------------
+npm install -g create-webiu
+
+
+STEP 2 -- Create your new community portal
+---------------------------------------------------------
+webiu init
+
+
+STEP 3 -- Enter your project folder
+---------------------------------------------------------
+cd your-project-name
+
+
+STEP 4 -- Install project dependencies
+---------------------------------------------------------
+cd webiu-server && npm install && cd ../webiu-ui && npm install && cd ..
+
+
+STEP 5 -- Start your local development server
+---------------------------------------------------------
+webiu dev
+
+    Frontend UI  ->  http://localhost:4200
+    Backend API  ->  http://localhost:3000
+```
+
+After Step 2, the interactive wizard will appear in your terminal and ask you a series of dropdown selection questions about your organization, database, branding, and deployment preferences. No manual file editing required.
+
+---
+
+## USING WITHOUT GLOBAL INSTALL
+
+If you prefer not to install globally, you can use `npx` instead for every command:
+
+```bash
+npx create-webiu init        # replaces: webiu init
+npx webiu dev                # replaces: webiu dev
+npx webiu deploy             # replaces: webiu deploy
+npx webiu help               # replaces: webiu help
+```
+
+The behavior is identical. The difference is that `npx` fetches the CLI from your local `node_modules` folder each time, while the global install makes the `webiu` command available system-wide in your terminal.
+
+---
+
+## SYSTEM ARCHITECTURE
+
+Webiu follows a decoupled architecture with three components:
 
 ```
 +-----------------------------------------------------------------------+
-|                         npx create-webiu init                         |
+|               webiu init  (Interactive Setup Wizard)                  |
 +-----------------------------------------------------------------------+
                                     |
                                     v
 +-----------------------------------------------------------------------+
 |                    INTERACTIVE TERMINAL DROPDOWNS                     |
-|  - Organization Metadata & Name                                       |
-|  - Database Strategy (PostgreSQL Container / Remote / SQLite)           |
-|  - UI Branding Accent Palette                                         |
-|  - Cloud Deployment Target Selection                                  |
+|  - Organization Metadata and Name                                     |
+|  - Database Engine (PostgreSQL Container / Remote / SQLite)           |
+|  - UI Branding Accent Color Theme                                     |
+|  - Cloud Deployment Target Platform                                   |
 +-----------------------------------------------------------------------+
                                     |
                                     v
 +-----------------------------------------------------------------------+
-|                    PROJECT GENERATION & SCAFFOLDING                   |
-|  - Injects dynamic environment variables into root .env               |
-|  - Configures Angular UI runtime assets (webiu-ui)                    |
-|  - Prepares NestJS backend API parameters (webiu-server)              |
+|              PROJECT CLONING AND CONFIGURATION                        |
+|  - Clones Webiu source from GitHub                                    |
+|  - Injects .env files for backend (webiu-server)                      |
+|  - Configures Angular runtime assets (webiu-ui/src/assets/config.json)|
 +-----------------------------------------------------------------------+
                                     |
-                  +-----------------+-----------------+
-                  |                                   |
-                  v                                   v
-+-----------------------------------+   +-------------------------------+
-|         npx webiu dev             |   |        npx webiu deploy       |
-| Concurrently launches Frontend    |   | Interactively generates       |
-| (Port 4200) & Backend (Port 3000) |   | Render, Railway, or Docker    |
-+-----------------------------------+   +-------------------------------+
+                   +----------------+----------------+
+                   |                                 |
+                   v                                 v
++-----------------------------------+ +-------------------------------+
+|         webiu dev                 | |       webiu deploy            |
+| Concurrently launches:            | | Interactively generates       |
+|   Frontend  ->  http://localhost:4200| Render, Railway, or Docker |
+|   Backend   ->  http://localhost:3000| deployment configuration   |
++-----------------------------------+ +-------------------------------+
 ```
 
 ---
 
-## ⚡ QUICK START & USAGE
+## COMMAND REFERENCE MANUAL
 
-### 1. Initialize a New Portal
-
-Launch the interactive prompt wizard in your target workspace directory :D:
-
-```bash
-npx create-webiu init
-```
-
-*Short alias alternative:*
-```bash
-npx webiu init
-```
-
-The wizard will guide you through interactive selection menus:
-- **Organization Type**: Open Source Community, Non-Profit, Startup, or Custom Setup.
-- **Organization Metadata**: Organization Name and GitHub Org Username.
-- **Database Connection**: Local PostgreSQL Docker container, Remote PostgreSQL connection string, or local SQLite light mode.
-- **Branding Theme**: Primary color theme (Ocean Blue, Emerald Green, Deep Purple, Sunset Crimson).
-- **Target Deployment Platform**: Render, Railway, Vercel + Render, or Self-Hosted Docker.
-
----
-
-### 2. Local Development Execution
-
-To start the full-stack local development environment with hot-reloading:
-
-```bash
-npx webiu dev
-```
-
-This command concurrently executes both sub-applications:
-- **Angular Frontend UI**: Available at `http://localhost:4200`
-- **NestJS REST & GraphQL Server API**: Available at `http://localhost:3000`
-
----
-
-## 📖 COMMAND REFERENCE MANUAL
+Run `webiu help` at any time to display this in your terminal.
 
 ```
 ====================================================================
-                        WEBIU CLI TOOL - HELP MANUAL                
+                        WEBIU CLI TOOL - HELP MANUAL
 ====================================================================
 
 Usage: webiu [command] [options]
@@ -115,59 +130,67 @@ Commands:
 Options:
   -v, --version Output the current version of webiu
   -h, --help    Display help information for command
+
+Examples:
+  $ webiu init
+  $ webiu dev
+  $ webiu deploy
+  $ webiu help
 ```
 
 ---
 
-## 🚢 CLOUD DEPLOYMENT GENERATOR
+## DEPLOYMENT GENERATOR
 
-Scaffold pre-configured deployment manifests with a single command:
+Generates production-ready deployment configuration files for your target platform.
 
 ```bash
-npx webiu deploy
+webiu deploy
 ```
 
 ```
 +-----------------------------------------------------------------------+
-|                           npx webiu deploy                            |
+|                         webiu deploy                                  |
 +-----------------------------------------------------------------------+
                                     |
-        +---------------------------+---------------------------+
-        |                           |                           |
-        v                           v                           v
-+-------------------+       +--------------------+     +----------------+
-|  RENDER PLATFORM  |       |  RAILWAY PLATFORM  |     |  DOCKER SWARM  |
-| Generates         |       | Generates          |     | Generates      |
-| render.yaml       |       | railway.json       |     | docker-compose |
-+-------------------+       +--------------------+     +----------------+
+        +--------------------------+--------------------------+
+        |                          |                          |
+        v                          v                          v
++-------------------+   +--------------------+   +--------------------+
+|  RENDER PLATFORM  |   |  RAILWAY PLATFORM  |   |  DOCKER SELF-HOST  |
+| Generates         |   | Generates          |   | Generates          |
+| render.yaml       |   | railway.json       |   | docker-compose.    |
+|                   |   |                    |   | prod.yml           |
++-------------------+   +--------------------+   +--------------------+
 ```
 
-### Supported Platforms:
-1. **Render (Recommended)**: Auto-generates `render.yaml` for one-click Infrastructure-as-Code deployment.
-2. **Railway**: Generates `railway.json` container configurations.
-3. **Vercel + Render**: Prepares static Angular build for Vercel combined with NestJS REST API on Render.
-4. **Self-Hosted Docker**: Generates production-ready `docker-compose.prod.yml` with containerized PostgreSQL and Nginx reverse proxy.
+Supported platforms and what gets generated:
+
+- **Render**: `render.yaml` Blueprint for one-click fullstack deployment with managed PostgreSQL.
+- **Railway**: `railway.json` container service configuration.
+- **Vercel + Render**: `vercel.json` for Angular static hosting on Vercel, plus NestJS on Render.
+- **Self-Hosted Docker**: `docker-compose.prod.yml` with Nginx reverse proxy and containerized database.
 
 ---
 
-## 🔮 FUTURE ROADMAP & FEATURE PIPELINE
+## FUTURE ROADMAP
 
-We are actively developing and refining new capabilities for upcoming CLI releases:
+Planned features for upcoming releases:
 
-- [ ] **Plugin & Extension Marketplace**: Ability to install community add-ons (`npx webiu add analytics`, `npx webiu add oauth-discord`).
-- [ ] **Interactive Component Generator**: CLI sub-commands to generate custom portal sections directly from terminal (`npx webiu generate component team-member`).
-- [ ] **One-Command Database Migration Assistant**: Simplified CLI commands for database schema generation and seed management (`npx webiu db:migrate`, `npx webiu db:seed`).
-- [ ] **AI-Powered Setup Assistant**: Optional integration with Gemini API to automatically pull GitHub organization metadata, logos, and repository stats during `npx webiu init`.
+- [ ] Plugin and Extension Marketplace: `webiu add analytics`, `webiu add oauth-discord`
+- [ ] Interactive Component Generator: `webiu generate component team-member`
+- [ ] Database Migration Assistant: `webiu db:migrate`, `webiu db:seed`
+- [ ] AI-Powered Setup Assistant: Automatically pull GitHub org metadata, logos, and repository stats during `webiu init`
 
 ---
 
-## 👤 CREDITS & MAINTAINERS
+## CREDITS AND MAINTAINERS
 
-- **Creator & Lead Architect**: [Tarunya Kesharwani](https://github.com/TarunyaProgrammer/) XD
+- **Creator and Lead Architect**: [Tarunya Kesharwani](https://github.com/TarunyaProgrammer/) XD
 - **Maintainer Organization**: [C2SI (Ceylon Computer Science Institute)](https://github.com/c2siorg/Webiu/)
 
 ---
 
-## 📄 LICENSE
+## LICENSE
 
 This project is licensed under the **MIT License**. See the `LICENSE` file for details.

@@ -23,6 +23,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 
 // src-cli/index.ts
 var import_commander = require("commander");
+var import_chalk7 = __toESM(require("chalk"));
 
 // src-cli/commands/init.ts
 var import_prompts = require("@inquirer/prompts");
@@ -158,26 +159,29 @@ Directory "${projectName}" already exists and is not empty. :(`));
     }
     spinner.succeed(import_chalk.default.green(`Project "${import_chalk.default.bold(projectName)}" scaffolded successfully! XD`));
     console.log(`
-${import_chalk.default.bold.yellow("================================================")}
-${import_chalk.default.bold.green("   Your Webiu portal is ready! Here is what")}
-${import_chalk.default.bold.green("   to do next:                               ")}
-${import_chalk.default.bold.yellow("================================================")}
+${import_chalk.default.bold.yellow("===================================================================")}
+${import_chalk.default.bold.green("   Your Webiu portal is ready! Here is what to do next:            ")}
+${import_chalk.default.bold.yellow("===================================================================")}
 
-  ${import_chalk.default.cyan("cd")} ${projectName}
+  ${import_chalk.default.bold("1. Enter your project directory:")}
+     ${import_chalk.default.cyan(`cd ${projectName}`)}
 
-  ${import_chalk.default.bold("Install dependencies:")}
-  ${import_chalk.default.cyan("cd webiu-server && npm install")}
-  ${import_chalk.default.cyan("cd ../webiu-ui   && npm install")}
-  ${import_chalk.default.cyan("cd ..")}
+  ${import_chalk.default.bold("2. Install all dependencies:")}
+     ${import_chalk.default.cyan("cd webiu-server && npm install && cd ../webiu-ui && npm install && cd ..")}
 
-  ${import_chalk.default.bold("Start development servers:")}
-  ${import_chalk.default.cyan("npx webiu dev")}
+  ${import_chalk.default.bold("3. Start development servers:")}
+     ${import_chalk.default.cyan("npx webiu dev")}
+     ${import_chalk.default.gray("   Frontend UI  ->  http://localhost:4200")}
+     ${import_chalk.default.gray("   Backend API  ->  http://localhost:3000")}
 
-  ${import_chalk.default.bold("Generate deployment files:")}
-  ${import_chalk.default.cyan("npx webiu deploy")}
+  ${import_chalk.default.bold("4. Generate deployment files:")}
+     ${import_chalk.default.cyan("npx webiu deploy")}
 
-  ${import_chalk.default.bold("View all commands:")}
-  ${import_chalk.default.cyan("npx webiu help")}
+${import_chalk.default.bold.yellow("-------------------------------------------------------------------")}
+${import_chalk.default.bold('  TIP: To use "webiu" directly without "npx" every time:')}
+  ${import_chalk.default.cyan("npm install -g create-webiu")}
+  ${import_chalk.default.gray("  Then you can simply type: webiu init, webiu dev, webiu help, etc.")}
+${import_chalk.default.bold.yellow("===================================================================")}
 `);
   } catch (err) {
     spinner.fail(import_chalk.default.red("Scaffolding failed!"));
@@ -253,6 +257,23 @@ ${import_chalk2.default.bold.cyan("Starting Webiu Development Server (Frontend +
     console.error(import_chalk2.default.red("\nDevelopment servers stopped unexpectedly:"), err);
   }
 }
+async function buildCommand() {
+  console.log(`
+${import_chalk2.default.bold.cyan("Building production bundles for Webiu... XD")}
+`);
+  const serverDir = import_path2.default.join(process.cwd(), "webiu-server");
+  const uiDir = import_path2.default.join(process.cwd(), "webiu-ui");
+  if (!await import_fs_extra2.default.pathExists(serverDir) || !await import_fs_extra2.default.pathExists(uiDir)) {
+    console.error(import_chalk2.default.red("Error: webiu-server or webiu-ui directories not found. Run `npx webiu init` first."));
+    process.exit(1);
+  }
+  const execa3 = (await import("execa")).default;
+  console.log(import_chalk2.default.cyan("Building NestJS backend..."));
+  await execa3("npm", ["run", "build"], { cwd: serverDir, stdio: "inherit" });
+  console.log(import_chalk2.default.cyan("\nBuilding Angular frontend..."));
+  await execa3("npm", ["run", "build"], { cwd: uiDir, stdio: "inherit" });
+  console.log(import_chalk2.default.green("\nBuild complete! XD"));
+}
 
 // src-cli/commands/config.ts
 var import_prompts2 = require("@inquirer/prompts");
@@ -275,11 +296,6 @@ ${import_chalk3.default.bold.cyan("=============================================
   });
   const spinner = (0, import_ora2.default)("Updating configuration parameters...").start();
   spinner.succeed(import_chalk3.default.green(`Successfully updated ${setting} configuration! XD`));
-}
-async function buildCommand() {
-  console.log(`
-${import_chalk3.default.bold.cyan("Building production bundles for webiu-ui and webiu-server... XD")}
-`);
 }
 
 // src-cli/commands/deploy.ts
@@ -441,7 +457,7 @@ ${import_chalk6.default.bold.cyan("Stopping Docker containerized environment..."
 
 // src-cli/index.ts
 var program = new import_commander.Command();
-program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version("1.0.0");
+program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version("1.0.5").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
 program.command("init").description("Interactively initialize a new Webiu portal project").option("-n, --name <name>", "Project name").action(initCommand);
 program.command("dev").description("Start local development server (Frontend + Backend concurrently)").action(devCommand);
 program.command("build").description("Build production assets for both webiu-ui and webiu-server").action(buildCommand);
@@ -450,6 +466,13 @@ program.command("deploy").description("Launch interactive deployment generator f
 program.command("docker:up").description("Spin up containerized development environment using Docker Compose").action(dockerUpCommand);
 program.command("docker:down").description("Stop and remove running local Docker containers").action(dockerDownCommand);
 program.command("help").description("Display detailed command usage and architectural instructions").action(helpCommand);
+program.on("command:*", (operands) => {
+  console.error(import_chalk7.default.red(`
+Command not found: "${operands[0]}". See available commands below: :(
+`));
+  helpCommand();
+  process.exit(1);
+});
 program.parse(process.argv);
 if (!process.argv.slice(2).length) {
   helpCommand();
