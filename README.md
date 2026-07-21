@@ -164,7 +164,7 @@ We are actively developing and refining new capabilities for upcoming CLI releas
 ## 👤 CREDITS & MAINTAINERS
 
 - **Creator & Lead Architect**: [Tarunya Kesharwani](https://github.com/TarunyaProgrammer/) XD
-- **Maintainer Organization**: [C2SI (Community Software Infrastructure)](https://github.com/c2siorg/Webiu/)
+- **Maintainer Organization**: [C2SI (Ceylon Computer Science Institute)](https://github.com/c2siorg/Webiu/)
 
 ---
 

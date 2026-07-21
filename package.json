@@ -1,7 +1,20 @@
 {
   "name": "create-webiu",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "CLI tool to generate, configure, and deploy Webiu community portal applications",
+  "keywords": [
+    "webiu",
+    "create-webiu",
+    "cli",
+    "c2si",
+    "community-portal",
+    "angular",
+    "nestjs",
+    "generator",
+    "open-source",
+    "scaffolding",
+    "deployment"
+  ],
   "main": "./dist-cli/index.js",
   "bin": {
     "create-webiu": "./bin/webiu.js",
