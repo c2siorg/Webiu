@@ -3,16 +3,22 @@ import chalk from 'chalk';
 import ora from 'ora';
 import fs from 'fs-extra';
 import path from 'path';
+import { execa } from 'execa';
+
+const WEBIU_REPO = 'https://github.com/TarunyaProgrammer/Webiu.git';
+const WEBIU_BRANCH = 'webiu-npm-pack';
 
 export async function initCommand(options: { name?: string }) {
-  console.log(`\n${chalk.bold.cyan('====================================================')}`);
-  console.log(`${chalk.bold.yellow('   Welcome to Webiu CLI Project Setup Wizard! :D   ')}`);
-  console.log(`${chalk.bold.cyan('====================================================')}\n`);
+  console.log(`\n${chalk.bold.cyan('====================================================')}`)
+  console.log(`${chalk.bold.yellow('   Welcome to Webiu CLI Project Setup Wizard! :D   ')}`)
+  console.log(`${chalk.bold.cyan('====================================================')}\n`)
+
+  // ── Step 1: Collect configuration via interactive dropdowns ──────────────
 
   const projectName = options.name || await input({
     message: 'What is your project directory name?',
     default: 'my-webiu-portal',
-  });
+  })
 
   const orgType = await select({
     message: 'Select your Organization Type:',
@@ -22,93 +28,174 @@ export async function initCommand(options: { name?: string }) {
       { name: 'Startup / Personal Project', value: 'startup' },
       { name: 'Custom / Blank Setup', value: 'custom' },
     ],
-  });
+  })
 
   const orgName = await input({
     message: 'What is your Organization Name?',
     default: 'My Community Org',
-  });
+  })
 
   const githubOrg = await input({
     message: 'What is your GitHub Organization / User name?',
     default: 'c2siorg',
-  });
+  })
 
   const dbStrategy = await select({
     message: 'Select Database Setup Strategy:',
     choices: [
-      { name: 'PostgreSQL Container (Automatic local Docker DB setup)', value: 'docker-postgres' },
-      { name: 'Remote PostgreSQL (Provide connection string URL)', value: 'remote-postgres' },
-      { name: 'SQLite Light Mode (Zero-config local development)', value: 'sqlite' },
+      { name: 'PostgreSQL Container  (Automatic local Docker DB - Recommended)', value: 'docker-postgres' },
+      { name: 'Remote PostgreSQL     (Provide your own connection string URL)', value: 'remote-postgres' },
+      { name: 'SQLite Light Mode     (Zero-config, no Docker needed)', value: 'sqlite' },
     ],
-  });
+  })
 
-  let databaseUrl = 'postgresql://postgres:postgres@localhost:5432/webiu_db';
+  let databaseUrl = 'postgresql://postgres:postgres@localhost:5432/webiu_db'
   if (dbStrategy === 'remote-postgres') {
     databaseUrl = await input({
       message: 'Enter your PostgreSQL Connection String URL:',
       default: databaseUrl,
-    });
+    })
   }
 
   const themeAccent = await select({
     message: 'Select Primary UI Theme Accent:',
     choices: [
-      { name: 'Ocean Blue (#0052CC)', value: '#0052CC' },
-      { name: 'Emerald Green (#10B981)', value: '#10B981' },
-      { name: 'Deep Purple (#7C3AED)', value: '#7C3AED' },
+      { name: 'Ocean Blue     (#0052CC)', value: '#0052CC' },
+      { name: 'Emerald Green  (#10B981)', value: '#10B981' },
+      { name: 'Deep Purple    (#7C3AED)', value: '#7C3AED' },
       { name: 'Sunset Crimson (#EF4444)', value: '#EF4444' },
     ],
-  });
+  })
 
   const deployTarget = await select({
     message: 'Select Target Deployment Platform:',
     choices: [
-      { name: 'Render (Fullstack App + Postgres Database - Guided config)', value: 'render' },
-      { name: 'Railway (Instant container deployment)', value: 'railway' },
-      { name: 'Vercel + Render (Static Angular UI on Vercel + NestJS API on Render)', value: 'vercel-render' },
-      { name: 'Self-Hosted Docker (Generates production docker-compose.prod.yml)', value: 'docker' },
+      { name: 'Render              (Fullstack App + Postgres DB - Guided config)', value: 'render' },
+      { name: 'Railway             (Instant container deployment)', value: 'railway' },
+      { name: 'Vercel + Render     (Static Angular UI + NestJS API on Render)', value: 'vercel-render' },
+      { name: 'Self-Hosted Docker  (Generates docker-compose.prod.yml)', value: 'docker' },
     ],
-  });
+  })
 
-  const spinner = ora('Scaffolding your custom Webiu portal...').start();
+  // ── Step 2: Scaffold the project ─────────────────────────────────────────
+
+  const projectDir = path.resolve(process.cwd(), projectName)
+
+  // Check if target directory already exists
+  if (await fs.pathExists(projectDir)) {
+    const existing = await fs.readdir(projectDir)
+    if (existing.length > 0) {
+      console.log(chalk.red(`\nDirectory "${projectName}" already exists and is not empty. :(`) )
+      console.log(chalk.yellow('Please choose an empty directory or delete the existing one.\n'))
+      process.exit(1)
+    }
+  }
+
+  await fs.ensureDir(projectDir)
+
+  const spinner = ora({
+    text: `Cloning Webiu source code into "${projectName}"... (this may take a moment)`,
+    color: 'cyan',
+  }).start()
 
   try {
-    // Generate .env content
-    const envContent = `
-# Generated by Webiu CLI
-PORT=3000
-NODE_ENV=development
-ORG_NAME="${orgName}"
-GITHUB_ORG="${githubOrg}"
-ORG_TYPE="${orgType}"
-THEME_ACCENT="${themeAccent}"
-DEPLOY_TARGET="${deployTarget}"
-DATABASE_URL="${databaseUrl}"
-JWT_SECRET="webiu_super_secret_${Math.random().toString(36).substring(7)}"
-`.trim();
+    // ── Step 3: Clone the Webiu repository ───────────────────────────────
+    await execa('git', [
+      'clone',
+      '--branch', WEBIU_BRANCH,
+      '--single-branch',
+      '--depth=1',
+      WEBIU_REPO,
+      projectDir,
+    ], { stdio: 'pipe' })
 
-    await fs.writeFile(path.join(process.cwd(), '.env'), envContent);
+    spinner.text = 'Injecting your organization configuration...'
 
-    // Write webiu-ui config
-    const uiConfigPath = path.join(process.cwd(), 'webiu-ui', 'src', 'assets', 'config.json');
+    // ── Step 4: Write root .env ───────────────────────────────────────────
+    const jwtSecret = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10)
+    const envContent = [
+      '# Generated by Webiu CLI - Do not commit this file to version control',
+      `PORT=3000`,
+      `NODE_ENV=development`,
+      `ORG_NAME="${orgName}"`,
+      `GITHUB_ORG="${githubOrg}"`,
+      `ORG_TYPE="${orgType}"`,
+      `THEME_ACCENT="${themeAccent}"`,
+      `DEPLOY_TARGET="${deployTarget}"`,
+      `DATABASE_URL="${databaseUrl}"`,
+      `JWT_SECRET="${jwtSecret}"`,
+    ].join('\n')
+
+    await fs.writeFile(path.join(projectDir, '.env'), envContent)
+
+    // Copy .env to webiu-server as well (NestJS reads it from there)
+    const serverEnvPath = path.join(projectDir, 'webiu-server', '.env')
+    if (await fs.pathExists(path.dirname(serverEnvPath))) {
+      const serverEnvContent = [
+        '# Generated by Webiu CLI',
+        `PORT=3000`,
+        `NODE_ENV=development`,
+        `DATABASE_URL="${databaseUrl}"`,
+        `JWT_SECRET="${jwtSecret}"`,
+        `GITHUB_ORG="${githubOrg}"`,
+      ].join('\n')
+      await fs.writeFile(serverEnvPath, serverEnvContent)
+    }
+
+    // ── Step 5: Write webiu-ui runtime config.json ────────────────────────
+    const uiConfigPath = path.join(projectDir, 'webiu-ui', 'src', 'assets', 'config.json')
     if (await fs.pathExists(path.dirname(uiConfigPath))) {
       await fs.writeJson(uiConfigPath, {
         orgName,
         githubOrg,
+        orgType,
         themeAccent,
         apiUrl: 'http://localhost:3000',
-      }, { spaces: 2 });
+        graphqlUrl: 'http://localhost:3000/graphql',
+      }, { spaces: 2 })
     }
 
-    spinner.succeed(chalk.green(`Webiu project configured successfully for ${chalk.bold(projectName)}! XD`));
+    spinner.succeed(chalk.green(`Project "${chalk.bold(projectName)}" scaffolded successfully! XD`))
 
-    console.log(`\n${chalk.bold.yellow('Next Steps:')}`);
-    console.log(`  1. Run ${chalk.cyan('npx webiu dev')} to start your portal locally.`);
-    console.log(`  2. Run ${chalk.cyan('npx webiu deploy')} to prepare deployment files.`);
-    console.log(`  3. Run ${chalk.cyan('npx webiu help')} anytime for commands list.\n`);
+    // ── Step 6: Print next steps ──────────────────────────────────────────
+    console.log(`
+${chalk.bold.yellow('================================================')}
+${chalk.bold.green('   Your Webiu portal is ready! Here is what')}
+${chalk.bold.green('   to do next:                               ')}
+${chalk.bold.yellow('================================================')}
+
+  ${chalk.cyan('cd')} ${projectName}
+
+  ${chalk.bold('Install dependencies:')}
+  ${chalk.cyan('cd webiu-server && npm install')}
+  ${chalk.cyan('cd ../webiu-ui   && npm install')}
+  ${chalk.cyan('cd ..')}
+
+  ${chalk.bold('Start development servers:')}
+  ${chalk.cyan('npx webiu dev')}
+
+  ${chalk.bold('Generate deployment files:')}
+  ${chalk.cyan('npx webiu deploy')}
+
+  ${chalk.bold('View all commands:')}
+  ${chalk.cyan('npx webiu help')}
+`)
   } catch (err: any) {
-    spinner.fail(chalk.red('Failed to initialize Webiu project.'));
-    console.error(err);
+    spinner.fail(chalk.red('Scaffolding failed!'))
+
+    if (err.message && err.message.includes('git')) {
+      console.error(chalk.red('\nGit is required to scaffold a Webiu project.'))
+      console.error(chalk.yellow('Please install git from https://git-scm.com and try again.\n'))
+    } else {
+      console.error(err)
+    }
+
+    // Clean up empty directory on failure
+    const existing = await fs.readdir(projectDir).catch(() => [])
+    if (existing.length === 0) {
+      await fs.remove(projectDir)
+    }
+
+    process.exit(1)
   }
 }
