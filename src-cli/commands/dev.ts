@@ -73,7 +73,7 @@ export async function buildCommand() {
     process.exit(1)
   }
 
-  const { execa } = await import('execa')
+  const execa = (await import('execa')).default
 
   console.log(chalk.cyan('Building NestJS backend...'))
   await execa('npm', ['run', 'build'], { cwd: serverDir, stdio: 'inherit' })

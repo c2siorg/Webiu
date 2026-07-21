@@ -7,7 +7,7 @@ import chalk from "chalk";
 import ora from "ora";
 import fs from "fs-extra";
 import path from "path";
-import { execa } from "execa";
+import execa from "execa";
 var WEBIU_REPO = "https://github.com/TarunyaProgrammer/Webiu.git";
 var WEBIU_BRANCH = "webiu-npm-pack";
 async function initCommand(options) {

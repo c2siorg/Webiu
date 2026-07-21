@@ -30,7 +30,7 @@ var import_chalk = __toESM(require("chalk"));
 var import_ora = __toESM(require("ora"));
 var import_fs_extra = __toESM(require("fs-extra"));
 var import_path = __toESM(require("path"));
-var import_execa = require("execa");
+var import_execa = __toESM(require("execa"));
 var WEBIU_REPO = "https://github.com/TarunyaProgrammer/Webiu.git";
 var WEBIU_BRANCH = "webiu-npm-pack";
 async function initCommand(options) {
@@ -109,7 +109,7 @@ Directory "${projectName}" already exists and is not empty. :(`));
     color: "cyan"
   }).start();
   try {
-    await (0, import_execa.execa)("git", [
+    await (0, import_execa.default)("git", [
       "clone",
       "--branch",
       WEBIU_BRANCH,
