@@ -36,11 +36,15 @@
     "commander": "^13.1.0",
     "concurrently": "^9.1.2",
     "execa": "^5.1.1",
+    "figlet": "^1.11.4",
     "fs-extra": "^11.3.0",
+    "gradient-string": "^3.0.0",
     "ora": "^5.4.1"
   },
   "devDependencies": {
+    "@types/figlet": "^1.7.0",
     "@types/fs-extra": "^11.0.4",
+    "@types/gradient-string": "^1.1.6",
     "@types/node": "^22.13.4",
     "husky": "^9.1.7",
     "tsup": "^8.4.0",
