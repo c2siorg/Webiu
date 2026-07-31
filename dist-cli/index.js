@@ -173,7 +173,7 @@ var init_banner = __esm({
 \u2588\u2588\u2551\u2588\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u255D  \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551
 \u255A\u2588\u2588\u2588\u2554\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D
  \u255A\u2550\u2550\u255D\u255A\u2550\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D `;
-    VERSION = "1.0.5";
+    VERSION = "2.0.1";
   }
 });
 
@@ -1278,7 +1278,7 @@ process.on("unhandledRejection", (reason) => {
   }
 });
 var program = new import_commander.Command();
-program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version("1.0.5", "-V, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
+program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version("2.0.1", "-V, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
 program.configureOutput({
   writeOut: (str) => {
     if (str.includes("Usage: webiu") || str.includes("Commands:") || str.includes("Options:")) {

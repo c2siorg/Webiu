@@ -1,7 +1,8 @@
 {
   "name": "create-webiu",
-  "version": "1.0.5",
+  "version": "2.0.1",
   "description": "CLI tool to generate, configure, and deploy Webiu community portal applications",
+  "license": "MIT",
   "keywords": [
     "webiu",
     "create-webiu",
@@ -23,7 +24,8 @@
   "files": [
     "bin",
     "dist-cli",
-    "templates"
+    "templates",
+    "src-cli/assets"
   ],
   "scripts": {
     "prepare": "husky",

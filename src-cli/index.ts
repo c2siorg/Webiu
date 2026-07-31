@@ -28,7 +28,7 @@ const program = new Command();
 program
   .name('webiu')
   .description('CLI tool to generate, configure, and deploy Webiu community portals')
-  .version('1.0.5', '-V, --version', 'Output the current CLI version')
+  .version('2.0.1', '-V, --version', 'Output the current CLI version')
   .addHelpCommand(false)
   .helpOption('-h, --help', 'Display command usage and instructions');
 

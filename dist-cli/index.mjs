@@ -5,7 +5,7 @@ import {
   printFinalVictoryScreen,
   printLiveSummaryCard,
   printWelcomeBanner
-} from "./chunk-I2IRNSBF.mjs";
+} from "./chunk-36XSOGHD.mjs";
 
 // src-cli/index.ts
 import { Command } from "commander";
@@ -508,7 +508,7 @@ import { AppConfigService } from './services/app-config.service';`
         default: true
       });
       if (shouldStart) {
-        const { devCommand: devCommand2 } = await import("./dev-NIGB5ZNI.mjs");
+        const { devCommand: devCommand2 } = await import("./dev-NPAINWOV.mjs");
         process.chdir(projectDir);
         await devCommand2();
       }
@@ -958,7 +958,7 @@ process.on("unhandledRejection", (reason) => {
   }
 });
 var program = new Command();
-program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version("1.0.5", "-V, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
+program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version("2.0.1", "-V, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
 program.configureOutput({
   writeOut: (str) => {
     if (str.includes("Usage: webiu") || str.includes("Commands:") || str.includes("Options:")) {

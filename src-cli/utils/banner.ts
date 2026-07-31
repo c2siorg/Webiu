@@ -11,7 +11,7 @@ const WEBIU_BIG_ASCII = `
 ╚███╔███╔╝███████╗██████╔╝██║╚██████╔╝
  ╚══╝╚══╝ ╚══════╝╚═════╝ ╚═╝ ╚═════╝ `;
 
-const VERSION = '1.0.5';
+const VERSION = '2.0.1';
 
 /**
  * Calculates string length excluding ANSI color escape sequences
