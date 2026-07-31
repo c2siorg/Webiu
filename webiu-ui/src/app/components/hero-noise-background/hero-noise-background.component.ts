@@ -247,47 +247,52 @@ export class HeroNoiseBackgroundComponent implements AfterViewInit, OnDestroy {
     if (this.lastThemeState === isDark && !force) return;
     this.lastThemeState = isDark;
 
-    // Dynamically retrieve current background style color from the DOM
+    // Dynamically retrieve current background and accent style color from the DOM
     const computedStyle = getComputedStyle(document.documentElement);
     const bgColorStr = computedStyle.getPropertyValue('--bg').trim();
     const parsedBgColor = bgColorStr || (isDark ? '#07090d' : '#f7f7f2');
 
+    const accentStr = computedStyle.getPropertyValue('--theme-accent').trim() || '#7B8CFF';
+    const themeAccentColor = new THREE.Color(accentStr);
+
     if (this.scene.fog && this.scene.fog instanceof THREE.FogExp2) {
       this.scene.fog.color.setStyle(parsedBgColor);
-      this.scene.fog.density = isDark ? 0.011 : 0.012; // Adjusted dark mode fog density to create distinct silhouette layers
+      this.scene.fog.density = isDark ? 0.011 : 0.012;
     }
 
     if (isDark) {
-      // Dark Mode: Rich purple ambient base to create distinct silhouette layers in shades of purple
-      this.ambientLight.color.setHex(0x4c1d95); // Vibrant purple base (purple-900)
-      this.ambientLight.intensity = 1.5;       // Raised to make the different shades of purple highly visible
+      // Dark Mode: Ambient base and 3D wave mesh material copy the user-selected theme accent color
+      this.material.color.copy(themeAccentColor);
+      this.ambientLight.color.copy(themeAccentColor);
+      this.ambientLight.intensity = 1.2;
 
-      this.light1.color.setHex(0x3b82f6); // Vibrant Blue
-      this.light2.color.setHex(0x06b6d4); // Vibrant Cyan
-      this.light3.color.setHex(0x10b981); // Vibrant Green
-      this.light4.color.setHex(0xd946ef); // Vibrant Pink
+      this.light1.color.copy(themeAccentColor);
+      this.light2.color.copy(themeAccentColor);
+      this.light3.color.setHex(0x10b981); // Subtle mint accent accentuation
+      this.light4.color.copy(themeAccentColor);
       
-      this.light1.intensity = 16.0;       // Bright neon foreground peaks
-      this.light2.intensity = 16.0;
-      this.light3.intensity = 16.0;
-      this.light4.intensity = 16.0;
+      this.light1.intensity = 12.0;
+      this.light2.intensity = 12.0;
+      this.light3.intensity = 8.0;
+      this.light4.intensity = 12.0;
 
-      this.light1.distance = 110;          // Localized decay to separate foreground, middle ground, and background
+      this.light1.distance = 110;
       this.light2.distance = 110;
       this.light3.distance = 110;
       this.light4.distance = 110;
 
-      this.material.roughness = 0.4;
-      this.material.metalness = 0.1;
+      this.material.roughness = 0.3;
+      this.material.metalness = 0.2;
     } else {
-      // Light Mode: Clean white backdrop & light pastel colors
+      // Light Mode: Clean white mesh backdrop with soft accent lighting
+      this.material.color.setHex(0xffffff);
       this.ambientLight.color.setHex(0xffffff);
       this.ambientLight.intensity = 1.4;
 
-      this.light1.color.setHex(0xb19ffb); // Pastel lavender
-      this.light2.color.setHex(0x94c5ff); // Pastel sky blue
-      this.light3.color.setHex(0xa2f5cb); // Pastel mint green
-      this.light4.color.setHex(0xffb8d1); // Pastel rose pink
+      this.light1.color.copy(themeAccentColor);
+      this.light2.color.setHex(0x94c5ff);
+      this.light3.color.setHex(0xa2f5cb);
+      this.light4.color.copy(themeAccentColor);
 
       this.light1.intensity = 2.2;
       this.light2.intensity = 2.2;

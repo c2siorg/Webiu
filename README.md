@@ -58,9 +58,9 @@ If you prefer not to install globally, you can use `npx` instead for every comma
 
 ```bash
 npx create-webiu init        # replaces: webiu init
-npx webiu dev                # replaces: webiu dev
-npx webiu deploy             # replaces: webiu deploy
-npx webiu help               # replaces: webiu help
+npx create-webiu dev         # replaces: webiu dev
+npx create-webiu deploy      # replaces: webiu deploy
+npx create-webiu help        # replaces: webiu help
 ```
 
 The behavior is identical. The difference is that `npx` fetches the CLI from your local `node_modules` folder each time, while the global install makes the `webiu` command available system-wide in your terminal.
@@ -79,7 +79,8 @@ The behavior is identical. The difference is that `npx` fetches the CLI from you
    - Configures Angular runtime settings in `webiu-ui/src/assets/config.json`.
 
 3. **Development Phase (`webiu dev`)**
-   - Concurrently launches Angular Frontend (`http://localhost:4200`) and NestJS API Backend (`http://localhost:3000`) with live hot-reloading.
+   - Concurrently launches Angular Frontend (`http://localhost:4200`) and NestJS API Backend (`http://localhost:5050`) with live hot-reloading.
+   - Pre-flight checks if the database is reachable and warns if Docker is not running.
 
 4. **Deployment Phase (`webiu deploy`)**
    - Interactively scaffolds tailored Infrastructure-as-Code manifests for Render, Railway, Vercel, or production Docker Compose.
@@ -91,31 +92,27 @@ The behavior is identical. The difference is that `npx` fetches the CLI from you
 Run `webiu help` at any time to display this in your terminal.
 
 ```
-====================================================================
-                        WEBIU CLI TOOL - HELP MANUAL
-====================================================================
-
-Usage: webiu [command] [options]
+Usage: webiu [command]
 
 Commands:
   init          Interactively initialize a new Webiu portal project
-  dev           Start local development server (Frontend + Backend concurrently)
+  dev           Start local development servers (Frontend + Backend concurrently)
   build         Build production assets for both webiu-ui and webiu-server
-  config        Re-configure Organization metadata, branding, or environment variables
+  config        Re-configure organization metadata, branding, DB, or admin credentials
   deploy        Launch interactive deployment generator for Render, Railway, Vercel, or Docker
-  docker:up     Spin up containerized development environment using Docker Compose
-  docker:down   Stop and remove running local Docker containers
-  help          Display detailed command usage and architectural instructions
+  docker:up     Start local Docker containers (PostgreSQL database)
+  docker:down   Stop and remove local Docker containers
+  help          Display detailed command usage and instructions
 
-Options:
-  -v, --version Output the current version of webiu
-  -h, --help    Display help information for command
+Flags:
+  -V, --version Output the current CLI version
+  -h, --help    Display help information
 
 Examples:
   $ webiu init
   $ webiu dev
   $ webiu deploy
-  $ webiu help
+  $ webiu -V
 ```
 
 ---

@@ -53,8 +53,8 @@ describe('SystemSettingService', () => {
 
       await service.onApplicationBootstrap();
 
-      expect(mockRepository.create).toHaveBeenCalledTimes(6);
-      expect(mockRepository.save).toHaveBeenCalledTimes(6);
+      expect(mockRepository.create).toHaveBeenCalledTimes(8);
+      expect(mockRepository.save).toHaveBeenCalledTimes(8);
     });
 
     it('should not seed if settings already exist', async () => {
