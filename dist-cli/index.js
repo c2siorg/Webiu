@@ -28,6 +28,25 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
   mod
 ));
 
+// src-cli/constants.ts
+var VERSION, WEBIU_REPO, WEBIU_BRANCH, ALL_NAVBAR_SECTIONS;
+var init_constants = __esm({
+  "src-cli/constants.ts"() {
+    VERSION = "2.0.1";
+    WEBIU_REPO = "https://github.com/TarunyaProgrammer/Webiu.git";
+    WEBIU_BRANCH = "webiu-npm-pack";
+    ALL_NAVBAR_SECTIONS = [
+      { name: "\u{1F3E0} Home          (always included)", value: "home", disabled: true },
+      { name: "\u{1F4C1} Projects", value: "projects", checked: true },
+      { name: "\u{1F4F0} Publications", value: "publications", checked: true },
+      { name: "\u{1F465} Contributors", value: "contributors", checked: true },
+      { name: "\u{1F310} Community", value: "community", checked: true },
+      { name: "\u{1F4BC} Opportunities", value: "opportunities", checked: true },
+      { name: "\u{1F393} GSoC (Google Summer of Code)", value: "gsoc", checked: true }
+    ];
+  }
+});
+
 // src-cli/utils/banner.ts
 function visibleLength(str) {
   return str.replace(/\u001b\[[0-9;]*m/g, "").length;
@@ -160,12 +179,13 @@ function printCompactHeader(commandName) {
 ${tag}  ${cmd}
 `);
 }
-var import_chalk, import_gradient_string, import_os, WEBIU_BIG_ASCII, VERSION;
+var import_chalk, import_gradient_string, import_os, WEBIU_BIG_ASCII;
 var init_banner = __esm({
   "src-cli/utils/banner.ts"() {
     import_chalk = __toESM(require("chalk"));
     import_gradient_string = __toESM(require("gradient-string"));
     import_os = __toESM(require("os"));
+    init_constants();
     WEBIU_BIG_ASCII = `
 \u2588\u2588\u2557    \u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2557 \u2588\u2588\u2557\u2588\u2588\u2557   \u2588\u2588\u2557
 \u2588\u2588\u2551    \u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u2550\u2550\u255D\u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551
@@ -173,7 +193,6 @@ var init_banner = __esm({
 \u2588\u2588\u2551\u2588\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2554\u2550\u2550\u255D  \u2588\u2588\u2554\u2550\u2550\u2588\u2588\u2557\u2588\u2588\u2551\u2588\u2588\u2551   \u2588\u2588\u2551
 \u255A\u2588\u2588\u2588\u2554\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2588\u2588\u2588\u2588\u2588\u2557\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D\u2588\u2588\u2551\u255A\u2588\u2588\u2588\u2588\u2588\u2588\u2554\u255D
  \u255A\u2550\u2550\u255D\u255A\u2550\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u2550\u255D\u255A\u2550\u2550\u2550\u2550\u2550\u255D \u255A\u2550\u255D \u255A\u2550\u2550\u2550\u2550\u2550\u255D `;
-    VERSION = "2.0.1";
   }
 });
 
@@ -332,19 +351,10 @@ var import_chalk3 = __toESM(require("chalk"));
 var import_ora = __toESM(require("ora"));
 var import_fs_extra2 = __toESM(require("fs-extra"));
 var import_path2 = __toESM(require("path"));
+var import_crypto = __toESM(require("crypto"));
 var import_execa = __toESM(require("execa"));
 init_banner();
-var WEBIU_REPO = "https://github.com/TarunyaProgrammer/Webiu.git";
-var WEBIU_BRANCH = "webiu-npm-pack";
-var ALL_NAVBAR_SECTIONS = [
-  { name: "\u{1F3E0} Home          (always included)", value: "home", disabled: true },
-  { name: "\u{1F4C1} Projects", value: "projects", checked: true },
-  { name: "\u{1F4F0} Publications", value: "publications", checked: true },
-  { name: "\u{1F465} Contributors", value: "contributors", checked: true },
-  { name: "\u{1F310} Community", value: "community", checked: true },
-  { name: "\u{1F4BC} Opportunities", value: "opportunities", checked: true },
-  { name: "\u{1F393} GSoC (Google Summer of Code)", value: "gsoc", checked: true }
-];
+init_constants();
 async function initCommand(options) {
   printWelcomeBanner();
   console.log(`${import_chalk3.default.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}`);
@@ -356,6 +366,12 @@ async function initCommand(options) {
     message: "What is your project directory name?",
     default: "my-webiu-portal"
   });
+  const normalizedPath = import_path2.default.normalize(projectName);
+  if (normalizedPath.startsWith("..") || import_path2.default.isAbsolute(projectName) || /[\\/]/.test(projectName)) {
+    console.error(import_chalk3.default.red("\n  \u2718 Invalid project directory name. Path traversal characters (/, \\, ..) are not allowed."));
+    console.error(import_chalk3.default.yellow('  Please provide a simple directory name (e.g. "my-webiu-portal").\n'));
+    process.exit(1);
+  }
   summary.projectName = projectName;
   printLiveSummaryCard(summary);
   const orgName = await (0, import_prompts.input)({
@@ -472,7 +488,7 @@ ${import_chalk3.default.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u
       projectDir
     ], { stdio: "pipe" });
     spinner.text = "Injecting organization configuration...";
-    const jwtSecret = Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10) + Math.random().toString(36).substring(2, 10);
+    const jwtSecret = import_crypto.default.randomBytes(32).toString("hex");
     const rootEnvContent = [
       "# Generated by Webiu CLI \u2014 Do not commit this file to version control",
       `PORT=5050`,
@@ -851,22 +867,21 @@ async function runInstall(projectDir) {
     text: "Installing backend dependencies (webiu-server)...",
     color: "blue"
   }).start();
-  try {
-    await (0, import_execa.default)("npm", ["install"], { cwd: serverDir, stdio: "pipe" });
-    serverSpinner.succeed(import_chalk3.default.green("  \u2714 Backend dependencies installed"));
-  } catch {
-    serverSpinner.fail(import_chalk3.default.red("  \u2718 Backend install failed \u2014 run: cd webiu-server && npm install"));
-  }
   const uiSpinner = (0, import_ora.default)({
     text: "Installing frontend dependencies (webiu-ui)...",
     color: "green"
   }).start();
-  try {
-    await (0, import_execa.default)("npm", ["install"], { cwd: uiDir, stdio: "pipe" });
+  const installServer = (0, import_execa.default)("npm", ["install"], { cwd: serverDir, stdio: "pipe" }).then(() => {
+    serverSpinner.succeed(import_chalk3.default.green("  \u2714 Backend dependencies installed"));
+  }).catch(() => {
+    serverSpinner.fail(import_chalk3.default.red("  \u2718 Backend install failed \u2014 run: cd webiu-server && npm install"));
+  });
+  const installUi = (0, import_execa.default)("npm", ["install"], { cwd: uiDir, stdio: "pipe" }).then(() => {
     uiSpinner.succeed(import_chalk3.default.green("  \u2714 Frontend dependencies installed"));
-  } catch {
+  }).catch(() => {
     uiSpinner.fail(import_chalk3.default.red("  \u2718 Frontend install failed \u2014 run: cd webiu-ui && npm install"));
-  }
+  });
+  await Promise.all([installServer, installUi]);
 }
 
 // src-cli/index.ts
@@ -879,15 +894,7 @@ var import_ora2 = __toESM(require("ora"));
 var import_fs_extra3 = __toESM(require("fs-extra"));
 var import_path3 = __toESM(require("path"));
 init_banner();
-var ALL_NAVBAR_SECTIONS2 = [
-  { name: "\u{1F3E0} Home          (always included)", value: "home", disabled: true },
-  { name: "\u{1F4C1} Projects", value: "projects", checked: true },
-  { name: "\u{1F4F0} Publications", value: "publications", checked: true },
-  { name: "\u{1F465} Contributors", value: "contributors", checked: true },
-  { name: "\u{1F310} Community", value: "community", checked: true },
-  { name: "\u{1F4BC} Opportunities", value: "opportunities", checked: true },
-  { name: "\u{1F393} GSoC (Google Summer of Code)", value: "gsoc", checked: true }
-];
+init_constants();
 async function configCommand() {
   printCompactHeader("webiu config \u2014 Interactive Configuration Manager");
   const rootEnvPath = import_path3.default.join(process.cwd(), ".env");
@@ -949,7 +956,7 @@ Select new accent color:`,
   } else if (setting === "navbar") {
     const selected = await (0, import_prompts2.checkbox)({
       message: "Which navbar sections should be active?",
-      choices: ALL_NAVBAR_SECTIONS2,
+      choices: ALL_NAVBAR_SECTIONS,
       instructions: import_chalk4.default.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
     });
     newNavbarSections = ["home", ...selected.filter((s) => s !== "home")];
@@ -973,7 +980,8 @@ Select new accent color:`,
     if (await import_fs_extra3.default.pathExists(rootEnvPath)) {
       let envContent = await import_fs_extra3.default.readFile(rootEnvPath, "utf-8");
       for (const [key, val] of Object.entries(updates)) {
-        const regex = new RegExp(`^${key}=.*$`, "m");
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(`^${escapedKey}=.*$`, "m");
         const newLine = `${key}="${val}"`;
         if (regex.test(envContent)) {
           envContent = envContent.replace(regex, newLine);
@@ -987,7 +995,8 @@ ${newLine}`;
     if (await import_fs_extra3.default.pathExists(serverEnvPath)) {
       let serverEnv = await import_fs_extra3.default.readFile(serverEnvPath, "utf-8");
       for (const [key, val] of Object.entries(updates)) {
-        const regex = new RegExp(`^${key}=.*$`, "m");
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const regex = new RegExp(`^${escapedKey}=.*$`, "m");
         const newLine = `${key}="${val}"`;
         if (regex.test(serverEnv)) {
           serverEnv = serverEnv.replace(regex, newLine);
@@ -1196,10 +1205,11 @@ ${import_chalk5.default.bold.yellow("Next Steps for Docker:")}`);
 
 // src-cli/commands/help.ts
 var import_chalk6 = __toESM(require("chalk"));
+init_constants();
 function helpCommand() {
   console.log(`
 ${import_chalk6.default.bold.hex("#7B8CFF")("\u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E")}
-${import_chalk6.default.bold.hex("#7B8CFF")("\u2502")}  ${import_chalk6.default.bold.white("WEBIU CLI")}  ${import_chalk6.default.gray("v1.0.5")}  ${import_chalk6.default.hex("#7B8CFF")("\xB7")}  ${import_chalk6.default.gray("by Ceylon Computer Science Institute")}        ${import_chalk6.default.bold.hex("#7B8CFF")("\u2502")}
+${import_chalk6.default.bold.hex("#7B8CFF")("\u2502")}  ${import_chalk6.default.bold.white("WEBIU CLI")}  ${import_chalk6.default.gray(`v${VERSION}`)}  ${import_chalk6.default.hex("#7B8CFF")("\xB7")}  ${import_chalk6.default.gray("by Ceylon Computer Science Institute")}        ${import_chalk6.default.bold.hex("#7B8CFF")("\u2502")}
 ${import_chalk6.default.bold.hex("#7B8CFF")("\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F")}
 
 ${import_chalk6.default.bold("Usage:")} ${import_chalk6.default.cyan("webiu")} ${import_chalk6.default.gray("[command]")}

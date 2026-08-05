@@ -1,6 +1,7 @@
 import chalk from 'chalk';
 import gradient from 'gradient-string';
 import os from 'os';
+import { VERSION } from '../constants';
 
 // Big bold 3D ASCII Logo for WEBIU
 const WEBIU_BIG_ASCII = `
@@ -10,8 +11,6 @@ const WEBIU_BIG_ASCII = `
 ██║███╗██║██╔══╝  ██╔══██╗██║██║   ██║
 ╚███╔███╔╝███████╗██████╔╝██║╚██████╔╝
  ╚══╝╚══╝ ╚══════╝╚═════╝ ╚═╝ ╚═════╝ `;
-
-const VERSION = '2.0.1';
 
 /**
  * Calculates string length excluding ANSI color escape sequences

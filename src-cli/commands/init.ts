@@ -3,22 +3,11 @@ import chalk from 'chalk';
 import ora from 'ora';
 import fs from 'fs-extra';
 import path from 'path';
+import crypto from 'crypto';
 import execa from 'execa';
 import { printWelcomeBanner, printLiveSummaryCard, printFinalVictoryScreen } from '../utils/banner';
+import { WEBIU_REPO, WEBIU_BRANCH, ALL_NAVBAR_SECTIONS } from '../constants';
 
-const WEBIU_REPO = 'https://github.com/TarunyaProgrammer/Webiu.git';
-const WEBIU_BRANCH = 'webiu-npm-pack';
-
-// All available navbar sections — Home is always forced on
-const ALL_NAVBAR_SECTIONS = [
-  { name: '🏠 Home          (always included)', value: 'home', disabled: true },
-  { name: '📁 Projects', value: 'projects', checked: true },
-  { name: '📰 Publications', value: 'publications', checked: true },
-  { name: '👥 Contributors', value: 'contributors', checked: true },
-  { name: '🌐 Community', value: 'community', checked: true },
-  { name: '💼 Opportunities', value: 'opportunities', checked: true },
-  { name: '🎓 GSoC (Google Summer of Code)', value: 'gsoc', checked: true },
-];
 
 export async function initCommand(options: { name?: string }) {
   // ── GREETING BANNER ────────────────────────────────────────────────────────
@@ -36,6 +25,14 @@ export async function initCommand(options: { name?: string }) {
     message: 'What is your project directory name?',
     default: 'my-webiu-portal',
   });
+  // Guard: Path traversal protection
+  const normalizedPath = path.normalize(projectName);
+  if (normalizedPath.startsWith('..') || path.isAbsolute(projectName) || /[\\/]/.test(projectName)) {
+    console.error(chalk.red('\n  ✘ Invalid project directory name. Path traversal characters (/, \\, ..) are not allowed.'));
+    console.error(chalk.yellow('  Please provide a simple directory name (e.g. "my-webiu-portal").\n'));
+    process.exit(1);
+  }
+
   summary.projectName = projectName;
   printLiveSummaryCard(summary);
 
@@ -174,9 +171,7 @@ export async function initCommand(options: { name?: string }) {
     spinner.text = 'Injecting organization configuration...';
 
     // ── Generate a secure JWT secret ─────────────────────────────────────────
-    const jwtSecret = Math.random().toString(36).substring(2, 10)
-      + Math.random().toString(36).substring(2, 10)
-      + Math.random().toString(36).substring(2, 10);
+    const jwtSecret = crypto.randomBytes(32).toString('hex');
 
     // ── Write root .env ───────────────────────────────────────────────────────
     const rootEnvContent = [
@@ -600,22 +595,26 @@ async function runInstall(projectDir: string): Promise<void> {
     color: 'blue',
   }).start();
 
-  try {
-    await execa('npm', ['install'], { cwd: serverDir, stdio: 'pipe' });
-    serverSpinner.succeed(chalk.green('  ✔ Backend dependencies installed'));
-  } catch {
-    serverSpinner.fail(chalk.red('  ✘ Backend install failed — run: cd webiu-server && npm install'));
-  }
-
   const uiSpinner = ora({
     text: 'Installing frontend dependencies (webiu-ui)...',
     color: 'green',
   }).start();
 
-  try {
-    await execa('npm', ['install'], { cwd: uiDir, stdio: 'pipe' });
-    uiSpinner.succeed(chalk.green('  ✔ Frontend dependencies installed'));
-  } catch {
-    uiSpinner.fail(chalk.red('  ✘ Frontend install failed — run: cd webiu-ui && npm install'));
-  }
+  const installServer = execa('npm', ['install'], { cwd: serverDir, stdio: 'pipe' })
+    .then(() => {
+      serverSpinner.succeed(chalk.green('  ✔ Backend dependencies installed'));
+    })
+    .catch(() => {
+      serverSpinner.fail(chalk.red('  ✘ Backend install failed — run: cd webiu-server && npm install'));
+    });
+
+  const installUi = execa('npm', ['install'], { cwd: uiDir, stdio: 'pipe' })
+    .then(() => {
+      uiSpinner.succeed(chalk.green('  ✔ Frontend dependencies installed'));
+    })
+    .catch(() => {
+      uiSpinner.fail(chalk.red('  ✘ Frontend install failed — run: cd webiu-ui && npm install'));
+    });
+
+  await Promise.all([installServer, installUi]);
 }
