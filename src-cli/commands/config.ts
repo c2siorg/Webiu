@@ -5,16 +5,8 @@ import fs from 'fs-extra';
 import path from 'path';
 import execa from 'execa';
 import { printCompactHeader } from '../utils/banner';
+import { ALL_NAVBAR_SECTIONS } from '../constants';
 
-const ALL_NAVBAR_SECTIONS = [
-  { name: '🏠 Home          (always included)', value: 'home', disabled: true },
-  { name: '📁 Projects', value: 'projects', checked: true },
-  { name: '📰 Publications', value: 'publications', checked: true },
-  { name: '👥 Contributors', value: 'contributors', checked: true },
-  { name: '🌐 Community', value: 'community', checked: true },
-  { name: '💼 Opportunities', value: 'opportunities', checked: true },
-  { name: '🎓 GSoC (Google Summer of Code)', value: 'gsoc', checked: true },
-];
 
 export async function configCommand() {
   printCompactHeader('webiu config — Interactive Configuration Manager');
@@ -118,7 +110,8 @@ export async function configCommand() {
     if (await fs.pathExists(rootEnvPath)) {
       let envContent = await fs.readFile(rootEnvPath, 'utf-8');
       for (const [key, val] of Object.entries(updates)) {
-        const regex = new RegExp(`^${key}=.*$`, 'm');
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`^${escapedKey}=.*$`, 'm');
         const newLine = `${key}="${val}"`;
         if (regex.test(envContent)) {
           envContent = envContent.replace(regex, newLine);
@@ -133,7 +126,8 @@ export async function configCommand() {
     if (await fs.pathExists(serverEnvPath)) {
       let serverEnv = await fs.readFile(serverEnvPath, 'utf-8');
       for (const [key, val] of Object.entries(updates)) {
-        const regex = new RegExp(`^${key}=.*$`, 'm');
+        const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const regex = new RegExp(`^${escapedKey}=.*$`, 'm');
         const newLine = `${key}="${val}"`;
         if (regex.test(serverEnv)) {
           serverEnv = serverEnv.replace(regex, newLine);

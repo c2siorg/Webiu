@@ -1,9 +1,10 @@
 import chalk from 'chalk';
+import { VERSION } from '../constants';
 
 export function helpCommand() {
   console.log(`
 ${chalk.bold.hex('#7B8CFF')('╭──────────────────────────────────────────────────────────────╮')}
-${chalk.bold.hex('#7B8CFF')('│')}  ${chalk.bold.white('WEBIU CLI')}  ${chalk.gray('v1.0.5')}  ${chalk.hex('#7B8CFF')('·')}  ${chalk.gray('by Ceylon Computer Science Institute')}        ${chalk.bold.hex('#7B8CFF')('│')}
+${chalk.bold.hex('#7B8CFF')('│')}  ${chalk.bold.white('WEBIU CLI')}  ${chalk.gray(`v${VERSION}`)}  ${chalk.hex('#7B8CFF')('·')}  ${chalk.gray('by Ceylon Computer Science Institute')}        ${chalk.bold.hex('#7B8CFF')('│')}
 ${chalk.bold.hex('#7B8CFF')('╰──────────────────────────────────────────────────────────────╯')}
 
 ${chalk.bold('Usage:')} ${chalk.cyan('webiu')} ${chalk.gray('[command]')}
