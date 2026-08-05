@@ -1540,8 +1540,8 @@ ${import_chalk8.default.bold.green("Commands:")}
   ${import_chalk8.default.bold.cyan("help")}            Display this help manual
 
 ${import_chalk8.default.bold.green("Flags:")}
-  ${import_chalk8.default.bold.cyan("-V, --version")}   Output the current CLI version
-  ${import_chalk8.default.bold.cyan("-h, --help")}      Display help information
+  ${import_chalk8.default.bold.cyan("-v, -V, --version")} Output the current CLI version
+  ${import_chalk8.default.bold.cyan("-h, --help")}       Display help information
 
 ${import_chalk8.default.bold.magenta("Examples:")}
   ${import_chalk8.default.gray("$")} ${import_chalk8.default.cyan("webiu init")}
@@ -1696,7 +1696,7 @@ process.on("unhandledRejection", (reason) => {
   }
 });
 var program = new import_commander.Command();
-program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version(VERSION, "-V, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
+program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version(VERSION, "-v, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
 program.configureOutput({
   writeOut: (str) => {
     if (str.includes("Usage: webiu") || str.includes("Commands:") || str.includes("Options:")) {
@@ -1723,6 +1723,10 @@ program.on("command:*", (operands) => {
   helpCommand();
   process.exit(1);
 });
+if (process.argv.includes("-V")) {
+  console.log(VERSION);
+  process.exit(0);
+}
 if (process.argv.includes("-h") || process.argv.includes("--help")) {
   helpCommand();
   process.exit(0);

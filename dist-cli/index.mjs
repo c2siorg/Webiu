@@ -1201,8 +1201,8 @@ ${chalk6.bold.green("Commands:")}
   ${chalk6.bold.cyan("help")}            Display this help manual
 
 ${chalk6.bold.green("Flags:")}
-  ${chalk6.bold.cyan("-V, --version")}   Output the current CLI version
-  ${chalk6.bold.cyan("-h, --help")}      Display help information
+  ${chalk6.bold.cyan("-v, -V, --version")} Output the current CLI version
+  ${chalk6.bold.cyan("-h, --help")}       Display help information
 
 ${chalk6.bold.magenta("Examples:")}
   ${chalk6.gray("$")} ${chalk6.cyan("webiu init")}
@@ -1353,7 +1353,7 @@ process.on("unhandledRejection", (reason) => {
   }
 });
 var program = new Command();
-program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version(VERSION, "-V, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
+program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version(VERSION, "-v, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
 program.configureOutput({
   writeOut: (str) => {
     if (str.includes("Usage: webiu") || str.includes("Commands:") || str.includes("Options:")) {
@@ -1380,6 +1380,10 @@ program.on("command:*", (operands) => {
   helpCommand();
   process.exit(1);
 });
+if (process.argv.includes("-V")) {
+  console.log(VERSION);
+  process.exit(0);
+}
 if (process.argv.includes("-h") || process.argv.includes("--help")) {
   helpCommand();
   process.exit(0);

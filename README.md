@@ -157,8 +157,8 @@ Commands:
   help          Display detailed command usage and instructions
 
 Options:
-  -V, --version Output the current CLI version
-  -h, --help    Display help information
+  -v, -V, --version Output the current CLI version
+  -h, --help        Display help information
 ```
 
 ### Detailed Command Explanations

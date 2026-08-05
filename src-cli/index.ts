@@ -37,7 +37,7 @@ const program = new Command();
 program
   .name('webiu')
   .description('CLI tool to generate, configure, and deploy Webiu community portals')
-  .version(VERSION, '-V, --version', 'Output the current CLI version')
+  .version(VERSION, '-v, --version', 'Output the current CLI version')
   .addHelpCommand(false)
   .helpOption('-h, --help', 'Display command usage and instructions');
 
@@ -105,6 +105,12 @@ program.on('command:*', (operands) => {
   helpCommand();
   process.exit(1);
 });
+
+// Intercept `-v` or `-V` or `--version`
+if (process.argv.includes('-V')) {
+  console.log(VERSION);
+  process.exit(0);
+}
 
 // Intercept `-h` or `--help` explicitly before Commander default parsing
 if (process.argv.includes('-h') || process.argv.includes('--help')) {

@@ -21,8 +21,8 @@ ${chalk.bold.green('Commands:')}
   ${chalk.bold.cyan('help')}            Display this help manual
 
 ${chalk.bold.green('Flags:')}
-  ${chalk.bold.cyan('-V, --version')}   Output the current CLI version
-  ${chalk.bold.cyan('-h, --help')}      Display help information
+  ${chalk.bold.cyan('-v, -V, --version')} Output the current CLI version
+  ${chalk.bold.cyan('-h, --help')}       Display help information
 
 ${chalk.bold.magenta('Examples:')}
   ${chalk.gray('$')} ${chalk.cyan('webiu init')}
