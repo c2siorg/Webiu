@@ -9,7 +9,7 @@ import {
   printFinalVictoryScreen,
   printLiveSummaryCard,
   printWelcomeBanner
-} from "./chunk-4OTIRWM2.mjs";
+} from "./chunk-EEQFRCKM.mjs";
 
 // src-cli/index.ts
 import { Command } from "commander";
@@ -583,7 +583,7 @@ import { AppConfigService } from './services/app-config.service';`
         default: true
       });
       if (shouldStart) {
-        const { devCommand: devCommand2 } = await import("./dev-BM75D33Q.mjs");
+        const { devCommand: devCommand2 } = await import("./dev-V3ZNEDVM.mjs");
         process.chdir(projectDir);
         await devCommand2();
       }

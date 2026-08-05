@@ -32,7 +32,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var VERSION, WEBIU_REPO, WEBIU_BRANCH, ALL_NAVBAR_SECTIONS;
 var init_constants = __esm({
   "src-cli/constants.ts"() {
-    VERSION = "2.1.0";
+    VERSION = "2.2.0";
     WEBIU_REPO = "https://github.com/TarunyaProgrammer/Webiu.git";
     WEBIU_BRANCH = "webiu-npm-pack";
     ALL_NAVBAR_SECTIONS = [
