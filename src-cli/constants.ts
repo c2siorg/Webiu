@@ -2,7 +2,7 @@
  * Centralized Constants for Webiu CLI (create-webiu)
  */
 
-export const VERSION = '2.0.1';
+export const VERSION = '2.1.0';
 
 export const WEBIU_REPO = 'https://github.com/TarunyaProgrammer/Webiu.git';
 export const WEBIU_BRANCH = 'webiu-npm-pack';
