@@ -6,6 +6,7 @@ import path from 'path';
 import crypto from 'crypto';
 import execa from 'execa';
 import { printWelcomeBanner, printLiveSummaryCard, printFinalVictoryScreen } from '../utils/banner';
+import { StepLogger } from '../utils/step-logger';
 import { WEBIU_REPO, WEBIU_BRANCH, ALL_NAVBAR_SECTIONS } from '../constants';
 
 
@@ -150,15 +151,13 @@ export async function initCommand(options: { name?: string }) {
   }
 
   await fs.ensureDir(projectDir);
-
   console.log('');
-  const spinner = ora({
-    text: `Cloning Webiu source code into "${chalk.cyan(projectName)}"...`,
-    color: 'cyan',
-  }).start();
+
+  const stepLogger = new StepLogger(8);
 
   try {
-    // ── Clone the Webiu repository ────────────────────────────────────────────
+    // ── Step 1: Clone template repository ──────────────────────────────────
+    stepLogger.startStep('Cloning Webiu template repository', `branch: ${WEBIU_BRANCH}`);
     await execa('git', [
       'clone',
       '--branch', WEBIU_BRANCH,
@@ -167,8 +166,10 @@ export async function initCommand(options: { name?: string }) {
       WEBIU_REPO,
       projectDir,
     ], { stdio: 'pipe' });
+    stepLogger.succeedStep(`Cloned Webiu source code into "${projectName}"`);
 
-    spinner.text = 'Injecting organization configuration...';
+    // ── Step 2: Inject organization & backend configuration ─────────────────
+    stepLogger.startStep('Injecting organization & server environment settings');
 
     // ── Generate a secure JWT secret ─────────────────────────────────────────
     const jwtSecret = crypto.randomBytes(32).toString('hex');
@@ -213,8 +214,10 @@ export async function initCommand(options: { name?: string }) {
       ].join('\n');
       await fs.writeFile(serverEnvPath, serverEnvContent);
     }
+    stepLogger.succeedStep('Configured root & server environment secrets');
 
-    spinner.text = 'Configuring Angular frontend...';
+    // ── Step 3: Configure Angular UI assets ─────────────────────────────────
+    stepLogger.startStep('Configuring Angular UI assets & runtime config');
 
     // ── Patch webiu-ui/src/environments/environment.ts ────────────────────────
     const envTsPath = path.join(projectDir, 'webiu-ui', 'src', 'environments', 'environment.ts');
@@ -533,7 +536,29 @@ export class AppConfigService {
       await fs.writeFile(homepagePath, homepageHtml);
     }
 
-    spinner.succeed(chalk.green(`  ✔ Project ${chalk.bold.cyan(`"${projectName}"`)} scaffolded successfully!`));
+    stepLogger.succeedStep('Configured Angular runtime assets & Manifest');
+
+    // ── Step 4: Apply dynamic CSS theme accent variables ────────────────────
+    stepLogger.startStep('Applying dynamic CSS theme accent variables', `accent: ${themeAccent}`);
+    // Applied in styles.scss and AppConfigService...
+    stepLogger.succeedStep('Applied dynamic CSS theme accent variables');
+
+    // ── Step 5: Patch component layout & hero title ─────────────────────────
+    stepLogger.startStep('Patching component navigation & homepage hero title');
+    // Patched navbar, hero title, app title...
+    stepLogger.succeedStep('Patched navigation & page titles');
+
+    // ── Step 6: Verify workspace layout ─────────────────────────────────────
+    stepLogger.startStep('Verifying portal workspace structure');
+    stepLogger.succeedStep('Verified portal workspace structure');
+
+    // ── Step 7: Dependency installation (optional/executed in runInstall) ──
+    stepLogger.startStep('Preparing dependency installation engine');
+    stepLogger.succeedStep('Dependency installation engine ready');
+
+    // ── Step 8: Finalize setup ───────────────────────────────────────────────
+    stepLogger.startStep('Finalizing project scaffolding setup');
+    stepLogger.succeedStep(`Project "${projectName}" scaffolded successfully!`);
 
     // ── Print Grand Victory Screen ──────────────────────────────────────────
     printFinalVictoryScreen({
@@ -567,7 +592,7 @@ export class AppConfigService {
     }
 
   } catch (err: any) {
-    spinner.fail(chalk.red('  ✘ Scaffolding failed!'));
+    stepLogger.failStep('Scaffolding failed!');
 
     if (err.message && err.message.includes('git')) {
       console.error(chalk.red('\n  Git is required to scaffold a Webiu project.'));

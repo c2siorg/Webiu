@@ -4,8 +4,17 @@ import { initCommand } from './commands/init';
 import { devCommand, buildCommand } from './commands/dev';
 import { configCommand } from './commands/config';
 import { deployCommand } from './commands/deploy';
+import { doctorCommand } from './commands/doctor';
 import { helpCommand } from './commands/help';
 import { dockerUpCommand, dockerDownCommand } from './commands/docker';
+import { VERSION } from './constants';
+import { checkForUpdates, displayUpdateBanner } from './utils/updater';
+
+// Trigger non-blocking update check in background
+let updatePromise: Promise<string | null> | null = null;
+try {
+  updatePromise = checkForUpdates();
+} catch {}
 
 // ── Global Graceful Exit Handler (Catches Ctrl+C / SIGINT) ───────────────────
 function handleGracefulExit(): void {
@@ -28,7 +37,7 @@ const program = new Command();
 program
   .name('webiu')
   .description('CLI tool to generate, configure, and deploy Webiu community portals')
-  .version('2.0.1', '-V, --version', 'Output the current CLI version')
+  .version(VERSION, '-V, --version', 'Output the current CLI version')
   .addHelpCommand(false)
   .helpOption('-h, --help', 'Display command usage and instructions');
 
@@ -71,6 +80,11 @@ program
   .action(deployCommand);
 
 program
+  .command('doctor')
+  .description('Run Homebrew-style self-diagnostics and project health check')
+  .action(doctorCommand);
+
+program
   .command('docker:up')
   .description('Start local Docker containers (PostgreSQL database)')
   .action(dockerUpCommand);
@@ -98,7 +112,19 @@ if (process.argv.includes('-h') || process.argv.includes('--help')) {
   process.exit(0);
 }
 
-program.parse(process.argv);
+async function run() {
+  await program.parseAsync(process.argv);
+
+  // Render update banner at end of execution if a new version is available
+  if (updatePromise) {
+    const latest = await updatePromise;
+    if (latest) {
+      displayUpdateBanner(latest);
+    }
+  }
+}
+
+run();
 
 // If no arguments are given at all, show the help screen
 if (!process.argv.slice(2).length) {

@@ -15,6 +15,7 @@ ${chalk.bold.green('Commands:')}
   ${chalk.bold.cyan('build')}           Build production assets for webiu-ui and webiu-server
   ${chalk.bold.cyan('config')}          Re-configure org, theme, DB, or admin credentials
   ${chalk.bold.cyan('deploy')}          Generate deployment files (Render, Railway, Vercel, Docker)
+  ${chalk.bold.cyan('doctor')}          Run Homebrew-style self-diagnostics and project health check
   ${chalk.bold.cyan('docker:up')}       Start local Docker containers (PostgreSQL DB)
   ${chalk.bold.cyan('docker:down')}     Stop and remove local Docker containers
   ${chalk.bold.cyan('help')}            Display this help manual

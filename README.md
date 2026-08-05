@@ -151,6 +151,7 @@ Commands:
   build         Build production assets for both webiu-ui and webiu-server
   config        Re-configure organization metadata, branding, DB, or admin credentials
   deploy        Launch interactive deployment generator for Render, Railway, Vercel, or Docker
+  doctor        Run Homebrew-style self-diagnostics and project health check
   docker:up     Start local Docker containers (PostgreSQL database)
   docker:down   Stop and remove local Docker containers
   help          Display detailed command usage and instructions
@@ -163,18 +164,30 @@ Options:
 ### Detailed Command Explanations
 
 #### 1. `webiu init`
-Initializes a new Webiu portal application. Displays an interactive terminal setup wizard with real-time live summary updates and generates the project structure with configured environment files.
+Initializes a new Webiu portal application using an ultra-aesthetic 8-step progress logger (`[1/8]` through `[8/8]`). Displays an interactive terminal setup wizard with real-time live summary updates and generates the project structure with configured environment files.
 
-#### 2. `webiu dev`
+#### 2. `webiu doctor`
+Runs a Homebrew-style (`brew doctor`) self-diagnostic audit of your system and workspace. Checks 8 critical operational pillars:
+- **Node.js Environment**: Verifies Node.js version (`>= 18.0.0`).
+- **Package Manager & Git**: Verifies `npm` and `git` binaries are accessible.
+- **Docker Engine**: Probes Docker daemon readiness (`docker info`).
+- **Webiu Workspace**: Validates `webiu-server`, `webiu-ui`, and root `.env`.
+- **Framework Diagnostics**: Detects Angular (`@angular/core`) and NestJS (`@nestjs/core`) framework versions.
+- **PostgreSQL Connectivity**: Probes database port (`5433` or parsed connection string) via TCP socket.
+- **Environment & Secrets**: Validates `JWT_SECRET`, default admin credentials, and checks if `GITHUB_TOKEN` is present.
+
+If issues are found, `webiu doctor` displays a clean remediation guide with exact steps to resolve warnings (`⚠`) and errors (`✘`).
+
+#### 3. `webiu dev`
 Executes pre-flight checks (database connectivity and Docker daemon state) and starts both Angular frontend (`http://localhost:4200`) and NestJS backend (`http://localhost:5050`) in parallel using hot-reloading development servers.
 
-#### 3. `webiu build`
+#### 4. `webiu build`
 Triggers production compilation for both `webiu-ui` and `webiu-server`, placing optimized build artifacts ready for production deployment.
 
-#### 4. `webiu config`
+#### 5. `webiu config`
 Launches the re-configuration utility on an existing Webiu project. Allows updating organization details, theme accent colors, active navbar sections, database connection settings, and admin passwords without re-cloning or re-scaffolding.
 
-#### 5. `webiu deploy`
+#### 6. `webiu deploy`
 Generates platform-specific Infrastructure-as-Code deployment configurations based on interactive prompts.
 
 Supported Deployment Targets:
@@ -183,11 +196,24 @@ Supported Deployment Targets:
 - **Vercel + Render Hybrid**: Generates `vercel.json` for hosting the Angular frontend on Vercel while connecting to NestJS hosted on Render.
 - **Self-Hosted Docker**: Generates `docker-compose.prod.yml` configured with an Nginx reverse proxy and containerized PostgreSQL database.
 
-#### 6. `webiu docker:up`
+#### 7. `webiu docker:up`
 Spins up local PostgreSQL database containers in detached mode using Docker Compose.
 
-#### 7. `webiu docker:down`
+#### 8. `webiu docker:down`
 Stops and removes local Docker database containers.
+
+---
+
+## AUTOMATED UPDATE NOTIFICATIONS
+
+The CLI includes an automatic background update checker (`updater.ts`). Whenever a command is run, the CLI asynchronously checks the NPM registry for newer releases (cached locally for 24 hours). If an update is available, a clean update card is displayed at process completion:
+
+```
+╭─────────────────────────────────────────────────────────────╮
+│  Update available!  v2.1.0 → v2.2.0                         │
+│  Run: npm install -g create-webiu to update to latest       │
+╰─────────────────────────────────────────────────────────────╯
+```
 
 ---
 
