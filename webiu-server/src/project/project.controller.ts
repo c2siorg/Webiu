@@ -7,11 +7,13 @@ import {
   Param,
   UseGuards,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { ProjectService } from './project.service';
 import { RepositorySyncService } from './repository-sync.service';
 import { AdminGuard } from '../auth/guards/admin.guard';
 
 @Controller('api/v1/projects')
+@Throttle({ default: { ttl: 60000, limit: 20 } })
 export class ProjectController {
   constructor(
     private projectService: ProjectService,
