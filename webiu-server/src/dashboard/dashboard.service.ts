@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository as TypeOrmRepository } from 'typeorm';
 import { Repository as RepositoryEntity } from '../database/entities/repository.entity';
@@ -128,7 +132,9 @@ export class DashboardService {
       };
     } catch (error) {
       this.logger.error('Error compiling dashboard summary:', error.message);
-      throw error;
+      throw new InternalServerErrorException(
+        'Failed to compile dashboard summary',
+      );
     }
   }
 }
