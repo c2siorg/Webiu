@@ -9,25 +9,90 @@ import {
   printFinalVictoryScreen,
   printLiveSummaryCard,
   printWelcomeBanner
-} from "./chunk-4OTIRWM2.mjs";
+} from "./chunk-EEQFRCKM.mjs";
 
 // src-cli/index.ts
 import { Command } from "commander";
-import chalk6 from "chalk";
+import chalk9 from "chalk";
 
 // src-cli/commands/init.ts
 import { select, input, checkbox, confirm, password } from "@inquirer/prompts";
-import chalk from "chalk";
-import ora from "ora";
+import chalk2 from "chalk";
+import ora2 from "ora";
 import fs from "fs-extra";
 import path from "path";
 import crypto from "crypto";
 import execa from "execa";
+
+// src-cli/utils/step-logger.ts
+import chalk from "chalk";
+import ora from "ora";
+var StepLogger = class {
+  totalSteps;
+  currentStep = 0;
+  currentSpinner = null;
+  constructor(totalSteps) {
+    this.totalSteps = totalSteps;
+  }
+  /**
+   * Starts a new aesthetic step with spinner and badge formatting.
+   * e.g., [1/8] Cloning template source code...
+   */
+  startStep(title, detail) {
+    this.currentStep++;
+    const stepBadge = chalk.bgHex("#7B8CFF").black.bold(` ${this.currentStep}/${this.totalSteps} `);
+    const stepTitle = chalk.bold.white(title);
+    const detailText = detail ? chalk.gray(` (${detail})`) : "";
+    const text = `${stepBadge} ${stepTitle}${detailText}`;
+    if (this.currentSpinner) {
+      this.currentSpinner.stop();
+    }
+    this.currentSpinner = ora({
+      text,
+      color: "cyan",
+      spinner: "dots"
+    }).start();
+    return this.currentSpinner;
+  }
+  /**
+   * Completes the current active step with a green checkmark.
+   */
+  succeedStep(message) {
+    if (this.currentSpinner) {
+      const stepBadge = chalk.bgHex("#10B981").black.bold(` ${this.currentStep}/${this.totalSteps} `);
+      const text = message ? `${stepBadge} ${chalk.bold.green(message)}` : this.currentSpinner.text.replace(/^[^\s]+\s*/, `${stepBadge} `);
+      this.currentSpinner.succeed(text);
+      this.currentSpinner = null;
+    }
+  }
+  /**
+   * Marks the current active step as failed with a red cross.
+   */
+  failStep(message) {
+    if (this.currentSpinner) {
+      const stepBadge = chalk.bgHex("#EF4444").white.bold(` ${this.currentStep}/${this.totalSteps} `);
+      const text = message ? `${stepBadge} ${chalk.bold.red(message)}` : this.currentSpinner.text.replace(/^[^\s]+\s*/, `${stepBadge} `);
+      this.currentSpinner.fail(text);
+      this.currentSpinner = null;
+    }
+  }
+  /**
+   * Updates sub-text on the active spinner.
+   */
+  updateText(text) {
+    if (this.currentSpinner) {
+      const stepBadge = chalk.bgHex("#7B8CFF").black.bold(` ${this.currentStep}/${this.totalSteps} `);
+      this.currentSpinner.text = `${stepBadge} ${chalk.bold.cyan(text)}`;
+    }
+  }
+};
+
+// src-cli/commands/init.ts
 async function initCommand(options) {
   printWelcomeBanner();
-  console.log(`${chalk.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}`);
-  console.log(`${chalk.bold.yellow("  \u{1F680} Project Setup Wizard \u2014 Answer a few questions to begin")}`);
-  console.log(`${chalk.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}
+  console.log(`${chalk2.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}`);
+  console.log(`${chalk2.bold.yellow("  \u{1F680} Project Setup Wizard \u2014 Answer a few questions to begin")}`);
+  console.log(`${chalk2.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}
 `);
   const summary = {};
   const projectName = options.name || await input({
@@ -36,8 +101,8 @@ async function initCommand(options) {
   });
   const normalizedPath = path.normalize(projectName);
   if (normalizedPath.startsWith("..") || path.isAbsolute(projectName) || /[\\/]/.test(projectName)) {
-    console.error(chalk.red("\n  \u2718 Invalid project directory name. Path traversal characters (/, \\, ..) are not allowed."));
-    console.error(chalk.yellow('  Please provide a simple directory name (e.g. "my-webiu-portal").\n'));
+    console.error(chalk2.red("\n  \u2718 Invalid project directory name. Path traversal characters (/, \\, ..) are not allowed."));
+    console.error(chalk2.yellow('  Please provide a simple directory name (e.g. "my-webiu-portal").\n'));
     process.exit(1);
   }
   summary.projectName = projectName;
@@ -84,12 +149,12 @@ async function initCommand(options) {
   const themeAccent = await select({
     message: "Select Primary UI Theme Accent Color:",
     choices: [
-      { name: `${chalk.hex("#0052CC")("\u25A0")} Ocean Blue      (#0052CC)`, value: "#0052CC" },
-      { name: `${chalk.hex("#10B981")("\u25A0")} Emerald Green   (#10B981)`, value: "#10B981" },
-      { name: `${chalk.hex("#7C3AED")("\u25A0")} Deep Purple      (#7C3AED)`, value: "#7C3AED" },
-      { name: `${chalk.hex("#EF4444")("\u25A0")} Sunset Crimson   (#EF4444)`, value: "#EF4444" },
-      { name: `${chalk.hex("#F59E0B")("\u25A0")} Amber Gold       (#F59E0B)`, value: "#F59E0B" },
-      { name: `${chalk.hex("#EC4899")("\u25A0")} Rose Pink        (#EC4899)`, value: "#EC4899" }
+      { name: `${chalk2.hex("#0052CC")("\u25A0")} Ocean Blue      (#0052CC)`, value: "#0052CC" },
+      { name: `${chalk2.hex("#10B981")("\u25A0")} Emerald Green   (#10B981)`, value: "#10B981" },
+      { name: `${chalk2.hex("#7C3AED")("\u25A0")} Deep Purple      (#7C3AED)`, value: "#7C3AED" },
+      { name: `${chalk2.hex("#EF4444")("\u25A0")} Sunset Crimson   (#EF4444)`, value: "#EF4444" },
+      { name: `${chalk2.hex("#F59E0B")("\u25A0")} Amber Gold       (#F59E0B)`, value: "#F59E0B" },
+      { name: `${chalk2.hex("#EC4899")("\u25A0")} Rose Pink        (#EC4899)`, value: "#EC4899" }
     ]
   });
   summary.themeAccent = themeAccent;
@@ -106,7 +171,7 @@ async function initCommand(options) {
   summary.deployTarget = deployTarget;
   printLiveSummaryCard(summary);
   console.log(`
-${chalk.bold.gray("\u2500\u2500 Admin Account Setup \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")}
+${chalk2.bold.gray("\u2500\u2500 Admin Account Setup \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")}
 `);
   const adminUsername = await input({
     message: "Admin dashboard username:",
@@ -119,12 +184,12 @@ ${chalk.bold.gray("\u2500\u2500 Admin Account Setup \u2500\u2500\u2500\u2500\u25
     validate: (val) => val.length >= 8 ? true : "Password must be at least 8 characters."
   });
   console.log(`
-${chalk.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")}
+${chalk2.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")}
 `);
   const selectedSections = await checkbox({
     message: "Which sections do you want in your portal's navbar?",
     choices: ALL_NAVBAR_SECTIONS,
-    instructions: chalk.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
+    instructions: chalk2.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
   });
   const navbarSections = ["home", ...selectedSections.filter((s) => s !== "home")];
   summary.navbarSections = navbarSections;
@@ -133,19 +198,17 @@ ${chalk.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u2500\u2500\u2500
   if (await fs.pathExists(projectDir)) {
     const existing = await fs.readdir(projectDir);
     if (existing.length > 0) {
-      console.log(chalk.red(`
+      console.log(chalk2.red(`
   \u2718 Directory "${projectName}" already exists and is not empty.`));
-      console.log(chalk.yellow("  Please choose an empty directory or delete the existing one.\n"));
+      console.log(chalk2.yellow("  Please choose an empty directory or delete the existing one.\n"));
       process.exit(1);
     }
   }
   await fs.ensureDir(projectDir);
   console.log("");
-  const spinner = ora({
-    text: `Cloning Webiu source code into "${chalk.cyan(projectName)}"...`,
-    color: "cyan"
-  }).start();
+  const stepLogger = new StepLogger(8);
   try {
+    stepLogger.startStep("Cloning Webiu template repository", `branch: ${WEBIU_BRANCH}`);
     await execa("git", [
       "clone",
       "--branch",
@@ -155,7 +218,8 @@ ${chalk.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u2500\u2500\u2500
       WEBIU_REPO,
       projectDir
     ], { stdio: "pipe" });
-    spinner.text = "Injecting organization configuration...";
+    stepLogger.succeedStep(`Cloned Webiu source code into "${projectName}"`);
+    stepLogger.startStep("Injecting organization & server environment settings");
     const jwtSecret = crypto.randomBytes(32).toString("hex");
     const rootEnvContent = [
       "# Generated by Webiu CLI \u2014 Do not commit this file to version control",
@@ -193,7 +257,8 @@ ${chalk.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u2500\u2500\u2500
       ].join("\n");
       await fs.writeFile(serverEnvPath, serverEnvContent);
     }
-    spinner.text = "Configuring Angular frontend...";
+    stepLogger.succeedStep("Configured root & server environment secrets");
+    stepLogger.startStep("Configuring Angular UI assets & runtime config");
     const envTsPath = path.join(projectDir, "webiu-ui", "src", "environments", "environment.ts");
     if (await fs.pathExists(envTsPath)) {
       const envTsContent = `export const environment = {
@@ -489,7 +554,17 @@ import { AppConfigService } from './services/app-config.service';`
       );
       await fs.writeFile(homepagePath, homepageHtml);
     }
-    spinner.succeed(chalk.green(`  \u2714 Project ${chalk.bold.cyan(`"${projectName}"`)} scaffolded successfully!`));
+    stepLogger.succeedStep("Configured Angular runtime assets & Manifest");
+    stepLogger.startStep("Applying dynamic CSS theme accent variables", `accent: ${themeAccent}`);
+    stepLogger.succeedStep("Applied dynamic CSS theme accent variables");
+    stepLogger.startStep("Patching component navigation & homepage hero title");
+    stepLogger.succeedStep("Patched navigation & page titles");
+    stepLogger.startStep("Verifying portal workspace structure");
+    stepLogger.succeedStep("Verified portal workspace structure");
+    stepLogger.startStep("Preparing dependency installation engine");
+    stepLogger.succeedStep("Dependency installation engine ready");
+    stepLogger.startStep("Finalizing project scaffolding setup");
+    stepLogger.succeedStep(`Project "${projectName}" scaffolded successfully!`);
     printFinalVictoryScreen({
       projectName,
       orgName,
@@ -498,7 +573,7 @@ import { AppConfigService } from './services/app-config.service';`
       navbarSections
     });
     const shouldInstall = await confirm({
-      message: `Install all dependencies now? ${chalk.gray("(npm install in webiu-server + webiu-ui)")}`,
+      message: `Install all dependencies now? ${chalk2.gray("(npm install in webiu-server + webiu-ui)")}`,
       default: true
     });
     if (shouldInstall) {
@@ -508,16 +583,16 @@ import { AppConfigService } from './services/app-config.service';`
         default: true
       });
       if (shouldStart) {
-        const { devCommand: devCommand2 } = await import("./dev-BM75D33Q.mjs");
+        const { devCommand: devCommand2 } = await import("./dev-V3ZNEDVM.mjs");
         process.chdir(projectDir);
         await devCommand2();
       }
     }
   } catch (err) {
-    spinner.fail(chalk.red("  \u2718 Scaffolding failed!"));
+    stepLogger.failStep("Scaffolding failed!");
     if (err.message && err.message.includes("git")) {
-      console.error(chalk.red("\n  Git is required to scaffold a Webiu project."));
-      console.error(chalk.yellow("  Please install git from https://git-scm.com and try again.\n"));
+      console.error(chalk2.red("\n  Git is required to scaffold a Webiu project."));
+      console.error(chalk2.yellow("  Please install git from https://git-scm.com and try again.\n"));
     } else {
       console.error(err);
     }
@@ -531,31 +606,31 @@ import { AppConfigService } from './services/app-config.service';`
 async function runInstall(projectDir) {
   const serverDir = path.join(projectDir, "webiu-server");
   const uiDir = path.join(projectDir, "webiu-ui");
-  const serverSpinner = ora({
+  const serverSpinner = ora2({
     text: "Installing backend dependencies (webiu-server)...",
     color: "blue"
   }).start();
-  const uiSpinner = ora({
+  const uiSpinner = ora2({
     text: "Installing frontend dependencies (webiu-ui)...",
     color: "green"
   }).start();
   const installServer = execa("npm", ["install"], { cwd: serverDir, stdio: "pipe" }).then(() => {
-    serverSpinner.succeed(chalk.green("  \u2714 Backend dependencies installed"));
+    serverSpinner.succeed(chalk2.green("  \u2714 Backend dependencies installed"));
   }).catch(() => {
-    serverSpinner.fail(chalk.red("  \u2718 Backend install failed \u2014 run: cd webiu-server && npm install"));
+    serverSpinner.fail(chalk2.red("  \u2718 Backend install failed \u2014 run: cd webiu-server && npm install"));
   });
   const installUi = execa("npm", ["install"], { cwd: uiDir, stdio: "pipe" }).then(() => {
-    uiSpinner.succeed(chalk.green("  \u2714 Frontend dependencies installed"));
+    uiSpinner.succeed(chalk2.green("  \u2714 Frontend dependencies installed"));
   }).catch(() => {
-    uiSpinner.fail(chalk.red("  \u2718 Frontend install failed \u2014 run: cd webiu-ui && npm install"));
+    uiSpinner.fail(chalk2.red("  \u2718 Frontend install failed \u2014 run: cd webiu-ui && npm install"));
   });
   await Promise.all([installServer, installUi]);
 }
 
 // src-cli/commands/config.ts
 import { select as select2, input as input2, checkbox as checkbox2, password as password2 } from "@inquirer/prompts";
-import chalk2 from "chalk";
-import ora2 from "ora";
+import chalk3 from "chalk";
+import ora3 from "ora";
 import fs2 from "fs-extra";
 import path2 from "path";
 async function configCommand() {
@@ -565,8 +640,8 @@ async function configCommand() {
   const uiConfigPath = path2.join(process.cwd(), "webiu-ui", "src", "assets", "config.json");
   const isWebiuProject = await fs2.pathExists(rootEnvPath) && await fs2.pathExists(path2.join(process.cwd(), "webiu-server")) && await fs2.pathExists(path2.join(process.cwd(), "webiu-ui"));
   if (!isWebiuProject) {
-    console.error(chalk2.red("\n  \u2718 Not inside a Webiu project directory."));
-    console.error(chalk2.yellow("  Please run this command from inside your project folder (e.g. cd my-webiu-portal)\n"));
+    console.error(chalk3.red("\n  \u2718 Not inside a Webiu project directory."));
+    console.error(chalk3.yellow("  Please run this command from inside your project folder (e.g. cd my-webiu-portal)\n"));
     process.exit(1);
   }
   let currentEnv = {};
@@ -580,7 +655,7 @@ async function configCommand() {
       currentEnv[key] = val;
     }
   } catch {
-    console.error(chalk2.yellow("  Could not read .env \u2014 starting fresh.\n"));
+    console.error(chalk3.yellow("  Could not read .env \u2014 starting fresh.\n"));
   }
   const setting = await select2({
     message: "What would you like to re-configure?",
@@ -605,22 +680,22 @@ async function configCommand() {
     });
   } else if (setting === "theme") {
     updates["THEME_ACCENT"] = await select2({
-      message: `Current theme: ${chalk2.hex(currentEnv["THEME_ACCENT"] || "#7B8CFF")("\u25A0")} ${currentEnv["THEME_ACCENT"] || "#7B8CFF"}
+      message: `Current theme: ${chalk3.hex(currentEnv["THEME_ACCENT"] || "#7B8CFF")("\u25A0")} ${currentEnv["THEME_ACCENT"] || "#7B8CFF"}
 Select new accent color:`,
       choices: [
-        { name: `${chalk2.hex("#0052CC")("\u25A0")} Ocean Blue      (#0052CC)`, value: "#0052CC" },
-        { name: `${chalk2.hex("#10B981")("\u25A0")} Emerald Green   (#10B981)`, value: "#10B981" },
-        { name: `${chalk2.hex("#7C3AED")("\u25A0")} Deep Purple      (#7C3AED)`, value: "#7C3AED" },
-        { name: `${chalk2.hex("#EF4444")("\u25A0")} Sunset Crimson   (#EF4444)`, value: "#EF4444" },
-        { name: `${chalk2.hex("#F59E0B")("\u25A0")} Amber Gold       (#F59E0B)`, value: "#F59E0B" },
-        { name: `${chalk2.hex("#EC4899")("\u25A0")} Rose Pink        (#EC4899)`, value: "#EC4899" }
+        { name: `${chalk3.hex("#0052CC")("\u25A0")} Ocean Blue      (#0052CC)`, value: "#0052CC" },
+        { name: `${chalk3.hex("#10B981")("\u25A0")} Emerald Green   (#10B981)`, value: "#10B981" },
+        { name: `${chalk3.hex("#7C3AED")("\u25A0")} Deep Purple      (#7C3AED)`, value: "#7C3AED" },
+        { name: `${chalk3.hex("#EF4444")("\u25A0")} Sunset Crimson   (#EF4444)`, value: "#EF4444" },
+        { name: `${chalk3.hex("#F59E0B")("\u25A0")} Amber Gold       (#F59E0B)`, value: "#F59E0B" },
+        { name: `${chalk3.hex("#EC4899")("\u25A0")} Rose Pink        (#EC4899)`, value: "#EC4899" }
       ]
     });
   } else if (setting === "navbar") {
     const selected = await checkbox2({
       message: "Which navbar sections should be active?",
       choices: ALL_NAVBAR_SECTIONS,
-      instructions: chalk2.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
+      instructions: chalk3.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
     });
     newNavbarSections = ["home", ...selected.filter((s) => s !== "home")];
   } else if (setting === "db") {
@@ -638,7 +713,7 @@ Select new accent color:`,
       validate: (v) => v.length >= 8 ? true : "Password must be at least 8 characters."
     });
   }
-  const spinner = ora2({ text: "Writing updated configuration across portal...", color: "cyan" }).start();
+  const spinner = ora3({ text: "Writing updated configuration across portal...", color: "cyan" }).start();
   try {
     if (await fs2.pathExists(rootEnvPath)) {
       let envContent = await fs2.readFile(rootEnvPath, "utf-8");
@@ -752,34 +827,34 @@ ${newLine}`;
         await fs2.writeFile(homepagePath, hp);
       }
     }
-    spinner.succeed(chalk2.green("  \u2714 Configuration updated successfully!"));
+    spinner.succeed(chalk3.green("  \u2714 Configuration updated successfully!"));
     console.log(`
-  ${chalk2.bold("Changes applied:")}`);
+  ${chalk3.bold("Changes applied:")}`);
     for (const [key, val] of Object.entries(updates)) {
       const displayVal = key.includes("PASSWORD") ? "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" : val;
-      console.log(`    ${chalk2.gray(key)} \u2192 ${chalk2.cyan(displayVal)}`);
+      console.log(`    ${chalk3.gray(key)} \u2192 ${chalk3.cyan(displayVal)}`);
     }
     if (newNavbarSections) {
-      console.log(`    ${chalk2.gray("NAVBAR_SECTIONS")} \u2192 ${chalk2.cyan(newNavbarSections.join(", "))}`);
+      console.log(`    ${chalk3.gray("NAVBAR_SECTIONS")} \u2192 ${chalk3.cyan(newNavbarSections.join(", "))}`);
     }
     console.log("");
   } catch (err) {
-    spinner.fail(chalk2.red("  \u2718 Failed to update configuration."));
+    spinner.fail(chalk3.red("  \u2718 Failed to update configuration."));
     console.error(err);
   }
 }
 
 // src-cli/commands/deploy.ts
 import { select as select3 } from "@inquirer/prompts";
-import chalk3 from "chalk";
-import ora3 from "ora";
+import chalk4 from "chalk";
+import ora4 from "ora";
 import fs3 from "fs-extra";
 import path3 from "path";
 async function deployCommand() {
   console.log(`
-${chalk3.bold.cyan("====================================================")}`);
-  console.log(`${chalk3.bold.yellow("      Webiu Interactive Deployment Generator       ")}`);
-  console.log(`${chalk3.bold.cyan("====================================================")}
+${chalk4.bold.cyan("====================================================")}`);
+  console.log(`${chalk4.bold.yellow("      Webiu Interactive Deployment Generator       ")}`);
+  console.log(`${chalk4.bold.cyan("====================================================")}
 `);
   const platform = await select3({
     message: "Select target cloud platform for deployment:",
@@ -806,7 +881,7 @@ ${chalk3.bold.cyan("====================================================")}`);
       }
     ]
   });
-  const spinner = ora3(`Generating deployment configuration files for ${platform}...`).start();
+  const spinner = ora4(`Generating deployment configuration files for ${platform}...`).start();
   try {
     if (platform === "render") {
       const renderYaml = `
@@ -827,9 +902,9 @@ services:
     staticPublishPath: ./webiu-ui/dist/webiu-ui/browser
 `.trim();
       await fs3.writeFile(path3.join(process.cwd(), "render.yaml"), renderYaml);
-      spinner.succeed(chalk3.green("Generated render.yaml successfully! XD"));
+      spinner.succeed(chalk4.green("Generated render.yaml successfully! XD"));
       console.log(`
-${chalk3.bold.yellow("Next Steps for Render:")}`);
+${chalk4.bold.yellow("Next Steps for Render:")}`);
       console.log("  1. Commit and push your changes to GitHub.");
       console.log('  2. Go to https://dashboard.render.com and choose "New Blueprint Group".');
       console.log("  3. Select your GitHub repo to deploy automatically!\n");
@@ -852,91 +927,419 @@ services:
     restart: always
 `.trim();
       await fs3.writeFile(path3.join(process.cwd(), "docker-compose.prod.yml"), dockerProd);
-      spinner.succeed(chalk3.green("Generated docker-compose.prod.yml successfully! :D"));
+      spinner.succeed(chalk4.green("Generated docker-compose.prod.yml successfully! :D"));
       console.log(`
-${chalk3.bold.yellow("Next Steps for Docker:")}`);
-      console.log(`  1. Run ${chalk3.cyan("docker compose -f docker-compose.prod.yml up -d")}`);
+${chalk4.bold.yellow("Next Steps for Docker:")}`);
+      console.log(`  1. Run ${chalk4.cyan("docker compose -f docker-compose.prod.yml up -d")}`);
       console.log("  2. Access your portal at http://localhost\n");
     } else {
-      spinner.succeed(chalk3.green(`Prepared deployment instructions for ${platform}!`));
+      spinner.succeed(chalk4.green(`Prepared deployment instructions for ${platform}!`));
     }
   } catch (err) {
-    spinner.fail(chalk3.red("Failed to generate deployment templates."));
+    spinner.fail(chalk4.red("Failed to generate deployment templates."));
     console.error(err);
   }
 }
 
+// src-cli/commands/doctor.ts
+import chalk5 from "chalk";
+import path4 from "path";
+import fs4 from "fs-extra";
+import net from "net";
+import execa2 from "execa";
+function probePort(port, host = "127.0.0.1", timeout = 1200) {
+  return new Promise((resolve) => {
+    const socket = new net.Socket();
+    socket.setTimeout(timeout);
+    socket.once("connect", () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.once("timeout", () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.once("error", () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.connect(port, host);
+  });
+}
+function parseDatabaseUrl(url) {
+  try {
+    const normalized = url.replace(/^postgres:\/\//, "postgresql://");
+    const parsed = new URL(normalized);
+    return {
+      host: parsed.hostname || "localhost",
+      port: parseInt(parsed.port || "5432", 10)
+    };
+  } catch {
+    return null;
+  }
+}
+async function doctorCommand() {
+  printCompactHeader("webiu doctor \u2014 Homebrew-Style Self-Diagnostics");
+  console.log(chalk5.gray("  Running system and project diagnostic checks...\n"));
+  const results = [];
+  const nodeVer = process.version;
+  const majorNode = parseInt(nodeVer.replace(/^v/, "").split(".")[0], 10) || 0;
+  if (majorNode >= 18) {
+    results.push({
+      title: "Node.js Version",
+      status: "ok",
+      message: `Node.js ${nodeVer} detected (>= v18.0.0 required)`
+    });
+  } else {
+    results.push({
+      title: "Node.js Version",
+      status: "error",
+      message: `Node.js ${nodeVer} is outdated (>= v18.0.0 required)`,
+      fix: "Upgrade Node.js from https://nodejs.org or using nvm (nvm install 20)"
+    });
+  }
+  try {
+    const { stdout: npmVer } = await execa2("npm", ["--version"]);
+    results.push({
+      title: "npm Package Manager",
+      status: "ok",
+      message: `npm v${npmVer.trim()} installed and available`
+    });
+  } catch {
+    results.push({
+      title: "npm Package Manager",
+      status: "error",
+      message: "npm command not found in system PATH",
+      fix: "Install npm alongside Node.js from https://nodejs.org"
+    });
+  }
+  try {
+    const { stdout: gitVer } = await execa2("git", ["--version"]);
+    results.push({
+      title: "Git Version Control",
+      status: "ok",
+      message: `${gitVer.trim()} installed`
+    });
+  } catch {
+    results.push({
+      title: "Git Version Control",
+      status: "error",
+      message: "Git CLI not found in system PATH",
+      fix: "Install Git from https://git-scm.com to allow project scaffolding"
+    });
+  }
+  try {
+    await execa2("docker", ["info"], { stdio: "ignore" });
+    results.push({
+      title: "Docker Engine",
+      status: "ok",
+      message: "Docker daemon is running and responsive"
+    });
+  } catch {
+    results.push({
+      title: "Docker Engine",
+      status: "warn",
+      message: "Docker daemon is not running or not installed",
+      fix: "Start Docker Desktop or run PostgreSQL natively (webiu docker:up)"
+    });
+  }
+  const rootDir = process.cwd();
+  const serverDir = path4.join(rootDir, "webiu-server");
+  const uiDir = path4.join(rootDir, "webiu-ui");
+  const envPath = path4.join(rootDir, ".env");
+  const isProject = await fs4.pathExists(serverDir) && await fs4.pathExists(uiDir);
+  if (isProject) {
+    results.push({
+      title: "Webiu Project Structure",
+      status: "ok",
+      message: `Webiu project detected at ${chalk5.cyan(rootDir)}`
+    });
+    const uiPkgPath = path4.join(uiDir, "package.json");
+    if (await fs4.pathExists(uiPkgPath)) {
+      try {
+        const uiPkg = await fs4.readJson(uiPkgPath);
+        const ngVer = uiPkg.dependencies?.["@angular/core"] || uiPkg.devDependencies?.["@angular/core"] || "Unknown";
+        results.push({
+          title: "Angular UI Framework",
+          status: "ok",
+          message: `Angular Frontend detected (${chalk5.bold(ngVer)})`
+        });
+      } catch {
+      }
+    }
+    const serverPkgPath = path4.join(serverDir, "package.json");
+    if (await fs4.pathExists(serverPkgPath)) {
+      try {
+        const serverPkg = await fs4.readJson(serverPkgPath);
+        const nestVer = serverPkg.dependencies?.["@nestjs/core"] || serverPkg.devDependencies?.["@nestjs/core"] || "Unknown";
+        results.push({
+          title: "NestJS Backend API",
+          status: "ok",
+          message: `NestJS Server detected (${chalk5.bold(nestVer)})`
+        });
+      } catch {
+      }
+    }
+    let dbHost = "localhost";
+    let dbPort = 5433;
+    const serverEnvPath = path4.join(serverDir, ".env");
+    const targetEnvPath = await fs4.pathExists(serverEnvPath) ? serverEnvPath : envPath;
+    if (await fs4.pathExists(targetEnvPath)) {
+      const envContent = await fs4.readFile(targetEnvPath, "utf-8");
+      const dbMatch = envContent.match(/^DATABASE_URL="?([^"\n]+)"?/m);
+      if (dbMatch) {
+        const parsed = parseDatabaseUrl(dbMatch[1]);
+        if (parsed) {
+          dbHost = parsed.host;
+          dbPort = parsed.port;
+        }
+      }
+    }
+    const dbConnected = await probePort(dbPort, dbHost === "localhost" ? "127.0.0.1" : dbHost);
+    if (dbConnected) {
+      results.push({
+        title: "PostgreSQL Database",
+        status: "ok",
+        message: `PostgreSQL is reachable at ${dbHost}:${dbPort}`
+      });
+    } else {
+      results.push({
+        title: "PostgreSQL Database",
+        status: "warn",
+        message: `Cannot reach PostgreSQL at ${dbHost}:${dbPort}`,
+        fix: "Run `webiu docker:up` or start your local PostgreSQL service"
+      });
+    }
+    if (await fs4.pathExists(targetEnvPath)) {
+      const envContent = await fs4.readFile(targetEnvPath, "utf-8");
+      const adminPassMatch = envContent.match(/^ADMIN_PASSWORD="?([^"\n]+)"?/m);
+      if (adminPassMatch && adminPassMatch[1] === "admin") {
+        results.push({
+          title: "Admin Credentials Security",
+          status: "warn",
+          message: 'Admin dashboard password is using default fallback "admin"',
+          fix: "Run `webiu config` to set a strong custom admin password"
+        });
+      } else {
+        results.push({
+          title: "Admin Credentials Security",
+          status: "ok",
+          message: "Custom admin credentials configured"
+        });
+      }
+      const ghTokenMatch = envContent.match(/^GITHUB_TOKEN="?([^"\n]+)"?/m);
+      if (!ghTokenMatch || !ghTokenMatch[1] || ghTokenMatch[1].includes("your_token")) {
+        results.push({
+          title: "GitHub API Authentication",
+          status: "warn",
+          message: "GitHub API Token missing (rate limits may apply to research data)",
+          fix: 'Add GITHUB_TOKEN="ghp_..." to webiu-server/.env to increase rate limits'
+        });
+      } else {
+        results.push({
+          title: "GitHub API Authentication",
+          status: "ok",
+          message: "GitHub Personal Access Token configured"
+        });
+      }
+    }
+  } else {
+    results.push({
+      title: "Webiu Project Workspace",
+      status: "warn",
+      message: "Not inside a Webiu project directory",
+      fix: "Navigate inside a project folder or create one with `webiu init`"
+    });
+  }
+  console.log(`${chalk5.bold("System & Environment Diagnostics:")}
+`);
+  for (const res of results) {
+    const symbol = res.status === "ok" ? chalk5.bold.green("  \u2713 ") : res.status === "warn" ? chalk5.bold.yellow("  \u26A0 ") : chalk5.bold.red("  \u2718 ");
+    const titleStr = chalk5.bold(res.title.padEnd(30));
+    console.log(`${symbol}${titleStr} ${chalk5.gray(res.message)}`);
+  }
+  console.log("");
+  const warnings = results.filter((r) => r.status === "warn");
+  const errors = results.filter((r) => r.status === "error");
+  if (warnings.length === 0 && errors.length === 0) {
+    console.log(chalk5.bold.green("  \u2714 Your WebiU environment is healthy and ready to build and deploy!\n"));
+  } else {
+    console.log(chalk5.bold.yellow("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"));
+    console.log(chalk5.bold.yellow("  Suggested Remediation Steps:"));
+    console.log(chalk5.bold.yellow("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n"));
+    let count = 1;
+    for (const item of [...errors, ...warnings]) {
+      if (item.fix) {
+        console.log(`  ${chalk5.bold.cyan(`${count}.`)} ${chalk5.bold.white(item.title)}`);
+        console.log(`     ${chalk5.yellow("\u2192")} ${item.fix}
+`);
+        count++;
+      }
+    }
+  }
+}
+
 // src-cli/commands/help.ts
-import chalk4 from "chalk";
+import chalk6 from "chalk";
 function helpCommand() {
   console.log(`
-${chalk4.bold.hex("#7B8CFF")("\u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E")}
-${chalk4.bold.hex("#7B8CFF")("\u2502")}  ${chalk4.bold.white("WEBIU CLI")}  ${chalk4.gray(`v${VERSION}`)}  ${chalk4.hex("#7B8CFF")("\xB7")}  ${chalk4.gray("by Ceylon Computer Science Institute")}        ${chalk4.bold.hex("#7B8CFF")("\u2502")}
-${chalk4.bold.hex("#7B8CFF")("\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F")}
+${chalk6.bold.hex("#7B8CFF")("\u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E")}
+${chalk6.bold.hex("#7B8CFF")("\u2502")}  ${chalk6.bold.white("WEBIU CLI")}  ${chalk6.gray(`v${VERSION}`)}  ${chalk6.hex("#7B8CFF")("\xB7")}  ${chalk6.gray("by Ceylon Computer Science Institute")}        ${chalk6.bold.hex("#7B8CFF")("\u2502")}
+${chalk6.bold.hex("#7B8CFF")("\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F")}
 
-${chalk4.bold("Usage:")} ${chalk4.cyan("webiu")} ${chalk4.gray("[command]")}
+${chalk6.bold("Usage:")} ${chalk6.cyan("webiu")} ${chalk6.gray("[command]")}
 
-${chalk4.bold.green("Commands:")}
-  ${chalk4.bold.cyan("init")}            Interactively initialize a new Webiu portal project
-  ${chalk4.bold.cyan("dev")}             Start local development servers (Frontend + Backend)
-  ${chalk4.bold.cyan("build")}           Build production assets for webiu-ui and webiu-server
-  ${chalk4.bold.cyan("config")}          Re-configure org, theme, DB, or admin credentials
-  ${chalk4.bold.cyan("deploy")}          Generate deployment files (Render, Railway, Vercel, Docker)
-  ${chalk4.bold.cyan("docker:up")}       Start local Docker containers (PostgreSQL DB)
-  ${chalk4.bold.cyan("docker:down")}     Stop and remove local Docker containers
-  ${chalk4.bold.cyan("help")}            Display this help manual
+${chalk6.bold.green("Commands:")}
+  ${chalk6.bold.cyan("init")}            Interactively initialize a new Webiu portal project
+  ${chalk6.bold.cyan("dev")}             Start local development servers (Frontend + Backend)
+  ${chalk6.bold.cyan("build")}           Build production assets for webiu-ui and webiu-server
+  ${chalk6.bold.cyan("config")}          Re-configure org, theme, DB, or admin credentials
+  ${chalk6.bold.cyan("deploy")}          Generate deployment files (Render, Railway, Vercel, Docker)
+  ${chalk6.bold.cyan("doctor")}          Run Homebrew-style self-diagnostics and project health check
+  ${chalk6.bold.cyan("docker:up")}       Start local Docker containers (PostgreSQL DB)
+  ${chalk6.bold.cyan("docker:down")}     Stop and remove local Docker containers
+  ${chalk6.bold.cyan("help")}            Display this help manual
 
-${chalk4.bold.green("Flags:")}
-  ${chalk4.bold.cyan("-V, --version")}   Output the current CLI version
-  ${chalk4.bold.cyan("-h, --help")}      Display help information
+${chalk6.bold.green("Flags:")}
+  ${chalk6.bold.cyan("-v, -V, --version")} Output the current CLI version
+  ${chalk6.bold.cyan("-h, --help")}       Display help information
 
-${chalk4.bold.magenta("Examples:")}
-  ${chalk4.gray("$")} ${chalk4.cyan("webiu init")}
-  ${chalk4.gray("$")} ${chalk4.cyan("webiu dev")}
-  ${chalk4.gray("$")} ${chalk4.cyan("webiu config")}
-  ${chalk4.gray("$")} ${chalk4.cyan("webiu deploy")}
-  ${chalk4.gray("$")} ${chalk4.cyan("webiu -V")}
+${chalk6.bold.magenta("Examples:")}
+  ${chalk6.gray("$")} ${chalk6.cyan("webiu init")}
+  ${chalk6.gray("$")} ${chalk6.cyan("webiu dev")}
+  ${chalk6.gray("$")} ${chalk6.cyan("webiu config")}
+  ${chalk6.gray("$")} ${chalk6.cyan("webiu deploy")}
+  ${chalk6.gray("$")} ${chalk6.cyan("webiu -V")}
 
-${chalk4.bold.green("URLs after webiu dev:")}
-  ${chalk4.gray("Frontend UI \u2192")}  ${chalk4.underline.blue("http://localhost:4200")}
-  ${chalk4.gray("Backend API \u2192")}  ${chalk4.underline.blue("http://localhost:5050")}
+${chalk6.bold.green("URLs after webiu dev:")}
+  ${chalk6.gray("Frontend UI \u2192")}  ${chalk6.underline.blue("http://localhost:4200")}
+  ${chalk6.gray("Backend API \u2192")}  ${chalk6.underline.blue("http://localhost:5050")}
 
-${chalk4.gray("Documentation:")} ${chalk4.underline.blue("https://github.com/c2siorg/Webiu")}
-${chalk4.gray("Maintainers: Ceylon Computer Science Institute (C2SI)")}
+${chalk6.gray("Documentation:")} ${chalk6.underline.blue("https://github.com/c2siorg/Webiu")}
+${chalk6.gray("Maintainers: Ceylon Computer Science Institute (C2SI)")}
 `);
 }
 
 // src-cli/commands/docker.ts
-import { execa as execa2 } from "execa";
-import chalk5 from "chalk";
+import { execa as execa3 } from "execa";
+import chalk7 from "chalk";
 async function dockerUpCommand() {
   console.log(`
-${chalk5.bold.cyan("Starting Docker containerized environment... :D")}
+${chalk7.bold.cyan("Starting Docker containerized environment... :D")}
 `);
   try {
-    await execa2("docker", ["compose", "up", "-d"], { stdio: "inherit" });
-    console.log(chalk5.green("\nDocker containers started successfully! XD"));
+    await execa3("docker", ["compose", "up", "-d"], { stdio: "inherit" });
+    console.log(chalk7.green("\nDocker containers started successfully! XD"));
   } catch (err) {
-    console.error(chalk5.red("Failed to start Docker containers:"), err);
+    console.error(chalk7.red("Failed to start Docker containers:"), err);
   }
 }
 async function dockerDownCommand() {
   console.log(`
-${chalk5.bold.cyan("Stopping Docker containerized environment...")}
+${chalk7.bold.cyan("Stopping Docker containerized environment...")}
 `);
   try {
-    await execa2("docker", ["compose", "down"], { stdio: "inherit" });
-    console.log(chalk5.green("\nDocker containers stopped cleanly."));
+    await execa3("docker", ["compose", "down"], { stdio: "inherit" });
+    console.log(chalk7.green("\nDocker containers stopped cleanly."));
   } catch (err) {
-    console.error(chalk5.red("Failed to stop Docker containers:"), err);
+    console.error(chalk7.red("Failed to stop Docker containers:"), err);
   }
 }
 
+// src-cli/utils/updater.ts
+import chalk8 from "chalk";
+import fs5 from "fs-extra";
+import path5 from "path";
+import os from "os";
+import https from "https";
+var CACHE_DIR = path5.join(os.homedir(), ".config", "webiu");
+var CACHE_FILE = path5.join(CACHE_DIR, "update-check.json");
+var CACHE_TTL_MS = 24 * 60 * 60 * 1e3;
+function isNewerVersion(current, candidate) {
+  const cParts = current.split(".").map((p) => parseInt(p, 10) || 0);
+  const vParts = candidate.split(".").map((p) => parseInt(p, 10) || 0);
+  for (let i = 0; i < 3; i++) {
+    if ((vParts[i] || 0) > (cParts[i] || 0)) return true;
+    if ((vParts[i] || 0) < (cParts[i] || 0)) return false;
+  }
+  return false;
+}
+function fetchLatestNpmVersion() {
+  return new Promise((resolve) => {
+    const req = https.get("https://registry.npmjs.org/create-webiu/latest", { timeout: 1500 }, (res) => {
+      if (res.statusCode !== 200) {
+        resolve(null);
+        return;
+      }
+      let body = "";
+      res.on("data", (chunk) => {
+        body += chunk;
+      });
+      res.on("end", () => {
+        try {
+          const parsed = JSON.parse(body);
+          resolve(parsed.version || null);
+        } catch {
+          resolve(null);
+        }
+      });
+    });
+    req.on("error", () => resolve(null));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(null);
+    });
+  });
+}
+async function checkForUpdates() {
+  try {
+    await fs5.ensureDir(CACHE_DIR);
+    let cache = null;
+    if (await fs5.pathExists(CACHE_FILE)) {
+      try {
+        cache = await fs5.readJson(CACHE_FILE);
+      } catch {
+        cache = null;
+      }
+    }
+    const now = Date.now();
+    if (cache && now - cache.lastChecked < CACHE_TTL_MS && cache.latestVersion) {
+      return isNewerVersion(VERSION, cache.latestVersion) ? cache.latestVersion : null;
+    }
+    const latest = await fetchLatestNpmVersion();
+    if (latest) {
+      await fs5.writeJson(CACHE_FILE, {
+        lastChecked: now,
+        latestVersion: latest
+      }, { spaces: 2 });
+      return isNewerVersion(VERSION, latest) ? latest : null;
+    }
+  } catch {
+  }
+  return null;
+}
+function displayUpdateBanner(latestVersion) {
+  const border = chalk8.hex("#7B8CFF")("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  const line1 = `  ${chalk8.bold.yellow("\u26A1 Update available!")} ${chalk8.gray(`v${VERSION}`)} \u2192 ${chalk8.bold.green(`v${latestVersion}`)}`;
+  const line2 = `  ${chalk8.gray("Run:")} ${chalk8.bold.cyan("npm install -g create-webiu")} ${chalk8.gray("to update to latest")}`;
+  console.log(`
+\u256D${border}\u256E`);
+  console.log(`\u2502${line1.padEnd(76)}\u2502`);
+  console.log(`\u2502${line2.padEnd(78)}\u2502`);
+  console.log(`\u2570${border}\u256F
+`);
+}
+
 // src-cli/index.ts
+var updatePromise = null;
+try {
+  updatePromise = checkForUpdates();
+} catch {
+}
 function handleGracefulExit() {
   console.log(`
 
-  ${chalk6.bold.yellow("\u{1F44B} Goodbye!")} ${chalk6.gray("Operation cancelled by user.")}
+  ${chalk9.bold.yellow("\u{1F44B} Goodbye!")} ${chalk9.gray("Operation cancelled by user.")}
 `);
   process.exit(0);
 }
@@ -945,12 +1348,12 @@ process.on("unhandledRejection", (reason) => {
   if (reason && (reason.name === "ExitPromptError" || reason.message?.includes("force closed"))) {
     handleGracefulExit();
   } else {
-    console.error(chalk6.red("\n  \u2718 Unexpected Error:"), reason);
+    console.error(chalk9.red("\n  \u2718 Unexpected Error:"), reason);
     process.exit(1);
   }
 });
 var program = new Command();
-program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version("2.0.1", "-V, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
+program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version(VERSION, "-v, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
 program.configureOutput({
   writeOut: (str) => {
     if (str.includes("Usage: webiu") || str.includes("Commands:") || str.includes("Options:")) {
@@ -966,21 +1369,35 @@ program.command("dev").description("Start local development servers (Frontend + 
 program.command("build").description("Build production assets for both webiu-ui and webiu-server").action(buildCommand);
 program.command("config").description("Re-configure organization metadata, branding, DB, or admin credentials").action(configCommand);
 program.command("deploy").description("Launch interactive deployment generator for Render, Railway, Vercel, or Docker").action(deployCommand);
+program.command("doctor").description("Run Homebrew-style self-diagnostics and project health check").action(doctorCommand);
 program.command("docker:up").description("Start local Docker containers (PostgreSQL database)").action(dockerUpCommand);
 program.command("docker:down").description("Stop and remove local Docker containers").action(dockerDownCommand);
 program.command("help").description("Display detailed command usage and instructions").action(helpCommand);
 program.on("command:*", (operands) => {
-  console.error(chalk6.red(`
+  console.error(chalk9.red(`
   \u2718 Unknown command: "${operands[0]}"
 `));
   helpCommand();
   process.exit(1);
 });
+if (process.argv.includes("-V")) {
+  console.log(VERSION);
+  process.exit(0);
+}
 if (process.argv.includes("-h") || process.argv.includes("--help")) {
   helpCommand();
   process.exit(0);
 }
-program.parse(process.argv);
+async function run() {
+  await program.parseAsync(process.argv);
+  if (updatePromise) {
+    const latest = await updatePromise;
+    if (latest) {
+      displayUpdateBanner(latest);
+    }
+  }
+}
+run();
 if (!process.argv.slice(2).length) {
   helpCommand();
 }

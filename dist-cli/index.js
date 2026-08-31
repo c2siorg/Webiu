@@ -32,7 +32,7 @@ var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__ge
 var VERSION, WEBIU_REPO, WEBIU_BRANCH, ALL_NAVBAR_SECTIONS;
 var init_constants = __esm({
   "src-cli/constants.ts"() {
-    VERSION = "2.1.0";
+    VERSION = "2.2.0";
     WEBIU_REPO = "https://github.com/TarunyaProgrammer/Webiu.git";
     WEBIU_BRANCH = "webiu-npm-pack";
     ALL_NAVBAR_SECTIONS = [
@@ -238,20 +238,20 @@ async function devCommand() {
   const serverDir = import_path.default.join(process.cwd(), "webiu-server");
   const uiDir = import_path.default.join(process.cwd(), "webiu-ui");
   if (!await import_fs_extra.default.pathExists(serverDir) || !await import_fs_extra.default.pathExists(uiDir)) {
-    console.error(import_chalk2.default.red("\n  \u2718 webiu-server or webiu-ui directories not found!"));
-    console.error(import_chalk2.default.yellow("  Make sure you have run `webiu init` first and are inside your project directory."));
-    console.error(import_chalk2.default.yellow(`  Expected: ${import_chalk2.default.cyan(serverDir)}`));
-    console.error(import_chalk2.default.yellow(`  Expected: ${import_chalk2.default.cyan(uiDir)}
+    console.error(import_chalk3.default.red("\n  \u2718 webiu-server or webiu-ui directories not found!"));
+    console.error(import_chalk3.default.yellow("  Make sure you have run `webiu init` first and are inside your project directory."));
+    console.error(import_chalk3.default.yellow(`  Expected: ${import_chalk3.default.cyan(serverDir)}`));
+    console.error(import_chalk3.default.yellow(`  Expected: ${import_chalk3.default.cyan(uiDir)}
 `));
     process.exit(1);
   }
   const serverModules = import_path.default.join(serverDir, "node_modules");
   const uiModules = import_path.default.join(uiDir, "node_modules");
   if (!await import_fs_extra.default.pathExists(serverModules) || !await import_fs_extra.default.pathExists(uiModules)) {
-    console.error(import_chalk2.default.red("\n  \u2718 node_modules not found in webiu-server or webiu-ui!"));
-    console.error(import_chalk2.default.yellow("  Please run the following commands first:"));
-    console.error(import_chalk2.default.cyan("    cd webiu-server && npm install && cd .."));
-    console.error(import_chalk2.default.cyan("    cd webiu-ui && npm install && cd ..\n"));
+    console.error(import_chalk3.default.red("\n  \u2718 node_modules not found in webiu-server or webiu-ui!"));
+    console.error(import_chalk3.default.yellow("  Please run the following commands first:"));
+    console.error(import_chalk3.default.cyan("    cd webiu-server && npm install && cd .."));
+    console.error(import_chalk3.default.cyan("    cd webiu-ui && npm install && cd ..\n"));
     process.exit(1);
   }
   const envPath = import_path.default.join(process.cwd(), "webiu-server", ".env");
@@ -268,25 +268,25 @@ async function devCommand() {
       }
     }
   }
-  console.log(import_chalk2.default.gray(`  Checking database at ${dbHost}:${dbPort}...`));
+  console.log(import_chalk3.default.gray(`  Checking database at ${dbHost}:${dbPort}...`));
   const dbReachable = await isPortReachable(dbPort, dbHost === "localhost" ? "127.0.0.1" : dbHost);
   if (!dbReachable) {
     console.log("");
-    console.log(import_chalk2.default.yellow("  \u26A0 Warning: Cannot reach the database!"));
-    console.log(import_chalk2.default.gray(`  Expected PostgreSQL at ${import_chalk2.default.bold(`${dbHost}:${dbPort}`)}`));
+    console.log(import_chalk3.default.yellow("  \u26A0 Warning: Cannot reach the database!"));
+    console.log(import_chalk3.default.gray(`  Expected PostgreSQL at ${import_chalk3.default.bold(`${dbHost}:${dbPort}`)}`));
     console.log("");
-    console.log(import_chalk2.default.bold("  To fix this, start your database first:"));
-    console.log(import_chalk2.default.cyan("    docker compose up -d"));
+    console.log(import_chalk3.default.bold("  To fix this, start your database first:"));
+    console.log(import_chalk3.default.cyan("    docker compose up -d"));
     console.log("");
-    console.log(import_chalk2.default.gray("  (Continuing anyway \u2014 backend will retry the connection automatically)"));
+    console.log(import_chalk3.default.gray("  (Continuing anyway \u2014 backend will retry the connection automatically)"));
     console.log("");
   } else {
-    console.log(import_chalk2.default.green(`  \u2714 Database reachable at ${dbHost}:${dbPort}`));
+    console.log(import_chalk3.default.green(`  \u2714 Database reachable at ${dbHost}:${dbPort}`));
   }
   console.log("");
-  console.log(import_chalk2.default.gray(`  Backend API \u2192  http://localhost:5050`));
-  console.log(import_chalk2.default.gray(`  Frontend UI \u2192  http://localhost:4200`));
-  console.log(import_chalk2.default.gray("  Press Ctrl+C to stop all servers\n"));
+  console.log(import_chalk3.default.gray(`  Backend API \u2192  http://localhost:5050`));
+  console.log(import_chalk3.default.gray(`  Frontend UI \u2192  http://localhost:4200`));
+  console.log(import_chalk3.default.gray("  Press Ctrl+C to stop all servers\n"));
   try {
     const { result } = (0, import_concurrently.default)(
       [
@@ -311,7 +311,7 @@ async function devCommand() {
     );
     await result;
   } catch (err) {
-    console.error(import_chalk2.default.red("\n  Development servers stopped unexpectedly:"), err);
+    console.error(import_chalk3.default.red("\n  Development servers stopped unexpectedly:"), err);
   }
 }
 async function buildCommand() {
@@ -319,21 +319,21 @@ async function buildCommand() {
   const serverDir = import_path.default.join(process.cwd(), "webiu-server");
   const uiDir = import_path.default.join(process.cwd(), "webiu-ui");
   if (!await import_fs_extra.default.pathExists(serverDir) || !await import_fs_extra.default.pathExists(uiDir)) {
-    console.error(import_chalk2.default.red("  \u2718 webiu-server or webiu-ui not found. Run `webiu init` first.\n"));
+    console.error(import_chalk3.default.red("  \u2718 webiu-server or webiu-ui not found. Run `webiu init` first.\n"));
     process.exit(1);
   }
-  const execa3 = (await import("execa")).default;
-  console.log(import_chalk2.default.cyan("  Building NestJS backend..."));
-  await execa3("npm", ["run", "build"], { cwd: serverDir, stdio: "inherit" });
-  console.log(import_chalk2.default.cyan("\n  Building Angular frontend..."));
-  await execa3("npm", ["run", "build"], { cwd: uiDir, stdio: "inherit" });
-  console.log(import_chalk2.default.green("\n  \u2714 Build complete!\n"));
+  const execa4 = (await import("execa")).default;
+  console.log(import_chalk3.default.cyan("  Building NestJS backend..."));
+  await execa4("npm", ["run", "build"], { cwd: serverDir, stdio: "inherit" });
+  console.log(import_chalk3.default.cyan("\n  Building Angular frontend..."));
+  await execa4("npm", ["run", "build"], { cwd: uiDir, stdio: "inherit" });
+  console.log(import_chalk3.default.green("\n  \u2714 Build complete!\n"));
 }
-var import_concurrently, import_chalk2, import_path, import_fs_extra, import_net;
+var import_concurrently, import_chalk3, import_path, import_fs_extra, import_net;
 var init_dev = __esm({
   "src-cli/commands/dev.ts"() {
     import_concurrently = __toESM(require("concurrently"));
-    import_chalk2 = __toESM(require("chalk"));
+    import_chalk3 = __toESM(require("chalk"));
     import_path = __toESM(require("path"));
     import_fs_extra = __toESM(require("fs-extra"));
     import_net = __toESM(require("net"));
@@ -343,23 +343,88 @@ var init_dev = __esm({
 
 // src-cli/index.ts
 var import_commander = require("commander");
-var import_chalk8 = __toESM(require("chalk"));
+var import_chalk11 = __toESM(require("chalk"));
 
 // src-cli/commands/init.ts
 var import_prompts = require("@inquirer/prompts");
-var import_chalk3 = __toESM(require("chalk"));
-var import_ora = __toESM(require("ora"));
+var import_chalk4 = __toESM(require("chalk"));
+var import_ora2 = __toESM(require("ora"));
 var import_fs_extra2 = __toESM(require("fs-extra"));
 var import_path2 = __toESM(require("path"));
 var import_crypto = __toESM(require("crypto"));
 var import_execa = __toESM(require("execa"));
 init_banner();
+
+// src-cli/utils/step-logger.ts
+var import_chalk2 = __toESM(require("chalk"));
+var import_ora = __toESM(require("ora"));
+var StepLogger = class {
+  totalSteps;
+  currentStep = 0;
+  currentSpinner = null;
+  constructor(totalSteps) {
+    this.totalSteps = totalSteps;
+  }
+  /**
+   * Starts a new aesthetic step with spinner and badge formatting.
+   * e.g., [1/8] Cloning template source code...
+   */
+  startStep(title, detail) {
+    this.currentStep++;
+    const stepBadge = import_chalk2.default.bgHex("#7B8CFF").black.bold(` ${this.currentStep}/${this.totalSteps} `);
+    const stepTitle = import_chalk2.default.bold.white(title);
+    const detailText = detail ? import_chalk2.default.gray(` (${detail})`) : "";
+    const text = `${stepBadge} ${stepTitle}${detailText}`;
+    if (this.currentSpinner) {
+      this.currentSpinner.stop();
+    }
+    this.currentSpinner = (0, import_ora.default)({
+      text,
+      color: "cyan",
+      spinner: "dots"
+    }).start();
+    return this.currentSpinner;
+  }
+  /**
+   * Completes the current active step with a green checkmark.
+   */
+  succeedStep(message) {
+    if (this.currentSpinner) {
+      const stepBadge = import_chalk2.default.bgHex("#10B981").black.bold(` ${this.currentStep}/${this.totalSteps} `);
+      const text = message ? `${stepBadge} ${import_chalk2.default.bold.green(message)}` : this.currentSpinner.text.replace(/^[^\s]+\s*/, `${stepBadge} `);
+      this.currentSpinner.succeed(text);
+      this.currentSpinner = null;
+    }
+  }
+  /**
+   * Marks the current active step as failed with a red cross.
+   */
+  failStep(message) {
+    if (this.currentSpinner) {
+      const stepBadge = import_chalk2.default.bgHex("#EF4444").white.bold(` ${this.currentStep}/${this.totalSteps} `);
+      const text = message ? `${stepBadge} ${import_chalk2.default.bold.red(message)}` : this.currentSpinner.text.replace(/^[^\s]+\s*/, `${stepBadge} `);
+      this.currentSpinner.fail(text);
+      this.currentSpinner = null;
+    }
+  }
+  /**
+   * Updates sub-text on the active spinner.
+   */
+  updateText(text) {
+    if (this.currentSpinner) {
+      const stepBadge = import_chalk2.default.bgHex("#7B8CFF").black.bold(` ${this.currentStep}/${this.totalSteps} `);
+      this.currentSpinner.text = `${stepBadge} ${import_chalk2.default.bold.cyan(text)}`;
+    }
+  }
+};
+
+// src-cli/commands/init.ts
 init_constants();
 async function initCommand(options) {
   printWelcomeBanner();
-  console.log(`${import_chalk3.default.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}`);
-  console.log(`${import_chalk3.default.bold.yellow("  \u{1F680} Project Setup Wizard \u2014 Answer a few questions to begin")}`);
-  console.log(`${import_chalk3.default.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}
+  console.log(`${import_chalk4.default.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}`);
+  console.log(`${import_chalk4.default.bold.yellow("  \u{1F680} Project Setup Wizard \u2014 Answer a few questions to begin")}`);
+  console.log(`${import_chalk4.default.bold.cyan("\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501")}
 `);
   const summary = {};
   const projectName = options.name || await (0, import_prompts.input)({
@@ -368,8 +433,8 @@ async function initCommand(options) {
   });
   const normalizedPath = import_path2.default.normalize(projectName);
   if (normalizedPath.startsWith("..") || import_path2.default.isAbsolute(projectName) || /[\\/]/.test(projectName)) {
-    console.error(import_chalk3.default.red("\n  \u2718 Invalid project directory name. Path traversal characters (/, \\, ..) are not allowed."));
-    console.error(import_chalk3.default.yellow('  Please provide a simple directory name (e.g. "my-webiu-portal").\n'));
+    console.error(import_chalk4.default.red("\n  \u2718 Invalid project directory name. Path traversal characters (/, \\, ..) are not allowed."));
+    console.error(import_chalk4.default.yellow('  Please provide a simple directory name (e.g. "my-webiu-portal").\n'));
     process.exit(1);
   }
   summary.projectName = projectName;
@@ -416,12 +481,12 @@ async function initCommand(options) {
   const themeAccent = await (0, import_prompts.select)({
     message: "Select Primary UI Theme Accent Color:",
     choices: [
-      { name: `${import_chalk3.default.hex("#0052CC")("\u25A0")} Ocean Blue      (#0052CC)`, value: "#0052CC" },
-      { name: `${import_chalk3.default.hex("#10B981")("\u25A0")} Emerald Green   (#10B981)`, value: "#10B981" },
-      { name: `${import_chalk3.default.hex("#7C3AED")("\u25A0")} Deep Purple      (#7C3AED)`, value: "#7C3AED" },
-      { name: `${import_chalk3.default.hex("#EF4444")("\u25A0")} Sunset Crimson   (#EF4444)`, value: "#EF4444" },
-      { name: `${import_chalk3.default.hex("#F59E0B")("\u25A0")} Amber Gold       (#F59E0B)`, value: "#F59E0B" },
-      { name: `${import_chalk3.default.hex("#EC4899")("\u25A0")} Rose Pink        (#EC4899)`, value: "#EC4899" }
+      { name: `${import_chalk4.default.hex("#0052CC")("\u25A0")} Ocean Blue      (#0052CC)`, value: "#0052CC" },
+      { name: `${import_chalk4.default.hex("#10B981")("\u25A0")} Emerald Green   (#10B981)`, value: "#10B981" },
+      { name: `${import_chalk4.default.hex("#7C3AED")("\u25A0")} Deep Purple      (#7C3AED)`, value: "#7C3AED" },
+      { name: `${import_chalk4.default.hex("#EF4444")("\u25A0")} Sunset Crimson   (#EF4444)`, value: "#EF4444" },
+      { name: `${import_chalk4.default.hex("#F59E0B")("\u25A0")} Amber Gold       (#F59E0B)`, value: "#F59E0B" },
+      { name: `${import_chalk4.default.hex("#EC4899")("\u25A0")} Rose Pink        (#EC4899)`, value: "#EC4899" }
     ]
   });
   summary.themeAccent = themeAccent;
@@ -438,7 +503,7 @@ async function initCommand(options) {
   summary.deployTarget = deployTarget;
   printLiveSummaryCard(summary);
   console.log(`
-${import_chalk3.default.bold.gray("\u2500\u2500 Admin Account Setup \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")}
+${import_chalk4.default.bold.gray("\u2500\u2500 Admin Account Setup \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")}
 `);
   const adminUsername = await (0, import_prompts.input)({
     message: "Admin dashboard username:",
@@ -451,12 +516,12 @@ ${import_chalk3.default.bold.gray("\u2500\u2500 Admin Account Setup \u2500\u2500
     validate: (val) => val.length >= 8 ? true : "Password must be at least 8 characters."
   });
   console.log(`
-${import_chalk3.default.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")}
+${import_chalk4.default.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500")}
 `);
   const selectedSections = await (0, import_prompts.checkbox)({
     message: "Which sections do you want in your portal's navbar?",
     choices: ALL_NAVBAR_SECTIONS,
-    instructions: import_chalk3.default.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
+    instructions: import_chalk4.default.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
   });
   const navbarSections = ["home", ...selectedSections.filter((s) => s !== "home")];
   summary.navbarSections = navbarSections;
@@ -465,19 +530,17 @@ ${import_chalk3.default.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u
   if (await import_fs_extra2.default.pathExists(projectDir)) {
     const existing = await import_fs_extra2.default.readdir(projectDir);
     if (existing.length > 0) {
-      console.log(import_chalk3.default.red(`
+      console.log(import_chalk4.default.red(`
   \u2718 Directory "${projectName}" already exists and is not empty.`));
-      console.log(import_chalk3.default.yellow("  Please choose an empty directory or delete the existing one.\n"));
+      console.log(import_chalk4.default.yellow("  Please choose an empty directory or delete the existing one.\n"));
       process.exit(1);
     }
   }
   await import_fs_extra2.default.ensureDir(projectDir);
   console.log("");
-  const spinner = (0, import_ora.default)({
-    text: `Cloning Webiu source code into "${import_chalk3.default.cyan(projectName)}"...`,
-    color: "cyan"
-  }).start();
+  const stepLogger = new StepLogger(8);
   try {
+    stepLogger.startStep("Cloning Webiu template repository", `branch: ${WEBIU_BRANCH}`);
     await (0, import_execa.default)("git", [
       "clone",
       "--branch",
@@ -487,7 +550,8 @@ ${import_chalk3.default.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u
       WEBIU_REPO,
       projectDir
     ], { stdio: "pipe" });
-    spinner.text = "Injecting organization configuration...";
+    stepLogger.succeedStep(`Cloned Webiu source code into "${projectName}"`);
+    stepLogger.startStep("Injecting organization & server environment settings");
     const jwtSecret = import_crypto.default.randomBytes(32).toString("hex");
     const rootEnvContent = [
       "# Generated by Webiu CLI \u2014 Do not commit this file to version control",
@@ -525,7 +589,8 @@ ${import_chalk3.default.bold.gray("\u2500\u2500 Portal Navigation \u2500\u2500\u
       ].join("\n");
       await import_fs_extra2.default.writeFile(serverEnvPath, serverEnvContent);
     }
-    spinner.text = "Configuring Angular frontend...";
+    stepLogger.succeedStep("Configured root & server environment secrets");
+    stepLogger.startStep("Configuring Angular UI assets & runtime config");
     const envTsPath = import_path2.default.join(projectDir, "webiu-ui", "src", "environments", "environment.ts");
     if (await import_fs_extra2.default.pathExists(envTsPath)) {
       const envTsContent = `export const environment = {
@@ -821,7 +886,17 @@ import { AppConfigService } from './services/app-config.service';`
       );
       await import_fs_extra2.default.writeFile(homepagePath, homepageHtml);
     }
-    spinner.succeed(import_chalk3.default.green(`  \u2714 Project ${import_chalk3.default.bold.cyan(`"${projectName}"`)} scaffolded successfully!`));
+    stepLogger.succeedStep("Configured Angular runtime assets & Manifest");
+    stepLogger.startStep("Applying dynamic CSS theme accent variables", `accent: ${themeAccent}`);
+    stepLogger.succeedStep("Applied dynamic CSS theme accent variables");
+    stepLogger.startStep("Patching component navigation & homepage hero title");
+    stepLogger.succeedStep("Patched navigation & page titles");
+    stepLogger.startStep("Verifying portal workspace structure");
+    stepLogger.succeedStep("Verified portal workspace structure");
+    stepLogger.startStep("Preparing dependency installation engine");
+    stepLogger.succeedStep("Dependency installation engine ready");
+    stepLogger.startStep("Finalizing project scaffolding setup");
+    stepLogger.succeedStep(`Project "${projectName}" scaffolded successfully!`);
     printFinalVictoryScreen({
       projectName,
       orgName,
@@ -830,7 +905,7 @@ import { AppConfigService } from './services/app-config.service';`
       navbarSections
     });
     const shouldInstall = await (0, import_prompts.confirm)({
-      message: `Install all dependencies now? ${import_chalk3.default.gray("(npm install in webiu-server + webiu-ui)")}`,
+      message: `Install all dependencies now? ${import_chalk4.default.gray("(npm install in webiu-server + webiu-ui)")}`,
       default: true
     });
     if (shouldInstall) {
@@ -846,10 +921,10 @@ import { AppConfigService } from './services/app-config.service';`
       }
     }
   } catch (err) {
-    spinner.fail(import_chalk3.default.red("  \u2718 Scaffolding failed!"));
+    stepLogger.failStep("Scaffolding failed!");
     if (err.message && err.message.includes("git")) {
-      console.error(import_chalk3.default.red("\n  Git is required to scaffold a Webiu project."));
-      console.error(import_chalk3.default.yellow("  Please install git from https://git-scm.com and try again.\n"));
+      console.error(import_chalk4.default.red("\n  Git is required to scaffold a Webiu project."));
+      console.error(import_chalk4.default.yellow("  Please install git from https://git-scm.com and try again.\n"));
     } else {
       console.error(err);
     }
@@ -863,23 +938,23 @@ import { AppConfigService } from './services/app-config.service';`
 async function runInstall(projectDir) {
   const serverDir = import_path2.default.join(projectDir, "webiu-server");
   const uiDir = import_path2.default.join(projectDir, "webiu-ui");
-  const serverSpinner = (0, import_ora.default)({
+  const serverSpinner = (0, import_ora2.default)({
     text: "Installing backend dependencies (webiu-server)...",
     color: "blue"
   }).start();
-  const uiSpinner = (0, import_ora.default)({
+  const uiSpinner = (0, import_ora2.default)({
     text: "Installing frontend dependencies (webiu-ui)...",
     color: "green"
   }).start();
   const installServer = (0, import_execa.default)("npm", ["install"], { cwd: serverDir, stdio: "pipe" }).then(() => {
-    serverSpinner.succeed(import_chalk3.default.green("  \u2714 Backend dependencies installed"));
+    serverSpinner.succeed(import_chalk4.default.green("  \u2714 Backend dependencies installed"));
   }).catch(() => {
-    serverSpinner.fail(import_chalk3.default.red("  \u2718 Backend install failed \u2014 run: cd webiu-server && npm install"));
+    serverSpinner.fail(import_chalk4.default.red("  \u2718 Backend install failed \u2014 run: cd webiu-server && npm install"));
   });
   const installUi = (0, import_execa.default)("npm", ["install"], { cwd: uiDir, stdio: "pipe" }).then(() => {
-    uiSpinner.succeed(import_chalk3.default.green("  \u2714 Frontend dependencies installed"));
+    uiSpinner.succeed(import_chalk4.default.green("  \u2714 Frontend dependencies installed"));
   }).catch(() => {
-    uiSpinner.fail(import_chalk3.default.red("  \u2718 Frontend install failed \u2014 run: cd webiu-ui && npm install"));
+    uiSpinner.fail(import_chalk4.default.red("  \u2718 Frontend install failed \u2014 run: cd webiu-ui && npm install"));
   });
   await Promise.all([installServer, installUi]);
 }
@@ -889,8 +964,8 @@ init_dev();
 
 // src-cli/commands/config.ts
 var import_prompts2 = require("@inquirer/prompts");
-var import_chalk4 = __toESM(require("chalk"));
-var import_ora2 = __toESM(require("ora"));
+var import_chalk5 = __toESM(require("chalk"));
+var import_ora3 = __toESM(require("ora"));
 var import_fs_extra3 = __toESM(require("fs-extra"));
 var import_path3 = __toESM(require("path"));
 init_banner();
@@ -902,8 +977,8 @@ async function configCommand() {
   const uiConfigPath = import_path3.default.join(process.cwd(), "webiu-ui", "src", "assets", "config.json");
   const isWebiuProject = await import_fs_extra3.default.pathExists(rootEnvPath) && await import_fs_extra3.default.pathExists(import_path3.default.join(process.cwd(), "webiu-server")) && await import_fs_extra3.default.pathExists(import_path3.default.join(process.cwd(), "webiu-ui"));
   if (!isWebiuProject) {
-    console.error(import_chalk4.default.red("\n  \u2718 Not inside a Webiu project directory."));
-    console.error(import_chalk4.default.yellow("  Please run this command from inside your project folder (e.g. cd my-webiu-portal)\n"));
+    console.error(import_chalk5.default.red("\n  \u2718 Not inside a Webiu project directory."));
+    console.error(import_chalk5.default.yellow("  Please run this command from inside your project folder (e.g. cd my-webiu-portal)\n"));
     process.exit(1);
   }
   let currentEnv = {};
@@ -917,7 +992,7 @@ async function configCommand() {
       currentEnv[key] = val;
     }
   } catch {
-    console.error(import_chalk4.default.yellow("  Could not read .env \u2014 starting fresh.\n"));
+    console.error(import_chalk5.default.yellow("  Could not read .env \u2014 starting fresh.\n"));
   }
   const setting = await (0, import_prompts2.select)({
     message: "What would you like to re-configure?",
@@ -942,22 +1017,22 @@ async function configCommand() {
     });
   } else if (setting === "theme") {
     updates["THEME_ACCENT"] = await (0, import_prompts2.select)({
-      message: `Current theme: ${import_chalk4.default.hex(currentEnv["THEME_ACCENT"] || "#7B8CFF")("\u25A0")} ${currentEnv["THEME_ACCENT"] || "#7B8CFF"}
+      message: `Current theme: ${import_chalk5.default.hex(currentEnv["THEME_ACCENT"] || "#7B8CFF")("\u25A0")} ${currentEnv["THEME_ACCENT"] || "#7B8CFF"}
 Select new accent color:`,
       choices: [
-        { name: `${import_chalk4.default.hex("#0052CC")("\u25A0")} Ocean Blue      (#0052CC)`, value: "#0052CC" },
-        { name: `${import_chalk4.default.hex("#10B981")("\u25A0")} Emerald Green   (#10B981)`, value: "#10B981" },
-        { name: `${import_chalk4.default.hex("#7C3AED")("\u25A0")} Deep Purple      (#7C3AED)`, value: "#7C3AED" },
-        { name: `${import_chalk4.default.hex("#EF4444")("\u25A0")} Sunset Crimson   (#EF4444)`, value: "#EF4444" },
-        { name: `${import_chalk4.default.hex("#F59E0B")("\u25A0")} Amber Gold       (#F59E0B)`, value: "#F59E0B" },
-        { name: `${import_chalk4.default.hex("#EC4899")("\u25A0")} Rose Pink        (#EC4899)`, value: "#EC4899" }
+        { name: `${import_chalk5.default.hex("#0052CC")("\u25A0")} Ocean Blue      (#0052CC)`, value: "#0052CC" },
+        { name: `${import_chalk5.default.hex("#10B981")("\u25A0")} Emerald Green   (#10B981)`, value: "#10B981" },
+        { name: `${import_chalk5.default.hex("#7C3AED")("\u25A0")} Deep Purple      (#7C3AED)`, value: "#7C3AED" },
+        { name: `${import_chalk5.default.hex("#EF4444")("\u25A0")} Sunset Crimson   (#EF4444)`, value: "#EF4444" },
+        { name: `${import_chalk5.default.hex("#F59E0B")("\u25A0")} Amber Gold       (#F59E0B)`, value: "#F59E0B" },
+        { name: `${import_chalk5.default.hex("#EC4899")("\u25A0")} Rose Pink        (#EC4899)`, value: "#EC4899" }
       ]
     });
   } else if (setting === "navbar") {
     const selected = await (0, import_prompts2.checkbox)({
       message: "Which navbar sections should be active?",
       choices: ALL_NAVBAR_SECTIONS,
-      instructions: import_chalk4.default.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
+      instructions: import_chalk5.default.gray("  Space to toggle \xB7 A to select all \xB7 Enter to confirm")
     });
     newNavbarSections = ["home", ...selected.filter((s) => s !== "home")];
   } else if (setting === "db") {
@@ -975,7 +1050,7 @@ Select new accent color:`,
       validate: (v) => v.length >= 8 ? true : "Password must be at least 8 characters."
     });
   }
-  const spinner = (0, import_ora2.default)({ text: "Writing updated configuration across portal...", color: "cyan" }).start();
+  const spinner = (0, import_ora3.default)({ text: "Writing updated configuration across portal...", color: "cyan" }).start();
   try {
     if (await import_fs_extra3.default.pathExists(rootEnvPath)) {
       let envContent = await import_fs_extra3.default.readFile(rootEnvPath, "utf-8");
@@ -1089,34 +1164,34 @@ ${newLine}`;
         await import_fs_extra3.default.writeFile(homepagePath, hp);
       }
     }
-    spinner.succeed(import_chalk4.default.green("  \u2714 Configuration updated successfully!"));
+    spinner.succeed(import_chalk5.default.green("  \u2714 Configuration updated successfully!"));
     console.log(`
-  ${import_chalk4.default.bold("Changes applied:")}`);
+  ${import_chalk5.default.bold("Changes applied:")}`);
     for (const [key, val] of Object.entries(updates)) {
       const displayVal = key.includes("PASSWORD") ? "\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022" : val;
-      console.log(`    ${import_chalk4.default.gray(key)} \u2192 ${import_chalk4.default.cyan(displayVal)}`);
+      console.log(`    ${import_chalk5.default.gray(key)} \u2192 ${import_chalk5.default.cyan(displayVal)}`);
     }
     if (newNavbarSections) {
-      console.log(`    ${import_chalk4.default.gray("NAVBAR_SECTIONS")} \u2192 ${import_chalk4.default.cyan(newNavbarSections.join(", "))}`);
+      console.log(`    ${import_chalk5.default.gray("NAVBAR_SECTIONS")} \u2192 ${import_chalk5.default.cyan(newNavbarSections.join(", "))}`);
     }
     console.log("");
   } catch (err) {
-    spinner.fail(import_chalk4.default.red("  \u2718 Failed to update configuration."));
+    spinner.fail(import_chalk5.default.red("  \u2718 Failed to update configuration."));
     console.error(err);
   }
 }
 
 // src-cli/commands/deploy.ts
 var import_prompts3 = require("@inquirer/prompts");
-var import_chalk5 = __toESM(require("chalk"));
-var import_ora3 = __toESM(require("ora"));
+var import_chalk6 = __toESM(require("chalk"));
+var import_ora4 = __toESM(require("ora"));
 var import_fs_extra4 = __toESM(require("fs-extra"));
 var import_path4 = __toESM(require("path"));
 async function deployCommand() {
   console.log(`
-${import_chalk5.default.bold.cyan("====================================================")}`);
-  console.log(`${import_chalk5.default.bold.yellow("      Webiu Interactive Deployment Generator       ")}`);
-  console.log(`${import_chalk5.default.bold.cyan("====================================================")}
+${import_chalk6.default.bold.cyan("====================================================")}`);
+  console.log(`${import_chalk6.default.bold.yellow("      Webiu Interactive Deployment Generator       ")}`);
+  console.log(`${import_chalk6.default.bold.cyan("====================================================")}
 `);
   const platform = await (0, import_prompts3.select)({
     message: "Select target cloud platform for deployment:",
@@ -1143,7 +1218,7 @@ ${import_chalk5.default.bold.cyan("=============================================
       }
     ]
   });
-  const spinner = (0, import_ora3.default)(`Generating deployment configuration files for ${platform}...`).start();
+  const spinner = (0, import_ora4.default)(`Generating deployment configuration files for ${platform}...`).start();
   try {
     if (platform === "render") {
       const renderYaml = `
@@ -1164,9 +1239,9 @@ services:
     staticPublishPath: ./webiu-ui/dist/webiu-ui/browser
 `.trim();
       await import_fs_extra4.default.writeFile(import_path4.default.join(process.cwd(), "render.yaml"), renderYaml);
-      spinner.succeed(import_chalk5.default.green("Generated render.yaml successfully! XD"));
+      spinner.succeed(import_chalk6.default.green("Generated render.yaml successfully! XD"));
       console.log(`
-${import_chalk5.default.bold.yellow("Next Steps for Render:")}`);
+${import_chalk6.default.bold.yellow("Next Steps for Render:")}`);
       console.log("  1. Commit and push your changes to GitHub.");
       console.log('  2. Go to https://dashboard.render.com and choose "New Blueprint Group".');
       console.log("  3. Select your GitHub repo to deploy automatically!\n");
@@ -1189,92 +1264,425 @@ services:
     restart: always
 `.trim();
       await import_fs_extra4.default.writeFile(import_path4.default.join(process.cwd(), "docker-compose.prod.yml"), dockerProd);
-      spinner.succeed(import_chalk5.default.green("Generated docker-compose.prod.yml successfully! :D"));
+      spinner.succeed(import_chalk6.default.green("Generated docker-compose.prod.yml successfully! :D"));
       console.log(`
-${import_chalk5.default.bold.yellow("Next Steps for Docker:")}`);
-      console.log(`  1. Run ${import_chalk5.default.cyan("docker compose -f docker-compose.prod.yml up -d")}`);
+${import_chalk6.default.bold.yellow("Next Steps for Docker:")}`);
+      console.log(`  1. Run ${import_chalk6.default.cyan("docker compose -f docker-compose.prod.yml up -d")}`);
       console.log("  2. Access your portal at http://localhost\n");
     } else {
-      spinner.succeed(import_chalk5.default.green(`Prepared deployment instructions for ${platform}!`));
+      spinner.succeed(import_chalk6.default.green(`Prepared deployment instructions for ${platform}!`));
     }
   } catch (err) {
-    spinner.fail(import_chalk5.default.red("Failed to generate deployment templates."));
+    spinner.fail(import_chalk6.default.red("Failed to generate deployment templates."));
     console.error(err);
   }
 }
 
+// src-cli/commands/doctor.ts
+var import_chalk7 = __toESM(require("chalk"));
+var import_path5 = __toESM(require("path"));
+var import_fs_extra5 = __toESM(require("fs-extra"));
+var import_net2 = __toESM(require("net"));
+var import_execa2 = __toESM(require("execa"));
+init_banner();
+function probePort(port, host = "127.0.0.1", timeout = 1200) {
+  return new Promise((resolve) => {
+    const socket = new import_net2.default.Socket();
+    socket.setTimeout(timeout);
+    socket.once("connect", () => {
+      socket.destroy();
+      resolve(true);
+    });
+    socket.once("timeout", () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.once("error", () => {
+      socket.destroy();
+      resolve(false);
+    });
+    socket.connect(port, host);
+  });
+}
+function parseDatabaseUrl2(url) {
+  try {
+    const normalized = url.replace(/^postgres:\/\//, "postgresql://");
+    const parsed = new URL(normalized);
+    return {
+      host: parsed.hostname || "localhost",
+      port: parseInt(parsed.port || "5432", 10)
+    };
+  } catch {
+    return null;
+  }
+}
+async function doctorCommand() {
+  printCompactHeader("webiu doctor \u2014 Homebrew-Style Self-Diagnostics");
+  console.log(import_chalk7.default.gray("  Running system and project diagnostic checks...\n"));
+  const results = [];
+  const nodeVer = process.version;
+  const majorNode = parseInt(nodeVer.replace(/^v/, "").split(".")[0], 10) || 0;
+  if (majorNode >= 18) {
+    results.push({
+      title: "Node.js Version",
+      status: "ok",
+      message: `Node.js ${nodeVer} detected (>= v18.0.0 required)`
+    });
+  } else {
+    results.push({
+      title: "Node.js Version",
+      status: "error",
+      message: `Node.js ${nodeVer} is outdated (>= v18.0.0 required)`,
+      fix: "Upgrade Node.js from https://nodejs.org or using nvm (nvm install 20)"
+    });
+  }
+  try {
+    const { stdout: npmVer } = await (0, import_execa2.default)("npm", ["--version"]);
+    results.push({
+      title: "npm Package Manager",
+      status: "ok",
+      message: `npm v${npmVer.trim()} installed and available`
+    });
+  } catch {
+    results.push({
+      title: "npm Package Manager",
+      status: "error",
+      message: "npm command not found in system PATH",
+      fix: "Install npm alongside Node.js from https://nodejs.org"
+    });
+  }
+  try {
+    const { stdout: gitVer } = await (0, import_execa2.default)("git", ["--version"]);
+    results.push({
+      title: "Git Version Control",
+      status: "ok",
+      message: `${gitVer.trim()} installed`
+    });
+  } catch {
+    results.push({
+      title: "Git Version Control",
+      status: "error",
+      message: "Git CLI not found in system PATH",
+      fix: "Install Git from https://git-scm.com to allow project scaffolding"
+    });
+  }
+  try {
+    await (0, import_execa2.default)("docker", ["info"], { stdio: "ignore" });
+    results.push({
+      title: "Docker Engine",
+      status: "ok",
+      message: "Docker daemon is running and responsive"
+    });
+  } catch {
+    results.push({
+      title: "Docker Engine",
+      status: "warn",
+      message: "Docker daemon is not running or not installed",
+      fix: "Start Docker Desktop or run PostgreSQL natively (webiu docker:up)"
+    });
+  }
+  const rootDir = process.cwd();
+  const serverDir = import_path5.default.join(rootDir, "webiu-server");
+  const uiDir = import_path5.default.join(rootDir, "webiu-ui");
+  const envPath = import_path5.default.join(rootDir, ".env");
+  const isProject = await import_fs_extra5.default.pathExists(serverDir) && await import_fs_extra5.default.pathExists(uiDir);
+  if (isProject) {
+    results.push({
+      title: "Webiu Project Structure",
+      status: "ok",
+      message: `Webiu project detected at ${import_chalk7.default.cyan(rootDir)}`
+    });
+    const uiPkgPath = import_path5.default.join(uiDir, "package.json");
+    if (await import_fs_extra5.default.pathExists(uiPkgPath)) {
+      try {
+        const uiPkg = await import_fs_extra5.default.readJson(uiPkgPath);
+        const ngVer = uiPkg.dependencies?.["@angular/core"] || uiPkg.devDependencies?.["@angular/core"] || "Unknown";
+        results.push({
+          title: "Angular UI Framework",
+          status: "ok",
+          message: `Angular Frontend detected (${import_chalk7.default.bold(ngVer)})`
+        });
+      } catch {
+      }
+    }
+    const serverPkgPath = import_path5.default.join(serverDir, "package.json");
+    if (await import_fs_extra5.default.pathExists(serverPkgPath)) {
+      try {
+        const serverPkg = await import_fs_extra5.default.readJson(serverPkgPath);
+        const nestVer = serverPkg.dependencies?.["@nestjs/core"] || serverPkg.devDependencies?.["@nestjs/core"] || "Unknown";
+        results.push({
+          title: "NestJS Backend API",
+          status: "ok",
+          message: `NestJS Server detected (${import_chalk7.default.bold(nestVer)})`
+        });
+      } catch {
+      }
+    }
+    let dbHost = "localhost";
+    let dbPort = 5433;
+    const serverEnvPath = import_path5.default.join(serverDir, ".env");
+    const targetEnvPath = await import_fs_extra5.default.pathExists(serverEnvPath) ? serverEnvPath : envPath;
+    if (await import_fs_extra5.default.pathExists(targetEnvPath)) {
+      const envContent = await import_fs_extra5.default.readFile(targetEnvPath, "utf-8");
+      const dbMatch = envContent.match(/^DATABASE_URL="?([^"\n]+)"?/m);
+      if (dbMatch) {
+        const parsed = parseDatabaseUrl2(dbMatch[1]);
+        if (parsed) {
+          dbHost = parsed.host;
+          dbPort = parsed.port;
+        }
+      }
+    }
+    const dbConnected = await probePort(dbPort, dbHost === "localhost" ? "127.0.0.1" : dbHost);
+    if (dbConnected) {
+      results.push({
+        title: "PostgreSQL Database",
+        status: "ok",
+        message: `PostgreSQL is reachable at ${dbHost}:${dbPort}`
+      });
+    } else {
+      results.push({
+        title: "PostgreSQL Database",
+        status: "warn",
+        message: `Cannot reach PostgreSQL at ${dbHost}:${dbPort}`,
+        fix: "Run `webiu docker:up` or start your local PostgreSQL service"
+      });
+    }
+    if (await import_fs_extra5.default.pathExists(targetEnvPath)) {
+      const envContent = await import_fs_extra5.default.readFile(targetEnvPath, "utf-8");
+      const adminPassMatch = envContent.match(/^ADMIN_PASSWORD="?([^"\n]+)"?/m);
+      if (adminPassMatch && adminPassMatch[1] === "admin") {
+        results.push({
+          title: "Admin Credentials Security",
+          status: "warn",
+          message: 'Admin dashboard password is using default fallback "admin"',
+          fix: "Run `webiu config` to set a strong custom admin password"
+        });
+      } else {
+        results.push({
+          title: "Admin Credentials Security",
+          status: "ok",
+          message: "Custom admin credentials configured"
+        });
+      }
+      const ghTokenMatch = envContent.match(/^GITHUB_TOKEN="?([^"\n]+)"?/m);
+      if (!ghTokenMatch || !ghTokenMatch[1] || ghTokenMatch[1].includes("your_token")) {
+        results.push({
+          title: "GitHub API Authentication",
+          status: "warn",
+          message: "GitHub API Token missing (rate limits may apply to research data)",
+          fix: 'Add GITHUB_TOKEN="ghp_..." to webiu-server/.env to increase rate limits'
+        });
+      } else {
+        results.push({
+          title: "GitHub API Authentication",
+          status: "ok",
+          message: "GitHub Personal Access Token configured"
+        });
+      }
+    }
+  } else {
+    results.push({
+      title: "Webiu Project Workspace",
+      status: "warn",
+      message: "Not inside a Webiu project directory",
+      fix: "Navigate inside a project folder or create one with `webiu init`"
+    });
+  }
+  console.log(`${import_chalk7.default.bold("System & Environment Diagnostics:")}
+`);
+  for (const res of results) {
+    const symbol = res.status === "ok" ? import_chalk7.default.bold.green("  \u2713 ") : res.status === "warn" ? import_chalk7.default.bold.yellow("  \u26A0 ") : import_chalk7.default.bold.red("  \u2718 ");
+    const titleStr = import_chalk7.default.bold(res.title.padEnd(30));
+    console.log(`${symbol}${titleStr} ${import_chalk7.default.gray(res.message)}`);
+  }
+  console.log("");
+  const warnings = results.filter((r) => r.status === "warn");
+  const errors = results.filter((r) => r.status === "error");
+  if (warnings.length === 0 && errors.length === 0) {
+    console.log(import_chalk7.default.bold.green("  \u2714 Your WebiU environment is healthy and ready to build and deploy!\n"));
+  } else {
+    console.log(import_chalk7.default.bold.yellow("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500"));
+    console.log(import_chalk7.default.bold.yellow("  Suggested Remediation Steps:"));
+    console.log(import_chalk7.default.bold.yellow("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n"));
+    let count = 1;
+    for (const item of [...errors, ...warnings]) {
+      if (item.fix) {
+        console.log(`  ${import_chalk7.default.bold.cyan(`${count}.`)} ${import_chalk7.default.bold.white(item.title)}`);
+        console.log(`     ${import_chalk7.default.yellow("\u2192")} ${item.fix}
+`);
+        count++;
+      }
+    }
+  }
+}
+
 // src-cli/commands/help.ts
-var import_chalk6 = __toESM(require("chalk"));
+var import_chalk8 = __toESM(require("chalk"));
 init_constants();
 function helpCommand() {
   console.log(`
-${import_chalk6.default.bold.hex("#7B8CFF")("\u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E")}
-${import_chalk6.default.bold.hex("#7B8CFF")("\u2502")}  ${import_chalk6.default.bold.white("WEBIU CLI")}  ${import_chalk6.default.gray(`v${VERSION}`)}  ${import_chalk6.default.hex("#7B8CFF")("\xB7")}  ${import_chalk6.default.gray("by Ceylon Computer Science Institute")}        ${import_chalk6.default.bold.hex("#7B8CFF")("\u2502")}
-${import_chalk6.default.bold.hex("#7B8CFF")("\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F")}
+${import_chalk8.default.bold.hex("#7B8CFF")("\u256D\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256E")}
+${import_chalk8.default.bold.hex("#7B8CFF")("\u2502")}  ${import_chalk8.default.bold.white("WEBIU CLI")}  ${import_chalk8.default.gray(`v${VERSION}`)}  ${import_chalk8.default.hex("#7B8CFF")("\xB7")}  ${import_chalk8.default.gray("by Ceylon Computer Science Institute")}        ${import_chalk8.default.bold.hex("#7B8CFF")("\u2502")}
+${import_chalk8.default.bold.hex("#7B8CFF")("\u2570\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u256F")}
 
-${import_chalk6.default.bold("Usage:")} ${import_chalk6.default.cyan("webiu")} ${import_chalk6.default.gray("[command]")}
+${import_chalk8.default.bold("Usage:")} ${import_chalk8.default.cyan("webiu")} ${import_chalk8.default.gray("[command]")}
 
-${import_chalk6.default.bold.green("Commands:")}
-  ${import_chalk6.default.bold.cyan("init")}            Interactively initialize a new Webiu portal project
-  ${import_chalk6.default.bold.cyan("dev")}             Start local development servers (Frontend + Backend)
-  ${import_chalk6.default.bold.cyan("build")}           Build production assets for webiu-ui and webiu-server
-  ${import_chalk6.default.bold.cyan("config")}          Re-configure org, theme, DB, or admin credentials
-  ${import_chalk6.default.bold.cyan("deploy")}          Generate deployment files (Render, Railway, Vercel, Docker)
-  ${import_chalk6.default.bold.cyan("docker:up")}       Start local Docker containers (PostgreSQL DB)
-  ${import_chalk6.default.bold.cyan("docker:down")}     Stop and remove local Docker containers
-  ${import_chalk6.default.bold.cyan("help")}            Display this help manual
+${import_chalk8.default.bold.green("Commands:")}
+  ${import_chalk8.default.bold.cyan("init")}            Interactively initialize a new Webiu portal project
+  ${import_chalk8.default.bold.cyan("dev")}             Start local development servers (Frontend + Backend)
+  ${import_chalk8.default.bold.cyan("build")}           Build production assets for webiu-ui and webiu-server
+  ${import_chalk8.default.bold.cyan("config")}          Re-configure org, theme, DB, or admin credentials
+  ${import_chalk8.default.bold.cyan("deploy")}          Generate deployment files (Render, Railway, Vercel, Docker)
+  ${import_chalk8.default.bold.cyan("doctor")}          Run Homebrew-style self-diagnostics and project health check
+  ${import_chalk8.default.bold.cyan("docker:up")}       Start local Docker containers (PostgreSQL DB)
+  ${import_chalk8.default.bold.cyan("docker:down")}     Stop and remove local Docker containers
+  ${import_chalk8.default.bold.cyan("help")}            Display this help manual
 
-${import_chalk6.default.bold.green("Flags:")}
-  ${import_chalk6.default.bold.cyan("-V, --version")}   Output the current CLI version
-  ${import_chalk6.default.bold.cyan("-h, --help")}      Display help information
+${import_chalk8.default.bold.green("Flags:")}
+  ${import_chalk8.default.bold.cyan("-v, -V, --version")} Output the current CLI version
+  ${import_chalk8.default.bold.cyan("-h, --help")}       Display help information
 
-${import_chalk6.default.bold.magenta("Examples:")}
-  ${import_chalk6.default.gray("$")} ${import_chalk6.default.cyan("webiu init")}
-  ${import_chalk6.default.gray("$")} ${import_chalk6.default.cyan("webiu dev")}
-  ${import_chalk6.default.gray("$")} ${import_chalk6.default.cyan("webiu config")}
-  ${import_chalk6.default.gray("$")} ${import_chalk6.default.cyan("webiu deploy")}
-  ${import_chalk6.default.gray("$")} ${import_chalk6.default.cyan("webiu -V")}
+${import_chalk8.default.bold.magenta("Examples:")}
+  ${import_chalk8.default.gray("$")} ${import_chalk8.default.cyan("webiu init")}
+  ${import_chalk8.default.gray("$")} ${import_chalk8.default.cyan("webiu dev")}
+  ${import_chalk8.default.gray("$")} ${import_chalk8.default.cyan("webiu config")}
+  ${import_chalk8.default.gray("$")} ${import_chalk8.default.cyan("webiu deploy")}
+  ${import_chalk8.default.gray("$")} ${import_chalk8.default.cyan("webiu -V")}
 
-${import_chalk6.default.bold.green("URLs after webiu dev:")}
-  ${import_chalk6.default.gray("Frontend UI \u2192")}  ${import_chalk6.default.underline.blue("http://localhost:4200")}
-  ${import_chalk6.default.gray("Backend API \u2192")}  ${import_chalk6.default.underline.blue("http://localhost:5050")}
+${import_chalk8.default.bold.green("URLs after webiu dev:")}
+  ${import_chalk8.default.gray("Frontend UI \u2192")}  ${import_chalk8.default.underline.blue("http://localhost:4200")}
+  ${import_chalk8.default.gray("Backend API \u2192")}  ${import_chalk8.default.underline.blue("http://localhost:5050")}
 
-${import_chalk6.default.gray("Documentation:")} ${import_chalk6.default.underline.blue("https://github.com/c2siorg/Webiu")}
-${import_chalk6.default.gray("Maintainers: Ceylon Computer Science Institute (C2SI)")}
+${import_chalk8.default.gray("Documentation:")} ${import_chalk8.default.underline.blue("https://github.com/c2siorg/Webiu")}
+${import_chalk8.default.gray("Maintainers: Ceylon Computer Science Institute (C2SI)")}
 `);
 }
 
 // src-cli/commands/docker.ts
-var import_execa2 = require("execa");
-var import_chalk7 = __toESM(require("chalk"));
+var import_execa3 = require("execa");
+var import_chalk9 = __toESM(require("chalk"));
 async function dockerUpCommand() {
   console.log(`
-${import_chalk7.default.bold.cyan("Starting Docker containerized environment... :D")}
+${import_chalk9.default.bold.cyan("Starting Docker containerized environment... :D")}
 `);
   try {
-    await (0, import_execa2.execa)("docker", ["compose", "up", "-d"], { stdio: "inherit" });
-    console.log(import_chalk7.default.green("\nDocker containers started successfully! XD"));
+    await (0, import_execa3.execa)("docker", ["compose", "up", "-d"], { stdio: "inherit" });
+    console.log(import_chalk9.default.green("\nDocker containers started successfully! XD"));
   } catch (err) {
-    console.error(import_chalk7.default.red("Failed to start Docker containers:"), err);
+    console.error(import_chalk9.default.red("Failed to start Docker containers:"), err);
   }
 }
 async function dockerDownCommand() {
   console.log(`
-${import_chalk7.default.bold.cyan("Stopping Docker containerized environment...")}
+${import_chalk9.default.bold.cyan("Stopping Docker containerized environment...")}
 `);
   try {
-    await (0, import_execa2.execa)("docker", ["compose", "down"], { stdio: "inherit" });
-    console.log(import_chalk7.default.green("\nDocker containers stopped cleanly."));
+    await (0, import_execa3.execa)("docker", ["compose", "down"], { stdio: "inherit" });
+    console.log(import_chalk9.default.green("\nDocker containers stopped cleanly."));
   } catch (err) {
-    console.error(import_chalk7.default.red("Failed to stop Docker containers:"), err);
+    console.error(import_chalk9.default.red("Failed to stop Docker containers:"), err);
   }
 }
 
 // src-cli/index.ts
+init_constants();
+
+// src-cli/utils/updater.ts
+var import_chalk10 = __toESM(require("chalk"));
+var import_fs_extra6 = __toESM(require("fs-extra"));
+var import_path6 = __toESM(require("path"));
+var import_os2 = __toESM(require("os"));
+var import_https = __toESM(require("https"));
+init_constants();
+var CACHE_DIR = import_path6.default.join(import_os2.default.homedir(), ".config", "webiu");
+var CACHE_FILE = import_path6.default.join(CACHE_DIR, "update-check.json");
+var CACHE_TTL_MS = 24 * 60 * 60 * 1e3;
+function isNewerVersion(current, candidate) {
+  const cParts = current.split(".").map((p) => parseInt(p, 10) || 0);
+  const vParts = candidate.split(".").map((p) => parseInt(p, 10) || 0);
+  for (let i = 0; i < 3; i++) {
+    if ((vParts[i] || 0) > (cParts[i] || 0)) return true;
+    if ((vParts[i] || 0) < (cParts[i] || 0)) return false;
+  }
+  return false;
+}
+function fetchLatestNpmVersion() {
+  return new Promise((resolve) => {
+    const req = import_https.default.get("https://registry.npmjs.org/create-webiu/latest", { timeout: 1500 }, (res) => {
+      if (res.statusCode !== 200) {
+        resolve(null);
+        return;
+      }
+      let body = "";
+      res.on("data", (chunk) => {
+        body += chunk;
+      });
+      res.on("end", () => {
+        try {
+          const parsed = JSON.parse(body);
+          resolve(parsed.version || null);
+        } catch {
+          resolve(null);
+        }
+      });
+    });
+    req.on("error", () => resolve(null));
+    req.on("timeout", () => {
+      req.destroy();
+      resolve(null);
+    });
+  });
+}
+async function checkForUpdates() {
+  try {
+    await import_fs_extra6.default.ensureDir(CACHE_DIR);
+    let cache = null;
+    if (await import_fs_extra6.default.pathExists(CACHE_FILE)) {
+      try {
+        cache = await import_fs_extra6.default.readJson(CACHE_FILE);
+      } catch {
+        cache = null;
+      }
+    }
+    const now = Date.now();
+    if (cache && now - cache.lastChecked < CACHE_TTL_MS && cache.latestVersion) {
+      return isNewerVersion(VERSION, cache.latestVersion) ? cache.latestVersion : null;
+    }
+    const latest = await fetchLatestNpmVersion();
+    if (latest) {
+      await import_fs_extra6.default.writeJson(CACHE_FILE, {
+        lastChecked: now,
+        latestVersion: latest
+      }, { spaces: 2 });
+      return isNewerVersion(VERSION, latest) ? latest : null;
+    }
+  } catch {
+  }
+  return null;
+}
+function displayUpdateBanner(latestVersion) {
+  const border = import_chalk10.default.hex("#7B8CFF")("\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500");
+  const line1 = `  ${import_chalk10.default.bold.yellow("\u26A1 Update available!")} ${import_chalk10.default.gray(`v${VERSION}`)} \u2192 ${import_chalk10.default.bold.green(`v${latestVersion}`)}`;
+  const line2 = `  ${import_chalk10.default.gray("Run:")} ${import_chalk10.default.bold.cyan("npm install -g create-webiu")} ${import_chalk10.default.gray("to update to latest")}`;
+  console.log(`
+\u256D${border}\u256E`);
+  console.log(`\u2502${line1.padEnd(76)}\u2502`);
+  console.log(`\u2502${line2.padEnd(78)}\u2502`);
+  console.log(`\u2570${border}\u256F
+`);
+}
+
+// src-cli/index.ts
+var updatePromise = null;
+try {
+  updatePromise = checkForUpdates();
+} catch {
+}
 function handleGracefulExit() {
   console.log(`
 
-  ${import_chalk8.default.bold.yellow("\u{1F44B} Goodbye!")} ${import_chalk8.default.gray("Operation cancelled by user.")}
+  ${import_chalk11.default.bold.yellow("\u{1F44B} Goodbye!")} ${import_chalk11.default.gray("Operation cancelled by user.")}
 `);
   process.exit(0);
 }
@@ -1283,12 +1691,12 @@ process.on("unhandledRejection", (reason) => {
   if (reason && (reason.name === "ExitPromptError" || reason.message?.includes("force closed"))) {
     handleGracefulExit();
   } else {
-    console.error(import_chalk8.default.red("\n  \u2718 Unexpected Error:"), reason);
+    console.error(import_chalk11.default.red("\n  \u2718 Unexpected Error:"), reason);
     process.exit(1);
   }
 });
 var program = new import_commander.Command();
-program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version("2.0.1", "-V, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
+program.name("webiu").description("CLI tool to generate, configure, and deploy Webiu community portals").version(VERSION, "-v, --version", "Output the current CLI version").addHelpCommand(false).helpOption("-h, --help", "Display command usage and instructions");
 program.configureOutput({
   writeOut: (str) => {
     if (str.includes("Usage: webiu") || str.includes("Commands:") || str.includes("Options:")) {
@@ -1304,21 +1712,35 @@ program.command("dev").description("Start local development servers (Frontend + 
 program.command("build").description("Build production assets for both webiu-ui and webiu-server").action(buildCommand);
 program.command("config").description("Re-configure organization metadata, branding, DB, or admin credentials").action(configCommand);
 program.command("deploy").description("Launch interactive deployment generator for Render, Railway, Vercel, or Docker").action(deployCommand);
+program.command("doctor").description("Run Homebrew-style self-diagnostics and project health check").action(doctorCommand);
 program.command("docker:up").description("Start local Docker containers (PostgreSQL database)").action(dockerUpCommand);
 program.command("docker:down").description("Stop and remove local Docker containers").action(dockerDownCommand);
 program.command("help").description("Display detailed command usage and instructions").action(helpCommand);
 program.on("command:*", (operands) => {
-  console.error(import_chalk8.default.red(`
+  console.error(import_chalk11.default.red(`
   \u2718 Unknown command: "${operands[0]}"
 `));
   helpCommand();
   process.exit(1);
 });
+if (process.argv.includes("-V")) {
+  console.log(VERSION);
+  process.exit(0);
+}
 if (process.argv.includes("-h") || process.argv.includes("--help")) {
   helpCommand();
   process.exit(0);
 }
-program.parse(process.argv);
+async function run() {
+  await program.parseAsync(process.argv);
+  if (updatePromise) {
+    const latest = await updatePromise;
+    if (latest) {
+      displayUpdateBanner(latest);
+    }
+  }
+}
+run();
 if (!process.argv.slice(2).length) {
   helpCommand();
 }
