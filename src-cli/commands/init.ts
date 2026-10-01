@@ -10,6 +10,27 @@ import { StepLogger } from '../utils/step-logger';
 import { WEBIU_REPO, WEBIU_BRANCH, ALL_NAVBAR_SECTIONS } from '../constants';
 
 
+function replaceOrThrow(
+  content: string,
+  pattern: string | RegExp,
+  replacement: string,
+  filePath: string,
+  description: string,
+): string {
+  const matches = typeof pattern === 'string'
+    ? content.includes(pattern)
+    : new RegExp(pattern.source, pattern.flags).test(content);
+
+  if (!matches) {
+    throw new Error(
+      `Failed to patch ${filePath}: expected ${description} was not found.`,
+    );
+  }
+
+  return content.replace(pattern, replacement);
+}
+
+
 export async function initCommand(options: { name?: string }) {
   // ── GREETING BANNER ────────────────────────────────────────────────────────
   printWelcomeBanner();
@@ -319,13 +340,19 @@ export class AppConfigService {
       if (await fs.pathExists(navbarTsPath)) {
         let navTs = await fs.readFile(navbarTsPath, 'utf-8');
         if (!navTs.includes('AppConfigService')) {
-          navTs = navTs.replace(
+          navTs = replaceOrThrow(
+            navTs,
             /import { SearchService } from '\.\.\/\.\.\/services\/search\.service';/,
-            `import { SearchService } from '../../services/search.service';\nimport { AppConfigService } from '../../services/app-config.service';`
+            `import { SearchService } from '../../services/search.service';\nimport { AppConfigService } from '../../services/app-config.service';`,
+            navbarTsPath,
+            'SearchService import in navbar.component.ts',
           );
-          navTs = navTs.replace(
+          navTs = replaceOrThrow(
+            navTs,
             /private searchService = inject\(SearchService\);/,
-            `private searchService = inject(SearchService);\n  private appConfigService = inject(AppConfigService);`
+            `private searchService = inject(SearchService);\n  private appConfigService = inject(AppConfigService);`,
+            navbarTsPath,
+            'searchService injection in navbar.component.ts',
           );
           const navSectionsLogic = `
   showProjects = ${navbarSections.includes('projects')};
@@ -335,7 +362,13 @@ export class AppConfigService {
   showOpportunities = ${navbarSections.includes('opportunities')};
   showGsoc = ${navbarSections.includes('gsoc')};
 `;
-          navTs = navTs.replace(/isSunVisible = true;/, `isSunVisible = true;\n${navSectionsLogic}`);
+          navTs = replaceOrThrow(
+            navTs,
+            /isSunVisible = true;/,
+            `isSunVisible = true;\n${navSectionsLogic}`,
+            navbarTsPath,
+            'isSunVisible in navbar.component.ts',
+          );
           const initSub = `
     this.appConfigService.getConfig().subscribe({
       next: (config: import('../../services/app-config.service').AppConfig) => {
@@ -351,7 +384,13 @@ export class AppConfigService {
       },
     });
 `;
-          navTs = navTs.replace(/ngOnInit\(\): void \{/, `ngOnInit(): void {${initSub}`);
+          navTs = replaceOrThrow(
+            navTs,
+            /ngOnInit\(\): void \{/,
+            `ngOnInit(): void {${initSub}`,
+            navbarTsPath,
+            'ngOnInit() in navbar.component.ts',
+          );
           await fs.writeFile(navbarTsPath, navTs);
         }
       }
@@ -363,29 +402,47 @@ export class AppConfigService {
 
         // Wrap projects item if not already wrapped
         if (!navHtml.includes('@if (showProjects)')) {
-          navHtml = navHtml.replace(
+          navHtml = replaceOrThrow(
+            navHtml,
             /(<a\s+class="navbar__menu__items"\s+\[routerLink\]="\['\/projects'\]"[\s\S]*?<\/a>)/,
-            `@if (showProjects) {\n      $1\n    }`
+            `@if (showProjects) {\n      $1\n    }`,
+            navbarHtmlPath,
+            'projects navbar link',
           );
-          navHtml = navHtml.replace(
+          navHtml = replaceOrThrow(
+            navHtml,
             /(<a\s+class="navbar__menu__items"\s+\[routerLink\]="\['\/publications'\]"[\s\S]*?<\/a>)/,
-            `@if (showPublications) {\n      $1\n    }`
+            `@if (showPublications) {\n      $1\n    }`,
+            navbarHtmlPath,
+            'publications navbar link',
           );
-          navHtml = navHtml.replace(
+          navHtml = replaceOrThrow(
+            navHtml,
             /(<a\s+class="navbar__menu__items"\s+\[routerLink\]="\['\/contributors'\]"[\s\S]*?<\/a>)/,
-            `@if (showContributors) {\n      $1\n    }`
+            `@if (showContributors) {\n      $1\n    }`,
+            navbarHtmlPath,
+            'contributors navbar link',
           );
-          navHtml = navHtml.replace(
+          navHtml = replaceOrThrow(
+            navHtml,
             /(<a\s+class="navbar__menu__items"\s+\[routerLink\]="\['\/community'\]"[\s\S]*?<\/a>)/,
-            `@if (showCommunity) {\n      $1\n    }`
+            `@if (showCommunity) {\n      $1\n    }`,
+            navbarHtmlPath,
+            'community navbar link',
           );
-          navHtml = navHtml.replace(
+          navHtml = replaceOrThrow(
+            navHtml,
             /(<a\s+class="navbar__menu__items"\s+\[routerLink\]="\['\/opportunities'\]"[\s\S]*?<\/a>)/,
-            `@if (showOpportunities) {\n      $1\n    }`
+            `@if (showOpportunities) {\n      $1\n    }`,
+            navbarHtmlPath,
+            'opportunities navbar link',
           );
-          navHtml = navHtml.replace(
+          navHtml = replaceOrThrow(
+            navHtml,
             /@if \(showIdeasPage\) \{/,
-            `@if (showGsoc && showIdeasPage) {`
+            `@if (showGsoc && showIdeasPage) {`,
+            navbarHtmlPath,
+            'showIdeasPage condition in navbar.component.html',
           );
           await fs.writeFile(navbarHtmlPath, navHtml);
         }
@@ -395,7 +452,8 @@ export class AppConfigService {
       const heroNoiseTsPath = path.join(targetUiDir, 'components', 'hero-noise-background', 'hero-noise-background.component.ts');
       if (await fs.pathExists(heroNoiseTsPath)) {
         let heroTs = await fs.readFile(heroNoiseTsPath, 'utf-8');
-        heroTs = heroTs.replace(
+        heroTs = replaceOrThrow(
+          heroTs,
           /this\.ambientLight\.color\.setHex\(0x4c1d95\);[\s\S]*?this\.light4\.color\.setHex\(0xd946ef\);/,
           `const computedStyle = getComputedStyle(document.documentElement);
       const accentStr = computedStyle.getPropertyValue('--theme-accent').trim() || '${themeAccent}';
@@ -406,7 +464,9 @@ export class AppConfigService {
       this.light1.color.copy(themeAccentColor);
       this.light2.color.copy(themeAccentColor);
       this.light3.color.setHex(0x10b981);
-      this.light4.color.copy(themeAccentColor);`
+      this.light4.color.copy(themeAccentColor);`,
+          heroNoiseTsPath,
+          'default Three.js lighting in hero-noise-background.component.ts',
         );
         await fs.writeFile(heroNoiseTsPath, heroTs);
       }
@@ -416,13 +476,19 @@ export class AppConfigService {
       if (await fs.pathExists(appCompTsPath)) {
         let appTs = await fs.readFile(appCompTsPath, 'utf-8');
         if (!appTs.includes('AppConfigService')) {
-          appTs = appTs.replace(
+          appTs = replaceOrThrow(
+            appTs,
             /import { SettingsService } from '\.\/services\/settings\.service';/,
-            `import { SettingsService } from './services/settings.service';\nimport { AppConfigService } from './services/app-config.service';`
+            `import { SettingsService } from './services/settings.service';\nimport { AppConfigService } from './services/app-config.service';`,
+            appCompTsPath,
+            'SettingsService import in app.component.ts',
           );
-          appTs = appTs.replace(
+          appTs = replaceOrThrow(
+            appTs,
             /private settingsService = inject\(SettingsService\);/,
-            `private settingsService = inject(SettingsService);\n  private appConfigService = inject(AppConfigService);`
+            `private settingsService = inject(SettingsService);\n  private appConfigService = inject(AppConfigService);`,
+            appCompTsPath,
+            'settingsService injection in app.component.ts',
           );
           const appInitLogic = `
     this.appConfigService.getConfig().subscribe({
@@ -434,7 +500,13 @@ export class AppConfigService {
       },
     });
 `;
-          appTs = appTs.replace(/ngOnInit\(\): void \{/, `ngOnInit(): void {${appInitLogic}`);
+          appTs = replaceOrThrow(
+            appTs,
+            /ngOnInit\(\): void \{/,
+            `ngOnInit(): void {${appInitLogic}`,
+            appCompTsPath,
+            'ngOnInit() in app.component.ts',
+          );
           await fs.writeFile(appCompTsPath, appTs);
         }
       }
@@ -444,17 +516,26 @@ export class AppConfigService {
     const indexHtmlPath = path.join(projectDir, 'webiu-ui', 'src', 'index.html');
     if (await fs.pathExists(indexHtmlPath)) {
       let indexHtml = await fs.readFile(indexHtmlPath, 'utf-8');
-      indexHtml = indexHtml.replace(
+      indexHtml = replaceOrThrow(
+        indexHtml,
         /<title>.*?<\/title>/,
-        `<title>${orgName} — Community Portal</title>`
+        `<title>${orgName} — Community Portal</title>`,
+        indexHtmlPath,
+        '<title> in index.html',
       );
-      indexHtml = indexHtml.replace(
+      indexHtml = replaceOrThrow(
+        indexHtml,
         /content="WebiU — Open Source Intelligence Platform"/g,
-        `content="${orgName} — Community Portal"`
+        `content="${orgName} — Community Portal"`,
+        indexHtmlPath,
+        'WebiU description metadata in index.html',
       );
-      indexHtml = indexHtml.replace(
+      indexHtml = replaceOrThrow(
+        indexHtml,
         /content="Discover repositories, contributors, research publications, and community activity from C2SI\."/,
-        `content="Discover projects, contributors, publications, and community activity from ${orgName}."`
+        `content="Discover projects, contributors, publications, and community activity from ${orgName}."`,
+        indexHtmlPath,
+        'C2SI description metadata in index.html',
       );
       await fs.writeFile(indexHtmlPath, indexHtml);
     }
@@ -474,17 +555,26 @@ export class AppConfigService {
       let stylesContent = await fs.readFile(stylesPath, 'utf-8');
 
       // Replace default --theme-accent value in :root
-      stylesContent = stylesContent.replace(
+      stylesContent = replaceOrThrow(
+        stylesContent,
         /--theme-accent:\s*#[0-9A-Fa-f]{6};/,
-        `--theme-accent:       ${themeAccent};`
+        `--theme-accent:       ${themeAccent};`,
+        stylesPath,
+        '--theme-accent in styles.scss',
       );
-      stylesContent = stylesContent.replace(
+      stylesContent = replaceOrThrow(
+        stylesContent,
         /--theme-accent-dim:\s*rgba\(.*?\);/,
-        `--theme-accent-dim:   ${themeAccent}26;`
+        `--theme-accent-dim:   ${themeAccent}26;`,
+        stylesPath,
+        '--theme-accent-dim in styles.scss',
       );
-      stylesContent = stylesContent.replace(
+      stylesContent = replaceOrThrow(
+        stylesContent,
         /--theme-accent-glow:\s*.*?;/,
-        `--theme-accent-glow:  0 0 24px ${themeAccent}40;`
+        `--theme-accent-glow:  0 0 24px ${themeAccent}40;`,
+        stylesPath,
+        '--theme-accent-glow in styles.scss',
       );
 
       await fs.writeFile(stylesPath, stylesContent);
@@ -529,9 +619,12 @@ export class AppConfigService {
       </h1>`;
 
       // Replace the existing <h1 class="hero-title"...>...</h1> block
-      homepageHtml = homepageHtml.replace(
+      homepageHtml = replaceOrThrow(
+        homepageHtml,
         /<h1 class="hero-title"[\s\S]*?<\/h1>/,
-        newHeroTitle
+        newHeroTitle,
+        homepagePath,
+        'hero title in homepage.component.html',
       );
       await fs.writeFile(homepagePath, homepageHtml);
     }
