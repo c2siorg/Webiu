@@ -51,6 +51,28 @@ describe('GithubWebhookService', () => {
     expect(syncService.deleteRepository).not.toHaveBeenCalled();
   });
 
+  it('should trigger syncSingleRepository on publicized and privatized actions', async () => {
+    const actions = ['publicized', 'privatized'];
+
+    for (const action of actions) {
+      await service.handleWebhookEvent('repository', {
+        action,
+        repository: { name: 'test-repo' },
+      });
+    }
+
+    expect(syncService.syncSingleRepository).toHaveBeenCalledTimes(2);
+    expect(syncService.syncSingleRepository).toHaveBeenNthCalledWith(
+      1,
+      'test-repo',
+    );
+    expect(syncService.syncSingleRepository).toHaveBeenNthCalledWith(
+      2,
+      'test-repo',
+    );
+    expect(syncService.deleteRepository).not.toHaveBeenCalled();
+  });
+
   it('should trigger deleteRepository on deleted and archived actions', async () => {
     const actions = ['deleted', 'archived'];
     for (const action of actions) {

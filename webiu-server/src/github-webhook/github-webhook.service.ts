@@ -32,6 +32,8 @@ export class GithubWebhookService {
       case 'edited':
       case 'renamed':
       case 'unarchived':
+      case 'publicized':
+      case 'privatized':
         await this.repositorySyncService.syncSingleRepository(repoName);
         break;
       case 'deleted':
