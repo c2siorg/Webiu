@@ -14,9 +14,14 @@ const DEFAULT_SETTINGS: Record<string, string> = {
   'gsoc.current_year': '2026',
   'gsoc.show_ideas_page': 'true',
   'gsoc.registration_open': 'true',
-  'site.title': 'WebiU',
-  'site.description': 'WebiU - GSOC Portal',
+  'site.title': process.env['ORG_NAME'] || 'WebiU',
+  'site.description': process.env['ORG_NAME']
+    ? `${process.env['ORG_NAME']} — Community Portal`
+    : 'WebiU - GSOC Portal',
   'site.maintenance_mode': 'false',
+  // Seeded from CLI-generated env vars so they surface through /admin/settings/public
+  'site.org_name': process.env['ORG_NAME'] || 'WebiU',
+  'site.theme_accent': process.env['THEME_ACCENT'] || '#7B8CFF',
 };
 
 @Injectable()
@@ -177,6 +182,19 @@ export class SystemSettingService implements OnApplicationBootstrap {
     } else if (key === 'site.description') {
       if (typeof value !== 'string') {
         throw new BadRequestException('Site description must be a string.');
+      }
+    } else if (key === 'site.org_name') {
+      if (typeof value !== 'string' || value.trim().length === 0) {
+        throw new BadRequestException('Organization name cannot be empty.');
+      }
+    } else if (key === 'site.theme_accent') {
+      if (
+        typeof value !== 'string' ||
+        !/^#[0-9A-Fa-f]{6}$/.test(value.trim())
+      ) {
+        throw new BadRequestException(
+          'Theme accent must be a valid hex color (e.g. #7B8CFF).',
+        );
       }
     }
   }

@@ -4,6 +4,9 @@ import { NavbarComponent } from './navbar.component';
 import { SettingsService } from '../../services/settings.service';
 import { of } from 'rxjs';
 
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+
 describe('NavbarComponent', () => {
   let component: NavbarComponent;
   let fixture: ComponentFixture<NavbarComponent>;
@@ -22,6 +25,8 @@ describe('NavbarComponent', () => {
     await TestBed.configureTestingModule({
       imports: [NavbarComponent, RouterTestingModule],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: SettingsService, useValue: mockSettingsService }
       ]
     }).compileComponents();

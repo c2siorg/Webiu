@@ -1,300 +1,229 @@
-# WebiU 2.0: C2SI/SCoRe Lab Website
+# WEBIU CLI (`create-webiu`)
 
-<p align="center">
-  <img width="400" height="auto" src="https://github.com/Grumpyyash/Webiu/blob/master/static/images/logo.png" alt="WebiU Logo">
-</p>
+The Official Command Line Interface and Scaffolding Engine for Webiu Community Portals.
 
-<p align="center">
-  <strong>The official web application for C2SI and SCoRe Lab</strong><br>
-  Showcasing open-source projects, contributors, and community activity.
-</p>
+[![NPM Version](https://img.shields.io/npm/v/create-webiu.svg)](https://www.npmjs.com/package/create-webiu)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ---
 
-## Project Summary
+## OVERVIEW AND PREVIEW
 
-**WebiU 2.0** is a full-stack web application designed to showcase C2SI and SCoRe Lab's open-source ecosystem. It syncs directly with GitHub to pull repository statistics, contributions, and contributor profiles into a local PostgreSQL database, enabling high-performance, real-time search and leaderboards without hitting GitHub API rate limits.
+![Webiu CLI Terminal Preview](./src-cli/assets/Webiu-CLI%20preview.png)
 
-**Key Highlights:**
+Webiu is an open-source community portal platform designed to help organizations showcase open-source projects, display member portfolios, coordinate Google Summer of Code (GSoC) activities, manage publications, and aggregate community contributions.
 
-* **Database-Backed Sync** — Stores organization repository and contributor data in PostgreSQL to serve low-latency requests.
-* **GitHub Webhook Integration** — Automatically updates the database when repositories are created, edited, archived, or deleted on GitHub.
-* **Drift Reconciliation** — Runs a background cron job every 12 hours to reconcile any missed webhook events.
-* **Administrator CMS Panel** — Secure dashboard to manage GSoC programs, project ideas, mentors, and global site settings.
-* **Dark Mode** — Toggle between light and dark themes with persistent preference.
-* **Modern Stack** — Built with Angular (standalone components) and NestJS.
+The platform is architected as a fullstack monorepo consisting of:
+1. **Frontend Interface (`webiu-ui`)**: Built with modern Angular, providing responsive layouts, theme accent customization, dynamic component rendering, and client-side data binding.
+2. **Backend API Service (`webiu-server`)**: Built with NestJS, offering REST endpoints, GraphQL queries, authentication middleware, and database connectivity.
 
----
+Setting up a complete community portal manually requires cloning repositories, configuring database connection strings, managing environment variables across client and server environments, and setting up Docker containers.
 
-## Table of Contents
-
-1. [Features](#features)
-2. [Tech Stack](#tech-stack)
-3. [Prerequisites](#prerequisites)
-4. [Installation & Setup](#installation--setup)
-   * [Backend Setup (webiu-server)](#backend-setup-webiu-server)
-   * [Frontend Setup (webiu-ui)](#frontend-setup-webiu-ui)
-   * [Running with Docker](#running-with-docker)
-5. [Project Structure](#project-structure)
-6. [API Endpoints](#api-endpoints)
-7. [Linting & Code Quality](#linting--code-quality)
-8. [Testing](#testing)
-9. [Contributing](#contributing)
-10. [Documentation](#documentation)
-11. [License](#license)
+The `create-webiu` CLI automates this end-to-end workflow into an interactive prompt wizard that scaffolds, builds, configures, and deploys your custom Webiu portal within minutes.
 
 ---
 
-## Features
+## QUICK START: GETTING STARTED IN 5 STEPS
 
-| Feature | Description |
-| :--- | :--- |
-| **Project Dashboard** | Browse all repositories with real-time stats (stars, forks, languages, open issues, and PR counts). |
-| **Contributor Leaderboards** | View aggregated contribution statistics across all repositories in the organization. |
-| **Contributor Search** | Query by GitHub username to view individual issues and pull requests inside the organization. |
-| **GSoC CMS & Explorer** | Manage GSoC programs, draft/publish project ideas, and map mentors dynamically from the admin panel. |
-| **Admin Settings Panel** | Update the active GSoC year, site title, description, and toggle maintenance mode dynamically. |
-| **Secure Admin Login** | Credentials-based administrator login secured with HttpOnly cookies and JWT sessions. |
-| **Responsive Design** | Fully responsive layout optimized for desktop, tablet, and mobile browsers. |
+Follow these instructions to create and launch a new Webiu portal on your local machine.
 
----
+### Step 1: Install the CLI Globally
 
-## Tech Stack
-
-| Layer | Technology |
-| :--- | :--- |
-| **Frontend** | Angular 17+, TypeScript, SCSS, RxJS |
-| **Backend** | NestJS 10, TypeScript, Express |
-| **Database & ORM** | PostgreSQL, TypeORM |
-| **API Integration** | GitHub REST API via Axios |
-| **Authentication** | JWT Session via Secure HttpOnly Cookie |
-| **Containerization** | Docker, Docker Compose |
-| **Code Quality** | ESLint, Prettier, Husky (pre-commit hooks) |
-| **Testing** | Jest (backend), Karma + Jasmine (frontend) |
-
----
-
-## Prerequisites
-
-Before you begin, ensure you have the following installed:
-
-* **Node.js** v20.x or higher — [Download](https://nodejs.org/)
-* **npm** v9.x or higher (ships with Node.js)
-* **Angular CLI** v17.x or higher — Install globally: `npm install -g @angular/cli`
-* **PostgreSQL** Database server (v14+) — [Download](https://www.postgresql.org/)
-* **Git** — [Download](https://git-scm.com/)
-* **Docker** (Optional for containerized run) — [Download](https://www.docker.com/)
-
-You will also need:
-1. A **GitHub Personal Access Token** (classic, no special scopes needed for public repo data) to raise rate limits. Get yours at [github.com/settings/tokens](https://github.com/settings/tokens).
-2. A **GitHub Webhook Secret** (any custom secure string) if you plan to test webhook integration locally.
-
----
-
-## Installation & Setup
-
-### 1. Clone the Repository
+Install the CLI globally on your system using npm:
 
 ```bash
-git clone https://github.com/c2siorg/Webiu.git
-cd Webiu
+npm install -g create-webiu
 ```
 
-### 2. Install Root Dependencies (Husky)
+### Step 2: Initialize a New Community Portal
 
-The repository root manages **Husky** pre-commit hooks. Run this from the root directory:
+Run the interactive setup wizard:
 
 ```bash
-npm install
+webiu init
 ```
 
----
+Alternatively, specify a target directory name directly:
 
-### Backend Setup (`webiu-server`)
-
-1. **Navigate to the server directory:**
-   ```bash
-   cd webiu-server
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Configure Environment Variables:**
-   Copy `.env.example` to `.env`:
-   ```bash
-   cp .env.example .env
-   ```
-   Open `.env` and fill in the required details:
-   ```ini
-   NODE_ENV=development
-   PORT=5050
-   JWT_SECRET=use_a_strong_random_secret_here
-   ADMIN_USERNAME=admin
-   ADMIN_PASSWORD=choose_a_secure_admin_password
-   GITHUB_ACCESS_TOKEN=your_github_personal_access_token
-   DATABASE_URL=postgresql://postgres:postgres@localhost:5432/webiu
-   DATABASE_SSL=false
-   GITHUB_WEBHOOK_SECRET=your_webhook_secret_here
-   FRONTEND_BASE_URL=http://localhost:4200
-   ```
-
-4. **Run Database Migrations:**
-   TypeORM will automatically sync schemas in development, but you can run migrations manually:
-   ```bash
-   npm run migration:run
-   ```
-
-5. **Start the server:**
-   ```bash
-   npm run start:dev
-   ```
-   The backend will be available at **http://localhost:5050**.
-
----
-
-### Frontend Setup (`webiu-ui`)
-
-1. **Navigate to the UI directory:**
-   ```bash
-   cd ../webiu-ui
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Start the local server:**
-   ```bash
-   ng serve
-   ```
-   Open **http://localhost:4200** in your browser.
-
----
-
-### Running with Docker
-
-You can run the entire stack (Angular, NestJS, and PostgreSQL) containerized.
-
-#### Development Mode (With source-code watch support)
 ```bash
-docker compose -f docker-compose.dev.yml up --build
+webiu init --name my-community-portal
 ```
 
-#### Production Preview Mode (Serves UI via Nginx)
+During initialization, the CLI will guide you through an interactive setup wizard in your terminal:
+- **Project Directory Name**: Name of the folder where the portal will be generated.
+- **Organization Name**: The display name of your organization.
+- **Organization Type**: Choose from Open Source Community, Non-Profit Organization, Startup / Personal Project, or Custom / Blank Setup.
+- **GitHub Organization / Username**: GitHub handle used to pull repository metadata and contributors automatically.
+- **Database Strategy**: Select between Local Docker PostgreSQL container (automatic setup) or Remote PostgreSQL URL.
+- **Theme Accent Color**: Choose a primary branding color swatch (Ocean Blue, Emerald Green, Deep Purple, Sunset Crimson, Amber Gold, or Rose Pink).
+- **Navbar Section Selector**: Interactively check which portal sections to enable (Projects, Publications, Contributors, Community, Opportunities, GSoC).
+- **Admin Setup**: Configure administrator account credentials.
+
+### Step 3: Navigate into the Project Folder
+
 ```bash
-docker compose up --build
+cd my-community-portal
 ```
 
-#### Docker Service URL Mapping
-| Service | URL |
-|---------|-----|
-| Frontend | http://localhost:4200 |
-| Backend | http://localhost:5050 |
+### Step 4: Install Dependencies
 
----
+Install required node modules for both the frontend UI and backend server:
 
-## Project Structure
-
-```
-Webiu/
-├── webiu-ui/                  # Angular frontend
-│   └── src/app/
-│       ├── components/        # Reusable UI components (navbar, cards)
-│       ├── page/              # Page layouts (homepage, admin panel, CMS)
-│       ├── services/          # Services (GSoC CMS API, theming, cache)
-│       └── shared/            # Common UI elements (loading spinner)
-│
-├── webiu-server/              # NestJS backend
-│   └── src/
-│       ├── auth/              # Admin authentication & HttpOnly sessions
-│       ├── database/          # PostgreSQL database entities & migrations
-│       ├── github/            # GitHub API wrapper client
-│       ├── github-webhook/    # GitHub Webhook webhook payload handler
-│       ├── gsoc/              # GSoC CMS (programs, ideas, mentors)
-│       ├── system-setting/    # Config settings (title, year, maintenance)
-│       ├── project/           # Repository listing & sync logic
-│       └── contributor/       # Contributor leaderboards & sync
-│
-├── docs/                      # Technical guides & specifications
-│   ├── ARCHITECTURE.md        # High-level architecture & code flows
-│   ├── API_DOCUMENTATION.md   # Endpoint inputs, outputs, and JSON formats
-│   └── CONTRIBUTING.md        # Git guidelines & code style conventions
-```
-
----
-
-## API Endpoints
-
-A quick overview of key REST routes:
-
-| Method | Endpoint | Access | Description |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/auth/login` | Public | Login admin & set HttpOnly session cookie |
-| `POST` | `/auth/logout` | Public | Clear admin session cookie |
-| `GET` | `/auth/me` | Public | Check if current session cookie is valid |
-| `GET` | `/api/v1/projects` | Public | Get cached list of org repositories |
-| `GET` | `/api/v1/contributor/contributors` | Public | Retrieve contributor leaderboard data |
-| `GET` | `/api/v1/contributor/stats/:username` | Public | Fetch contributor's issues and PR stats |
-| `POST` | `/api/v1/github-webhook` | GitHub | GitHub Webhook event receiver |
-| `GET` | `/gsoc/current` | Public | Fetch current GSoC year details |
-| `GET` | `/gsoc/current/ideas` | Public | Get active GSoC project ideas |
-| `GET` | `/admin/gsoc/programs` | Admin | List all GSoC programs |
-| `POST` | `/admin/gsoc/ideas` | Admin | Create a new project idea draft |
-
-For complete payload details, consult [API_DOCUMENTATION.md](file:///Users/tarunyakesh/Desktop/GSOC%2026/WebiU_Dev/docs/API_DOCUMENTATION.md).
-
----
-
-## Linting & Code Quality
-
-The project uses **ESLint** and **Prettier** formatting enforced automatically on commit via **Husky** hooks.
-
-Run formatting checks manually:
 ```bash
-# Lint frontend
-cd webiu-ui && npm run lint
-
-# Lint backend
-cd webiu-server && npm run lint
+cd webiu-server && npm install && cd ../webiu-ui && npm install && cd ..
 ```
 
----
+### Step 5: Start Local Development Servers
 
-## Testing
+Launch both frontend and backend development servers concurrently:
 
-Run unit tests locally:
 ```bash
-# Test backend
-cd webiu-server && npm run test
+webiu dev
+```
 
-# Test frontend
-cd webiu-ui && npm run test
+Once running, access your local application at:
+- **Frontend Application UI**: http://localhost:4200
+- **Backend API Service**: http://localhost:5050 (or http://localhost:3000)
+
+---
+
+## ZERO-INSTALL EXECUTION VIA NPX
+
+If you prefer not to install the CLI globally, execute any command directly using `npx`:
+
+```bash
+npx create-webiu init        # Replaces: webiu init
+npx create-webiu dev         # Replaces: webiu dev
+npx create-webiu build       # Replaces: webiu build
+npx create-webiu config      # Replaces: webiu config
+npx create-webiu deploy      # Replaces: webiu deploy
+npx create-webiu docker:up   # Replaces: webiu docker:up
+npx create-webiu docker:down # Replaces: webiu docker:down
+npx create-webiu help        # Replaces: webiu help
 ```
 
 ---
 
-## Contributing
+## ARCHITECTURE AND WORKFLOW PIPELINE
 
-We welcome contributions! Please review our [CONTRIBUTING.md](file:///Users/tarunyakesh/Desktop/GSOC%2026/WebiU_Dev/docs/CONTRIBUTING.md) to understand our git branch structures, conventions, and merge practices.
+The CLI operates through a structured four-phase pipeline:
+
+```
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│ 1. INITIALIZATION PHASE (webiu init)                                              │
+│    - Interactive terminal prompt wizard collects portal parameters                │
+│    - Displays real-time live configuration summary card                           │
+└───────────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│ 2. SCAFFOLDING & INJECTION PHASE                                                  │
+│    - Clones repository structure and template files                               │
+│    - Injects root .env, webiu-server/.env, and webiu-ui/src/assets/config.json    │
+│    - Configures database credentials and theme accent styling                     │
+└───────────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│ 3. DEVELOPMENT & TESTING PHASE (webiu dev / webiu docker:up)                      │
+│    - Validates database connectivity and Docker container status                  │
+│    - Concurrently runs Angular (port 4200) and NestJS (port 5050) with hot reload │
+└───────────────────────────────────────────────────────────────────────────────────┘
+                                       │
+                                       ▼
+┌───────────────────────────────────────────────────────────────────────────────────┐
+│ 4. DEPLOYMENT PHASE (webiu deploy)                                                │
+│    - Scaffolds tailored Infrastructure-as-Code manifests                          │
+│    - Supports Render, Railway, Vercel, and Production Docker Compose              │
+└───────────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
-## Documentation
+## COMPLETE COMMAND REFERENCE MANUAL
 
-| Document | Description |
-| :--- | :--- |
-| [README.md](README.md) | Project overview, setup, and quick reference |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Code structure, module system, data flow, and database schemas |
-| [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md) | Full API reference — endpoints, schemas, validation, and errors |
-| [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) | How to contribute (git branch rules, code conventions) |
-| [docs/webiu.postman_collection.json](docs/webiu.postman_collection.json) | Pre-configured Postman requests for rapid local testing |
+```
+Usage: webiu [command] [options]
+
+Commands:
+  init          Interactively initialize a new Webiu portal project
+  dev           Start local development servers (Frontend + Backend concurrently)
+  build         Build production assets for both webiu-ui and webiu-server
+  config        Re-configure organization metadata, branding, DB, or admin credentials
+  deploy        Launch interactive deployment generator for Render, Railway, Vercel, or Docker
+  doctor        Run Homebrew-style self-diagnostics and project health check
+  docker:up     Start local Docker containers (PostgreSQL database)
+  docker:down   Stop and remove local Docker containers
+  help          Display detailed command usage and instructions
+
+Options:
+  -v, -V, --version Output the current CLI version
+  -h, --help        Display help information
+```
+
+### Detailed Command Explanations
+
+#### 1. `webiu init`
+Initializes a new Webiu portal application using an ultra-aesthetic 8-step progress logger (`[1/8]` through `[8/8]`). Displays an interactive terminal setup wizard with real-time live summary updates and generates the project structure with configured environment files.
+
+#### 2. `webiu doctor`
+Runs a Homebrew-style (`brew doctor`) self-diagnostic audit of your system and workspace. Checks 8 critical operational pillars:
+- **Node.js Environment**: Verifies Node.js version (`>= 18.0.0`).
+- **Package Manager & Git**: Verifies `npm` and `git` binaries are accessible.
+- **Docker Engine**: Probes Docker daemon readiness (`docker info`).
+- **Webiu Workspace**: Validates `webiu-server`, `webiu-ui`, and root `.env`.
+- **Framework Diagnostics**: Detects Angular (`@angular/core`) and NestJS (`@nestjs/core`) framework versions.
+- **PostgreSQL Connectivity**: Probes database port (`5433` or parsed connection string) via TCP socket.
+- **Environment & Secrets**: Validates `JWT_SECRET`, default admin credentials, and checks if `GITHUB_TOKEN` is present.
+
+If issues are found, `webiu doctor` displays a clean remediation guide with exact steps to resolve warnings (`⚠`) and errors (`✘`).
+
+#### 3. `webiu dev`
+Executes pre-flight checks (database connectivity and Docker daemon state) and starts both Angular frontend (`http://localhost:4200`) and NestJS backend (`http://localhost:5050`) in parallel using hot-reloading development servers.
+
+#### 4. `webiu build`
+Triggers production compilation for both `webiu-ui` and `webiu-server`, placing optimized build artifacts ready for production deployment.
+
+#### 5. `webiu config`
+Launches the re-configuration utility on an existing Webiu project. Allows updating organization details, theme accent colors, active navbar sections, database connection settings, and admin passwords without re-cloning or re-scaffolding.
+
+#### 6. `webiu deploy`
+Generates platform-specific Infrastructure-as-Code deployment configurations based on interactive prompts.
+
+Supported Deployment Targets:
+- **Render**: Generates `render.yaml` blueprint file for single-click fullstack web service and database deployment.
+- **Railway**: Generates `railway.json` infrastructure configuration.
+- **Vercel + Render Hybrid**: Generates `vercel.json` for hosting the Angular frontend on Vercel while connecting to NestJS hosted on Render.
+- **Self-Hosted Docker**: Generates `docker-compose.prod.yml` configured with an Nginx reverse proxy and containerized PostgreSQL database.
+
+#### 7. `webiu docker:up`
+Spins up local PostgreSQL database containers in detached mode using Docker Compose.
+
+#### 8. `webiu docker:down`
+Stops and removes local Docker database containers.
 
 ---
 
-## License
+## AUTOMATED UPDATE NOTIFICATIONS
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+The CLI includes an automatic background update checker (`updater.ts`). Whenever a command is run, the CLI asynchronously checks the NPM registry for newer releases (cached locally for 24 hours). If an update is available, a clean update card is displayed at process completion:
+
+```
+╭─────────────────────────────────────────────────────────────╮
+│  Update available!  v2.1.0 → v2.2.0                         │
+│  Run: npm install -g create-webiu to update to latest       │
+╰─────────────────────────────────────────────────────────────╯
+```
+
+---
+
+## MAINTAINERS AND CREDITS
+
+- **Creator and Lead Architect**: [Tarunya Kesharwani](https://github.com/TarunyaProgrammer/)
+- **Maintainer Organization**: [Ceylon Computer Science Institute (C2SI)](https://github.com/c2siorg/Webiu/)
+
+---
+
+## LICENSE
+
+This project is licensed under the **MIT License**. See the `LICENSE` file for details.

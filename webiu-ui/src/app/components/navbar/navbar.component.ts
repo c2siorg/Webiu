@@ -4,6 +4,7 @@ import { Router, RouterModule, NavigationEnd } from '@angular/router';
 import { ThemeService } from '../../services/theme.service';
 import { SettingsService } from '../../services/settings.service';
 import { SearchService } from '../../services/search.service';
+import { AppConfigService } from '../../services/app-config.service';
 import { filter } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
@@ -19,15 +20,28 @@ export class NavbarComponent implements OnInit {
   private themeService = inject(ThemeService);
   private settingsService = inject(SettingsService);
   private searchService = inject(SearchService);
+  private appConfigService = inject(AppConfigService);
   private platformId = inject(PLATFORM_ID);
   private destroyRef = inject(DestroyRef);
 
   isMenuOpen = false;
   isSunVisible = true;
   currentRoute = '/';
-  
+
+  /** Controls GSoC page visibility (also driven by backend settings) */
   showIdeasPage = true;
   currentYear = 2026;
+
+  /**
+   * Section visibility flags — driven by config.json written during `webiu init`.
+   * Home is always true (forced on). Defaults all-true so a fresh clone shows everything.
+   */
+  showProjects = true;
+  showPublications = true;
+  showContributors = true;
+  showCommunity = true;
+  showOpportunities = true;
+  showGsoc = true;
 
   get currentYearShort(): string {
     return String(this.currentYear).slice(-2);
@@ -35,13 +49,29 @@ export class NavbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.isSunVisible = !this.themeService.isDarkMode();
+
+    // ── Load section visibility from CLI config.json ──────────────────────
+    this.appConfigService.getConfig().subscribe({
+      next: (config: import('../../services/app-config.service').AppConfig) => {
+        if (config.navbarSections && config.navbarSections.length > 0) {
+          const s = config.navbarSections;
+          this.showProjects      = s.includes('projects');
+          this.showPublications  = s.includes('publications');
+          this.showContributors  = s.includes('contributors');
+          this.showCommunity     = s.includes('community');
+          this.showOpportunities = s.includes('opportunities');
+          this.showGsoc          = s.includes('gsoc');
+        }
+      },
+    });
+
+    // ── Load runtime settings from backend (GSoC year, ideas page toggle) ─
     this.loadPublicSettings();
+
     this.router.events
       .pipe(
-        filter(
-          (event): event is NavigationEnd => event instanceof NavigationEnd,
-        ),
-        takeUntilDestroyed(this.destroyRef)
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef),
       )
       .subscribe((event: NavigationEnd) => {
         this.currentRoute = event.url;
@@ -51,17 +81,20 @@ export class NavbarComponent implements OnInit {
 
   loadPublicSettings(): void {
     this.settingsService.getPublicSettings().subscribe({
-      next: (res) => {
-        if (res?.success && res?.settings) {
-          const s = res.settings;
+      next: (res: Record<string, any>) => {
+        if (res?.['success'] && res?.['settings']) {
+          const s = res['settings'];
           this.currentYear = Number(s['gsoc.current_year']) || 2026;
-          this.showIdeasPage = s['gsoc.show_ideas_page'] === true || s['gsoc.show_ideas_page'] === 'true';
+          // Backend can also override the GSoC section toggle
+          if (s['gsoc.show_ideas_page'] !== undefined) {
+            this.showIdeasPage = s['gsoc.show_ideas_page'] === true || s['gsoc.show_ideas_page'] === 'true';
+          }
         }
       },
       error: () => {
         this.showIdeasPage = true;
         this.currentYear = 2026;
-      }
+      },
     });
   }
 
@@ -102,7 +135,6 @@ export class NavbarComponent implements OnInit {
     const navbarMenu = document.querySelector('#navbarMenu');
     const navigationButtons = document.querySelector('.navigation__buttons');
 
-    // Handle menu closing when clicking outside (but not on the toggle button)
     if (
       this.isMenuOpen &&
       navbarMenu &&
@@ -122,7 +154,6 @@ export class NavbarComponent implements OnInit {
 
   navigateTo(route: string): void {
     this.router.navigate([route]);
-    // Close menu after navigation on mobile
     if (this.isMenuOpen) {
       this.isMenuOpen = false;
     }
