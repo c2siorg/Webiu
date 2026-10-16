@@ -17,6 +17,7 @@ describe('ProjectService', () => {
     getOrgRepos: jest.fn(),
     getRepoPulls: jest.fn(),
     getRepoIssues: jest.fn(),
+    searchOrgRepos: jest.fn(),
     getPublicUserProfile: jest.fn(),
   };
 
@@ -152,6 +153,25 @@ describe('ProjectService', () => {
       await expect(service.getIssuesAndPr('c2siorg', 'repo1')).rejects.toThrow(
         InternalServerErrorException,
       );
+    });
+  });
+
+  describe('searchProjects', () => {
+    it('should return { total, repositories } on both cache miss and cache hit', async () => {
+      mockGithubService.searchOrgRepos.mockResolvedValue([{ name: 'Webiu' }]);
+      mockGithubService.getRepoPulls.mockResolvedValue([{ id: 1 }, { id: 2 }]);
+
+      const expected = {
+        total: 1,
+        repositories: [{ name: 'Webiu', pull_requests: 2 }],
+      };
+
+      const first = await service.searchProjects('webiu');
+      const second = await service.searchProjects('webiu');
+
+      expect(first).toEqual(expected);
+      expect(second).toEqual(expected);
+      expect(mockGithubService.searchOrgRepos).toHaveBeenCalledTimes(1);
     });
   });
 });
