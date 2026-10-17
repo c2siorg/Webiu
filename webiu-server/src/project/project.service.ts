@@ -104,7 +104,10 @@ export class ProjectService {
     }
 
     const cacheKey = `projects_search_${query}`;
-    const cached = this.cacheService.get<any[]>(cacheKey);
+    const cached = this.cacheService.get<{
+      total: number;
+      repositories: any[];
+    }>(cacheKey);
     if (cached) return cached;
 
     try {
@@ -121,12 +124,14 @@ export class ProjectService {
         }),
       );
 
-      this.cacheService.set(cacheKey, repositoriesWithPRs, CACHE_TTL);
-
-      return {
+      const result = {
         total: repositoriesWithPRs.length,
         repositories: repositoriesWithPRs,
       };
+
+      this.cacheService.set(cacheKey, result, CACHE_TTL);
+
+      return result;
     } catch (error) {
       this.logger.error(
         'Error searching repositories:',
